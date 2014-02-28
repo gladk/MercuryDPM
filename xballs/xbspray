@@ -1,0 +1,2 @@
+#!/bin/tcsh
+Xb3 -f spray.xb7 -s 4 -o 550 -moh 250 -e 1 -v0 -invert -sort -3dturn 1 -drotphi 0.01 -noborder 4 -0f cylinderxz -cmode 1 -scala 4 -cmax -rred 0.005 -cminset "-6" -cmaxset 6 -col0 -ltime 40 -sort -step 1 -c 12 -fast0 -redraw 1000 $*

@@ -1,0 +1,1118 @@
+// This file is part of MercuryDPM.
+// 
+// MercuryDPM is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// MercuryDPM is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with MercuryDPM.  If not, see <http://www.gnu.org/licenses/>.
+// 
+// Copyright 2013 The Mercury Developers Team
+// For the list of developers, see <http://www.MercuryDPM.org/Team>
+
+std::ostream& operator<<(std::ostream& os, const CG S) {
+	if (S==HeavisideSphere) os << "HeavisideSphere";
+	else if (S==Gaussian) os << "Gaussian";
+	else if (S==Polynomial) os << "Polynomial";
+	return os;
+}
+
+template <StatType T>
+StatisticsVector<T>* StatisticsPoint<T>::gb;
+
+template <StatType T>
+void StatisticsPoint<T>::set_zero() {
+	Nu = 0.0;
+	Density = 0.0;
+	Momentum.set_zero();
+	DisplacementMomentum.set_zero();
+	Displacement.set_zero();
+	MomentumFlux.set_zero();
+	DisplacementMomentumFlux.set_zero();
+	EnergyFlux.set_zero();
+	TangentialStress.set_zero();
+	NormalStress.set_zero();
+	TangentialStress.set_zero();
+	NormalTraction.set_zero();
+	TangentialTraction.set_zero();
+	Fabric.set_zero();
+	CollisionalHeatFlux.set_zero();
+	Dissipation = 0.0;
+	Potential = 0.0;
+	LocalAngularMomentum.set_zero();
+	LocalAngularMomentumFlux.set_zero();
+	ContactCoupleStress.set_zero();
+}
+
+template <StatType T>
+StatisticsPoint<T> StatisticsPoint<T>::getSquared() {
+	StatisticsPoint<T> P;
+	P.Nu = sqr(Nu);
+	P.Density = sqr(Density);
+	P.Momentum = square(Momentum);
+	P.DisplacementMomentum = square(DisplacementMomentum);
+	P.Displacement = square(Displacement);
+	P.MomentumFlux = square(MomentumFlux);
+	P.DisplacementMomentumFlux = square(DisplacementMomentumFlux);
+	P.EnergyFlux = square(EnergyFlux);
+	P.NormalStress = square(NormalStress);
+	P.TangentialStress = square(TangentialStress);
+	P.NormalTraction = square(NormalTraction);
+	P.TangentialTraction = square(TangentialTraction);
+	P.Fabric = square(Fabric);
+	P.CollisionalHeatFlux = square(CollisionalHeatFlux);
+	P.Dissipation = sqr(Dissipation);
+	P.Potential = sqr(Potential);
+	LocalAngularMomentum     = square(P.LocalAngularMomentum);
+	LocalAngularMomentumFlux = square(P.LocalAngularMomentumFlux);
+	ContactCoupleStress      = square(P.ContactCoupleStress);
+	return P;
+}
+
+template <StatType T>
+StatisticsPoint<T>& StatisticsPoint<T>::operator=(const StatisticsPoint<T> &P)
+{
+	Nu = P.Nu;
+	Density = P.Density;
+	Momentum = P.Momentum;
+	DisplacementMomentum = P.DisplacementMomentum;
+	Displacement = P.Displacement;
+	MomentumFlux = P.MomentumFlux;
+	DisplacementMomentumFlux = P.DisplacementMomentumFlux;
+	EnergyFlux = P.EnergyFlux;
+	NormalStress = P.NormalStress;
+	TangentialStress = P.TangentialStress;
+	NormalTraction = P.NormalTraction;
+	TangentialTraction = P.TangentialTraction;
+	Fabric = P.Fabric;
+	CollisionalHeatFlux = P.CollisionalHeatFlux;
+	Dissipation = P.Dissipation;
+	Potential = P.Potential;
+	LocalAngularMomentum     = P.LocalAngularMomentum;
+	LocalAngularMomentumFlux = P.LocalAngularMomentumFlux;
+	ContactCoupleStress      = P.ContactCoupleStress;
+	return *this;
+}
+
+template <StatType T>
+StatisticsPoint<T>& StatisticsPoint<T>::operator+=(const StatisticsPoint<T> &P)
+{
+	Nu += P.Nu;
+	Density += P.Density;
+	Momentum += P.Momentum;
+	DisplacementMomentum += P.DisplacementMomentum;
+	Displacement += P.Displacement;
+	MomentumFlux += P.MomentumFlux;
+	DisplacementMomentumFlux += P.DisplacementMomentumFlux;
+	EnergyFlux += P.EnergyFlux;
+	NormalStress += P.NormalStress;
+	TangentialStress += P.TangentialStress;
+	NormalTraction += P.NormalTraction;
+	TangentialTraction += P.TangentialTraction;
+	Fabric += P.Fabric;
+	CollisionalHeatFlux += P.CollisionalHeatFlux;
+	Dissipation += P.Dissipation;
+	Potential += P.Potential;
+	LocalAngularMomentum     += P.LocalAngularMomentum;
+	LocalAngularMomentumFlux += P.LocalAngularMomentumFlux;
+	ContactCoupleStress      += P.ContactCoupleStress;
+	return *this;
+}
+
+template <StatType T>
+StatisticsPoint<T>& StatisticsPoint<T>::operator-=(const StatisticsPoint<T> &P)
+{
+	Nu -= P.Nu;
+	Density -= P.Density;
+	Momentum -= P.Momentum;
+	DisplacementMomentum -= P.DisplacementMomentum;
+	Displacement -= P.Displacement;
+	MomentumFlux -= P.MomentumFlux;
+	DisplacementMomentumFlux -= P.DisplacementMomentumFlux;
+	EnergyFlux -= P.EnergyFlux;
+	NormalStress -= P.NormalStress;
+	TangentialStress -= P.TangentialStress;
+	NormalTraction -= P.NormalTraction;
+	TangentialTraction -= P.TangentialTraction;
+	Fabric -= P.Fabric;
+	CollisionalHeatFlux -= P.CollisionalHeatFlux;
+	Dissipation -= P.Dissipation;
+	Potential -= P.Potential;
+	LocalAngularMomentum     -= P.LocalAngularMomentum;
+	LocalAngularMomentumFlux -= P.LocalAngularMomentumFlux;
+	ContactCoupleStress      -= P.ContactCoupleStress;
+	return *this;
+}
+
+template <StatType T>
+StatisticsPoint<T>& StatisticsPoint<T>::operator/=(const Mdouble a)
+{
+	Nu /= a;
+	Density /= a;
+	Momentum /= a;
+	DisplacementMomentum /= a;
+	Displacement /= a;
+	MomentumFlux /= a;
+	DisplacementMomentumFlux /= a;
+	EnergyFlux /= a;
+	NormalStress /= a;
+	TangentialStress /= a;
+	NormalTraction /= a;
+	TangentialTraction /= a;
+	Fabric /= a;
+	CollisionalHeatFlux /= a;
+	Dissipation /= a;
+	Potential /= a;
+	LocalAngularMomentum /= a;
+	LocalAngularMomentumFlux /= a;
+	ContactCoupleStress /= a;
+	return *this;
+}
+
+//in the first average, one timestep in Displacement is missing
+template <StatType T>
+void StatisticsPoint<T>::firstTimeAverage(const int n) {
+	Nu /= n;
+	Density /= n;
+	Momentum /= n;
+	if (n==1) {
+		DisplacementMomentum.set_zero();
+		Displacement.set_zero();
+		DisplacementMomentumFlux.set_zero();
+	} else {
+		DisplacementMomentum /= n-1;
+		Displacement /= n-1;
+		DisplacementMomentumFlux /= n-1;
+	}
+	MomentumFlux /= n;
+	EnergyFlux /= n;
+	NormalStress /= n;
+	TangentialStress /= n;
+	NormalTraction /= n;
+	TangentialTraction /= n;
+	Fabric /= n;
+	CollisionalHeatFlux /= n;
+	Dissipation /= n;
+	Potential /= n;
+	LocalAngularMomentum /= n;
+	LocalAngularMomentumFlux /= n;
+	ContactCoupleStress /= n;
+}
+
+template <StatType T>
+Mdouble StatisticsPoint<T>::get_distance2(const Vec3D &P) {
+	return sqr(P.X-Position.X)+sqr(P.Y-Position.Y)+sqr(P.Z-Position.Z);
+}
+
+template<StatType T> 
+Vec3D StatisticsPoint<T>::cross(Vec3D P, Vec3D &Q) {
+    return Vec3D(P.Y*Q.Z-P.Z*Q.Y, P.Z*Q.X-P.X*Q.Z, P.X*Q.Y-P.Y*Q.X);
+}
+
+template<StatType T> Matrix3D StatisticsPoint<T>::MatrixCross(Vec3D P, Matrix3D &Q) {
+    return Matrix3D(
+    P.Y*Q.ZX-P.Z*Q.YX, P.Z*Q.XX-P.X*Q.ZX, P.X*Q.YX-P.Y*Q.XX,
+    P.Y*Q.ZY-P.Z*Q.YY, P.Z*Q.XY-P.X*Q.ZY, P.X*Q.YY-P.Y*Q.XY,
+    P.Y*Q.ZZ-P.Z*Q.YZ, P.Z*Q.XZ-P.X*Q.ZZ, P.X*Q.YZ-P.Y*Q.XZ);
+}
+
+template <StatType T>
+Mdouble StatisticsPoint<T>::dot(const Vec3D &P, const Vec3D &Q) {
+	return P.X*Q.X + P.Y*Q.Y + P.Z*Q.Z;
+}
+
+template <StatType T>
+Mdouble StatisticsPoint<T>::CG_function(const Vec3D &PI) {
+	Mdouble dist2 = get_distance2(PI);
+	if (get_CG_type()==HeavisideSphere) {
+		return (get_w2()<dist2)?0.0:get_CG_invvolume();
+	} else if (get_CG_type()==Gaussian) {
+		return (get_cutoff2()<dist2)?0.0:get_CG_invvolume() * exp(-dist2/(2.0*get_w2()));
+	} else if (get_CG_type()==Polynomial) {
+		return (get_cutoff2()<dist2)?0.0:get_CG_invvolume()*evaluatePolynomial(sqrt(dist2)/get_cutoff());
+	} else { std::cerr << "error in CG_function" << std::endl; exit(-1); }
+}
+
+
+template <StatType T>
+Mdouble StatisticsPoint<T>::CG_function_2D(const Vec3D &PI) {
+	Mdouble dist2 = get_distance2(PI);
+	if (get_CG_type()==HeavisideSphere) {
+		if (get_w2()<dist2) return 0.0;
+		else {
+			Mdouble wn = sqrt(get_w2()-dist2);
+			return get_CG_invvolume()*2.0*wn; 
+			///\todo the volume should be calculated in set_CG_invvolume
+			//return get_CG_invvolume()*(std::min(wn,gb->getObjectDistanceLeft()) +std::min(wn,gb->getObjectDistanceRight()));	
+		}
+	} else if (get_CG_type()==Gaussian) {
+		return (get_cutoff2()<dist2)?0.0:get_CG_invvolume() * exp(-dist2/(2.0*get_w2()));
+	} else if (get_CG_type()==Polynomial) {
+		return (get_cutoff2()<dist2)?0.0:get_CG_invvolume()*evaluatePolynomial(sqrt(dist2)/get_cutoff());
+	} else { std::cerr << "error in CG_function_2D" << std::endl; exit(-1); }
+}
+
+template <StatType T>
+Mdouble StatisticsPoint<T>::CG_function_1D(const Vec3D &PI) {
+	Mdouble dist2 = get_distance2(PI);
+	if (get_CG_type()==HeavisideSphere) {
+		return (get_w2()<dist2)?0.0:(get_CG_invvolume()*constants::pi*(get_w2()-dist2));
+	} else if (get_CG_type()==Gaussian) {
+		return (get_cutoff2()<dist2)?0.0:get_CG_invvolume() * exp(-dist2/(2.0*get_w2()));
+	} else if (get_CG_type()==Polynomial) {
+		return (get_cutoff2()<dist2)?0.0:get_CG_invvolume()*evaluatePolynomial(sqrt(dist2)/get_cutoff());
+	} else { std::cerr << "error in CG_function_1D" << std::endl; exit(-1); }
+}
+
+template <StatType T>
+Vec3D StatisticsPoint<T>::CG_gradient(const Vec3D &P, const Mdouble phi) {
+	//CG_type_todo
+	if (get_CG_type()==Gaussian) {
+		return (P-Position)*(phi/get_w2());
+	} else if (get_CG_type()==Polynomial) {
+		Mdouble r=GetLength(Position-P)/get_w();
+		return get_CG_invvolume()*evaluatePolynomialGradient(r)/r/get_w2()*(Position-P);
+	} else { std::cerr << "error in CG_gradient" << std::endl; exit(-1); }
+}
+
+///\todo{some gradients are not computed}
+template <StatType T>
+Vec3D StatisticsPoint<T>::CG_integral_gradient(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_normal, Mdouble P1_P2_distance) {
+	Vec3D P_P1 = Position - P1;
+	Vec3D P_P2 = Position - P2;
+	Mdouble a = dot(P_P1,P1_P2_normal);
+	Mdouble b = dot(P_P2,P1_P2_normal);
+	Vec3D tangential = P_P1 - a * P1_P2_normal;
+	//CG_type_todo
+	if (get_CG_type()==Gaussian) {
+		Mdouble wsq2 = sqrt(2*get_w2());
+		Mdouble f = sqrt(2*constants::pi*get_w2());
+		return Vec3D(0.0,0.0,(exp(-sqr(a/wsq2))-exp(-sqr(b/wsq2)))/f/(P2.Z-P1.Z));
+	} else if (get_CG_type()==Polynomial) {
+		double wn2 = get_w2() - dot(tangential,tangential);
+		if ((wn2<=0) | (a*fabs(a)>=wn2) | (b*fabs(b)<=-wn2)) {
+			return Vec3D(0,0,0);
+		} else {
+			///\todo The gradient is not centered; thus there is a bias; follow the corrections in CG_integral_gradient_1D
+			double wn = sqrt(wn2);
+			double w = get_w();
+			double delta = w*1e-3;
+			double I =  get_CG_invvolume()*evaluateIntegral(std::max(a,-wn)/w,std::min(b,wn)/w,tangential.GetLength()/w)*w / P1_P2_distance;
+			Vec3D delta_P_P1 = P_P1 +Vec3D(delta,0,0);
+			Vec3D delta_P_P2 = P_P2 +Vec3D(delta,0,0);
+			a = dot(delta_P_P1,P1_P2_normal);
+			b = dot(delta_P_P2,P1_P2_normal);
+			tangential = delta_P_P1 - a * P1_P2_normal;
+			wn = sqrt(get_w2() - dot(tangential,tangential));
+			double Ix =  get_CG_invvolume()*evaluateIntegral(std::max(a,-wn)/w,std::min(b,wn)/w,tangential.GetLength()/w)*w / P1_P2_distance;
+			delta_P_P1 = P_P1 +Vec3D(0,delta,0);
+			delta_P_P2 = P_P2 +Vec3D(0,delta,0);
+			a = dot(delta_P_P1,P1_P2_normal);
+			b = dot(delta_P_P2,P1_P2_normal);
+			tangential = delta_P_P1 - a * P1_P2_normal;
+			wn = sqrt(get_w2() - dot(tangential,tangential));
+			double Iy =  get_CG_invvolume()*evaluateIntegral(std::max(a,-wn)/w,std::min(b,wn)/w,tangential.GetLength()/w)*w / P1_P2_distance;
+			delta_P_P1 = P_P1 +Vec3D(0,0,delta);
+			delta_P_P2 = P_P2 +Vec3D(0,0,delta);
+			a = dot(delta_P_P1,P1_P2_normal);
+			b = dot(delta_P_P2,P1_P2_normal);
+			tangential = delta_P_P1 - a * P1_P2_normal;
+			wn = sqrt(get_w2() - dot(tangential,tangential));
+			double Iz =  get_CG_invvolume()*evaluateIntegral(std::max(a,-wn)/w,std::min(b,wn)/w,tangential.GetLength()/w)*w / P1_P2_distance;
+			return Vec3D(Ix-I,Iy-I,Iz-I)/delta;
+		}
+	} else { return Vec3D(0,0,0);}
+	//~ if (get_CG_type()==Gaussian) return Vec3D(0.0,0.0,0.0);
+	//~ else { std::cerr << "error in CG_function" << std::endl; exit(-1); }
+}
+
+template <StatType T>
+Mdouble StatisticsPoint<T>::CG_integral_gradient_1D(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_normal, Mdouble P1_P2_distance) {
+	Vec3D P_P1 = Position - P1;
+	Vec3D P_P2 = Position - P2;
+	Mdouble a = dot(P_P1,P1_P2_normal);
+	Mdouble b = dot(P_P2,P1_P2_normal);
+	Vec3D tangential = P_P1 - a * P1_P2_normal;
+	//CG_type_todo
+	if (get_CG_type()==Gaussian) {
+		Mdouble wsq2 = sqrt(2*get_w2());
+		Mdouble f = sqrt(2*constants::pi*get_w2());
+		return (exp(-sqr(a/wsq2))-exp(-sqr(b/wsq2)))/f/(P2.Z-P1.Z);
+	} else if (get_CG_type()==Polynomial) {
+		double wn2 = get_w2() - dot(tangential,tangential);
+		if ((wn2<=0) | (a*fabs(a)>=wn2) | (b*fabs(b)<=-wn2)) {
+			return 0;
+		} else if ((P1_P2_distance<1e-12)|(GetLength2(tangential)<1e-24)) { 
+			//if the normal is parallel to the averaging direction
+			std::cout << "normal is parallel to the averaging direction: "
+			<< " P1_P2_distance " << P1_P2_distance
+			<< " tangential " << tangential << std::endl;
+			///\todo{debug this code}
+			return 0;//CG_gradient_1D(P1,CG_function(P1));
+		} else {
+			double wn = sqrt(wn2);
+			double w = get_w();
+			///\todo Thomas: whats the best delta? Somewhere between 1e-7 and 1e-4
+			double delta = w*3e-6;
+			//double I =  get_CG_invvolume()*evaluateIntegral(std::max(a,-wn)/w,std::min(b,wn)/w,dot(tangential,tangential)/w)*w / P1_P2_distance;
+			Vec3D delta_P_P1 = P_P1 +Vec3D(delta,delta,delta);
+			Vec3D delta_P_P2 = P_P2 +Vec3D(delta,delta,delta);
+			a = dot(delta_P_P1,P1_P2_normal);
+			b = dot(delta_P_P2,P1_P2_normal);
+			tangential = delta_P_P1 - a * P1_P2_normal;
+			wn = sqrt(get_w2() - dot(tangential,tangential));
+			double I2 = get_CG_invvolume()*evaluateIntegral(std::max(a,-wn)/w,std::min(b,wn)/w,dot(tangential,tangential)/w)*w / P1_P2_distance;
+
+			delta_P_P1 = P_P1 -Vec3D(delta,delta,delta);
+			delta_P_P2 = P_P2 -Vec3D(delta,delta,delta);
+			a = dot(delta_P_P1,P1_P2_normal);
+			b = dot(delta_P_P2,P1_P2_normal);
+			tangential = delta_P_P1 - a * P1_P2_normal;
+			wn = sqrt(get_w2() - dot(tangential,tangential));
+			double I1 = get_CG_invvolume()*evaluateIntegral(std::max(a,-wn)/w,std::min(b,wn)/w,dot(tangential,tangential)/w)*w / P1_P2_distance;
+
+			return (I2-I1)/(2.*delta);
+		}
+	} else return 0;
+}
+
+/** \todo .fstat/.restart/.data/.stat should be by default in binary, with text output as option. 
+we need a converter tool binary->text / text->binary 
+text version of .fstat and the particle data in .restart should have a header
+should .fstat report every p-p collision twice?
+**/
+
+/// /todo{Thomas: rpsi_scalar is not always set}
+template <StatType T>
+Mdouble StatisticsPoint<T>::CG_integral(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_normal, Mdouble P1_P2_distance, Vec3D& rpsi UNUSED)
+{
+	//apply the cutoff in normal direction:
+	Vec3D P_P1 = Position - P1;
+	Mdouble a = dot(P_P1,P1_P2_normal);
+	if ( a > get_cutoff() ) return 0.0;
+	Vec3D P_P2 = Position - P2;
+	Mdouble b = dot(P_P2,P1_P2_normal);
+	if ( -b > get_cutoff() ) return 0.0;
+	//apply the cutoff in tangential direction:
+	Vec3D tangential = P_P1 - a * P1_P2_normal;
+	if (dot(tangential,tangential)>get_cutoff2()) return 0.0;
+	//evaluate:
+	if (get_CG_type()==HeavisideSphere) {
+		Mdouble wn2 = get_w2() - dot(tangential,tangential);
+		if ((wn2<=0) | (a*fabs(a)>=wn2) | (b*fabs(b)<=-wn2)) {
+			return 0;
+		} else {
+			Mdouble wn = sqrt(wn2);
+			return get_CG_invvolume()*( std::min(b,wn)-std::max(a,-wn) ) / P1_P2_distance;
+		}
+	} else if (get_CG_type()==Gaussian) { //Gaussian
+		static Mdouble InvVolumeExp = compute_Gaussian_invvolume(gb->get_dim_particle()-1);	
+		static Mdouble w_sqrt_2 = constants::sqrt_2*get_w();
+		static Mdouble P1_P2_distance_for_cutoff=-1, InvVolumeErf=-1;
+		if (P1_P2_distance_for_cutoff!=P1_P2_distance) {
+			P1_P2_distance_for_cutoff = P1_P2_distance;
+			Mdouble amax = -get_cutoff();
+			Mdouble bmax =  get_cutoff()+P1_P2_distance;
+		  	InvVolumeErf = P1_P2_distance/(
+			 erf(bmax/w_sqrt_2)*bmax+w_sqrt_2/constants::sqrt_pi*exp(-bmax*bmax/(w_sqrt_2*w_sqrt_2))
+			-erf(amax/w_sqrt_2)*amax-w_sqrt_2/constants::sqrt_pi*exp(-amax*amax/(w_sqrt_2*w_sqrt_2)));	
+			// std::cout << "InvVolumeErf" << InvVolumeErf << " InvVolumeExp" << InvVolumeExp << " f" << get_CG_invvolume() * sqrt(2*constants::pi*get_w2()) << std::endl;
+		}
+        Mdouble psi=exp(-dot(tangential,tangential)/(2.0*get_w2())) * InvVolumeExp
+			   * ( erf(b/w_sqrt_2) - erf(a/w_sqrt_2) ) * InvVolumeErf /2./P1_P2_distance;
+        rpsi=Position*psi;
+		return psi;
+	} else if (get_CG_type()==Polynomial) {
+		double wn2 = get_w2() - dot(tangential,tangential);
+		if ((wn2<=0) | (a*fabs(a)>=wn2) | (b*fabs(b)<=-wn2)) {
+			return 0;
+		} else {
+			double wn = sqrt(wn2);
+			double w = get_w();
+			return get_CG_invvolume()*evaluateIntegral(std::max(a,-wn)/w,std::min(b,wn)/w,tangential.GetLength()/w)*w / P1_P2_distance;
+		}
+		//CG_type_todo
+	} else { std::cerr << "error in CG_integral" << std::endl; exit(-1); }
+}
+
+/// /todo{Thomas: rpsi_scalar is not always set}
+template <StatType T>
+Mdouble StatisticsPoint<T>::CG_integral_2D(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_normal, Mdouble P1_P2_distance, Mdouble& rpsi_scalar)
+{
+	//apply the cutoff in normal direction:
+	Vec3D P_P1 = Position - P1;
+	Mdouble a = dot(P_P1,P1_P2_normal);
+	if ( a > get_cutoff() ) return 0.0;
+	Vec3D P_P2 = Position - P2;
+	Mdouble b = dot(P_P2,P1_P2_normal);
+	if ( -b > get_cutoff() ) return 0.0;
+	//apply the cutoff in tangential direction:
+	Vec3D tangential = P_P1 - a * P1_P2_normal;
+	if (dot(tangential,tangential)>get_cutoff2()) return 0.0;
+	if (get_CG_type()==HeavisideSphere) {
+		Mdouble wn2 = get_w2() - dot(tangential,tangential);
+		if ((wn2<=0) || (a*fabs(a)>=wn2) || (b*fabs(b)<=-wn2)) {
+			return 0;
+		} else {
+			Mdouble wn = sqrt(wn2);
+			//if the normal is parallel to the averaging direction
+			if (std::max(fabs(a),fabs(b))<1e-20) {
+				return get_CG_invvolume() * 2 * wn;
+			}
+			return get_CG_invvolume() / P1_P2_distance
+				*( ((b>= wn)?(constants::pi*wn2/2.0):( b*sqrt(wn2-sqr(b))+wn2*asin(b/wn)))
+					+((a<=-wn)?(constants::pi*wn2/2.0):(-a*sqrt(wn2-sqr(a))-wn2*asin(a/wn))));
+		}
+	} else if (get_CG_type()==Gaussian) { //Gaussian
+		if (dot(P1_P2_normal,P1_P2_normal)<1e-20) { 
+			//since we average parallel to the force line, the CG integral is shaped like the CG function
+			///\todo add rpsi
+            return get_CG_invvolume() * exp(-dot(P_P1,P_P1)/(2.0*get_w2()));
+		}
+		static Mdouble InvVolumeExp = compute_Gaussian_invvolume(gb->get_dim_particle()-2);	
+		static Mdouble w_sqrt_2 = constants::sqrt_2*get_w();
+		static Mdouble P1_P2_distance_for_cutoff=-1, InvVolumeErf=-1;
+		if (P1_P2_distance_for_cutoff!=P1_P2_distance) {
+			P1_P2_distance_for_cutoff = P1_P2_distance;
+			Mdouble amax = -get_cutoff();
+			Mdouble bmax =  get_cutoff()+P1_P2_distance;
+		  	InvVolumeErf = P1_P2_distance/(
+			 erf(bmax/w_sqrt_2)*bmax+w_sqrt_2/constants::sqrt_pi*exp(-bmax*bmax/(w_sqrt_2*w_sqrt_2))
+			-erf(amax/w_sqrt_2)*amax-w_sqrt_2/constants::sqrt_pi*exp(-amax*amax/(w_sqrt_2*w_sqrt_2))			
+			) / averagingVolume();	
+			//std::cout << "InvVolumeErf" << InvVolumeErf << " InvVolumeExp" << InvVolumeExp << " f" << get_CG_invvolume() * sqrt(2*constants::pi*get_w2()) << std::endl;
+		}
+		//Note: use dot(t,t),  GetLength2(t), as dot only works on non-averaged directions
+		//we also define rpsi
+        Mdouble psi = exp(-dot(tangential,tangential)/(2.0*get_w2())) * InvVolumeExp
+			   * ( erf(b/w_sqrt_2) - erf(a/w_sqrt_2) ) * InvVolumeErf /2./P1_P2_distance;
+        Mdouble phi1 = get_CG_invvolume() * exp(-dot(P_P1,P_P1)/(2.0*get_w2()));
+        Mdouble phi2 = get_CG_invvolume() * exp(-dot(P_P2,P_P2)/(2.0*get_w2()));
+        rpsi_scalar = -a/P1_P2_distance*psi + get_w2()/P1_P2_distance/P1_P2_distance*(phi1-phi2);
+        return psi;
+	} else if (get_CG_type()==Polynomial) {
+		double wn2 = get_w2() - dot(tangential,tangential);
+		if ((wn2<=0) | (a*fabs(a)>=wn2) | (b*fabs(b)<=-wn2)) {
+			return 0;
+		} else if (P1_P2_distance<1e-20) { 
+			//if the normal is parallel to the averaging direction
+			return CG_function_1D(P_P1);
+		} else {
+			double wn = sqrt(wn2);
+			double w = get_w();
+			return get_CG_invvolume()*evaluateIntegral(std::max(a,-wn)/w,std::min(b,wn)/w,tangential.GetLength()/w)*w / P1_P2_distance;
+		}
+		//CG_type_todo
+	} else { std::cerr << "error in CG_integral_2D" << std::endl; exit(-1); }
+}
+
+/// /todo{Thomas: rpsi_scalar is not always set}
+template <StatType T>
+Mdouble StatisticsPoint<T>::CG_integral_1D(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_normal, Mdouble P1_P2_distance, Mdouble& rpsi_scalar)
+{
+	//apply the cutoff in normal direction:
+	Vec3D P_P1 = Position - P1;
+	Mdouble a = dot(P_P1,P1_P2_normal);
+	if ( a > get_cutoff() ) return 0.0;
+	Vec3D P_P2 = Position - P2;
+	Mdouble b = dot(P_P2,P1_P2_normal);
+	if ( -b > get_cutoff() ) return 0.0;
+	//apply the cutoff in tangential direction:
+	Vec3D tangential = P_P1 - a * P1_P2_normal;
+	if (dot(tangential,tangential)>get_cutoff2()) return 0.0;
+	if (get_CG_type()==HeavisideSphere) {
+		Mdouble wn2 = get_w2() - dot(tangential,tangential);
+		if ((wn2<=0) | (a*fabs(a)>=wn2) | (b*fabs(b)<=-wn2)) {
+			return 0;
+		} else {
+			//if the normal is parallel to the averaging direction
+			if (std::max(fabs(a),fabs(b))<1e-20) {
+				return get_CG_invvolume() * constants::pi * wn2;
+			}
+			Mdouble wn = sqrt(wn2);
+			return get_CG_invvolume() / P1_P2_distance
+				*( ((b>= wn)?( 2.0/3.0*constants::pi*wn2*wn):(b*constants::pi*(wn2-sqr(b)/3.0)))
+					-((a<=-wn)?(-2.0/3.0*constants::pi*wn2*wn):(a*constants::pi*(wn2-sqr(a)/3.0))) );
+		}
+	} else if (get_CG_type()==Gaussian) { //Gaussian
+		if (fabs(b-a)<1e-20) { 
+			return get_CG_invvolume() * exp(-dot(P_P1,P_P1)/(2.0*get_w2()));
+		}
+		static Mdouble w_sqrt_2 = constants::sqrt_2*get_w();
+		static Mdouble P1_P2_distance_for_cutoff=-1, InvVolumeErf=-1;
+		if (P1_P2_distance_for_cutoff!=P1_P2_distance) {
+			P1_P2_distance_for_cutoff = P1_P2_distance;
+			Mdouble amax = -get_cutoff();
+			Mdouble bmax =  get_cutoff()+P1_P2_distance;
+		  	InvVolumeErf = P1_P2_distance/(
+			 erf(bmax/w_sqrt_2)*bmax+w_sqrt_2/constants::sqrt_pi*exp(-bmax*bmax/(w_sqrt_2*w_sqrt_2))
+			-erf(amax/w_sqrt_2)*amax-w_sqrt_2/constants::sqrt_pi*exp(-amax*amax/(w_sqrt_2*w_sqrt_2))			
+			) / averagingVolume();	
+			//std::cout << "InvVolumeErf" << InvVolumeErf << " InvVolumeExp" << InvVolumeExp << " f" << get_CG_invvolume() * sqrt(2*constants::pi*get_w2()) << std::endl;
+		}
+		//Note: use dot(t,t),  GetLength2(t), as dot only works on non-averaged directions
+        Mdouble psi = ( erf(b/w_sqrt_2) - erf(a/w_sqrt_2) ) * InvVolumeErf /2./P1_P2_distance;
+        Mdouble phi1 = get_CG_invvolume() * exp(-dot(P_P1,P_P1)/(2.0*get_w2()));
+        Mdouble phi2 = get_CG_invvolume() * exp(-dot(P_P2,P_P2)/(2.0*get_w2()));
+        rpsi_scalar = -a/P1_P2_distance*psi + get_w2()/P1_P2_distance/P1_P2_distance*(phi1-phi2);
+        return psi;
+	} else if (get_CG_type()==Polynomial) {
+		//~ std::cout << setprecision(12) << P1_P2_normal << std::endl;
+		double wn2 = get_w2() - dot(tangential,tangential);
+		if ((wn2<=0) | (a*fabs(a)>=wn2) | (b*fabs(b)<=-wn2)) {
+			return 0;
+		} else if ((P1_P2_distance<1e-12)|(GetLength2(tangential)<1e-24)) { 
+		//~ } else if (fabs(b-a)<1e-12) { 
+			//if the normal is parallel to the averaging direction
+			//~ std::cout << "normal is parallel to the averaging direction: "
+			//~ << " P_P1 " << P1_P2_distance
+			//~ << " psi= " << CG_function_1D(P1) << std::endl;
+			return CG_function_1D(P1);
+		} else {
+			double wn = sqrt(wn2);
+			double w = get_w();
+			return get_CG_invvolume()*evaluateIntegral(std::max(a,-wn)/w,std::min(b,wn)/w,dot(tangential,tangential)/w)*w / P1_P2_distance;
+		}
+	} else { std::cerr << "error in CG_integral_1D" << std::endl; exit(-1); }
+	std::cout<<"eind testje"<< rpsi_scalar<<std::endl;
+}
+
+template <StatType T>
+std::string StatisticsPoint<T>::write_variable_names() {
+	std::stringstream ss;
+	ss<< "Nu "
+		<< "Density "
+		<< "MomentumX "
+		<< "MomentumY "
+		<< "MomentumZ "
+		<< "DisplacementMomentumX "
+		<< "DisplacementMomentumY "
+		<< "DisplacementMomentumZ "
+		<< "DisplacementXX "
+		<< "DisplacementXY "
+		<< "DisplacementXZ "
+		<< "DisplacementYY "
+		<< "DisplacementYZ "
+		<< "DisplacementZZ "
+		<< "MomentumFluxXX "
+		<< "MomentumFluxXY "
+		<< "MomentumFluxXZ "
+		<< "MomentumFluxYY "
+		<< "MomentumFluxYZ "
+		<< "MomentumFluxZZ "
+		<< "DisplacementMomentumFluxXX "
+		<< "DisplacementMomentumFluxXY "
+		<< "DisplacementMomentumFluxXZ "
+		<< "DisplacementMomentumFluxYY "
+		<< "DisplacementMomentumFluxYZ "
+		<< "DisplacementMomentumFluxZZ "
+		<< "EnergyFluxX "
+		<< "EnergyFluxY "
+		<< "EnergyFluxZ "
+		<< "NormalStressXX "
+		<< "NormalStressXY "
+		<< "NormalStressXZ "
+		<< "NormalStressYX "
+		<< "NormalStressYY "
+		<< "NormalStressYZ "
+		<< "NormalStressZX "
+		<< "NormalStressZY "
+		<< "NormalStressZZ "
+		<< "TangentialStressXX "
+		<< "TangentialStressXY "
+		<< "TangentialStressXZ "
+		<< "TangentialStressYX "
+		<< "TangentialStressYY "
+		<< "TangentialStressYZ "
+		<< "TangentialStressZX "
+		<< "TangentialStressZY "
+		<< "TangentialStressZZ "
+		<< "NormalTractionX "
+		<< "NormalTractionY "
+		<< "NormalTractionZ "
+		<< "TangentialTractionX "
+		<< "TangentialTractionY "
+		<< "TangentialTractionZ "
+		<< "FabricXX "
+		<< "FabricXY "
+		<< "FabricXZ "
+		<< "FabricYY "
+		<< "FabricYZ "
+		<< "FabricZZ "
+		<< "CollisionalHeatFluxX "
+		<< "CollisionalHeatFluxY "
+		<< "CollisionalHeatFluxZ "
+		<< "Dissipation "
+		<< "Potential "
+		<< "LocalAngularMomentumX "
+		<< "LocalAngularMomentumY "
+		<< "LocalAngularMomentumZ "
+		<< "LocalAngularMomentumFluxXX "
+		<< "LocalAngularMomentumFluxXY "
+		<< "LocalAngularMomentumFluxXZ "
+		<< "LocalAngularMomentumFluxYX "
+		<< "LocalAngularMomentumFluxYY "
+		<< "LocalAngularMomentumFluxYZ "
+		<< "LocalAngularMomentumFluxZX "
+		<< "LocalAngularMomentumFluxZY "
+		<< "LocalAngularMomentumFluxZZ "
+		<< "ContactCoupleStressXX "
+		<< "ContactCoupleStressXY "
+		<< "ContactCoupleStressXZ "
+		<< "ContactCoupleStressYX "
+		<< "ContactCoupleStressYY "
+		<< "ContactCoupleStressYZ "
+		<< "ContactCoupleStressZX "
+		<< "ContactCoupleStressZY "
+		<< "ContactCoupleStressZZ ";
+	return ss.str();
+}
+
+template <StatType T>
+std::string StatisticsPoint<T>::print() const
+{
+	std::stringstream ss;
+	ss<< "Nu " << Nu
+		<<", Density " << Density 
+		<< ",\n Momentum " << Momentum
+		<< ",\n DisplacementMomentum " << DisplacementMomentum
+		<< ",\n Displacement " << Displacement
+		<< ",\n MomentumFlux " << MomentumFlux
+		<< ",\n DisplacementMomentumFlux " << DisplacementMomentumFlux
+		<< ",\n EnergyFlux " << EnergyFlux
+		<< ",\n NormalStress " << NormalStress  
+		<< ",\n TangentialStress " << TangentialStress
+		<< ",\n NormalTraction " << NormalTraction  
+		<< ",\n TangentialTraction " << TangentialTraction
+		<< ",\n Fabric " << Fabric
+		<< ",\n CollisionalHeatFlux " << CollisionalHeatFlux
+		<< ",\n Dissipation " << Dissipation
+		<< ",\n Potential " << Potential
+        << ",\n LocalAngularMomentum " << LocalAngularMomentum
+		<< ",\n LocalAngularMomentumFlux " << LocalAngularMomentumFlux
+		<< ",\n ContactCoupleStress " << ContactCoupleStress;
+	return ss.str();
+}
+
+template <StatType T>
+std::string StatisticsPoint<T>::print_sqrt() const
+{
+	std::stringstream ss;
+	ss<< "Nu " << sqrt(Nu)
+		<< ", Density " << sqrt(Density)
+		<< ", Momentum " << sqrt(Momentum)
+		<< ", DisplacementMomentum " << sqrt(DisplacementMomentum)
+		<< ", Displacement " << sqrt(Displacement)
+		<< ", MomentumFlux " << sqrt(MomentumFlux)
+		<< ", DisplacementMomentumFlux " << sqrt(DisplacementMomentumFlux)
+		<< ", EnergyFlux " << sqrt(EnergyFlux)
+		<< ", NormalStress " << sqrt(NormalStress)
+		<< ", TangentialStress " << sqrt(TangentialStress)
+		<< ", NormalTraction " << sqrt(NormalTraction)
+		<< ", TangentialTraction " << sqrt(TangentialTraction)
+		<< ", Fabric " << sqrt(Fabric)
+		<< ", CollisionalHeatFlux " << sqrt(CollisionalHeatFlux)
+		<< ", Dissipation " << sqrt(Dissipation)
+		<< ", Potential " << sqrt(Potential)
+        << ", LocalAngularMomentum " << LocalAngularMomentum
+		<< ", LocalAngularMomentumFlux " << LocalAngularMomentumFlux
+		<< ", ContactCoupleStress " << ContactCoupleStress;
+
+	return ss.str();
+}
+
+template <StatType T>
+std::string StatisticsPoint<T>::write() const
+{
+	std::stringstream ss;
+	ss.precision(16);
+	ss<< Nu
+		<< " " << Density
+		<< " " << Momentum
+		<< " " << DisplacementMomentum
+		<< " " << Displacement
+		<< " " << MomentumFlux
+		<< " " << DisplacementMomentumFlux
+		<< " " << EnergyFlux
+		<< " " << NormalStress  
+		<< " " << TangentialStress
+		<< " " << NormalTraction  
+		<< " " << TangentialTraction
+		<< " " << Fabric
+		<< " " << CollisionalHeatFlux
+		<< " " << Dissipation
+		<< " " << Potential
+		<< " " << LocalAngularMomentum
+		<< " " << LocalAngularMomentumFlux
+		<< " " << ContactCoupleStress;
+	return ss.str();
+}
+
+template <StatType T>
+void StatisticsPoint<T>::set_Gaussian_invvolume(int dim) {
+	CG_invvolume = compute_Gaussian_invvolume(dim);
+}
+
+template <StatType T>
+double StatisticsPoint<T>::compute_Gaussian_invvolume(int dim) {
+	if (dim==0) { return 1.; }
+
+	//this is the prefactor 1/V of phi(r)=1/V*exp(-|r|^2/w^2) for dim=1
+	double CG_invvolume = 1. / ( constants::sqrt_2 * constants::sqrt_pi * get_w());
+	//take into account the cutoff radius and the dimension of the problem
+	if (dim==3) {
+		CG_invvolume = cubic(CG_invvolume);
+		//Wolfram alpha: erf(c/(sqrt(2) w))-(sqrt(2/pi) c e^(-c^2/(2 w^2)))/w
+		CG_invvolume /= erf( get_cutoff() / (constants::sqrt_2*get_w()) ) 
+			- constants::sqrt_2/constants::sqrt_pi * get_cutoff()/get_w() * exp( -get_cutoff2() / (2*get_w2()) );
+	} else if (dim==2) {
+		CG_invvolume = sqr(CG_invvolume);
+		//Wolfram alpha: integrate(x*exp(-x^2/(2w^2)),{x,0,c})/integrate(x*exp(-x^2/(2w^2)),{x,0,inf})=1-e^(-c^2/(2 w^2))
+		CG_invvolume /= 1-exp( -get_cutoff2() / (2*get_w2()) );
+	} else {
+		CG_invvolume /= erf( get_cutoff() / (constants::sqrt_2*get_w()) );
+	}
+	return CG_invvolume;
+}
+
+template <StatType T>
+void StatisticsPoint<T>::set_Heaviside_invvolume() {
+	///\todo{Thomas: check 2d case}
+	CG_invvolume = 1.0/(4.0/3.0*constants::pi*sqrt(get_w2())*get_w2()); 
+}
+
+template <StatType T>
+void StatisticsPoint<T>::set_Polynomial_invvolume(int dim) {
+	if (dim==3) CG_invvolume = 1.0/(sqrt(get_w2())*get_w2()); 
+	else if (dim==2) CG_invvolume = 1.0/get_w2(); 
+	else CG_invvolume = 1.0/sqrt(get_w2()); 
+}
+
+template <StatType T> void StatisticsPoint<T>::set_CG_invvolume() {
+	if (get_CG_type()==HeavisideSphere) {
+		set_Heaviside_invvolume();
+	} else if (get_CG_type()==Gaussian) {
+		set_Gaussian_invvolume(nonaveragedDim());
+	} else if (get_CG_type()==Polynomial) {
+		set_Polynomial_invvolume(nonaveragedDim());
+	} else { std::cerr << "error in CG_function" << std::endl; exit(-1); }
+	CG_invvolume /= averagingVolume();
+}
+
+template<> int StatisticsPoint<XYZ>::nonaveragedDim() { return gb->get_dim_particle(); }
+template<> int StatisticsPoint<YZ>::nonaveragedDim() { return gb->get_dim_particle()-1; }
+template<> int StatisticsPoint<XZ>::nonaveragedDim() { return gb->get_dim_particle()-1; }
+template<> int StatisticsPoint<XY>::nonaveragedDim() { return 2; }
+template<> int StatisticsPoint<X>::nonaveragedDim() { return 1; }
+template<> int StatisticsPoint<Y>::nonaveragedDim() { return 1; }
+template<> int StatisticsPoint<Z>::nonaveragedDim() { return gb->get_dim_particle()-2; }
+template<> int StatisticsPoint<O>::nonaveragedDim() { return 0; }
+template<> int StatisticsPoint<RAZ>::nonaveragedDim() { exit(-1);  }
+template<> int StatisticsPoint<AZ>::nonaveragedDim() { exit(-1);  }
+template<> int StatisticsPoint<RZ>::nonaveragedDim() { exit(-1);  }
+template<> int StatisticsPoint<RA>::nonaveragedDim() { exit(-1);  }
+template<> int StatisticsPoint<R>::nonaveragedDim() { exit(-1);  }
+template<> int StatisticsPoint<A>::nonaveragedDim() { exit(-1);  }
+
+
+template<> double StatisticsPoint<XYZ>::averagingVolume() {
+	return 1.0;
+}
+template<> double StatisticsPoint<XY>::averagingVolume() {
+	return ((gb->get_dim_particle()!=3)?(1.0):(get_zmaxStat()-get_zminStat()));
+}
+template<> double StatisticsPoint<XZ>::averagingVolume() {
+	return (get_ymaxStat()-get_yminStat());
+}
+template<> double StatisticsPoint<YZ>::averagingVolume() {
+	return (get_xmaxStat()-get_xminStat());
+}
+template<> double StatisticsPoint<X>::averagingVolume() {
+	return (get_ymaxStat()-get_yminStat())
+		 * ((gb->get_dim_particle()!=3)?(1.0):(get_zmaxStat()-get_zminStat()));
+}
+template<> double StatisticsPoint<Y>::averagingVolume() {
+	return (get_xmaxStat()-get_xminStat()) 
+		 * ((gb->get_dim_particle()!=3)?(1.0):(get_zmaxStat()-get_zminStat()));
+}
+template<> double StatisticsPoint<Z>::averagingVolume() {
+	return (get_xmaxStat()-get_xminStat()) 
+		 * (get_ymaxStat()-get_yminStat());
+}
+template<> double StatisticsPoint<O>::averagingVolume() {
+	return (get_xmaxStat()-get_xminStat()) 
+		 * (get_ymaxStat()-get_yminStat())
+		 * ((gb->get_dim_particle()!=3)?(1.0):(get_zmaxStat()-get_zminStat()));
+}
+template<> double StatisticsPoint<RAZ>::averagingVolume() { exit(-1); }
+template<> double StatisticsPoint<AZ>::averagingVolume() { exit(-1); }
+template<> double StatisticsPoint<RZ>::averagingVolume() { exit(-1); }
+template<> double StatisticsPoint<RA>::averagingVolume() { exit(-1); }
+template<> double StatisticsPoint<R>::averagingVolume() { exit(-1); }
+template<> double StatisticsPoint<A>::averagingVolume() { exit(-1); }
+	
+template<> Mdouble StatisticsPoint<RA>::CG_function(const Vec3D &PI) {
+	return CG_function_2D(PI);
+}
+template<> Mdouble StatisticsPoint<RZ>::CG_function(const Vec3D &PI) {
+	Mdouble dist2 = get_distance2(PI);
+	Mdouble R2 = sqr(PI.X)+sqr(PI.Y);
+	Mdouble RI2 = sqr(Position.X)+sqr(Position.Y);
+	Mdouble Z2 = sqr(PI.Z-Position.Z);
+	if (get_CG_type()==Gaussian) {
+		return (get_cutoff2()<dist2)?0.0:get_CG_invvolume() 
+			* exp(-(R2+RI2+Z2)/(2.0*get_w2())) * besselFunc::I0(sqrt(R2*RI2)/get_w2());
+	} else { std::cerr << "error in CG_function<RZ>" << std::endl; exit(-1); }
+}
+template<> Mdouble StatisticsPoint<AZ>::CG_function(const Vec3D&) {
+	std::cerr << "error in CG_function<AZ>" << std::endl; exit(-1);
+}
+template<> Mdouble StatisticsPoint<R>::CG_function(const Vec3D &PI) {
+	Mdouble dist2 = get_distance2(PI);
+	Mdouble R2 = sqr(PI.X)+sqr(PI.Y);
+	Mdouble RI2 = sqr(Position.X)+sqr(Position.Y);
+	if (get_CG_type()==Gaussian) {
+		return (get_cutoff2()<dist2)?0.0:get_CG_invvolume() 
+			* exp(-(R2+RI2)/(2.0*get_w2())) * besselFunc::I0(sqrt(R2*RI2)/get_w2());
+	} else { std::cerr << "error in CG_function<R>" << std::endl; exit(-1); }
+}
+template<> Mdouble StatisticsPoint<A>::CG_function(const Vec3D&) {
+	std::cerr << "error in CG_function<A>" << std::endl; exit(-1);
+}
+
+template<> Mdouble StatisticsPoint<XY>::CG_function(const Vec3D &PI) {
+	return CG_function_2D(PI);
+}
+template<> Mdouble StatisticsPoint<XZ>::CG_function(const Vec3D &PI) {
+	return CG_function_2D(PI);
+}
+template<> Mdouble StatisticsPoint<YZ>::CG_function(const Vec3D &PI) {
+	return CG_function_2D(PI);
+}
+template<> Mdouble StatisticsPoint<X>::CG_function(const Vec3D &PI) {
+	return CG_function_1D(PI);
+}
+template<> Mdouble StatisticsPoint<Y>::CG_function(const Vec3D &PI) {
+	return CG_function_1D(PI);
+}
+template<> Mdouble StatisticsPoint<Z>::CG_function(const Vec3D &PI) {
+	return CG_function_1D(PI);
+}
+template<> Mdouble StatisticsPoint<O>::CG_function(const Vec3D&) {
+	return get_CG_invvolume();
+}
+
+template<> Vec3D StatisticsPoint<YZ>::CG_gradient(const Vec3D &P, const Mdouble phi) {
+	//CG_type_todo
+	if (get_CG_type()==Gaussian) {
+		return Vec3D(0.0,P.Y - Position.Y,P.Z - Position.Z)*(phi/get_w2());
+	} else { std::cerr << "error in CG_gradient<YZ>" << std::endl; exit(-1); }
+}
+template<> Vec3D StatisticsPoint<XZ>::CG_gradient(const Vec3D &P, const Mdouble phi) {
+	//CG_type_todo
+	if (get_CG_type()==Gaussian) {
+		return Vec3D(P.X - Position.X,0.0,P.Z - Position.Z)*(phi/get_w2());
+	} else { std::cerr << "error in CG_gradient<XZ>" << std::endl; exit(-1); }
+}
+template<> Vec3D StatisticsPoint<XY>::CG_gradient(const Vec3D &P, const Mdouble phi) {
+	//CG_type_todo
+	if (get_CG_type()==Gaussian) {
+		return Vec3D(P.X - Position.X,P.Y - Position.Y,0.0)*(phi/get_w2());
+	} else { std::cerr << "error in CG_gradient<XY>" << std::endl; exit(-1); }
+}
+
+template<> Vec3D StatisticsPoint<X>::CG_gradient(const Vec3D &P,const  Mdouble phi) {
+	//CG_type_todo
+	if (get_CG_type()==Gaussian) {
+		return Vec3D((P.X - Position.X)*(phi/get_w2()),0.0,0.0);
+	} else if (get_CG_type()==Polynomial) {
+		Mdouble r=fabs(Position.X-P.X)/get_w();
+		return Vec3D(get_CG_invvolume()*evaluatePolynomialGradient(r)/r/get_w2()*(Position.X-P.X),0,0);
+	} else { std::cerr << "error in CG_gradient<X>" << std::endl; exit(-1); }
+}
+template<> Vec3D StatisticsPoint<Y>::CG_gradient(const Vec3D &P, const Mdouble phi) {
+	//CG_type_todo
+	if (get_CG_type()==Gaussian) { 
+		return Vec3D(0.0,(P.Y - Position.Y)*(phi/get_w2()),0.0);
+	} else if (get_CG_type()==Polynomial) {
+		Mdouble r=fabs(Position.Y-P.Y)/get_w();
+		return Vec3D(0,get_CG_invvolume()*evaluatePolynomialGradient(r)/r/get_w2()*(Position.Y-P.Y),0);
+	} else { std::cerr << "error in CG_gradient<Y>" << std::endl; exit(-1); }
+}
+template<> Vec3D StatisticsPoint<Z>::CG_gradient(const Vec3D &P, const Mdouble phi) {
+	//CG_type_todo
+	if (get_CG_type()==Gaussian) {
+		return Vec3D(0.0,0.0,(P.Z - Position.Z)*(phi/get_w2()));
+	} else if (get_CG_type()==Polynomial) {
+		Mdouble r=fabs(Position.Z-P.Z)/get_w();
+		return Vec3D(0,0,get_CG_invvolume()*evaluatePolynomialGradient(r)/r/get_w2()*(Position.Z-P.Z));
+	} else { std::cerr << "error in CG_gradient<Z>" << std::endl; exit(-1); }
+}
+
+template<> Vec3D StatisticsPoint<O>::CG_gradient(const Vec3D&, const Mdouble) {
+	return Vec3D(0.0,0.0,0.0);
+}
+
+//~ template<> Vec3D StatisticsPoint<Z>::CG_integral_gradient(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_normal, Mdouble P1_P2_distance) {
+		//~ Vec3D P_P1 = Position - P1;
+		//~ Vec3D P_P2 = Position - P2;
+		//~ Mdouble a = dot(P_P1,P1_P2_normal);
+		//~ Mdouble b = dot(P_P2,P1_P2_normal);
+		//~ Vec3D tangential = P_P1 - a * P1_P2_normal;
+		//~ if (get_CG_type()==Gaussian) {
+			//~ Mdouble wsq2 = sqrt(2*get_w2());
+			//~ Mdouble f = sqrt(2*constants::pi*get_w2());
+			//~ return Vec3D(0.0,0.0,(exp(-sqr(a/wsq2))-exp(-sqr(b/wsq2)))/f/(P2.Z-P1.Z));
+		//~ }	else { std::cerr << "error in CG_function" << std::endl; exit(-1); }
+	//~ }
+
+template<> Mdouble StatisticsPoint<RA>::CG_integral(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_normal, Mdouble P1_P2_distance, Vec3D& rpsi) {
+	Mdouble rpsi_scalar;
+	Mdouble psi = CG_integral_2D(P1, P2, P1_P2_normal, P1_P2_distance, rpsi_scalar);
+    rpsi=Position*psi;
+    return psi;
+}
+template<> Mdouble StatisticsPoint<RZ>::CG_integral(Vec3D &P1, Vec3D &P2, Vec3D&, Mdouble, Vec3D& rpsi UNUSED) {
+	Vec3D P=(P1+P2)/2; return CG_function(P);
+}
+template<> Mdouble StatisticsPoint<AZ>::CG_integral(Vec3D&, Vec3D&, Vec3D&, Mdouble, Vec3D& rpsi UNUSED) {
+	std::cerr << "error in CG_function<AZ>" << std::endl; exit(-1);
+}
+template<> Mdouble StatisticsPoint<R>::CG_integral(Vec3D &P1, Vec3D &P2, Vec3D&, Mdouble, Vec3D& rpsi UNUSED) {
+	Vec3D P=(P1+P2)/2; return CG_function(P);
+}
+template<> Mdouble StatisticsPoint<A>::CG_integral(Vec3D&, Vec3D&, Vec3D&, Mdouble, Vec3D& rpsi UNUSED) {
+	std::cerr << "error in CG_function<A>" << std::endl; exit(-1);
+}
+
+template<> Mdouble StatisticsPoint<XY>::CG_integral(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_normal, Mdouble P1_P2_distance, Vec3D& rpsi) {
+	Mdouble rpsi_scalar=0;
+	Mdouble psi = CG_integral_2D(P1, P2, P1_P2_normal, P1_P2_distance, rpsi_scalar);
+    rpsi=Vec3D(Position.X*psi,Position.Y*psi,P1.Z*psi-(P1.Z-P2.Z)*rpsi_scalar);
+    return psi;
+}
+template<> Mdouble StatisticsPoint<XZ>::CG_integral(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_normal, Mdouble P1_P2_distance, Vec3D& rpsi) {
+	Mdouble rpsi_scalar=0;
+	Mdouble psi = CG_integral_2D(P1, P2, P1_P2_normal, P1_P2_distance, rpsi_scalar);
+    rpsi=Vec3D(Position.X*psi,P1.Y*psi-(P1.Y-P2.Y)*rpsi_scalar,Position.Z*psi);
+    return psi;
+}
+template<> Mdouble StatisticsPoint<YZ>::CG_integral(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_normal, Mdouble P1_P2_distance, Vec3D& rpsi) {
+	Mdouble rpsi_scalar=0;
+    Mdouble psi = CG_integral_2D(P1, P2, P1_P2_normal, P1_P2_distance, rpsi_scalar);
+    rpsi=Vec3D(P1.X*psi-(P1.X-P2.X)*rpsi_scalar,Position.Y*psi,Position.Z*psi);
+    return psi;
+}
+template<> Mdouble StatisticsPoint<X>::CG_integral(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_normal, Mdouble P1_P2_distance, Vec3D& rpsi) {
+	Mdouble rpsi_scalar=0;
+	Mdouble psi = CG_integral_1D(P1, P2, P1_P2_normal, P1_P2_distance, rpsi_scalar);
+    rpsi=Vec3D(Position.X*psi,P1.Y*psi-(P1.Y-P2.Y)*rpsi_scalar,P1.Z*psi-(P1.Z-P2.Z)*rpsi_scalar);
+    return psi;
+}
+template<> Mdouble StatisticsPoint<Y>::CG_integral(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_normal, Mdouble P1_P2_distance, Vec3D& rpsi) {
+	Mdouble rpsi_scalar=0;
+	Mdouble psi = CG_integral_1D(P1, P2, P1_P2_normal, P1_P2_distance, rpsi_scalar);
+    rpsi=Vec3D(P1.X*psi-(P1.X-P2.X)*rpsi_scalar,Position.Y*psi,P1.Z*psi-(P1.Z-P2.Z)*rpsi_scalar);
+    return psi;
+}
+template<> Mdouble StatisticsPoint<Z>::CG_integral(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_normal, Mdouble P1_P2_distance, Vec3D& rpsi) {
+	Mdouble rpsi_scalar=0;
+	Mdouble psi = CG_integral_1D(P1, P2, P1_P2_normal, P1_P2_distance, rpsi_scalar);
+    rpsi=Vec3D(P1.X*psi-(P1.X-P2.X)*rpsi_scalar,P1.Y*psi-(P1.Y-P2.Y)*rpsi_scalar,Position.Z*psi);
+    return psi;
+}
+template<> Mdouble StatisticsPoint<O>::CG_integral(Vec3D &P1 UNUSED, Vec3D &P2 UNUSED, Vec3D &P1_P2_normal UNUSED, Mdouble P1_P2_distance UNUSED, Vec3D& rpsi) {
+    Mdouble psi = get_CG_invvolume();
+    rpsi=P1*psi; ///\todo Is that right?
+	return psi;
+}
+
+template<> Vec3D StatisticsPoint<Z>::CG_integral_gradient(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_normal, Mdouble P1_P2_distance) {
+	return Vec3D(0,0,CG_integral_gradient_1D(P1, P2, P1_P2_normal, P1_P2_distance));
+}
+
+///Output statistical variables to ostream
+template <StatType T> std::ostream& operator<< (std::ostream& os, const StatisticsPoint<T> &stat) {
+	os.precision(16);
+	if (stat.mirrorParticle<0) {
+		//only write std particles, not mirrored particles
+		os << stat.get_Position() << " " << stat.write() << std::endl; 
+	}
+	return os;
+}
+
+template <> std::ostream& operator<< (std::ostream& os, const StatisticsPoint<RAZ> &stat) {
+	os.precision(16); if (stat.mirrorParticle<0) os << stat.get_Position().GetCylindricalCoordinates() << " " << stat.write() << std::endl; return os;
+}
+template <> std::ostream& operator<< (std::ostream& os, const StatisticsPoint<RA> &stat) {
+	os.precision(16); if (stat.mirrorParticle<0) os << stat.get_Position().GetCylindricalCoordinates() << " " << stat.write() << std::endl; return os;
+}
+template <> std::ostream& operator<< (std::ostream& os, const StatisticsPoint<RZ> &stat) {
+	os.precision(16); if (stat.mirrorParticle<0) os << stat.get_Position().GetCylindricalCoordinates() << " " << stat.write() << std::endl; return os;
+}
+template <> std::ostream& operator<< (std::ostream& os, const StatisticsPoint<AZ> &stat) {
+	os.precision(16); if (stat.mirrorParticle<0) os << stat.get_Position().GetCylindricalCoordinates() << " " << stat.write() << std::endl; return os;
+}
+template <> std::ostream& operator<< (std::ostream& os, const StatisticsPoint<R> &stat) {
+	os.precision(16); if (stat.mirrorParticle<0) os << stat.get_Position().GetCylindricalCoordinates() << " " << stat.write() << std::endl; return os;
+}
+template <> std::ostream& operator<< (std::ostream& os, const StatisticsPoint<A> &stat) {
+	os.precision(16); if (stat.mirrorParticle<0) os << stat.get_Position().GetCylindricalCoordinates() << " " << stat.write() << std::endl; return os;
+}
+
+template<> Mdouble StatisticsPoint<XY>::get_distance2(const Vec3D &P) {return sqr(P.X-Position.X)+sqr(P.Y-Position.Y);}
+template<> Mdouble StatisticsPoint<XZ>::get_distance2(const Vec3D &P) {return sqr(P.X-Position.X)+sqr(P.Z-Position.Z);}
+template<> Mdouble StatisticsPoint<YZ>::get_distance2(const Vec3D &P) {return sqr(P.Y-Position.Y)+sqr(P.Z-Position.Z);}
+template<> Mdouble StatisticsPoint<X> ::get_distance2(const Vec3D &P) {return sqr(P.X-Position.X);}
+template<> Mdouble StatisticsPoint<Y> ::get_distance2(const Vec3D &P) {return sqr(P.Y-Position.Y);}
+template<> Mdouble StatisticsPoint<Z> ::get_distance2(const Vec3D &P) {return sqr(P.Z-Position.Z);}
+template<> Mdouble StatisticsPoint<O> ::get_distance2(const Vec3D&) {return 0;}
+
+template<> Mdouble StatisticsPoint<XY>::dot(const Vec3D &P, const Vec3D &Q) {return P.X*Q.X + P.Y*Q.Y;}
+template<> Mdouble StatisticsPoint<XZ>::dot(const Vec3D &P, const Vec3D &Q) {return P.X*Q.X + P.Z*Q.Z;}
+template<> Mdouble StatisticsPoint<YZ>::dot(const Vec3D &P, const Vec3D &Q) {return P.Y*Q.Y + P.Z*Q.Z;}
+template<> Mdouble StatisticsPoint<X> ::dot(const Vec3D &P, const Vec3D &Q) {return P.X*Q.X;}
+template<> Mdouble StatisticsPoint<Y> ::dot(const Vec3D &P, const Vec3D &Q) {return P.Y*Q.Y;}
+template<> Mdouble StatisticsPoint<Z> ::dot(const Vec3D &P, const Vec3D &Q) {return P.Z*Q.Z;}
+template<> Mdouble StatisticsPoint<O> ::dot(const Vec3D&, const Vec3D&) {return 0;}
+
+template<StatType T> Vec3D StatisticsPoint<T>::clearAveragedDirections(Vec3D P) {return P;}
+template<> Vec3D StatisticsPoint<XY>::clearAveragedDirections(Vec3D P) {return Vec3D(P.X, P.Y, 0);}
+template<> Vec3D StatisticsPoint<XZ>::clearAveragedDirections(Vec3D P) {return Vec3D(P.X, 0, P.Z);}
+template<> Vec3D StatisticsPoint<YZ>::clearAveragedDirections(Vec3D P) {return Vec3D(0, P.Y, P.Z);}
+template<> Vec3D StatisticsPoint<X>::clearAveragedDirections(Vec3D P) {return Vec3D(P.X, 0, 0);}
+template<> Vec3D StatisticsPoint<Y>::clearAveragedDirections(Vec3D P) {return Vec3D(0, P.Y, 0);}
+template<> Vec3D StatisticsPoint<Z>::clearAveragedDirections(Vec3D P) {return Vec3D(0, 0, P.Z);}
+template<> Vec3D StatisticsPoint<O>::clearAveragedDirections(Vec3D P UNUSED) {return Vec3D(0, 0, 0);}
+
+template<> Vec3D StatisticsPoint<XY>::cross(Vec3D P, Vec3D &Q) {return Vec3D(0, 0, P.X*Q.Y-P.Y*Q.X);}
+template<> Vec3D StatisticsPoint<XZ>::cross(Vec3D P, Vec3D &Q) {return Vec3D(0, P.Z*Q.X-P.X*Q.Z, 0);}
+template<> Vec3D StatisticsPoint<YZ>::cross(Vec3D P, Vec3D &Q) {return Vec3D(P.Y*Q.Z-P.Z*Q.Y, 0, 0);}
+template<> Vec3D StatisticsPoint<X>::cross(Vec3D P UNUSED, Vec3D &Q UNUSED) {return Vec3D(0,0,0);}
+template<> Vec3D StatisticsPoint<Y>::cross(Vec3D P UNUSED, Vec3D &Q UNUSED) {return Vec3D(0,0,0);}
+template<> Vec3D StatisticsPoint<Z>::cross(Vec3D P UNUSED, Vec3D &Q UNUSED) {return Vec3D(0,0,0);}
+template<> Vec3D StatisticsPoint<O>::cross(Vec3D P UNUSED, Vec3D &Q UNUSED) {return Vec3D(0,0,0);}
+
+template<> Matrix3D StatisticsPoint<XY>::MatrixCross(Vec3D P, Matrix3D &Q) {return Matrix3D(
+    0, 0, P.X*Q.YX-P.Y*Q.XX,
+    0, 0, P.X*Q.YY-P.Y*Q.XY,
+    0, 0, P.X*Q.YZ-P.Y*Q.XZ);}
+template<> Matrix3D StatisticsPoint<XZ>::MatrixCross(Vec3D P, Matrix3D &Q) {return Matrix3D(
+    0, P.Z*Q.XX-P.X*Q.ZX, 0,
+    0, P.Z*Q.XY-P.X*Q.ZY, 0,
+    0, P.Z*Q.XZ-P.X*Q.ZZ, 0);}
+template<> Matrix3D StatisticsPoint<YZ>::MatrixCross(Vec3D P, Matrix3D &Q) {return Matrix3D(
+    P.Y*Q.ZX-P.Z*Q.YX, 0, 0,
+    P.Y*Q.ZY-P.Z*Q.YY, 0, 0,
+    P.Y*Q.ZZ-P.Z*Q.YZ, 0, 0);}
+template<> Matrix3D StatisticsPoint<X>::MatrixCross(Vec3D P UNUSED, Matrix3D &Q UNUSED) {return Matrix3D(0,0,0,0,0,0,0,0,0);}
+template<> Matrix3D StatisticsPoint<Y>::MatrixCross(Vec3D P UNUSED, Matrix3D &Q UNUSED) {return Matrix3D(0,0,0,0,0,0,0,0,0);}
+template<> Matrix3D StatisticsPoint<Z>::MatrixCross(Vec3D P UNUSED, Matrix3D &Q UNUSED) {return Matrix3D(0,0,0,0,0,0,0,0,0);}
+template<> Matrix3D StatisticsPoint<O>::MatrixCross(Vec3D P UNUSED, Matrix3D &Q UNUSED) {return Matrix3D(0,0,0,0,0,0,0,0,0);}
+

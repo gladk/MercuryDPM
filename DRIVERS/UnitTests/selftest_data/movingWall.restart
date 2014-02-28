@@ -1,0 +1,13 @@
+restart_version 3
+name movingWall
+xmin 0 xmax 2 ymin 0 ymax 2 zmin 0 zmax 2
+dt 0.0002 t 1.0002 tmax 1 save_count_data 264 save_count_ene 264 save_count_stat 264 save_count_fstat 264
+dim 3 gravity 0 0 0
+options_fstat 1 options_data 1 options_ene 1 options_restart 1
+Species 1
+k 49348.022 disp -0 kt 0 dispt 0 mu 0 rho 1.9098593 dim_particle 3
+Walls 1
+InfiniteWall normal 0 0 -1 position -1.0002 velocity 0 0 1
+Boundaries 0
+Particles 1
+TSP BP 1 1 2.9726204 0 0 3.0004108 0.5 0 0 0 0 0 0 1 10 0 0

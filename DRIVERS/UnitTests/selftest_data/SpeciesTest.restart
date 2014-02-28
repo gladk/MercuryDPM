@@ -1,0 +1,19 @@
+restart_version 3
+name SpeciesTest
+xmin 0 xmax 10 ymin 0 ymax 10 zmin -1 zmax 1
+dt 0.0002 t 5 tmax 5 save_count_data 50 save_count_ene 50 save_count_stat 50 save_count_fstat 50
+dim 3 gravity 0 0 0
+options_fstat 1 options_data 1 options_ene 1 options_restart 1
+Species 2
+k 53545.966 disp 91.629073 kt 0 dispt 0 mu 0 rho 1.9098593 dim_particle 3
+k 428367.72 disp 733.03259 kt 0 dispt 0 mu 0 rho 1.9098593 dim_particle 3
+k 95192.828 disp 162.89613 kt 0 dispt 0 mu 0 rho 0 dim_particle 0 (mixed)
+Walls 0
+Boundaries 0
+Particles 6
+BP 2.894417 0 0 0.29746969 0 0 0.5 0 0 0 0 0 0 1 10 0
+BP 5.105583 0 0 0.70253031 0 0 0.5 0 0 0 0 0 0 1 10 0
+BP 0.63226998 0 2 -0.24894277 0 0 0.5 0 0 0 0 0 0 1 10 0
+BP 3.5459663 0 2 0.15611785 0 0 1 0 0 0 0 0 0 0.125 0.3125 1
+BP 2.1918867 0 4 0.29746969 0 0 1 0 0 0 0 0 0 0.125 0.3125 1
+BP 5.8081133 0 4 0.70253031 0 0 1 0 0 0 0 0 0 0.125 0.3125 1

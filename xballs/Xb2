@@ -1,0 +1,24 @@
+#!/bin/tcsh
+switch($HOSTTYPE) 
+case i386-linux: 
+        set XBPATH=/home/luding/XBALLS
+        set PATH=$PATH\ $XBPATH
+        $XBPATH/Xb2.linux $*
+        breaksw
+#case rs6000: 
+#        set XBPATH=/home/lui/XBALLS
+#        ~lui/bin/Xb2.ibm $*
+#        breaksw
+#case sun4:   
+#        set XBPATH=/home/lui/XBALLS
+#        ~lui/bin/Xb2.sun $*
+#        breaksw
+case alpha:   
+        set XBPATH=/home/lui/XBALLS
+        ~lui/bin/Xb2.dec $*
+        breaksw
+default: 
+        echo unknown hardware $HOSTTYPE
+        breaksw
+endsw
+

@@ -1,0 +1,144 @@
+// This file is part of MercuryDPM.
+// 
+// MercuryDPM is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// MercuryDPM is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with MercuryDPM.  If not, see <http://www.gnu.org/licenses/>.
+// 
+// Copyright 2013 The Mercury Developers Team
+// For the list of developers, see <http://www.MercuryDPM.org/Team>
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+///This function outputs the location and velocity of the particle in a format the xballs progream can read  
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//icc means included cc file
+void MD::output_xballs_data_particle(int i)
+{
+	//data_file.precision(14);
+	///\todo{changes in *.icc files are not immediately regognized by the makefile!}
+	//This outputs the data about particle i again to the file.
+	switch(get_format())
+	{
+		case 8:
+		{
+			if (get_dim()==1) {
+				data_file << getParticleHandler().getObject(i)->get_Position().X<<" 0 "<<getParticleHandler().getObject(i)->get_Velocity().X<<" 0 " <<getParticleHandler().getObject(i)->get_Radius()<<" 0 0 0"<<std::endl;
+				break;
+			} else {
+				data_file 
+					<< getParticleHandler().getObject(i)->get_Position().X << " " 
+					<< getParticleHandler().getObject(i)->get_Position().Y << " " 
+					<< getParticleHandler().getObject(i)->get_Velocity().X << " " 
+					<< getParticleHandler().getObject(i)->get_Velocity().Y << " "
+					<< getParticleHandler().getObject(i)->get_Radius() << " "
+					<< -getParticleHandler().getObject(i)->get_Angle().Z << " " // negative b/c we are plotting (x,y) coordinates on the xz-axis of xballs
+					<< -getParticleHandler().getObject(i)->get_AngularVelocity().Z << " "
+					<< getInfo(*getParticleHandler().getObject(i)) <<std::endl;
+			}
+			break;
+		}							
+		case 14:
+		{
+			data_file 
+					<< getParticleHandler().getObject(i)->get_Position().X << " " 
+					<< getParticleHandler().getObject(i)->get_Position().Y << " " 
+					<< getParticleHandler().getObject(i)->get_Position().Z << " " 
+					<< getParticleHandler().getObject(i)->get_Velocity().X << " " 
+					<< getParticleHandler().getObject(i)->get_Velocity().Y << " " 
+					<< getParticleHandler().getObject(i)->get_Velocity().Z << " "
+					<< getParticleHandler().getObject(i)->get_Radius() << " "
+					<< getParticleHandler().getObject(i)->get_Angle().X << " " // negative b/c we are plotting (x,y) coordinates on the xz-axis of xballs
+					<< getParticleHandler().getObject(i)->get_Angle().Y << " " // negative b/c we are plotting (x,y) coordinates on the xz-axis of xballs
+					<< getParticleHandler().getObject(i)->get_Angle().Z << " " // negative b/c we are plotting (x,y) coordinates on the xz-axis of xballs
+					<< getParticleHandler().getObject(i)->get_AngularVelocity().X << " "
+					<< getParticleHandler().getObject(i)->get_AngularVelocity().Y << " "
+					<< getParticleHandler().getObject(i)->get_AngularVelocity().Z << " "
+					<< getInfo(*getParticleHandler().getObject(i)) <<std::endl;
+				break;
+		} //end case 3
+		default:
+		{
+			std::cerr << "format not found" << std::endl;
+		}
+	} //end switch statement
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+///This automatically creates an xballs script to plot the data you have just generated///
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+void MD::create_xballs_script()
+{
+	
+	std::stringstream file_name;
+	std::ofstream script_file;
+	file_name << problem_name.str() <<".xballs";
+	script_file.open((file_name.str()).c_str());
+
+	///First put in all the script lines. All these lines do is move you to the correct directory from any location
+	script_file << "#!/bin/bash" << std::endl;
+	script_file << "x=$(echo $0 | cut -c2-)" << std::endl;
+	script_file << "file=$PWD$x" << std::endl;
+	script_file << "dirname=`dirname \"$file\"`" << std::endl;
+	script_file << "cd $dirname" << std::endl;
+	
+	Mdouble scale;
+	int format;
+
+	if (dim<3) 
+		{ // dim = 1 or 2
+		format = 8;
+		if (xballs_scale<0)
+			{
+			scale = 1.0 / std::max( ymax-ymin, xmax-xmin );
+			}
+		else
+			{
+			scale=xballs_scale;
+			}
+		} 
+	else 
+		{ //dim==3
+		format = 14;
+		if (xballs_scale<0)
+			{
+				scale = 1.2 / std::max( zmax-zmin,  xmax-xmin );
+			}
+		else
+			{
+				scale=xballs_scale;
+			}
+		
+		}
+	
+	script_file << "../../xballs/xballs -format " << format 
+		<< " -f " << data_filename.str() << ((get_options_data()==2)?".0000":"")
+		<< " -s " << scale
+		<< " -cmode " << xballs_cmode 
+		<< " -cmax -sort " 
+		<< xballs_additional_arguments 
+		<< " $*";
+	///\todo{thomas:why does vscale have to be integer?}
+	if (xballs_vscale>-1)
+		{
+			script_file << " -vscale " << xballs_vscale;
+		}
+	script_file.close();
+	
+	//This line changes teh file permision and give the owener (i.e. you) read, write and excute permission to the file.
+	#ifdef UNIX
+		chmod((file_name.str().c_str()),S_IRWXU);
+	#endif
+
+}
+
+
+
+
