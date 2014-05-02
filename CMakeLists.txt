@@ -74,16 +74,13 @@ if(Mercury_BUILD_DOCUMENTATION)
                             SOURCES ${PROJECT_BINARY_DIR}/conf/doxygen.conf)
 
 	add_custom_target	(docClean
-                        COMMAND rm -r ${PROJECT_BINARY_DIR}/docs/*
+		COMMAND rm -r ${PROJECT_BINARY_DIR}/Documentation/*
 			COMMENT "Cleaning (deleting) the documentation"	) 
 
 	add_custom_target	(docWeb
 			COMMAND ${DOXYGEN_EXECUTABLE} ${PROJECT_BINARY_DIR}/conf/web_doxygen.conf
 			SOURCES ${PROJECT_BINARY_DIR}/conf/web_doxygen.conf)
 
-		#add_custom_target	(docPublishAlpha
-		#	COMMAND rsync -vr docs/html/* WebAdmin@einder.ewi.utwente.nl:/home/www/html/hpGEM/assets/doxygen/alpha/
-		#			COMMENT "Publishing (uploading) the current documentation as ALPHA realese" )
   endif()
 endif()
 
