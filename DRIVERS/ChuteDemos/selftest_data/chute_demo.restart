@@ -1,7 +1,7 @@
 restart_version 3
 name chute_demo
 xmin 0 xmax 0.1 ymin 0 ymax 0.002 zmin 0 zmax 0.12
-dt 5e-05 t 0.50005 tmax 0.5 save_count_data 102 save_count_ene 102 save_count_stat 1000000 save_count_fstat 1000000
+dt 5e-05 t 0.50005 tmax 0.5 save_count_data 102 save_count_ene 102 save_count_stat 102 save_count_fstat 102
 dim 3 gravity 4.9 0 -8.487049
 options_fstat 1 options_data 1 options_ene 1 options_restart 1
 Species 1
