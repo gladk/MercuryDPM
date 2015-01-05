@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
     // Output properties
     problem.set_number_of_saves(1); //minimize output to the last timestep
     problem.set_number_of_saves_data(100); //allow enough data output so the evolution can be viewed in xballs
+    problem.set_number_of_saves_fstat(100);
     problem.set_number_of_saves_ene(100);
 
     //solve
