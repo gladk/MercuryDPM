@@ -4,7 +4,7 @@ project (Mercury C CXX)
 set(Mercury_VERSION_MAJOR 0)
 set(Mercury_VERSION_MINOR 10)
 
-# Directory were the external cmake modules are stored
+#Directory were the external cmake modules are stored
 #set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 
