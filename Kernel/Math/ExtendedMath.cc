@@ -24,7 +24,7 @@
 //#include <limits>
 //#include <iostream>
 //#include <sys/stat.h>
-//#include <iomanip>
+#include <iomanip>
 //#include <cmath>
 //#include <sstream>
 //#include <cstdlib>
@@ -136,6 +136,17 @@ Mdouble mathsFunc::goldenSectionSearch(Mdouble(*function)(const Mdouble), Mdoubl
             return goldenSectionSearch(function, x, cur, max, endCondition, curVal);
         }
     }
+}
+
+bool mathsFunc::compare(Mdouble v1, Mdouble v2, double absError)
+{
+    return std::abs(v1 - v2) > absError;
+}
+
+
+bool mathsFunc::compare(Vec3D v1, Vec3D v2, double absError)
+{
+    return compare(v1.X,v2.X,absError)||compare(v1.Y,v2.Y,absError)||compare(v1.Z,v2.Z,absError);
 }
 
 Mdouble besselFunc::chebyshev(Mdouble x, const Mdouble coef[], int N)

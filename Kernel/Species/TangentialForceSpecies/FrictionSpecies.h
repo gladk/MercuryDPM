@@ -20,7 +20,7 @@
 #define FrictionSpecies_H
 #include "SlidingFrictionSpecies.h"
 #include "Math/ExtendedMath.h"
-#include "Interactions/FrictionInteraction.h"
+#include "Interactions/TangentialForceInteractions/FrictionInteraction.h"
 //class SpeciesHandler;
 class BaseInteractable;
 class BaseInteraction;

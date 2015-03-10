@@ -17,7 +17,7 @@
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
 #include "EmptyAdhesiveInteraction.h"
-#include "Species/EmptyAdhesiveSpecies.h"
+#include "Species/AdhesiveForceSpecies/EmptyAdhesiveSpecies.h"
 #include "Particles/BaseParticle.h"
 #include "InteractionHandler.h"
 #include <iomanip>

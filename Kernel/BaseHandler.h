@@ -25,6 +25,7 @@
 
 #include <iostream>
 #include <vector>
+///\todo TW: someone help: how do I add a logger here?
 
 class DPMBase;
 
@@ -107,6 +108,8 @@ public:
      * \param[in] is The input stream from which the information is read.
      */
     virtual void readObject(std::istream& is)=0;
+
+    void read(std::istream& is);
 
     /*!
      * \brief Gets a pointer to the Object at the specified index in the BaseHandler.
@@ -328,6 +331,17 @@ template<class T> void BaseHandler<T>::clear()
     }
     nextId_ = 0;
     maxObjects_ = 0;
+}
+
+template<class T> void BaseHandler<T>::read(std::istream& is)
+{
+    clear();
+    unsigned int N;
+    std::string dummy;
+    is >> dummy >> N;
+    //std::cout << "In " << getName() << "::read(is): reading in " << N << " objects..." << std::endl; //verbose level
+    for (unsigned int i = 0; i < N; i++)
+        readObject(is);
 }
 
 template<class T> T* BaseHandler<T>::getObject(const unsigned int id)

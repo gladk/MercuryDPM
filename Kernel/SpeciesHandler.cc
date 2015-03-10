@@ -16,15 +16,15 @@
 // Copyright 2013 The Mercury Developers Team
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
+#include "SpeciesHandler.h"
+#include "Species/BaseSpecies.h"
 #include "Species/LinearViscoelasticSpecies.h"
 #include "Species/LinearPlasticViscoelasticSpecies.h"
 #include "Species/LinearViscoelasticFrictionSpecies.h"
 #include "Species/LinearViscoelasticSlidingFrictionSpecies.h"
 #include "Species/LinearPlasticViscoelasticFrictionSpecies.h"
 #include "Species/LinearPlasticViscoelasticSlidingFrictionSpecies.h"
-#include "SpeciesHandler.h"
 #include "DPMBase.h"
-#include "Species/BaseSpecies.h"
 
 ///Constructor of the SpeciesHandler class. It creates and empty SpeciesHandler.
 SpeciesHandler::SpeciesHandler()
@@ -70,18 +70,6 @@ SpeciesHandler::~SpeciesHandler()
 #endif
 }
 
-void SpeciesHandler::read(std::istream& is)
-{
-    clear();
-    unsigned int N;
-    std::string dummy;
-    is >> dummy >> N;
-    for (unsigned int i = 0; i < N; i++)
-    {
-        readObject(is);
-    }
-}
-
 /// \param[in] is The input stream from which the information is read.
 void SpeciesHandler::readObject(std::istream& is)
 {
@@ -111,9 +99,16 @@ void SpeciesHandler::readObject(std::istream& is)
         is >> species;
         copyAndAddObject(species);
     }
+    else if (type.compare("k") == 0) //for backwards compatibility
+    {
+        addObject(readOldObject(is));
+    }
     else
     {
         std::cerr << "Species type: " << type << " not understood in restart file" << std::endl;
+        std::stringstream line(std::stringstream::in | std::stringstream::out);
+        helpers::getLineFromStringStream(is, line);
+        std::cout << line.str() << std::endl;
         exit(-1);
     }
 
@@ -122,6 +117,7 @@ void SpeciesHandler::readObject(std::istream& is)
         is >> type;
         if (type.compare("LinearViscoelasticSpecies") == 0)
         {
+            ///\todo TW: should the pushback object be newed? I think so
             LinearViscoelasticSpecies species;
             is >> species;
             mixedObjects_.push_back(&species);
@@ -144,6 +140,10 @@ void SpeciesHandler::readObject(std::istream& is)
             is >> species;
             mixedObjects_.push_back(&species);
         }
+        else if (type.compare("k") == 0) //for backwards compatibility
+        {
+            mixedObjects_.push_back(readOldObject(is));
+        }
         else
         {
             std::cerr << "Species type: " << type << " not understood in restart file" << std::endl;
@@ -152,6 +152,76 @@ void SpeciesHandler::readObject(std::istream& is)
     }
 
 }
+
+/// \param[in] is The input stream from which the information is read.
+BaseSpecies* SpeciesHandler::readOldObject(std::istream& is)
+{
+    //read in next line
+    std::stringstream line(std::stringstream::in | std::stringstream::out);
+    helpers::getLineFromStringStream(is, line);
+
+    //read out each property
+    std::string dummy;
+    Mdouble density, particleDimension, stiffness, dissipation, slidingFrictionCoefficient, slidingFrictionCoefficientStatic=0, slidingStiffness, slidingDissipation;
+    line >> stiffness;
+    while (true)
+    {
+        line >> dummy;
+        if (!dummy.compare("disp"))
+            line >> dissipation;
+        else if (!dummy.compare("rho"))
+            line >> density;
+        else if (!dummy.compare("kt"))
+            line >> slidingStiffness;
+        else if (!dummy.compare("dispt"))
+            line >> slidingDissipation;
+        else if (!dummy.compare("mu"))
+            line >> slidingFrictionCoefficient;
+        else if (!dummy.compare("mus"))
+            line >> slidingFrictionCoefficientStatic;
+        else if (!dummy.compare("dim_particle"))
+        {
+            line >> particleDimension;
+            getDPMBase()->setParticleDimensions(particleDimension);
+        }
+        else if (!dummy.compare("(mixed)"))
+        {
+            density = 0;
+        }
+        else
+        {
+            std::cerr << "Warning: " << dummy << "is not a species property" << std::endl;
+            break;
+        }
+        if (line.eof())
+            break;
+    }
+
+    //create the correct species
+    if (slidingFrictionCoefficient==0)
+    {
+        LinearViscoelasticSpecies* species = new LinearViscoelasticSpecies;
+        species->setDensity(density);
+        species->setStiffness(stiffness);
+        species->setDissipation(dissipation);
+        return species;
+    }
+    else
+    {
+        LinearViscoelasticSlidingFrictionSpecies* species = new LinearViscoelasticSlidingFrictionSpecies;
+        species->setDensity(density);
+        species->setStiffness(stiffness);
+        species->setDissipation(dissipation);
+        species->setSlidingStiffness(slidingStiffness);
+        species->setSlidingDissipation(slidingDissipation);
+        species->setSlidingFrictionCoefficient(slidingFrictionCoefficient);
+        if (slidingFrictionCoefficientStatic==0)
+            slidingFrictionCoefficientStatic = slidingFrictionCoefficient;
+        species->setSlidingFrictionCoefficientStatic(slidingFrictionCoefficientStatic);
+        return species;
+    }
+}
+
 
 unsigned int SpeciesHandler::getMixedId(const unsigned int id1, const unsigned int id2) const
 {
@@ -224,44 +294,24 @@ void SpeciesHandler::write(std::ostream& os) const
     }
 }
 
-void SpeciesHandler::readVersion1(std::istream& is, unsigned int N)
-{
-    clear();
-    Species<LinearViscoelasticSpecies,SlidingFrictionSpecies> species;
-    for (unsigned int i = 0; i < N; i++)
-    {
-        species.read(is);
-        copyAndAddObject(species);
-        for (unsigned int j = 0; j+1 < i; j++)
-            getMixedObject(i,j)->read(is);
-    }
-}
-
-void SpeciesHandler::readVersion2(std::istream& is)
-{
-    clear();
-    unsigned int N;
-    is >> N;
-    for (unsigned int i = 0; i < N; ++i)
-    {
-        Species<LinearViscoelasticSpecies,SlidingFrictionSpecies> species;
-        ///\todo TW this function needs to be reimplemented
-        //species.readVersion2(is);
-        copyAndAddObject(species);
-
-        for (unsigned int j = 0; j+1 < getNumberOfObjects(); ++j)
-        {
-            Species<LinearViscoelasticSpecies,SlidingFrictionSpecies> mixedSpecies;
-            //mixedSpecies.readVersion2(is);
-            mixedObjects_.push_back(&mixedSpecies);
-        }
-
-    }
-}
-
 std::string SpeciesHandler::getName() const
 {
     return "SpeciesHandler";
+}
+
+bool SpeciesHandler::useAngularDOFs()
+{
+    for (unsigned int i = 0; i < getNumberOfObjects(); i++)
+    {
+        if (getObject(i)->getUseAngularDOFs())
+            return true;
+        for (unsigned int j = 0; j + 1 < i; j++)
+        {
+            if (getMixedObject(i, j)->getUseAngularDOFs())
+                return true;
+        }
+    }
+    return false;
 }
 
 //instantiate templated munctions

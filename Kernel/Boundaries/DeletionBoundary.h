@@ -61,7 +61,7 @@ public:
      * \brief
      * \param[in]
      */
-    Mdouble get_distance(const Vec3D &position) const;
+    Mdouble getDistance(const Vec3D &position) const;
     
     /*!
      * \brief

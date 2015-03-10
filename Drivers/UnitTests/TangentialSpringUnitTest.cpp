@@ -75,8 +75,8 @@ int main(int argc, char *argv[])
     if (!(*pIt)->getVelocity().compareTo(Vec3D(0.0,0.0,0.0)  , 1e-7))  logger.log(Log::FATAL, "First particle has the wrong velocity");
     ++pIt;
 
-    if (!((*pIt)->getPosition().compareTo(Vec3D(0.96153057,0.5,0.45014064), 1e-7)))      logger.log(Log::FATAL, "Second particle has the wrong position. It is % at time %",(*pIt)->getPosition(),tangentialSpringUnitTestProblem.getTime());
-    if (!(*pIt)->getVelocity().compareTo(Vec3D(0.32586989,0.0,-0.623271)    , 1e-7))  logger.log(Log::FATAL, "Second particle has the wrong velocity. It is %",(*pIt)->getVelocity());
-    if (!(*pIt)->getAngularVelocity().compareTo(Vec3D(0.0,2.1189662,0.0)    , 1e-7))  logger.log(Log::FATAL, "Second particles has the wrong angular velocity. It is %", (*pIt)->getAngularVelocity());
+    if (!((*pIt)->getPosition().compareTo(Vec3D(0.961524052956078, 0.5, 0.450153103106219), 1e-7)))      logger.log(Log::FATAL, "Second particle has the wrong position. It is % at time %",(*pIt)->getPosition(),tangentialSpringUnitTestProblem.getTime());
+    if (!(*pIt)->getVelocity().compareTo(Vec3D(0.325869890236916, 0, -0.623251003973752)    , 1e-7))  logger.log(Log::FATAL, "Second particle has the wrong velocity. It is %",(*pIt)->getVelocity());
+    if (!(*pIt)->getAngularVelocity().compareTo(Vec3D(0.0,2.11896618998424,0.0)    , 1e-7))  logger.log(Log::FATAL, "Second particles has the wrong angular velocity. It is %", (*pIt)->getAngularVelocity());
 
 }

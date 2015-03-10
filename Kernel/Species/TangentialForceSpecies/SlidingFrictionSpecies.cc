@@ -16,10 +16,11 @@
 // Copyright 2013 The Mercury Developers Team
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
+#include <cmath>
 #include "SlidingFrictionSpecies.h"
-#include "LinearViscoelasticSpecies.h"
-#include<cmath>
-#include <Species/BaseSpecies.h>
+#include "Species/LinearViscoelasticSpecies.h"
+#include "Species/BaseSpecies.h"
+#include "Species/LinearPlasticViscoelasticSpecies.h"
 
 class BaseParticle;
 class BaseInteractable;
@@ -72,8 +73,8 @@ void SlidingFrictionSpecies::write(std::ostream& os) const
     //BaseSpecies::write(os);
     os << " slidingStiffness " << slidingStiffness_;
     os << " slidingDissipation " << slidingDissipation_;
-    os << " frictionCoefficient " << slidingFrictionCoefficient_;
-    os << " frictionCoefficientStatic " << slidingFrictionCoefficientStatic_;
+    os << " slidingFrictionCoefficient " << slidingFrictionCoefficient_;
+    os << " slidingFrictionCoefficientStatic " << slidingFrictionCoefficientStatic_;
 }
 
 void SlidingFrictionSpecies::read(std::istream& is)
@@ -192,16 +193,32 @@ void SlidingFrictionSpecies::mix(SlidingFrictionSpecies* const SFrictional, Slid
 ///Sets k, disp, kt, dispt such that it matches a given tc and eps for a collision of two particles of masses m0,m1
 void SlidingFrictionSpecies::setCollisionTimeAndNormalAndTangentialRestitutionCoefficient(Mdouble tc, Mdouble eps, Mdouble beta, Mdouble mass)
 {
+    Mdouble stiffness;
     //the dynamic cast is needed to check if the normal force species is LinearViscoelasticSpecies; otherwise this function cannot be used
-    auto species = dynamic_cast<LinearViscoelasticSpecies*>(this);
-    if (species == nullptr)
+    LinearViscoelasticSpecies* species = dynamic_cast<LinearViscoelasticSpecies*>(this);
+    if (species!= nullptr)
     {
-        std::cerr << "SlidingFrictionSpecies::setCollisionTimeAndNormalAndTangentialRestitutionCoefficient only works for LinearViscoelasticSlidingFrictionSpecies" << std::endl;
-        exit(-1);
+        species->setCollisionTimeAndRestitutionCoefficient(tc, eps, mass);
+        stiffness = species->getStiffness();
     }
-    species->setCollisionTimeAndRestitutionCoefficient(tc, eps, mass);
+    else
+    {
+        LinearPlasticViscoelasticSpecies* species2 = dynamic_cast<LinearPlasticViscoelasticSpecies*>(this);
+        if (species2 != nullptr)
+        {
+            species2->setDissipation(-mass / tc * std::log(eps));
+            species2->setLoadingStiffness(.5 * mass * (mathsFunc::square(constants::pi/tc) + mathsFunc::square(species2->getDissipation()) /mass));
+            stiffness = species2->getLoadingStiffness();
+        }
+        else
+        {
+            std::cerr << "SlidingFrictionSpecies::setCollisionTimeAndNormalAndTangentialRestitutionCoefficient only works for LinearViscoelasticSlidingFrictionSpecies or LinearPlasticViscoelasticSlidingFrictionSpecies" << std::endl;
+            exit(-1);
+        }
+    }
+
     //from Deen...Kuipers2006, eq. 43 and 30
-    setSlidingStiffness(2.0 / 7.0 * species->getStiffness() * (mathsFunc::square(constants::pi) + mathsFunc::square(log(beta))) / (mathsFunc::square(constants::pi) + mathsFunc::square(log(eps))));
+    setSlidingStiffness(2.0 / 7.0 * stiffness * (mathsFunc::square(constants::pi) + mathsFunc::square(log(beta))) / (mathsFunc::square(constants::pi) + mathsFunc::square(log(eps))));
     if (beta != 0.0)
         setSlidingDissipation(-2 * log(beta) * sqrt(1.0 / 7.0 * mass * getSlidingStiffness() / (mathsFunc::square(constants::pi) + mathsFunc::square(log(beta)))));
     else
@@ -212,7 +229,7 @@ void SlidingFrictionSpecies::setCollisionTimeAndNormalAndTangentialRestitutionCo
 void SlidingFrictionSpecies::setCollisionTimeAndNormalAndTangentialRestitutionCoefficientNoDispt(Mdouble tc, Mdouble eps, Mdouble beta, Mdouble mass)
 {
     //the dynamic cast is needed to check if the normal force species is LinearViscoelasticSpecies; otherwise this function cannot be used
-    auto species = dynamic_cast<LinearViscoelasticSpecies*>(this);
+    LinearViscoelasticSpecies* species = dynamic_cast<LinearViscoelasticSpecies*>(this);
     if (species == nullptr)
     {
         std::cerr << "SlidingFrictionSpecies::setCollisionTimeAndNormalAndTangentialRestitutionCoefficient only works for LinearViscoelasticSlidingFrictionSpecies" << std::endl;

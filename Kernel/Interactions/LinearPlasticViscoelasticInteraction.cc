@@ -83,7 +83,7 @@ void LinearPlasticViscoelasticInteraction::computeLinearPlasticViscoelasticForce
         const LinearPlasticViscoelasticSpecies* species = getSpecies();
         //Mdouble normalForce = species->getLoadingStiffness() * getOverlap() - species->getDissipation() * getNormalRelativeVelocity();
         ///\todo TWnow this has to be corrected; I think the dissipation force is applied in the wrong direction
-        Mdouble normalForce = species->getDissipation() * getNormalRelativeVelocity();
+        Mdouble normalForce = -species->getDissipation() * getNormalRelativeVelocity();
 
         BaseParticle* PParticle = dynamic_cast<BaseParticle*>(getP());
         BaseParticle* IParticle = dynamic_cast<BaseParticle*>(getI());

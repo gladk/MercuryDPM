@@ -16,23 +16,26 @@
 // Copyright 2013 The Mercury Developers Team
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
-#ifndef WRITETOFILE_H
-#define WRITETOFILE_H
+#ifndef EMPTYTANGENTIALSPECIES_H
+#define EMPTYTANGENTIALSPECIES_H
+#include "Species/BaseSpecies.h"
+#include "Math/ExtendedMath.h"
+class BaseInteractable;
+class BaseInteraction;
+class EmptyTangentialInteraction;
 
-/*!
- * \brief
- */
-bool writeToFile(std::string filename, std::string filecontent)
+//Note the getVelocity can for some Species be dependent on which point on the Species is meant.
+class EmptyTangentialSpecies : public virtual BaseSpecies
 {
-    std::fstream file;
-    file.open(filename.c_str(), std::ios::out);
-    if (file.fail())
-    {
-        std::cerr << "Error in writeToFile: file could not be opened" << std::endl;
-        return false;
-    }
-    file << filecontent;
-    file.close();
-    return true;
-}
+public:
+    typedef EmptyTangentialInteraction InteractionType;
+    EmptyTangentialSpecies();
+    EmptyTangentialSpecies(const EmptyTangentialSpecies &s);
+    virtual ~EmptyTangentialSpecies();
+    void read(std::istream& is);
+    void write(std::ostream& os) const;
+    std::string getBaseName() const;
+    bool getUseAngularDOFs() const;
+    void mix(EmptyTangentialSpecies* const S, EmptyTangentialSpecies* const T);
+};
 #endif

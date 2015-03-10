@@ -19,6 +19,7 @@
 #include <iostream>
 #include <string>
 #include <stdlib.h>
+#include <Math/Helpers.h>
 
 #include "BoundaryHandler.h"
 #include "Boundaries/BaseBoundary.h"
@@ -126,12 +127,37 @@ void BoundaryHandler::readObject(std::istream& is)
         is >> periodicBoundary;
         copyAndAddObject(periodicBoundary);
     }
+    //for backward compatibility (before svnversion ~2360)
+    else if (type.compare("normal") == 0)
+    {
+        readOldObject(is);
+    }
     else
     {
         std::cerr << "Boundary type: " << type << " not understood in restart file" << std::endl;
         exit(-1);
     }
 }
+
+
+/// \param[in] is The input stream from which the information is read.
+void BoundaryHandler::readOldObject(std::istream& is)
+{
+    //read in next line
+    std::stringstream line(std::stringstream::in | std::stringstream::out);
+    helpers::getLineFromStringStream(is, line);
+
+    std::string dummy;
+    Vec3D normal;
+    Mdouble positionLeft, positionRight;
+
+    PeriodicBoundary periodicBoundary;
+    line >> normal >> dummy >> positionLeft >> dummy >> positionRight;
+    periodicBoundary.set(normal, positionLeft, positionRight);
+    copyAndAddObject(periodicBoundary);
+}
+
+
 
 std::string BoundaryHandler::getName() const
 {

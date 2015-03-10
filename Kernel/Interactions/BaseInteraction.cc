@@ -20,6 +20,7 @@
 #include "InteractionHandler.h"
 #include "Particles/BaseParticle.h"
 #include "Species/BaseSpecies.h"
+#include "DPMBase.h"
 #include<iomanip>
 #include<fstream>
 
@@ -352,4 +353,101 @@ Mdouble BaseInteraction::getElasticEnergy() const
 
 void BaseInteraction::reverseHistory()
 {
+}
+
+Mdouble BaseInteraction::getEffectiveRadius()
+{
+    BaseParticle* PParticle = dynamic_cast<BaseParticle*>(getP());
+    BaseParticle* IParticle = dynamic_cast<BaseParticle*>(getI());
+    if (PParticle==nullptr)
+    {
+        std::cerr << "BaseInteraction::getEffectiveCorrectedRadius(): first interactable P is not a particle" << std::endl;
+        exit(-1);
+    }
+    //Compute the reduced diameter
+    if (IParticle==nullptr) //if particle-wall
+    {
+        return PParticle->getRadius();
+    }
+    else
+    {
+        Mdouble radiusP = PParticle->getRadius();
+        Mdouble radiusI = IParticle->getRadius();
+        return radiusP * radiusI / (radiusP + radiusI);
+    }
+}
+
+Mdouble BaseInteraction::getEffectiveCorrectedRadius()
+{
+    BaseParticle* PParticle = dynamic_cast<BaseParticle*>(getP());
+    BaseParticle* IParticle = dynamic_cast<BaseParticle*>(getI());
+    if (PParticle==nullptr)
+    {
+        std::cerr << "BaseInteraction::getEffectiveCorrectedRadius(): first interactable P is not a particle" << std::endl;
+        exit(-1);
+    }
+    //Compute the reduced diameter
+    if (IParticle==nullptr) //if particle-wall
+    {
+        return PParticle->getRadius() - 0.5*getOverlap();
+    }
+    else
+    {
+        Mdouble radiusP = PParticle->getRadius() - 0.5*getOverlap();
+        Mdouble radiusI = IParticle->getRadius() - 0.5*getOverlap();
+        return radiusP * radiusI / (radiusP + radiusI);
+    }
+}
+
+void BaseInteraction::gatherContactStatistics()
+{
+    BaseParticle* IParticle = dynamic_cast<BaseParticle*>(I_);
+    BaseParticle* PParticle = dynamic_cast<BaseParticle*>(P_);
+
+    Vec3D tangentialForce = getTangentialForce();
+    Mdouble tangentialOverlap = getTangentialOverlap();
+
+    Mdouble scalarNormalForce = Vec3D::dot(force_, getNormal());
+    Mdouble scalarTangentialForce = tangentialForce.getLength();
+    Vec3D tangential;
+    if (scalarTangentialForce!=0.0)
+        tangential = tangentialForce/scalarTangentialForce;
+    else
+        tangential = Vec3D(0.0,0.0,0.0);
+
+    ///\todo TW centre is used just for backward compatibility; replace centre by contact law; we also have to correct it in StatisticsVector::gatherContactStatistics.
+    ///There also seems to be an issue with the normal being defined differently for walls
+    Vec3D centre;
+    if (IParticle!=0)
+        centre = 0.5 * (getP()->getPosition() + getI()->getPosition());
+    else
+        centre = getP()->getPosition() - normal_ * (PParticle->getRadius() - overlap_);
+
+    if (PParticle!=0 && !PParticle->isFixed())
+    {
+        getHandler()->getDPMBase()->gatherContactStatistics(
+            P_->getIndex(),
+            static_cast<int>((IParticle==0?(-I_->getIndex()-1):I_->getIndex())),
+            centre,
+            getOverlap(),
+            tangentialOverlap,
+            scalarNormalForce,
+            scalarTangentialForce,
+            (IParticle==0?-normal_:normal_),
+            (IParticle==0?-tangential:tangential));
+    }
+    if (IParticle!=0 && !IParticle->isFixed() && IParticle->getPeriodicFromParticle()==0)
+    {
+        getHandler()->getDPMBase()->gatherContactStatistics(
+            I_->getIndex(),
+            P_->getIndex(),
+            centre,
+            getOverlap(),
+            tangentialOverlap,
+            scalarNormalForce,
+            scalarTangentialForce,
+            -normal_,
+            -tangential);
+
+    }
 }

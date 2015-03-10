@@ -16,48 +16,30 @@
 // Copyright 2013 The Mercury Developers Team
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
-#ifndef LINEARREVERSIBLEADHESIVESPECIES_H
-#define LINEARREVERSIBLEADHESIVESPECIES_H
-#include "BaseSpecies.h"
+#ifndef EMPTYADHESIVESPECIES_H
+#define EMPTYADHESIVESPECIES_H
+#include "Species/BaseSpecies.h"
 #include "Math/ExtendedMath.h"
-#include "Interactions/LinearReversibleAdhesiveInteraction.h"
+#include "Interactions/AdhesiveForceInteractions/EmptyAdhesiveInteraction.h"
 class BaseInteractable;
 class BaseInteraction;
 
 //Note the getVelocity can for some Species be dependent on which point on the Species is meant.
-class LinearReversibleAdhesiveSpecies : public virtual BaseSpecies
+class EmptyAdhesiveSpecies : public virtual BaseSpecies
 {
 public:
-    typedef LinearReversibleAdhesiveInteraction InteractionType;
-    LinearReversibleAdhesiveSpecies();
-    LinearReversibleAdhesiveSpecies(const LinearReversibleAdhesiveSpecies &s);
-    virtual ~LinearReversibleAdhesiveSpecies();
+    typedef EmptyAdhesiveInteraction InteractionType;
+    EmptyAdhesiveSpecies();
+    EmptyAdhesiveSpecies(const EmptyAdhesiveSpecies &s);
+    virtual ~EmptyAdhesiveSpecies();
     void read(std::istream& is);
     void write(std::ostream& os) const;
     std::string getBaseName() const;
-    void mix(LinearReversibleAdhesiveSpecies* const S, LinearReversibleAdhesiveSpecies* const T);
+    void mix(EmptyAdhesiveSpecies* const S, EmptyAdhesiveSpecies* const T);
 
 //adhesion-specific functions
 
     ///Returns the particle distance below which adhesive forces can occur (needed for contact detection)
     Mdouble getInteractionDistance() const;
-
-//setters and getters
-    ///Allows the spring constant to be changed
-    void setAdhesionStiffness(Mdouble new_k0);
-
-    ///Allows the spring constant to be accessed
-    Mdouble getAdhesionStiffness() const;
-
-    ///Allows the spring constant to be changed
-    void setAdhesionForceMax(Mdouble new_f0);
-
-    ///Allows the spring constant to be accessed
-    Mdouble getAdhesionForceMax() const;
-
-private:
-    Mdouble adhesionStiffness_; ///<stiffness of linear adhesion force
-    Mdouble adhesionForceMax_; ///<adhesion force at zero overlap
-    
 };
 #endif

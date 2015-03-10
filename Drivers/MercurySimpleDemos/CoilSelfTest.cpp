@@ -76,7 +76,7 @@ class CoilSelfTest : public Mercury3D{
         double distance;
 		Vec3D normal;
         p0.setPosition(Vec3D(1.0,0.0,0.0));
-        if(coil->get_distance_and_normal(p0, distance, normal))
+        if(coil->getDistance_and_normal(p0, distance, normal))
 			std::cout<<"Collision, distance screw="<<distance<<std::endl;
 		else
 			std::cout<<"No collision, distance screw="<<distance<<std::endl;

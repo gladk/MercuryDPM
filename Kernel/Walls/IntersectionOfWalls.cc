@@ -61,21 +61,21 @@ void IntersectionOfWalls::addObject(Vec3D normal_, Mdouble position_)
     {
         unsigned int id = (n - 1) * n / 2 + m;
         //first we Vec3D::Cross the wall normals and normalize to obtain AB
-        AB_[id] = Vec3D::cross(objects_[m].get_Normal(), objects_[n].get_Normal());
+        AB_[id] = Vec3D::cross(objects_[m].getNormal(), objects_[n].getNormal());
         AB_[id] /= sqrt(AB_[id].getLengthSquared());
         //then we find a point A (using AB*x=0 as a third plane)
-        Mdouble invdet = 1.0 / (+objects_[n].get_Normal().X * (objects_[m].get_Normal().Y * AB_[id].Z - AB_[id].Y * objects_[m].get_Normal().Z)
-                - objects_[n].get_Normal().Y * (objects_[m].get_Normal().X * AB_[id].Z - objects_[m].get_Normal().Z * AB_[id].X)
-                + objects_[n].get_Normal().Z * (objects_[m].get_Normal().X * AB_[id].Y - objects_[m].get_Normal().Y * AB_[id].X));
-        A_[id] = Vec3D(+(objects_[m].get_Normal().Y * AB_[id].Z - AB_[id].Y * objects_[m].get_Normal().Z) * objects_[n].getPosition()
-                - (objects_[n].get_Normal().Y * AB_[id].Z - objects_[n].get_Normal().Z * AB_[id].Y) * objects_[m].getPosition()
-                + (objects_[n].get_Normal().Y * objects_[m].get_Normal().Z - objects_[n].get_Normal().Z * objects_[m].get_Normal().Y) * 0.0,
-                -(objects_[m].get_Normal().X * AB_[id].Z - objects_[m].get_Normal().Z * AB_[id].X) * objects_[n].getPosition()
-                        + (objects_[n].get_Normal().X * AB_[id].Z - objects_[n].get_Normal().Z * AB_[id].X) * objects_[m].getPosition()
-                        - (objects_[n].get_Normal().X * objects_[m].get_Normal().Z - objects_[m].get_Normal().X * objects_[n].get_Normal().Z) * 0.0,
-                +(objects_[m].get_Normal().X * AB_[id].Y - AB_[id].X * objects_[m].get_Normal().Y) * objects_[n].getPosition()
-                        - (objects_[n].get_Normal().X * AB_[id].Y - AB_[id].X * objects_[n].get_Normal().Y) * objects_[m].getPosition()
-                        + (objects_[n].get_Normal().X * objects_[m].get_Normal().Y - objects_[m].get_Normal().X * objects_[n].get_Normal().Y) * 0.0) * invdet;
+        Mdouble invdet = 1.0 / (+objects_[n].getNormal().X * (objects_[m].getNormal().Y * AB_[id].Z - AB_[id].Y * objects_[m].getNormal().Z)
+                - objects_[n].getNormal().Y * (objects_[m].getNormal().X * AB_[id].Z - objects_[m].getNormal().Z * AB_[id].X)
+                + objects_[n].getNormal().Z * (objects_[m].getNormal().X * AB_[id].Y - objects_[m].getNormal().Y * AB_[id].X));
+        A_[id] = Vec3D( +(objects_[m].getNormal().Y * AB_[id].Z - AB_[id].Y * objects_[m].getNormal().Z) * Vec3D::dot(objects_[n].getPosition(),objects_[n].getNormal())
+                        -(objects_[n].getNormal().Y * AB_[id].Z - objects_[n].getNormal().Z * AB_[id].Y) * Vec3D::dot(objects_[m].getPosition(),objects_[m].getNormal())
+                        +(objects_[n].getNormal().Y * objects_[m].getNormal().Z - objects_[n].getNormal().Z * objects_[m].getNormal().Y) * 0.0,
+                        -(objects_[m].getNormal().X * AB_[id].Z - objects_[m].getNormal().Z * AB_[id].X) * Vec3D::dot(objects_[n].getPosition(),objects_[n].getNormal())
+                        +(objects_[n].getNormal().X * AB_[id].Z - objects_[n].getNormal().Z * AB_[id].X) * Vec3D::dot(objects_[m].getPosition(),objects_[m].getNormal())
+                        -(objects_[n].getNormal().X * objects_[m].getNormal().Z - objects_[m].getNormal().X * objects_[n].getNormal().Z) * 0.0,
+                        +(objects_[m].getNormal().X * AB_[id].Y - AB_[id].X * objects_[m].getNormal().Y) * Vec3D::dot(objects_[n].getPosition(),objects_[n].getNormal())
+                        -(objects_[n].getNormal().X * AB_[id].Y - AB_[id].X * objects_[n].getNormal().Y) * Vec3D::dot(objects_[m].getPosition(),objects_[m].getNormal())
+                        +(objects_[n].getNormal().X * objects_[m].getNormal().Y - objects_[m].getNormal().X * objects_[n].getNormal().Y) * 0.0) * invdet;
     }
     
     // C[(n-2)*(n-1)*n/6+(m-1)*m/2+l] is a point intersecting walls l, m and n, l<m<n
@@ -85,18 +85,18 @@ void IntersectionOfWalls::addObject(Vec3D normal_, Mdouble position_)
         for (unsigned int l = 0; l < m; l++)
         {
             unsigned int id = (n - 2) * (n - 1) * n / 6 + (m - 1) * m / 2 + l;
-            Mdouble invdet = 1.0 / (+objects_[n].get_Normal().X * (objects_[m].get_Normal().Y * objects_[l].get_Normal().Z - objects_[l].get_Normal().Y * objects_[m].get_Normal().Z)
-                    - objects_[n].get_Normal().Y * (objects_[m].get_Normal().X * objects_[l].get_Normal().Z - objects_[m].get_Normal().Z * objects_[l].get_Normal().X)
-                    + objects_[n].get_Normal().Z * (objects_[m].get_Normal().X * objects_[l].get_Normal().Y - objects_[m].get_Normal().Y * objects_[l].get_Normal().X));
-            C_[id] = Vec3D(+(objects_[m].get_Normal().Y * objects_[l].get_Normal().Z - objects_[l].get_Normal().Y * objects_[m].get_Normal().Z) * objects_[n].getPosition()
-                    - (objects_[n].get_Normal().Y * objects_[l].get_Normal().Z - objects_[n].get_Normal().Z * objects_[l].get_Normal().Y) * objects_[m].getPosition()
-                    + (objects_[n].get_Normal().Y * objects_[m].get_Normal().Z - objects_[n].get_Normal().Z * objects_[m].get_Normal().Y) * objects_[l].getPosition(),
-                    -(objects_[m].get_Normal().X * objects_[l].get_Normal().Z - objects_[m].get_Normal().Z * objects_[l].get_Normal().X) * objects_[n].getPosition()
-                            + (objects_[n].get_Normal().X * objects_[l].get_Normal().Z - objects_[n].get_Normal().Z * objects_[l].get_Normal().X) * objects_[m].getPosition()
-                            - (objects_[n].get_Normal().X * objects_[m].get_Normal().Z - objects_[m].get_Normal().X * objects_[n].get_Normal().Z) * objects_[l].getPosition(),
-                    +(objects_[m].get_Normal().X * objects_[l].get_Normal().Y - objects_[l].get_Normal().X * objects_[m].get_Normal().Y) * objects_[n].getPosition()
-                            - (objects_[n].get_Normal().X * objects_[l].get_Normal().Y - objects_[l].get_Normal().X * objects_[n].get_Normal().Y) * objects_[m].getPosition()
-                            + (objects_[n].get_Normal().X * objects_[m].get_Normal().Y - objects_[m].get_Normal().X * objects_[n].get_Normal().Y) * objects_[l].getPosition()) * invdet;
+            Mdouble invdet = 1.0 / (+objects_[n].getNormal().X * (objects_[m].getNormal().Y * objects_[l].getNormal().Z - objects_[l].getNormal().Y * objects_[m].getNormal().Z)
+                    - objects_[n].getNormal().Y * (objects_[m].getNormal().X * objects_[l].getNormal().Z - objects_[m].getNormal().Z * objects_[l].getNormal().X)
+                    + objects_[n].getNormal().Z * (objects_[m].getNormal().X * objects_[l].getNormal().Y - objects_[m].getNormal().Y * objects_[l].getNormal().X));
+            C_[id] = Vec3D(+(objects_[m].getNormal().Y * objects_[l].getNormal().Z - objects_[l].getNormal().Y * objects_[m].getNormal().Z) * Vec3D::dot(objects_[n].getPosition(),objects_[n].getNormal())
+                    - (objects_[n].getNormal().Y * objects_[l].getNormal().Z - objects_[n].getNormal().Z * objects_[l].getNormal().Y) * Vec3D::dot(objects_[m].getPosition(),objects_[m].getNormal())
+                    + (objects_[n].getNormal().Y * objects_[m].getNormal().Z - objects_[n].getNormal().Z * objects_[m].getNormal().Y) * Vec3D::dot(objects_[l].getPosition(),objects_[l].getNormal()),
+                    -(objects_[m].getNormal().X * objects_[l].getNormal().Z - objects_[m].getNormal().Z * objects_[l].getNormal().X) * Vec3D::dot(objects_[n].getPosition(),objects_[n].getNormal())
+                            + (objects_[n].getNormal().X * objects_[l].getNormal().Z - objects_[n].getNormal().Z * objects_[l].getNormal().X) * Vec3D::dot(objects_[m].getPosition(),objects_[m].getNormal())
+                            - (objects_[n].getNormal().X * objects_[m].getNormal().Z - objects_[m].getNormal().X * objects_[n].getNormal().Z) * Vec3D::dot(objects_[l].getPosition(),objects_[l].getNormal()),
+                    +(objects_[m].getNormal().X * objects_[l].getNormal().Y - objects_[l].getNormal().X * objects_[m].getNormal().Y) * Vec3D::dot(objects_[n].getPosition(),objects_[n].getNormal())
+                            - (objects_[n].getNormal().X * objects_[l].getNormal().Y - objects_[l].getNormal().X * objects_[n].getNormal().Y) * Vec3D::dot(objects_[m].getPosition(),objects_[m].getNormal())
+                            + (objects_[n].getNormal().X * objects_[m].getNormal().Y - objects_[m].getNormal().X * objects_[n].getNormal().Y) * Vec3D::dot(objects_[l].getPosition(),objects_[l].getNormal())) * invdet;
         }
     }
 }
@@ -134,13 +134,13 @@ void IntersectionOfWalls::createPrism(std::vector<Vec3D> Points)
 }
 
 bool IntersectionOfWalls::getDistanceAndNormal(const BaseParticle &P, Mdouble &distance, Vec3D &normal_return) const
-{
+        {
     return getDistanceAndNormal(P.getPosition(), P.getInteractionRadius(), distance, normal_return);
 }
 
 ///Since this function should be called before calculating any Particle-Wall interactions, it can also be used to set the normal vector in case of curved walls.
-bool IntersectionOfWalls::getDistanceAndNormal(const Vec3D& position, Mdouble  wallInteractionRadius, Mdouble &distance, Vec3D &normal_return) const
-{
+bool IntersectionOfWalls::getDistanceAndNormal(const Vec3D& position, Mdouble wallInteractionRadius, Mdouble &distance, Vec3D &normal_return) const
+        {
     static Mdouble distance_new;
     static Mdouble distance2;
     static Mdouble distance3;
@@ -156,7 +156,7 @@ bool IntersectionOfWalls::getDistanceAndNormal(const Vec3D& position, Mdouble  w
     for (unsigned int i = 0; i < objects_.size(); i++)
     {
         //calculate the distance to the particle
-        distance_new = objects_[i].get_distance(position);
+        distance_new = objects_[i].getDistance(position);
         //return false if the distance to any one wall is too large (i.e. no contact)
         if (distance_new >= wallInteractionRadius)
             return false;
@@ -200,11 +200,11 @@ bool IntersectionOfWalls::getDistanceAndNormal(const Vec3D& position, Mdouble  w
     if (distance2 > -wallInteractionRadius)
     {
         //D is the point on wall id closest to P
-        Vec3D D = position + objects_[id].get_Normal() * distance;
+        Vec3D D = position + objects_[id].getNormal() * distance;
         //If the distance of D to id2 is positive, the contact is with the intersection
-        bool intersection_with_id2 = (objects_[id2].get_distance(D) > 0.0);
+        bool intersection_with_id2 = (objects_[id2].getDistance(D) > 0.0);
         
-        if (distance3 > -wallInteractionRadius && (objects_[id3].get_distance(D) > 0.0))
+        if (distance3 > -wallInteractionRadius && (objects_[id3].getDistance(D) > 0.0))
         {
             if (intersection_with_id2)
             {
@@ -242,7 +242,7 @@ bool IntersectionOfWalls::getDistanceAndNormal(const Vec3D& position, Mdouble  w
         }
     }
     //contact is with id
-    normal_return = objects_[id].get_Normal();
+    normal_return = objects_[id].getNormal();
     return true;
     
 }
@@ -263,7 +263,6 @@ void IntersectionOfWalls::read(std::istream& is)
         addObject(normal, position);
     }
 }
-    
 
 ///reads wall
 void IntersectionOfWalls::oldRead(std::istream& is)
@@ -291,7 +290,7 @@ void IntersectionOfWalls::write(std::ostream& os) const
     os << " numIntersectionOfWallss " << objects_.size();
     for (std::vector<InfiniteWall>::const_iterator it = objects_.begin(); it != objects_.end(); ++it)
     {
-        os << " normal " << it->get_Normal() << " position " << it->getPosition();
+        os << " normal " << it->getNormal() << " position " << it->getPosition();
     }
 }
 
@@ -305,14 +304,14 @@ BaseInteraction* IntersectionOfWalls::getInteractionWith(BaseParticle *P, Mdoubl
     Mdouble distance;
     Vec3D normal;
 
-    if (getDistanceAndNormal(*P,distance,normal))
+    if (getDistanceAndNormal(*P, distance, normal))
     {
         BaseInteraction* C = interactionHandler->getInteraction(P, this, timeStamp);
         C->setNormal(-normal);
         C->setDistance(distance);
         C->setOverlap(P->getRadius() - distance);
         ///todo{DK: What is the contact point for interactions with walls}
-        C->setContactPoint(P->getPosition()-(P->getRadius()- 0.5 * C->getOverlap())*C->getNormal());
+        C->setContactPoint(P->getPosition() - (P->getRadius() - 0.5 * C->getOverlap()) * C->getNormal());
         return C;
     }
     else

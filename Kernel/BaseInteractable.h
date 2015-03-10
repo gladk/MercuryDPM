@@ -19,9 +19,11 @@
 #ifndef BASEINTERACTABLE_H
 #define BASEINTERACTABLE_H
 
+#include <list>
+#include <functional>
+
 #include "BaseObject.h"
 #include "Math/Vector.h"
-#include <list>
 
 class BaseParticle;
 class BaseSpecies;
@@ -70,7 +72,7 @@ public:
      */
     unsigned int getIndSpecies() const;
 
-   /*!
+    /*!
      * \brief
      * \return
      */
@@ -83,9 +85,9 @@ public:
     const BaseSpecies* getSpecies() const;
 
     /*!
-      * \brief
-      * \param[in]
-      */
+     * \brief
+     * \param[in]
+     */
     void setSpecies(const BaseSpecies* species);
 
     /*!
@@ -198,6 +200,22 @@ public:
 
     virtual const Vec3D& getAngularVelocity() const;
 
+    void setPrescribedPosition(std::function<Vec3D (double)> prescribedPosition);
+
+    void applyPrescribedPosition(double time);
+
+    void setPrescribedVelocity(std::function<Vec3D (double)> prescribedVelocity);
+
+    void applyPrescribedVelocity(double time);
+
+    void setPrescribedOrientation(std::function<Vec3D (double)> prescribedOrientation);
+
+    void applyPrescribedOrientation(double time);
+
+    void setPrescribedAngularVelocity(std::function<Vec3D (double)> prescribedAngularVelocity);
+
+    void applyPrescribedAngularVelocity(double time);
+
     /*!
      * \brief
      * \param[in]
@@ -205,9 +223,22 @@ public:
      * \todo TW make sure this function sets normal, distance, overlap, contact point
      */
     virtual BaseInteraction* getInteractionWith(BaseParticle *P, Mdouble timeStamp, InteractionHandler* interactionHandler)=0;
+
     virtual const Vec3D getVelocityAtContact(const Vec3D& contact) const;
 
+    void integrateBeforeForceComputation(double time, double timeStep);
+
+    void integrateAfterForceComputation(double time, double timeStep);
+
 private:
+    /*!
+     * \brief
+     */
+    std::function<Vec3D (double)> prescribedPosition_;
+    std::function<Vec3D (double)> prescribedVelocity_;
+    std::function<Vec3D (double)> prescribedOrientation_;
+    std::function<Vec3D (double)> prescribedAngularVelocity_;
+
     /*!
      * \brief 
      */

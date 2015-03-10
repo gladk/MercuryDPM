@@ -24,6 +24,7 @@
 #define LOG_MAIN_LEVEL
 #endif
 
+//This is the class that defines the std_save routines
 #include "STD_save.h"
 //The vector class contains a 3D vector class.
 #include "Math/Vector.h"
@@ -37,13 +38,12 @@
 #include "InteractionHandler.h"
 //This class defines the interaction handler
 #include "SpeciesHandler.h"
-#include "Species/Species.h"
+//#include "Species/Species.h"
 //This class defines the posibleContact lists
 #ifdef CONTACT_LIST_HGRID
     #include "PossibleContactList.h"
 #endif
-//This is the class that defines the std_save routines
-
+//This class defines the random number generator
 #include "Math/RNG.h"
 
 
@@ -87,6 +87,8 @@ public:
 
     void checkSettings();
 
+    virtual void writeOutputFiles();
+
     /*!
      * \brief Read arguments before solving
      */
@@ -124,10 +126,10 @@ public:
      */
     int readRestartFile(std::string filename);
 
-    /*!
-     * \brief Loads all MD data and plots statistics for all timesteps in the .data file
-     */
-    void statisticsFromRestartData(const char *name);
+//    /*!
+//     * \brief Loads all MD data and plots statistics for all timesteps in the .data file
+//     */
+//    void statisticsFromRestartData(const char *name);
 
     /*!
      * \brief Writes all MD data into a restart file
@@ -142,12 +144,7 @@ public:
     /*!
      * \brief Reads all MD data into a restart file; old version
      */
-    virtual void read_v1(std::istream& is);
-
-    /*!
-     * \brief Reads all MD data into a restart file; old version
-     */
-    virtual void read_v2(std::istream& is);
+    virtual void readOld(std::istream &is);
 
     /*!
      * \brief This allows particle data to be reloaded from data files
@@ -196,6 +193,8 @@ public:
      */
     Mdouble getTime() const;
 
+    unsigned int getNtimeSteps() const;
+
     /*!
      * \brief Access function for the time
      */
@@ -218,7 +217,7 @@ public:
     /*!
      * \brief Sets how often the data is saved using the number of saves wanted, tmax, and dt. See also \ref Files::setSaveCount
      */
-    void set_do_stat_always(bool new_);
+    void setDoCGAlways(bool new_);
 
     /*!
      * \brief \todo{these functions should also update the mixed species}
@@ -237,7 +236,7 @@ public:
     /*!
      * \brief
      */
-    bool get_do_stat_always() const;
+    bool getDoCGAlways() const;
     
     /*!
      * \brief Get xmin
@@ -539,11 +538,7 @@ protected:
      */
     virtual void outputStatistics();
 
-    /*!
-     * \brief
-     * //Not unsigned index because of possible wall collisions.
-     */
-    virtual void gatherContactStatistics(int index1 UNUSED, int index2 UNUSED, Vec3D Contact UNUSED, Mdouble delta UNUSED, Mdouble ctheta UNUSED, Mdouble fdotn UNUSED, Mdouble fdott UNUSED, Vec3D P1_P2_normal_ UNUSED, Vec3D P1_P2_tangential UNUSED);
+    void gatherContactStatistics();
 
     /*!
      * \brief
@@ -575,6 +570,12 @@ public:
      * \brief
      */
     virtual void hGridUpdateMove(BaseParticle*, Mdouble);
+
+    /*!
+     * \brief
+     * //Not unsigned index because of possible wall collisions.
+     */
+    virtual void gatherContactStatistics(int index1 UNUSED, int index2 UNUSED, Vec3D Contact UNUSED, Mdouble delta UNUSED, Mdouble ctheta UNUSED, Mdouble fdotn UNUSED, Mdouble fdott UNUSED, Vec3D P1_P2_normal_ UNUSED, Vec3D P1_P2_tangential UNUSED);
 
 protected:
     /*!
@@ -660,14 +661,14 @@ private:
     Mdouble zMax_;
 
     /*!
-     * \brief These are informations for saving
-     */
-    bool do_stat_always;
-
-    /*!
      * \brief This stores the current time
      */
     Mdouble time_;
+
+    /*!
+     * \brief This stores the number of time steps
+     */
+    unsigned int ntimeSteps_;
 
     /*!
      * \brief The size of time step

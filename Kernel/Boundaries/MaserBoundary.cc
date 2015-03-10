@@ -21,6 +21,7 @@
 #include "BoundaryHandler.h"
 #include "ParticleHandler.h"
 #include "Particles/BaseParticle.h"
+#include "Species/BaseSpecies.h"
 
 MaserBoundary* MaserBoundary::copy() const
 {

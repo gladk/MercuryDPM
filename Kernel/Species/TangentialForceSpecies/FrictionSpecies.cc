@@ -18,7 +18,7 @@
 
 #include "FrictionSpecies.h"
 #include<cmath>
-#include <Species/BaseSpecies.h>
+#include "Species/BaseSpecies.h"
 
 class BaseParticle;
 class BaseInteractable;
@@ -76,6 +76,7 @@ FrictionSpecies* FrictionSpecies::copy() const
 ///FrictionSpecies print function, which accepts an os std::stringstream as input. It prints human readable FrictionSpecies information to the std::stringstream
 void FrictionSpecies::write(std::ostream& os) const
 {
+    SlidingFrictionSpecies::write(os);
     os  << " rollingStiffness " << rollingStiffness_;
     os  << " rollingDissipation " << rollingDissipation_;
     os  << " rollingFrictionCoefficient " << rollingFrictionCoefficient_;
@@ -88,7 +89,7 @@ void FrictionSpecies::write(std::ostream& os) const
 
 void FrictionSpecies::read(std::istream& is)
 {
-    //BaseSpecies::read(is);
+    SlidingFrictionSpecies::read(is);
     std::string dummy;
     is >> dummy >> rollingStiffness_;
     is >> dummy >> rollingDissipation_;

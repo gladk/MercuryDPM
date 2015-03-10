@@ -19,8 +19,8 @@
 #ifndef INTERACTION_H
 #define INTERACTION_H
 
-#include "EmptyTangentialInteraction.h"
-#include "EmptyAdhesiveInteraction.h"
+#include "TangentialForceInteractions/EmptyTangentialInteraction.h"
+#include "AdhesiveForceInteractions/EmptyAdhesiveInteraction.h"
 #include "InteractionHandler.h"
 #include "BaseInteractable.h"
 class BaseInteractable;

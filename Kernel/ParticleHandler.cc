@@ -17,6 +17,7 @@
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
 #include <limits>
+#include <Math/Helpers.h>
 #include "ParticleHandler.h"
 #include "DPMBase.h"
 #include "SpeciesHandler.h"
@@ -26,21 +27,21 @@
 ///Constructor of the ParticleHandler class. It creates and empty ParticleHandler.
 ParticleHandler::ParticleHandler()
 {
-    largestParticle_ = 0;
-    smallestParticle_ = 0;
+    largestParticle_ = nullptr;
+    smallestParticle_ = nullptr;
 #ifdef DEBUG_CONSTRUCTOR
     std::cerr << "ParticleHandler::ParticleHandler() finished" << std::endl;
 #endif
 }
 
-/// \param[in] PH The ParticleHandler that has te be copied.
+/// \param[in] PH The ParticleHandler that has to be copied.
 ParticleHandler::ParticleHandler(const ParticleHandler& PH)
 //    : BaseHandler<BaseParticle>()
 {
     clear();
     setDPMBase(PH.getDPMBase());
-    largestParticle_ = 0;
-    smallestParticle_ = 0;
+    largestParticle_ = nullptr;
+    smallestParticle_ = nullptr;
     copyContentsFromOtherHandler(PH);
 #ifdef DEBUG_CONSTRUCTOR
     std::cerr << "ParticleHandler::ParticleHandler(const ParticleHandler &PH) finished" << std::endl;
@@ -53,8 +54,8 @@ ParticleHandler ParticleHandler::operator =(const ParticleHandler& rhs)
     if (this != &rhs)
     {
         clear();
-        largestParticle_ = 0;
-        smallestParticle_ = 0;
+        largestParticle_ = nullptr;
+        smallestParticle_ = nullptr;
         copyContentsFromOtherHandler(rhs);
     }
 #ifdef DEBUG_CONSTRUCTOR
@@ -65,6 +66,9 @@ ParticleHandler ParticleHandler::operator =(const ParticleHandler& rhs)
 
 ParticleHandler::~ParticleHandler()
 {
+    //First reset the pointers, such that they are not checked when removing particles
+    largestParticle_ = nullptr;
+    smallestParticle_ = nullptr;
 #ifdef DEBUG_DESTRUCTOR
     std::cout << "ParticleHandler::~ParticleHandler() finished" << std::endl;
 #endif
@@ -117,7 +121,7 @@ BaseParticle* ParticleHandler::getSmallestParticle() const
 {
     if (!smallestParticle_)
     {
-        std::cerr << "Warning: No particles to set get_SmallestParticle()" << std::endl;
+        std::cerr << "Warning: No particles to set getSmallestParticle()" << std::endl;
     }
     return smallestParticle_;
 }
@@ -127,7 +131,7 @@ BaseParticle* ParticleHandler::getFastestParticle() const
 {
     if (!getNumberOfObjects())
     {
-        std::cerr << "Warning: No particles to set get_FastestParticle()" << std::endl;
+        std::cerr << "Warning: No particles to set getFastestParticle()" << std::endl;
     }
     BaseParticle* p = 0;
     Mdouble maxSpeed = -std::numeric_limits<Mdouble>::max();
@@ -274,15 +278,44 @@ void ParticleHandler::readObject(std::istream& is)
     }
     else if (isdigit(type[0]))
     {
-        BaseParticle baseParticle;
-        baseParticle.oldRead(is);
-        copyAndAddObject(baseParticle);
+        readOldObject(type, is);
     }
     else
     {
         std::cerr << "Particle type: " << type << " not understood in restart file" << std::endl;
         exit(-1);
     }
+}
+
+/// \param[in] is The input stream from which the information is read.
+void ParticleHandler::readOldObject(std::string type, std::istream& is)
+{
+    //read in next line
+    std::stringstream line(std::stringstream::in | std::stringstream::out);
+    helpers::getLineFromStringStream(is, line);
+    //std::cout << line.str() << std::endl;
+
+    BaseParticle particle;
+    std::string dummy;
+    Mdouble radius, inverseMass, inverseInertia, indSpecies;
+    Vec3D position, velocity, orientation, angularVelocity;
+    position.X = atof(type.c_str());
+
+    line >> position.Y >> position.Z >> velocity >> radius >> orientation >> angularVelocity >> inverseMass >> inverseInertia >> indSpecies;
+    particle.setPosition(position);
+    particle.setVelocity(velocity);
+    particle.setRadius(radius);
+    particle.setOrientation(orientation);
+    particle.setAngularVelocity(angularVelocity);
+    if (inverseMass==0)
+        particle.fixParticle();
+    else
+    {
+        particle.setInertia(1./inverseInertia);
+        particle.setMass(1./inverseMass);
+    }
+    particle.setIndSpecies(indSpecies);
+    copyAndAddObject(particle);
 }
 
 /// \param[in] P A pointer to the particle, which properties have to be checked against the ParticleHandlers extrema.

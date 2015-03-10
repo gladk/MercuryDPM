@@ -16,13 +16,11 @@
 // Copyright 2013 The Mercury Developers Team
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
-#include <Species/LinearViscoelasticSpecies.h>
-#include <Species/SlidingFrictionSpecies.h>
 #include "ChuteBottom.h"
-//#include "Boundaries/ChuteInsertionBoundary.h"
-//#include "Boundaries/PeriodicBoundary.h"
-//#include "Walls/InfiniteWall.h"
-///This is the default constructor. All it does is set sensible defaults.
+#include "Species/LinearViscoelasticSpecies.h"
+#include "Species/TangentialForceSpecies/SlidingFrictionSpecies.h"
+#include "Boundaries/PeriodicBoundary.h"
+#include "Walls/InfiniteWall.h"
 
 ChuteBottom::ChuteBottom()
 {

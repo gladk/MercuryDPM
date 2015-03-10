@@ -18,10 +18,8 @@
 
 #ifndef CHUTEBOTTOM_H
 #define CHUTEBOTTOM_H
-#include "Chute.h"
-#include "Boundaries/PeriodicBoundary.h"
-#include "Walls/InfiniteWall.h"
 
+#include "Chute.h"
 
 /*!
  * \class ChuteBottom

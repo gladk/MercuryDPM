@@ -17,7 +17,7 @@
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
 #include "LinearReversibleAdhesiveInteraction.h"
-#include "Species/LinearReversibleAdhesiveSpecies.h"
+#include "Species/AdhesiveForceSpecies/LinearReversibleAdhesiveSpecies.h"
 #include "Particles/BaseParticle.h"
 #include "InteractionHandler.h"
 #include <iomanip>

@@ -102,6 +102,8 @@ public:
      */
     void set_statType();
 
+    void writeOutputFiles();
+
     /*!
      * \brief 
      */
@@ -112,7 +114,7 @@ public:
     /*!
      * \brief 
      */
-    void set_nx(int new_)
+    void setNX(int new_)
     {
         nx = new_;
     }
@@ -122,13 +124,13 @@ public:
      */
     void set_hx(Mdouble hx)
     {
-        set_nx(static_cast<int>(std::ceil((getXMaxStat() - getXMinStat()) / hx)));
+        setNX(static_cast<int>(std::ceil((getXMaxStat() - getXMinStat()) / hx)));
     }
     
     /*!
      * \brief 
      */
-    void set_ny(int new_)
+    void setNY(int new_)
     {
         ny = new_;
     }
@@ -138,13 +140,13 @@ public:
      */
     void set_hy(Mdouble hy)
     {
-        set_ny(static_cast<int>(std::ceil((getYMaxStat() - getYMinStat()) / hy)));
+        setNY(static_cast<int>(std::ceil((getYMaxStat() - getYMinStat()) / hy)));
     }
     
     /*!
      * \brief 
      */
-    void set_nz(int new_)
+    void setNZ(int new_)
     {
         nz = new_;
         if (getSystemDimensions() < 3)
@@ -156,17 +158,17 @@ public:
      */
     void set_hz(Mdouble hz)
     {
-        set_nz(static_cast<int>(std::ceil((getZMaxStat() - getZMinStat()) / hz)));
+        setNZ(static_cast<int>(std::ceil((getZMaxStat() - getZMinStat()) / hz)));
     }
     
     /*!
      * \brief 
      */
-    void set_n(int n)
+    void setN(int n)
     {
-        set_nx(n);
-        set_ny(n);
-        set_nz(n);
+        setNX(n);
+        setNY(n);
+        setNZ(n);
     }
     
     /*!
@@ -182,7 +184,7 @@ public:
     /*!
      * \brief 
      */
-    int get_nx()
+    int getNX()
     {
         return nx;
     }
@@ -190,7 +192,7 @@ public:
     /*!
      * \brief 
      */
-    int get_ny()
+    int getNY()
     {
         return ny;
     }
@@ -198,7 +200,7 @@ public:
     /*!
      * \brief 
      */
-    int get_nz()
+    int getNZ()
     {
         return nz;
     }
@@ -206,7 +208,7 @@ public:
     /*!
      * \brief 
      */
-    void set_tminStat(Mdouble t)
+    void setCGTimeMin(Mdouble t)
     {
         tminStat = t;
     }
@@ -222,7 +224,7 @@ public:
     /*!
      * \brief 
      */
-    void set_tintStat(Mdouble t)
+    void setCGTimeAveragingInterval(Mdouble t)
     {
         tintStat = t;
     }
@@ -230,7 +232,7 @@ public:
     /*!
      * \brief 
      */
-    Mdouble get_tminStat()
+    Mdouble getCGTimeMin()
     {
         return tminStat;
     }
@@ -249,7 +251,7 @@ public:
     /*!
      * \brief 
      */
-    Mdouble get_tintStat()
+    Mdouble getCGTimeAveragingInterval()
     {
         return tintStat;
     }
@@ -259,24 +261,24 @@ public:
      */
     bool check_current_time_for_statistics()
     {
-        return (getTime() > get_tminStat() && getTime() <= getTimeMaxStat() + getTimeStep());
+        return (getTime() > getCGTimeMin() && getTime() <= getTimeMaxStat() + getTimeStep());
     }
     
 
     /*!
      * \brief 
      */
-    void set_CG_type(const char* new_);
+    void setCGShape(const char* new_);
 
     /*!
      * \brief 
      */
-    void set_CG_type(CG new_);
+    void setCGShape(CG new_);
 
     /*!
      * \brief 
      */
-    CG get_CG_type()
+    CG getCGShape()
     {
         return CG_type;
     }
@@ -284,14 +286,14 @@ public:
     /*!
      * \brief 
      */
-    void set_n(int nx_, int ny_, int nz_)
+    void setN(int nx_, int ny_, int nz_)
     {
         nx = nx_;
         ny = ny_;
         nz = nz_;
     }
     
-    void get_n(int& nx_, int& ny_, int& nz_)
+    void getN(int& nx_, int& ny_, int& nz_)
     {
         nx_ = nx;
         ny_ = ny;
@@ -300,21 +302,21 @@ public:
     
 
     ///Set CG variables w2 and CG_invvolume
-    void set_w(Mdouble w)
+    void setCGWidth(Mdouble w)
     {
-        set_w2(mathsFunc::square(w));
+        setCGWidth2(mathsFunc::square(w));
     }
     
 
     /*!
      * \brief Set CG variables w2 and CG_invvolume
      */
-    void set_w2(Mdouble new_);
+    void setCGWidth2(Mdouble new_);
 
     /*!
      * \brief 
      */
-    Mdouble get_w()
+    Mdouble getCGWidth()
     {
         return std::sqrt(w2);
     }
@@ -322,7 +324,7 @@ public:
     /*!
      * \brief 
      */
-    Mdouble get_w2()
+    Mdouble getCGWidthSquared()
     {
         return w2;
     }
@@ -330,7 +332,7 @@ public:
     /*!
      * \brief 
      */
-    Mdouble get_cutoff()
+    Mdouble getCutoff()
     {
         return cutoff;
     }
@@ -338,7 +340,7 @@ public:
     /*!
      * \brief 
      */
-    Mdouble get_cutoff2()
+    Mdouble getCutoff2()
     {
         return mathsFunc::square(cutoff);
     }
@@ -380,7 +382,7 @@ public:
     /*!
      * \brief 
      */
-    void set_doTimeAverage(bool new_)
+    void setDoTimeAverage(bool new_)
     {
         doTimeAverage = new_;
     }
@@ -388,7 +390,7 @@ public:
     /*!
      * \brief 
      */
-    bool get_doTimeAverage()
+    bool getDoTimeAverage()
     {
         return doTimeAverage;
     }
@@ -397,7 +399,7 @@ public:
     /*!
      * \brief 
      */
-    void set_StressTypeForFixedParticles(int new_)
+    void setStressTypeForFixedParticles(int new_)
     {
         StressTypeForFixedParticles = new_;
     }
@@ -405,7 +407,7 @@ public:
     /*!
      * \brief 
      */
-    int get_StressTypeForFixedParticles()
+    int getStressTypeForFixedParticles()
     {
         return StressTypeForFixedParticles;
     }
@@ -424,7 +426,7 @@ public:
     /*!
      * \brief 
      */
-    void set_mirrorAtDomainBoundary(Mdouble new_)
+    void setMirrorAtDomainBoundary(Mdouble new_)
     {
         mirrorAtDomainBoundary = new_;
     }
@@ -432,7 +434,7 @@ public:
     /*!
      * \brief 
      */
-    Mdouble get_mirrorAtDomainBoundary()
+    Mdouble getMirrorAtDomainBoundary()
     {
         return mirrorAtDomainBoundary;
     }
@@ -441,7 +443,7 @@ public:
     /*!
      * \brief 
      */
-    void set_doVariance(bool new_)
+    void setDoVariance(bool new_)
     {
         doVariance = new_;
     }
@@ -449,7 +451,7 @@ public:
     /*!
      * \brief 
      */
-    bool get_doVariance()
+    bool getDoVariance()
     {
         return doVariance;
     }
@@ -458,7 +460,7 @@ public:
     /*!
      * \brief 
      */
-    void set_doGradient(bool new_)
+    void setDoGradient(bool new_)
     {
         doGradient = new_;
     }
@@ -466,7 +468,7 @@ public:
     /*!
      * \brief 
      */
-    bool get_doGradient()
+    bool getDoGradient()
     {
         return doGradient;
     }
@@ -474,7 +476,7 @@ public:
     /*!
      * \brief 
      */
-    void set_superexact(bool new_)
+    void setSuperExact(bool new_)
     {
         superexact = new_;
     }
@@ -482,7 +484,7 @@ public:
     /*!
      * \brief 
      */
-    bool get_superexact()
+    bool getSuperExact()
     {
         return superexact;
     }
@@ -490,7 +492,7 @@ public:
     /*!
      * \brief 
      */
-    void set_ignoreFixedParticles(bool new_)
+    void setDoIgnoreFixedParticles(bool new_)
     {
         ignoreFixedParticles = new_;
     }
@@ -498,7 +500,7 @@ public:
     /*!
      * \brief 
      */
-    bool get_ignoreFixedParticles()
+    bool getDoIgnoreFixedParticles()
     {
         return ignoreFixedParticles;
     }
@@ -514,7 +516,7 @@ public:
     /*!
      * \brief 
      */
-    void set_verbosity(int new_)
+    void setVerbosityLevel(int new_)
     {
         verbosity = new_;
     }
@@ -522,7 +524,7 @@ public:
     /*!
      * \brief 
      */
-    int get_verbosity() const
+    int getVerbosityLevel() const
     {
         return verbosity;
     }
@@ -530,7 +532,7 @@ public:
     /*!
      * \brief 
      */
-    void set_walls(bool new_)
+    void setCGWidthalls(bool new_)
     {
         walls = new_;
     }
@@ -538,7 +540,7 @@ public:
     /*!
      * \brief 
      */
-    bool get_walls()
+    bool getCGWidthalls()
     {
         return walls;
     }
@@ -546,7 +548,7 @@ public:
     /*!
      * \brief 
      */
-    void set_periodicWalls(bool new_)
+    void setDoPeriodicWalls(bool new_)
     {
         periodicWalls = new_;
     }
@@ -554,7 +556,7 @@ public:
     /*!
      * \brief 
      */
-    bool get_periodicWalls()
+    bool getDoPeriodicWalls()
     {
         return periodicWalls;
     }
@@ -563,7 +565,7 @@ public:
     /*!
      * \brief 
      */
-    void set_w_over_rmax(Mdouble new_)
+    void setCGWidth_over_rmax(Mdouble new_)
     {
         w_over_rmax = new_;
     }
@@ -571,7 +573,7 @@ public:
     /*!
      * \brief 
      */
-    Mdouble get_w_over_rmax()
+    Mdouble getCGWidth_over_rmax()
     {
         return w_over_rmax;
     }
@@ -660,7 +662,7 @@ public:
     /*!
      * \brief 
      */
-    std::vector<StatisticsPoint<T> > get_Points()
+    std::vector<StatisticsPoint<T> > getCGPoints()
     {
         return Points;
     }
@@ -782,7 +784,7 @@ public:
     /*!
      * \brief 
      */
-    int get_nTimeAverage()
+    int getNTimeAverage()
     {
         return nTimeAverage;
     }
@@ -808,7 +810,7 @@ public:
     /*!
      * \brief 
      */
-    void set_PolynomialName(const char* new_name)
+    void setPolynomialName(const char* new_name)
     {
         CGPolynomial.setName(new_name);
     }
@@ -816,7 +818,7 @@ public:
     /*!
      * \brief 
      */
-    std::string get_PolynomialName()
+    std::string getPolynomialName()
     {
         return CGPolynomial.getName();
     }
@@ -824,23 +826,23 @@ public:
     /*!
      * \brief 
      */
-    void set_doublePoints(bool new_)
+    void setDoDoublePoints(bool new_)
     {
-        doublePoints = new_;
+        doDoublePoints = new_;
     }
     
     /*!
      * \brief 
      */
-    bool get_doublePoints()
+    bool getDoDoublePoints()
     {
-        return doublePoints;
+        return doDoublePoints;
     }
     
     /*!
      * \brief 
      */
-    void set_TimeAverageReset(int new_)
+    void setNTimeAverageReset(int new_)
     {
         nTimeAverageReset = new_;
     }
@@ -848,7 +850,7 @@ public:
     /*!
      * \brief 
      */
-    bool get_TimeAverageReset()
+    bool getNTimeAverageReset()
     {
         return nTimeAverageReset;
     }
@@ -1121,7 +1123,7 @@ protected:
     bool superexact;
 
     //uses close points to allow calculation of gradients
-    bool doublePoints;
+    bool doDoublePoints;
 
     /*!
      * \brief

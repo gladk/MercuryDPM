@@ -50,22 +50,24 @@ add_library(DPMBase STATIC
 	Interactions/BaseInteraction.cc
 	Interactions/LinearViscoelasticInteraction.cc
 	Interactions/LinearPlasticViscoelasticInteraction.cc
-	Interactions/EmptyTangentialInteraction.cc
-    Interactions/SlidingFrictionInteraction.cc
-    Interactions/FrictionInteraction.cc
-    Interactions/EmptyAdhesiveInteraction.cc
-    Interactions/LinearReversibleAdhesiveInteraction.cc
-    Interactions/LinearIrreversibleAdhesiveInteraction.cc
+	Interactions/HertzianViscoelasticInteraction.cc
+	Interactions/TangentialForceInteractions/EmptyTangentialInteraction.cc
+    Interactions/TangentialForceInteractions/SlidingFrictionInteraction.cc
+    Interactions/TangentialForceInteractions/FrictionInteraction.cc
+    Interactions/AdhesiveForceInteractions/EmptyAdhesiveInteraction.cc
+    Interactions/AdhesiveForceInteractions/LinearReversibleAdhesiveInteraction.cc
+    Interactions/AdhesiveForceInteractions/LinearIrreversibleAdhesiveInteraction.cc
 
 	Species/BaseSpecies.cc
     Species/LinearViscoelasticSpecies.cc
     Species/LinearPlasticViscoelasticSpecies.cc
-    Species/EmptyTangentialSpecies.cc
-    Species/SlidingFrictionSpecies.cc
-    Species/FrictionSpecies.cc
-    Species/EmptyAdhesiveSpecies.cc
-    Species/LinearReversibleAdhesiveSpecies.cc
-    Species/LinearIrreversibleAdhesiveSpecies.cc
+    Species/HertzianViscoelasticSpecies.cc
+    Species/TangentialForceSpecies/EmptyTangentialSpecies.cc
+    Species/TangentialForceSpecies/SlidingFrictionSpecies.cc
+    Species/TangentialForceSpecies/FrictionSpecies.cc
+    Species/AdhesiveForceSpecies/EmptyAdhesiveSpecies.cc
+    Species/AdhesiveForceSpecies/LinearReversibleAdhesiveSpecies.cc
+    Species/AdhesiveForceSpecies/LinearIrreversibleAdhesiveSpecies.cc
 
 	Particles/BaseParticle.cc
 	#The follow two should maybe removed from base at some point

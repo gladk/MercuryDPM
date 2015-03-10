@@ -40,7 +40,7 @@ BaseParticle::BaseParticle()
 #endif
     HGridNextObject_ = 0;
     HGridPrevObject_ = 0;
-    HGridLevel_=99999;
+    HGridLevel_ = 99999;
     HGridX_ = 99999;
     HGridY_ = 99999;
     HGridZ_ = 99999;
@@ -99,7 +99,11 @@ BaseParticle* BaseParticle::copy() const
 ///Get BaseParticle volume function, which required a reference to the Species vector. It returns the volume of the BaseParticle.
 Mdouble BaseParticle::getVolume() const
 {
-    if (handler_==0) {std::cerr << "Error in getVolume: no handler specified" << std::endl; exit(-1);}
+    if (handler_ == nullptr)
+    {
+        std::cerr << "Error in getVolume: no handler specified" << std::endl;
+        exit(-1);
+    }
     switch (getParticleDimensions())
     {
         case 3:
@@ -110,7 +114,7 @@ Mdouble BaseParticle::getVolume() const
             return (2.0 * radius_);
         default:
             {
-            std::cerr << "In get_Volume(vector<CSpecies>& Species) the dimension of the particle is not set" << std::endl;
+            std::cerr << "In getVolume(vector<CSpecies>& Species) the dimension of the particle is not set" << std::endl;
             exit(-1);
         }
     }
@@ -123,6 +127,8 @@ void BaseParticle::fixParticle()
     invMass_ = 0.0;
     inertia_ = 1e20;
     invInertia_ = 0.0;
+    setVelocity(Vec3D(0.0,0.0,0.0));
+    setAngularVelocity(Vec3D(0.0,0.0,0.0));
 }
 
 ///Is fixed BaseParticle function. It returns whether a BaseParticle is fixed or not, by checking its inverse Mass.
@@ -139,7 +145,7 @@ void BaseParticle::unfix()
 }
 
 ///Compute BaseParticle mass function, which required a reference to the Species vector. It computes the Particles mass, Inertia and the inverses.
-/// this function is called, if BaseParticleHandler::addObject, SpeciesHandler::addObject, BaseSpecies::setDensity or DPMBase::setParticleDimensions is called
+/// this function is called, if BaseParticleHandler::addObject, SpeciesHandler::addObject, BaseSpecies::setDensity, BaseParticle::setRadius or DPMBase::setParticleDimensions is called
 void BaseParticle::computeMass()
 {
     if (!isFixed())
@@ -178,8 +184,8 @@ void BaseParticle::write(std::ostream& os) const
         {
     BaseInteractable::write(os);
     os << " radius " << radius_
-        << " invMass " << invMass_
-        << " invInertia " << invInertia_;
+            << " invMass " << invMass_
+            << " invInertia " << invInertia_;
 }
 
 std::string BaseParticle::getName() const
@@ -212,7 +218,7 @@ void BaseParticle::oldRead(std::istream& is)
     is >> invMass_ >> invInertia_ >> indSpecies;
     setPosition(position);
     setOrientation(orientation);
-	setIndSpecies(indSpecies);
+    setIndSpecies(indSpecies);
     if (invMass_ != 0.0)
         mass_ = 1.0 / invMass_;
     else
@@ -389,7 +395,10 @@ void BaseParticle::setRadius(const Mdouble _new)
 {
     radius_ = _new;
     if (getHandler())
+    {
+        computeMass();
         getHandler()->checkExtrema(this);
+    }
 }
 void BaseParticle::setMass(const Mdouble _new)
 {
@@ -466,25 +475,39 @@ BaseInteraction* BaseParticle::getInteractionWith(BaseParticle *P, Mdouble timeS
     }
 }
 
-void BaseParticle::integrateBeforeForceComputation(double timeStep)
+void BaseParticle::integrateBeforeForceComputation(double time, double timeStep)
 {
-    accelerate(getForce() * getInvMass() * 0.5 * timeStep);
-    setDisplacement(getVelocity() * timeStep);
-    move(getDisplacement());
-    getHandler()->getDPMBase()->hGridUpdateMove(this, getDisplacement().getLength());
-    if (getHandler()->getDPMBase()->getRotation())
+    if (getInvMass() == 0.0)
     {
-        angularAccelerate(getTorque() * getInvInertia() * 0.5 * timeStep);
-        rotate(getAngularVelocity() * timeStep);
+        BaseInteractable::integrateBeforeForceComputation(time, timeStep);
+    }
+    else
+    {
+        accelerate(getForce() * getInvMass() * 0.5 * timeStep);
+        setDisplacement(getVelocity() * timeStep);
+        move(getDisplacement());
+        getHandler()->getDPMBase()->hGridUpdateMove(this, getDisplacement().getLength());
+        if (getHandler()->getDPMBase()->getRotation())
+        {
+            angularAccelerate(getTorque() * getInvInertia() * 0.5 * timeStep);
+            rotate(getAngularVelocity() * timeStep);
+        }
     }
 }
 
-void BaseParticle::integrateAfterForceComputation(double timeStep)
+void BaseParticle::integrateAfterForceComputation(double time, double timeStep)
 {
-    accelerate(getForce() * getInvMass() * 0.5 * timeStep);
-    if (getHandler()->getDPMBase()->getRotation())
+    if (getInvMass() == 0.0)
     {
-        angularAccelerate(getTorque() * getInvInertia() * 0.5 * timeStep);
+        BaseInteractable::integrateAfterForceComputation(time, timeStep);
+    }
+    else
+    {
+        accelerate(getForce() * getInvMass() * 0.5 * timeStep);
+        if (getHandler()->getDPMBase()->getRotation())
+        {
+            angularAccelerate(getTorque() * getInvInertia() * 0.5 * timeStep);
+        }
     }
 }
 
@@ -495,12 +518,30 @@ unsigned int BaseParticle::getParticleDimensions() const
 
 void BaseParticle::setIndSpecies(unsigned int indSpecies)
 {
-    if(handler_!=nullptr)
+    if (handler_ != nullptr)
     {
         setSpecies(getHandler()->getDPMBase()->speciesHandler.getObject(getIndSpecies()));
     }
     else
     {
         BaseInteractable::setIndSpecies(indSpecies);
+    }
+}
+
+void BaseParticle::setSpecies(const BaseSpecies* species)
+{
+    BaseInteractable::setSpecies(species);
+
+    //set pointer to particle Handler, which is needed to retrieve species information
+    if (getHandler()== nullptr)
+    {
+        SpeciesHandler* sH = species->getHandler();
+        if (sH!= nullptr)
+        {
+            DPMBase* dB = sH->getDPMBase();
+            if (dB!= nullptr)
+                setHandler(&dB->particleHandler);
+
+        }
     }
 }

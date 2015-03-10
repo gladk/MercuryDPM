@@ -60,6 +60,7 @@ public:
      */
     void readObject(std::istream& is);
 
+    void readOldObject(std::istream& is);
 
     std::string getName() const;
 };

@@ -16,30 +16,23 @@
 // Copyright 2013 The Mercury Developers Team
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
-#ifndef EMPTYADHESIVESPECIES_H
-#define EMPTYADHESIVESPECIES_H
-#include "BaseSpecies.h"
+#ifndef LINEARIRREVERSIBLEADHESIVESPECIES_H
+#define LINEARIRREVERSIBLEADHESIVESPECIES_H
+#include "Species/BaseSpecies.h"
 #include "Math/ExtendedMath.h"
-#include "Interactions/EmptyAdhesiveInteraction.h"
+#include "Interactions/AdhesiveForceInteractions/LinearIrreversibleAdhesiveInteraction.h"
+#include "LinearReversibleAdhesiveSpecies.h"
 class BaseInteractable;
 class BaseInteraction;
 
 //Note the getVelocity can for some Species be dependent on which point on the Species is meant.
-class EmptyAdhesiveSpecies : public virtual BaseSpecies
+class LinearIrreversibleAdhesiveSpecies : public LinearReversibleAdhesiveSpecies
 {
 public:
-    typedef EmptyAdhesiveInteraction InteractionType;
-    EmptyAdhesiveSpecies();
-    EmptyAdhesiveSpecies(const EmptyAdhesiveSpecies &s);
-    virtual ~EmptyAdhesiveSpecies();
-    void read(std::istream& is);
-    void write(std::ostream& os) const;
+    typedef LinearIrreversibleAdhesiveInteraction InteractionType;
+    LinearIrreversibleAdhesiveSpecies();
+    LinearIrreversibleAdhesiveSpecies(const LinearIrreversibleAdhesiveSpecies &s);
+    virtual ~LinearIrreversibleAdhesiveSpecies();
     std::string getBaseName() const;
-    void mix(EmptyAdhesiveSpecies* const S, EmptyAdhesiveSpecies* const T);
-
-//adhesion-specific functions
-
-    ///Returns the particle distance below which adhesive forces can occur (needed for contact detection)
-    Mdouble getInteractionDistance() const;
 };
 #endif

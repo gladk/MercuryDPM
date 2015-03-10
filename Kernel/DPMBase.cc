@@ -22,32 +22,31 @@
 #include "DPMBase.h"
 #include <iostream>
 #include <iomanip>
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <cstdlib>
 #include <limits>
 #include <string>
-///todo strcmp relies on this, should be changed to more modern versiono
+///todo strcmp relies on this, should be changed to more modern version
 #include <string.h>
 //This is only used to change the file permission of the xball script create, at some point this code may be moved from this file to a different file.
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "Interactions/Interaction.h"
-#include "InteractionHandler.h"
+
 #include "Species/Species.h"
-#include "SpeciesHandler.h"
-#include "Species/SlidingFrictionSpecies.h"
 #include "Species/LinearViscoelasticSpecies.h"
+#include "Species/TangentialForceSpecies/SlidingFrictionSpecies.h"
 
 //This is part of this class and just separates out the stuff to do with xballs.
-///todo{to incorporate changes in icc a make clean is required. Why?}
-//This is a header with some extra standard maths function and constants that are required by the code
+#include "MD_xballs.icc"
 #include "Logger.h"
 #include "Particles/BaseParticle.h"
 #include "Walls/BaseWall.h"
 #include "Walls/InfiniteWall.h"
 #include "Boundaries/PeriodicBoundary.h"
-#include "MD_xballs.icc"
+
 
 //Create a main logger for most of our output messages.
 Logger<LOG_MAIN_LEVEL> logger("Main");
@@ -84,9 +83,9 @@ DPMBase::DPMBase(const DPMBase& other)
     yMax_ = other.yMax_;
     zMin_ = other.zMin_;
     zMax_ = other.zMax_;
-    do_stat_always = other.do_stat_always;
     time_ = other.time_;
     timeStep_ = other.timeStep_;
+    ntimeSteps_ = other.ntimeSteps_;
     timeMax_ = other.timeMax_;
     restartVersion_ = other.restartVersion_; ///<to read new and old restart data
     restarted_ = other.restarted_; ///<to read new and old restart data
@@ -113,7 +112,6 @@ DPMBase::DPMBase(const DPMBase& other)
     wallHandler = other.wallHandler;
     boundaryHandler = other.boundaryHandler;
     interactionHandler = other.interactionHandler;
-
 }
 
 DPMBase::DPMBase()
@@ -135,6 +133,11 @@ void DPMBase::solve(int argc, char* argv[])
 Mdouble DPMBase::getTime() const
 {
     return time_;
+}
+
+unsigned int DPMBase::getNtimeSteps() const
+{
+    return ntimeSteps_;
 }
 
 void DPMBase::setTime(Mdouble time)
@@ -160,11 +163,6 @@ Mdouble DPMBase::getTimeMax() const
     return timeMax_;
 }
 
-void DPMBase::set_do_stat_always(bool new_)
-{
-    do_stat_always = new_;
-}
-
 #ifdef CONTACT_LIST_HGRID
 PossibleContactList& DPMBase::getPossibleContactList()
 {   
@@ -179,11 +177,6 @@ void DPMBase::setRotation(bool new_)
 bool DPMBase::getRotation() const
 {
     return rotation_;
-}
-
-bool DPMBase::get_do_stat_always() const
-{
-    return do_stat_always;
 }
 
 Mdouble DPMBase::getXMin() const
@@ -411,7 +404,6 @@ void DPMBase::setRestartVersion(std::string new_)
     restartVersion_ = new_;
 }
 
-
 bool DPMBase::getRestarted() const
 {
     return restarted_;
@@ -435,7 +427,7 @@ void DPMBase::setAppend(bool new_)
 
 Mdouble DPMBase::getElasticEnergy() const
 {
-    Mdouble elasticEnergy=0.0;
+    Mdouble elasticEnergy = 0.0;
     for (std::vector<BaseInteraction*>::const_iterator it = interactionHandler.begin(); it != interactionHandler.end(); ++it)
         elasticEnergy += (*it)->getElasticEnergy();
     return elasticEnergy;
@@ -456,7 +448,7 @@ Mdouble DPMBase::getKineticEnergy() const
 }
 
 double DPMBase::getInfo(const BaseParticle& P) const
-{
+        {
     return P.getSpecies()->getIndex();
 }
 
@@ -516,6 +508,13 @@ void DPMBase::outputStatistics()
 {
 }
 
+void DPMBase::gatherContactStatistics()
+{
+    for (std::vector<BaseInteraction*>::const_iterator it = interactionHandler.begin(); it != interactionHandler.end(); ++it)
+        (*it)->gatherContactStatistics();
+}
+
+
 void DPMBase::gatherContactStatistics(int index1 UNUSED, int index2 UNUSED, Vec3D Contact UNUSED, Mdouble delta UNUSED, Mdouble ctheta UNUSED, Mdouble fdotn UNUSED, Mdouble fdott UNUSED, Vec3D P1_P2_normal_ UNUSED, Vec3D P1_P2_tangential UNUSED)
 {
 }
@@ -564,7 +563,9 @@ void DPMBase::computeParticleMasses()
 
 void DPMBase::printTime() const
 {
-    std::cout << "\rt=" << std::setprecision(3) << std::left << std::setw(6) << getTime() << ", tmax=" << std::setprecision(3) << std::left << std::setw(6) << getTimeMax() << "        \r";
+    std::cout << "t=" << std::setprecision(3) << std::left << std::setw(6) << getTime()
+        << ", tmax=" << std::setprecision(3) << std::left << std::setw(6) << getTimeMax()
+        << std::endl;
     std::cout.flush();
 }
 
@@ -598,8 +599,8 @@ void DPMBase::constructor()
     //This is the parameter of the numerical part
     time_ = 0.0;
     timeStep_ = 0.0; // if dt is not user-specified, this is set in actionsBeforeTimeLoop()
+    ntimeSteps_ = 0;
     setSaveCount(20);
-    set_do_stat_always(false);
     timeMax_ = 1.0;
     
     //This sets the default xballs domain
@@ -699,7 +700,7 @@ void DPMBase::writeFstatHeader(std::ostream& os) const
 }
 
 void DPMBase::writeEneTimestep(std::ostream& os) const
-        {
+{
     Mdouble ene_kin = 0, ene_elastic = 0, ene_rot = 0, ene_gra = 0, mass_sum = 0, x_masslength = 0, y_masslength = 0, z_masslength = 0;
 
     for (std::vector<BaseParticle*>::const_iterator it = particleHandler.begin(); it != particleHandler.end(); ++it)
@@ -743,7 +744,7 @@ void DPMBase::outputXBallsData(std::ostream& os) const
             format = 14;
             break;
         default:
-            std::cerr<<"Unknown systemdimension"<<std::endl;
+            std::cerr << "Unknown systemdimension" << std::endl;
             exit(-1);
     }
     
@@ -1144,17 +1145,7 @@ bool DPMBase::readNextDataFile(unsigned int format)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void DPMBase::writeRestartFile()
 {
-    ///\todo check
-    if (getRestartFile().open(std::fstream::out))
-    {
-        write(getRestartFile().getFstream());
-        getRestartFile().close();
-    }
-    else
-    {
-        std::cerr << "restart_data " << getRestartFile().getName() << " could not be saved" << std::endl;
-        exit(-1);
-    }
+    write(getRestartFile().getFstream());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1173,7 +1164,7 @@ int DPMBase::readRestartFile()
     else
     {
         std::cerr << getRestartFile().getName() << " could not be loaded" << std::endl;
-        exit(-1);
+        return (0);
     }
 }
 
@@ -1221,12 +1212,12 @@ void DPMBase::computeInternalForces(BaseParticle* P1, BaseParticle* P2)
         PI->addForce(C->getForce());
         PJ->addForce(-C->getForce());
 
-        if(getRotation())
+        if (getRotation())
         {
             //std::cout<<"Adding Torque "<< C->getTorque() - Vec3D::cross(PI->getPosition() - C->getContactPoint(), C->getForce())<<" to particle "<<PI->getId()<<std::endl;
             //std::cout<<"Adding Torque "<<-C->getTorque() + Vec3D::cross(PJ->getPosition() - C->getContactPoint(), C->getForce())<<" to particle "<<PJ->getId()<<std::endl;
-        	PI->addTorque( C->getTorque() - Vec3D::cross(PI->getPosition() - C->getContactPoint(), C->getForce()));
-        	PJ->addTorque(-C->getTorque() + Vec3D::cross(PJ->getPosition() - C->getContactPoint(), C->getForce()));
+            PI->addTorque(C->getTorque() - Vec3D::cross(PI->getPosition() - C->getContactPoint(), C->getForce()));
+            PJ->addTorque(-C->getTorque() + Vec3D::cross(PJ->getPosition() - C->getContactPoint(), C->getForce()));
         }
     }
 }
@@ -1263,17 +1254,17 @@ void DPMBase::computeWalls(BaseParticle* pI)
             C->computeForce();
 
             //std::cout<<"Name="<<C->getName()<<std::endl;
-            //std::cout<<"Adding force "<< C->getForce()<<" to particle "<<PI->getId()<<std::endl;
-            //std::cout<<"Adding force "<<-C->getForce()<<" to wall "<<(*it)->getId()<<std::endl;
+            //std::cout<<std::setprecision(15)<<"Adding force "<< C->getForce()<<" to particle "<<pI->getId()<<std::endl;
+            //std::cout<<std::setprecision(15)<<"Adding force "<<-C->getForce()<<" to wall "<<(*it)->getId()<<std::endl;
             pI->addForce(C->getForce());
             (*it)->addForce(-C->getForce());
 
-            if(getRotation())
+            if (getRotation())
             {
-                //std::cout<<"Adding Torque "<< C->getTorque() - Vec3D::cross(PI->getPosition() - C->getContactPoint(), C->getForce())<<" to particle "<<PI->getId()<<std::endl;
-                //std::cout<<"Adding Torque "<<-C->getTorque() + Vec3D::cross((*it)->getPosition() - C->getContactPoint(), C->getForce())<<" to wall "<<(*it)->getId()<<std::endl;
-            	pI   ->addTorque( C->getTorque() - Vec3D::cross(pI->getPosition() - C->getContactPoint(), C->getForce()));
-            	(*it)->addTorque(-C->getTorque() + Vec3D::cross((*it)->getPosition() - C->getContactPoint(), C->getForce()));
+                //std::cout<<std::setprecision(15)<<"Adding Torque "<< C->getTorque() - Vec3D::cross(pI->getPosition() - C->getContactPoint(), C->getForce())<<" to particle "<<pI->getId()<<std::endl;
+                //std::cout<<std::setprecision(15)<<"Adding Torque "<<-C->getTorque() + Vec3D::cross((*it)->getPosition() - C->getContactPoint(), C->getForce())<<" to wall "<<(*it)->getId()<<std::endl;
+                pI->addTorque(C->getTorque() - Vec3D::cross(pI->getPosition() - C->getContactPoint(), C->getForce()));
+                (*it)->addTorque(-C->getTorque() + Vec3D::cross((*it)->getPosition() - C->getContactPoint(), C->getForce()));
             }
         }
     }
@@ -1284,10 +1275,14 @@ void DPMBase::computeWalls(BaseParticle* pI)
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 void DPMBase::integrateBeforeForceComputation()
 {
-    for (std::vector<BaseParticle*>::iterator it = particleHandler.begin(); it != particleHandler.end(); ++it)
+    for_each(particleHandler.begin(), particleHandler.end(), [this] (BaseParticle* p)
     {
-        (*it)->integrateBeforeForceComputation(getTimeStep());
-    }
+        p->integrateBeforeForceComputation(getTime(),getTimeStep());
+    });
+    for_each(wallHandler.begin(), wallHandler.end(), [this] (BaseWall* w)
+    {
+        w->integrateBeforeForceComputation(getTime(),getTimeStep());
+    });
 }
 
 void DPMBase::checkInteractionWithBoundaries()
@@ -1307,58 +1302,62 @@ void DPMBase::checkInteractionWithBoundaries()
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 void DPMBase::integrateAfterForceComputation()
 {
-    for (std::vector<BaseParticle*>::iterator it = particleHandler.begin(); it != particleHandler.end(); ++it)
+    for_each(particleHandler.begin(), particleHandler.end(), [this] (BaseParticle* p)
     {
-        (*it)->integrateAfterForceComputation(getTimeStep());
-    }
+        p->integrateAfterForceComputation(getTime(),getTimeStep());
+    });
+    for_each(wallHandler.begin(), wallHandler.end(), [this] (BaseWall* w)
+    {
+        w->integrateAfterForceComputation(getTime(),getTimeStep());
+    });
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-///statisticsFromRestartData
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-void DPMBase::statisticsFromRestartData(const char *name)
-{
-    ///todo{Check this whole function}
-    //This function loads all MD data
-    readRestartFile();
-    
-    //This creates the file statistics will be saved to
-    std::stringstream ss("");
-    ss << name << ".stat";
-    getStatFile().setName(ss.str());
-    getStatFile().setOpenMode(std::fstream::out);
-    getStatFile().open();
-    
-    // Sets up the initial conditions for the simulation	
-    // setupInitialConditions();
-    // Setup the previous position arrays and mass of each particle.
-    computeParticleMasses();
-    // Other routines required to jump-start the simulation
-    actionsBeforeTimeLoop();
-    initialiseStatistics();
-    hGridActionsBeforeTimeLoop();
-    writeEneHeader(getEneFile().getFstream());
-    
-    while (readDataFile(getDataFile().getName().c_str()))
-    {
-        hGridActionsBeforeTimeLoop();
-        actionsBeforeTimeStep();
-        checkAndDuplicatePeriodicParticles();
-        hGridActionsBeforeTimeStep();
-        getDataFile().setSaveCurrentTimestep(true);
-        getEneFile().setSaveCurrentTimestep(true);
-        getStatFile().setSaveCurrentTimestep(true);
-        getFStatFile().setSaveCurrentTimestep(true);
-        computeAllForces();
-        removeDuplicatePeriodicParticles();
-        actionsAfterTimeStep();
-        writeEneTimestep(getEneFile().getFstream());
-        std::cout << std::setprecision(6) << getTime() << std::endl;
-    }
-    
-    getDataFile().close();
-    getStatFile().close();
-}
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+/////statisticsFromRestartData
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+//void DPMBase::statisticsFromRestartData(const char *name)
+//{
+//    ///todo{Check this whole function}
+//    //This function loads all MD data
+//    readRestartFile();
+//
+//    //This creates the file statistics will be saved to
+//    std::stringstream ss("");
+//    ss << name << ".stat";
+//    getStatFile().setName(ss.str());
+//    getStatFile().setOpenMode(std::fstream::out);
+//    getStatFile().open();
+//
+//    // Sets up the initial conditions for the simulation
+//    // setupInitialConditions();
+//    // Setup the previous position arrays and mass of each particle.
+//    computeParticleMasses();
+//    // Other routines required to jump-start the simulation
+//    actionsBeforeTimeLoop();
+//    initialiseStatistics();
+//    hGridActionsBeforeTimeLoop();
+//    writeEneHeader(getEneFile().getFstream());
+//
+//    while (readDataFile(getDataFile().getName().c_str()))
+//    {
+//        hGridActionsBeforeTimeLoop();
+//        actionsBeforeTimeStep();
+//        checkAndDuplicatePeriodicParticles();
+//        hGridActionsBeforeTimeStep();
+////        getDataFile().setSaveCurrentTimestep(true);
+////        getEneFile().setSaveCurrentTimestep(true);
+////        getStatFile().setSaveCurrentTimestep(true);
+////        getFStatFile().setSaveCurrentTimestep(true);
+//        computeAllForces();
+//        removeDuplicatePeriodicParticles();
+//        actionsAfterTimeStep();
+//        writeEneTimestep(getEneFile().getFstream());
+//        std::cout << std::setprecision(6) << getTime() << std::endl;
+//    }
+//
+//    getDataFile().close();
+//    getStatFile().close();
+//}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 ///This does the force computation
@@ -1399,8 +1398,8 @@ void DPMBase::computeAllForces()
     PossibleContact* Curr=possibleContactList.getFirstPossibleContact();
     while(Curr)
     {   
-        computeInternalForces(Curr->get_P1(),Curr->get_P2());
-        Curr=Curr->get_Next();
+        computeInternalForces(Curr->getP1(),Curr->getP2());
+        Curr=Curr->getNext();
     }
 #endif
     //end outer loop over contacts.
@@ -1425,6 +1424,7 @@ void DPMBase::write(std::ostream& os, bool writeAllParticles) const
         << " zMax " << getZMax() << std::endl
         << "timeStep " << getTimeStep()
         << " time " << getTime()
+        << " ntimeSteps " << ntimeSteps_
         << " timeMax " << getTimeMax() << std::endl
         << "systemDimensions " << getSystemDimensions()
         << " particleDimensions " << getParticleDimensions()
@@ -1437,14 +1437,14 @@ void DPMBase::write(std::ostream& os, bool writeAllParticles) const
     for (std::vector<BaseBoundary*>::const_iterator it = boundaryHandler.begin(); it != boundaryHandler.end(); ++it)
         os << (**it) << std::endl;
     os << "Particles " << particleHandler.getNumberOfObjects() << std::endl;
-    if (writeAllParticles || particleHandler.getNumberOfObjects()<4)
+    if (writeAllParticles || particleHandler.getNumberOfObjects() < 4)
     {
         for (std::vector<BaseParticle*>::const_iterator it = particleHandler.begin(); it != particleHandler.end(); ++it)
             os << (**it) << std::endl;
     }
     else
     {
-        for (unsigned int i=0; i<2; i++)
+        for (unsigned int i = 0; i < 2; i++)
             os << *particleHandler.getObject(i) << std::endl;
         os << "..." << std::endl;
     }
@@ -1457,20 +1457,13 @@ void DPMBase::read(std::istream& is)
     is >> dummy;
     if (strcmp(dummy.c_str(), "restart_version"))
     {
-        systemDimensions_ = atoi(dummy.c_str());
-        restartVersion_ = 1;
-        read_v1(is);
+        //only very old files did not have a restart_version
+        logger.log(Log::FATAL, "Error in DPMBase::read(is): this is not a valid restart file");
     }
     else
     {
         is >> restartVersion_;
-        if (!restartVersion_.compare("2"))
-        {
-            is >> dummy >> dummy;
-            setName(dummy);
-            read_v2(is);
-        }
-        else
+        if (!restartVersion_.compare("1.0"))
         {
             Files::read(is);
             is >> dummy >> xMin_
@@ -1481,6 +1474,7 @@ void DPMBase::read(std::istream& is)
                 >> dummy >> zMax_
                 >> dummy >> timeStep_
                 >> dummy >> time_
+                >> dummy >> ntimeSteps_
                 >> dummy >> timeMax_
                 >> dummy >> systemDimensions_
                 >> dummy >> particleDimensions_
@@ -1518,135 +1512,66 @@ void DPMBase::read(std::istream& is)
                 //particleHandler.getLastObject()->computeMass();
             }
         }
+        else if (!restartVersion_.compare("3"))
+        {
+            logger.log(Log::INFO, "DPMBase::read(is): restarting from an old restart file (restart_version %).", restartVersion_);
+            readOld(is);
+        }
+        else
+        {
+            //only very old files did not have a restart_version
+            logger.log(Log::FATAL, "Error in DPMBase::read(is): restart_version % cannot be read; use an older version of Mercury to upgrade the file", restartVersion_);
+        }
     }
 }
 
-void DPMBase::read_v2(std::istream& is)
+void DPMBase::readOld(std::istream &is)
 {
     std::string dummy;
-    //std::cout << "version 2" << std::endl;
-    unsigned int saveCount;
+    is >> dummy >> dummy;
+    setName(dummy);
+
+    unsigned int saveCountData, saveCountEne, saveCountStat, saveCountFStat;
     unsigned int fileTypeFstat, fileTypeData, fileTypeEne, fileTypeRestart;
     is >> dummy >> xMin_
-            >> dummy >> xMax_
-            >> dummy >> yMin_
-            >> dummy >> yMax_
-            >> dummy >> zMin_
-            >> dummy >> zMax_
-            >> dummy >> timeStep_
-            >> dummy >> time_
-            >> dummy >> timeMax_
-            >> dummy >> saveCount
-            >> dummy >> systemDimensions_
-            >> dummy >> gravity_
-            >> dummy >> fileTypeFstat
-            >> dummy >> fileTypeData
-            >> dummy >> fileTypeEne >> dummy;
-    
-    getDataFile().setSaveCount(saveCount);
-    getEneFile().setSaveCount(saveCount);
-    getStatFile().setSaveCount(saveCount);
-    getFStatFile().setSaveCount(saveCount);
+        >> dummy >> xMax_
+        >> dummy >> yMin_
+        >> dummy >> yMax_
+        >> dummy >> zMin_
+        >> dummy >> zMax_
+        >> dummy >> timeStep_
+        >> dummy >> time_
+        >> dummy >> timeMax_
+        >> dummy >> saveCountData
+        >> dummy >> saveCountEne
+        >> dummy >> saveCountStat
+        >> dummy >> saveCountFStat
+        >> dummy >> systemDimensions_
+        >> dummy >> gravity_
+        >> dummy >> fileTypeFstat
+        >> dummy >> fileTypeData
+        >> dummy >> fileTypeEne;
+    getDataFile().setSaveCount(saveCountData);
+    getEneFile().setSaveCount(saveCountEne);
+    getStatFile().setSaveCount(saveCountStat);
+    getFStatFile().setSaveCount(saveCountFStat);
     
     getFStatFile().setFileType(static_cast<FileType>(fileTypeFstat));
     getDataFile().setFileType(static_cast<FileType>(fileTypeData));
     getEneFile().setFileType(static_cast<FileType>(fileTypeEne));
     
     //this is optional to allow restart files with and without getRestartFile().getFileType()
+    is >> dummy;
     if (!strcmp(dummy.c_str(), "options_restart"))
     {
         is >> fileTypeRestart;
         getRestartFile().setFileType(static_cast<FileType>(fileTypeRestart));
     }
 
-    speciesHandler.readVersion2(is);
-
-    unsigned int N;
-    std::stringstream line(std::stringstream::in | std::stringstream::out);
-    is >> dummy >> N;
-    wallHandler.clear();
-    helpers::getLineFromStringStream(is, line);
-    for (unsigned int i = 0; i < N; i++)
-    {
-        helpers::getLineFromStringStream(is, line);
-        wallHandler.readObject(line);
-    }
-    
-    is >> dummy >> N;
-    boundaryHandler.clear();
-    helpers::getLineFromStringStream(is, line);
-    for (unsigned int i = 0; i < N; i++)
-    {
-        helpers::getLineFromStringStream(is, line);
-        boundaryHandler.readObject(line);
-    }
-    
-    is >> dummy >> N;
-    particleHandler.clear();
-    helpers::getLineFromStringStream(is, line);
-    for (unsigned int i = 0; i < N; i++)
-    {
-        helpers::getLineFromStringStream(is, line);
-        particleHandler.readObject(line);
-        particleHandler.getLastObject()->computeMass();
-    }
-}
-
-///Reads all MD data
-void DPMBase::read_v1(std::istream& is)
-{
-    std::cout << "reading restart data version 1" << std::endl;
-    double dummy;
-    unsigned int saveCount;
-    is >> gravity_
-            >> xMin_ >> xMax_ >> yMin_ >> yMax_ >> zMin_ >> zMax_
-            >> timeStep_ >> time_ >> timeMax_
-            >> saveCount >> dummy;
-    getDataFile().setSaveCount(saveCount);
-    getEneFile().setSaveCount(saveCount);
-    getFStatFile().setSaveCount(saveCount);
-    getStatFile().setSaveCount(saveCount);
-    std::string str;
-    is >> str;
-    setName(str);
-    unsigned int NSpecies, NParticles, NWalls, NBoundarys;
-    is >> NSpecies;
-    is >> NParticles;
-    particleHandler.setStorageCapacity(NParticles);
-    is >> NWalls;
-    wallHandler.setStorageCapacity(NWalls);
-    is >> NBoundarys;
-    boundaryHandler.setStorageCapacity(NBoundarys);
-    unsigned int outputfileTypeDummy;
-    is >> outputfileTypeDummy;
-    getFStatFile().setFileType(static_cast<FileType>(outputfileTypeDummy));
-    is >> outputfileTypeDummy;
-    getDataFile().setFileType(static_cast<FileType>(outputfileTypeDummy));
-    is >> outputfileTypeDummy;
-    getEneFile().setFileType(static_cast<FileType>(outputfileTypeDummy));
-    speciesHandler.readVersion1(is, NSpecies);
-    
-    std::stringstream line(std::stringstream::in | std::stringstream::out);
-    helpers::getLineFromStringStream(is, line);
-    
-    for (unsigned int i = 0; i < NParticles; i++)
-    {
-        helpers::getLineFromStringStream(is, line);
-        particleHandler.readObject(line);
-        particleHandler.getLastObject()->computeMass();
-    }
-    
-    for (unsigned int i = 0; i < NWalls; i++)
-    {
-        helpers::getLineFromStringStream(is, line);
-        wallHandler.readObject(line);
-    }
-    
-    for (unsigned int i = 0; i < NBoundarys; i++)
-    {
-        helpers::getLineFromStringStream(is, line);
-        boundaryHandler.readObject(line);
-    }
+    speciesHandler.read(is);
+    wallHandler.read(is);
+    boundaryHandler.read(is);
+    particleHandler.read(is);
 }
 
 void DPMBase::checkSettings()
@@ -1673,6 +1598,40 @@ void DPMBase::checkSettings()
     }
 }
 
+void DPMBase::writeOutputFiles()
+{
+    if (getFStatFile().saveCurrentTimestep(ntimeSteps_))
+        writeFstatHeader(getFStatFile().getFstream());
+
+    if (getEneFile().saveCurrentTimestep(ntimeSteps_))
+    {
+        if (getEneFile().getCounter()==1 || getEneFile().getFileType()==FileType::MULTIPLE_FILES || getEneFile().getFileType()==FileType::MULTIPLE_FILES_PADDED)
+            writeEneHeader(getEneFile().getFstream());
+        writeEneTimestep(getEneFile().getFstream());
+    }
+
+    if (getDataFile().saveCurrentTimestep(ntimeSteps_))
+    {
+        if (getEneFile().getCounter()==1 && getEneFile().getFileType()!= FileType::NO_FILE)
+            writeXBallsScript();
+        outputXBallsData(getDataFile().getFstream());
+    }
+
+//    if (getStatFile().saveCurrentTimestep(ntimeSteps_))
+//    {
+//        outputStatistics();
+//        gatherContactStatistics();
+//        processStatistics(true);
+//    }
+
+    //write restart file last, otherwise the output cunters are wrong
+    if (getRestartFile().saveCurrentTimestep(ntimeSteps_))
+    {
+        writeRestartFile();
+        getRestartFile().close(); //overwrite old restart file if FileType::ONE_FILE
+    }
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 ///This is the main solve loop where all the action takes place///
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1691,160 +1650,65 @@ void DPMBase::solve()
     ///Thomas: I agree, setTimeStepByParticle should be rewritten to work without calling setupInitialConditions
     if (!getRestarted())
     {
-        time_ = 0;
+        ntimeSteps_ = 0;
         resetFileCounter();
         setupInitialConditions();
-#ifdef DEBUG_OUTPUT 
+        setTime(0.0);
+        setNextSavedTimeStep(0); //reset the counter
+#ifdef DEBUG_OUTPUT
         std::cerr << "Have created the particles initial conditions " << std::endl;
 #endif
     }
 
     checkSettings();
 
-    if (!getAppend())
-        setOpenMode(std::fstream::out);
-    else
+    //append_ determines if files have to be appended or not
+    if (getAppend())
     {
         setOpenMode(std::fstream::out | std::fstream::app);
-        //Restart files should always be overwritted.
-        getRestartFile().setOpenMode(std::fstream::out);
+        getRestartFile().setOpenMode(std::fstream::out); //Restart files should always be overwritten.
     }
-    ///This creates the file the data will be saved to
-    if (getDataFile().getFileType() == FileType::ONE_FILE && !getDataFile().open())
-    {
-        std::cerr << "Problem opening data file aborting" << std::endl;
-        exit(-1);
-    }
-    ///This creates the file ene will be saved to
-    if (getEneFile().getFileType() == FileType::ONE_FILE && !getEneFile().open())
-    {
-        std::cerr << "Problem opening ene file aborting" << std::endl;
-        exit(-1);
-    }
-    ///This creates the file fstatistics will be saved to
-    if (getFStatFile().getFileType() == FileType::ONE_FILE && !getFStatFile().open())
-    {
-        std::cerr << "Problem opening fstat file aborting" << std::endl;
-        exit(-1);
-    }
-    
+    else
+        setOpenMode(std::fstream::out);
+
+    initialiseStatistics();
+
     /// Setup the mass of each particle.
     computeParticleMasses();
 
     /// Other initializations
     //max_radius = getLargestParticle()->getRadius();
     actionsBeforeTimeLoop();
-    initialiseStatistics();
     hGridActionsBeforeTimeLoop();
-    
-    if (!getAppend())
-    {
-        //Writing to a buffer which is not open caused undefined behaviour
-        if (getEneFile().getFstream().is_open())
-            writeEneHeader(getEneFile().getFstream());
-    }
-    
-    //needed for outputStatistics
-    getDataFile().setSaveCurrentTimestep(false);
-    getEneFile().setSaveCurrentTimestep(false);
-    getStatFile().setSaveCurrentTimestep(false);
-    getFStatFile().setSaveCurrentTimestep(false);
-    
-    /// velocity verlet requires initial force calculation
-    if (get_do_stat_always() || getStatFile().getSaveCurrentTimestep())
-        outputStatistics();
+
+    /// do a first force computation
     checkAndDuplicatePeriodicParticles();
     hGridActionsBeforeTimeStep();
-    ///\todo{Thomas: the tangential spring should not be integrated here, but in the integration function; currently, the integration is supressed by setting dt=0, but sliding tangential springs are integrated}
-    Mdouble dt = timeStep_;
-    setTimeStep(0);
     computeAllForces();
-    setTimeStep(dt);
     removeDuplicatePeriodicParticles();
 
-    if (get_do_stat_always() || getStatFile().getSaveCurrentTimestep())
-        processStatistics(getStatFile().getSaveCurrentTimestep());
+
 #ifdef DEBUG_OUTPUT
     std::cerr << "Have computed the initial values for the forces " << std::endl;
-#endif 
-    
-    if (getAppend())
-    {
-        getDataFile().setSaveCurrentTimestep(false);
-        getEneFile().setSaveCurrentTimestep(false);
-        getStatFile().setSaveCurrentTimestep(false);
-        getFStatFile().setSaveCurrentTimestep(false);
-    }
-    else
-    {
-        getDataFile().setSaveCurrentTimestep(true);
-        getEneFile().setSaveCurrentTimestep(true);
-        getStatFile().setSaveCurrentTimestep(true);
-        getFStatFile().setSaveCurrentTimestep(true);
-    }
-    
-    unsigned int count_data = 1;
-    unsigned int count_ene = 1;
-    unsigned int count_stat = 1;
-    unsigned int count_fstat = 1;
-    //create .getDissipation() file if .data file is created
-    /// \bug This CmakeDeftions is current not included and should be readded. Currectly cause a strange compliler error, which I (Ant) do not follow
-    if (getDataFile().getFileType() != FileType::NO_FILE)
-        writeXBallsScript();
-    //if ((getDataFile().getFileType()) && (xballsSupportOn()=="ON")) writeXBallsScript();
-    
+#endif
+
     /// This is the main loop over advancing time
-    while (getTime() - getTimeStep() < getTimeMax() && continueSolve())
+    while (getTime() < getTimeMax() && continueSolve())
     {
-        //std::cout<<std::endl<<"New timestep "<<time_<<std::endl;
-        if (getDataFile().getSaveCurrentTimestep() && getRestartFile().getFileType() != FileType::NO_FILE)
-        {
-            getRestartFile().openNextFile();
-            writeRestartFile();
-        }
-        if (getEneFile().getSaveCurrentTimestep())
-        {
-            getEneFile().openNextFile();
-        }
-        if (getStatFile().getSaveCurrentTimestep() || get_do_stat_always())
-        {
-            getStatFile().openNextFile();
-        }
-        if (getFStatFile().getSaveCurrentTimestep())
-        {
-            getFStatFile().openNextFile();
-        }
+        writeOutputFiles(); //everything is written at the beginning of the timestep!
+
+        if (getDataFile().saveCurrentTimestep(ntimeSteps_))
+            printTime();
 
         /// Check if rotation_ is on
-        rotation_ = false;
-        for (unsigned int i = 0; i < speciesHandler.getNumberOfObjects(); i++)
-        {
-            if (speciesHandler.getObject(i)->getUseAngularDOFs())
-                rotation_ = true;
-            for (unsigned int j = 0; j + 1 < i; j++)
-            {
-                if (speciesHandler.getMixedObject(i, j)->getUseAngularDOFs())
-                    rotation_ = true;
-            }
-        }
+        rotation_ = speciesHandler.useAngularDOFs();
         
         /// Loop over all particles doing the time integration step
         hGridActionsBeforeIntegration();
         integrateBeforeForceComputation();
-
         checkInteractionWithBoundaries();
         hGridActionsAfterIntegration();
-        
-        /// Output statistical information
-        if (getDataFile().getSaveCurrentTimestep())
-        {
-            getDataFile().openNextFile();
-            outputXBallsData(getDataFile().getFstream());
-        }
-        
-        if (getStatFile().getSaveCurrentTimestep() || get_do_stat_always())
-            outputStatistics();
-        
+
         /// Compute forces
         
         ///bug{In chute particles are added in actions_before_time_set(), however they are not written to the xballs data yet, but can have a collison and be written to the fstat data}
@@ -1853,6 +1717,7 @@ void DPMBase::solve()
         {
             (*it)->checkBoundaryBeforeTimeStep(this);
         }
+
         actionsBeforeTimeStep();
 
         checkAndDuplicatePeriodicParticles();
@@ -1875,65 +1740,13 @@ void DPMBase::solve()
         //erase interactions that have not been used during the last timestep
         interactionHandler.eraseOldInteractions(getTime() - getTimeStep() * 0.5);
 
-        if (getFStatFile().getSaveCurrentTimestep())
-        {
-            writeFstatHeader(getFStatFile().getFstream());
-        }
-//        if (getFStatFile().getSaveCurrentTimestep())
-//            writeFStat();
-
-        if (getEneFile().getSaveCurrentTimestep())
-            writeEneTimestep(getEneFile().getFstream());
-
-        if (getStatFile().getSaveCurrentTimestep() || get_do_stat_always())
-            processStatistics(getStatFile().getSaveCurrentTimestep());
-        
         time_ += timeStep_;
-        
-        //To write the last time step (actually data is written at t+0.5*dt where t already is larger then timeMax_)
-        if (count_data == getDataFile().getSaveCount() || getTime() > getTimeMax()) //write data
-        {
-            getDataFile().setSaveCurrentTimestep(true);
-            count_data = 1;
-            printTime();
-        }
-        else
-        {
-            getDataFile().setSaveCurrentTimestep(false);
-            count_data++;
-        }
-        if (count_ene == getEneFile().getSaveCount() || getTime() > getTimeMax()) //write data
-        {
-            getEneFile().setSaveCurrentTimestep(true);
-            count_ene = 1;
-        }
-        else
-        {
-            getEneFile().setSaveCurrentTimestep(false);
-            count_ene++;
-        }
-        if (count_fstat == getFStatFile().getSaveCount() || getTime() > getTimeMax()) //write data
-        {
-            getFStatFile().setSaveCurrentTimestep(true);
-            count_fstat = 1;
-        }
-        else
-        {
-            getFStatFile().setSaveCurrentTimestep(false);
-            count_fstat++;
-        }
-        if (count_stat == getStatFile().getSaveCount() || getTime() > getTimeMax()) //write data
-        {
-            getStatFile().setSaveCurrentTimestep(true);
-            count_stat = 1;
-        }
-        else
-        {
-            getStatFile().setSaveCurrentTimestep(false);
-            count_stat++;
-        }
-        
+        ntimeSteps_ ++;
     }
+    //force writing of the last time step
+    setNextSavedTimeStep(ntimeSteps_);
+    writeOutputFiles();
+
     //end loop over interaction count
     actionsAfterSolve();
     
@@ -1941,12 +1754,7 @@ void DPMBase::solve()
     //To make sure getTime gets the correct time for outputting statistics
     finishStatistics();
     
-    getDataFile().close();
-    
-    getEneFile().close();
-    
-    getFStatFile().close();
-    
+    closeFiles();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2284,16 +2092,16 @@ void DPMBase::outputInteractionDetails() const
     for (std::vector<BaseInteraction*>::const_iterator it = interactionHandler.begin(); it != interactionHandler.end(); ++it)
     {
         (*it)->write(std::cout);
-        std::cout<<std::endl;
-        std::cout << "Interaction "<<(*it)->getName()<<" " << (*it)->getId() << " between " << (*it)->getP()->getId() << " and " << (*it)->getI()->getId() << std::endl;
+        std::cout << std::endl;
+        std::cout << "Interaction " << (*it)->getName() << " " << (*it)->getId() << " between " << (*it)->getP()->getId() << " and " << (*it)->getI()->getId() << std::endl;
     }
     /*std::cout << "Interactions currently in the particles:" << std::endl;
-    for (std::vector<BaseParticle*>::const_iterator it = particleHandler.begin(); it != particleHandler.end(); ++it)
-    {
-        std::cout << "Base particle " << (*it)->getId() << " has interactions:" << std::endl;
-        for (std::list<BaseInteraction*>::const_iterator it2 = (*it)->getInteractions().begin(); it2 != (*it)->getInteractions().end(); ++it2)
-        {
-            std::cout << (*it2)->getId() << " between " << (*it2)->getP()->getId() << " and " << (*it2)->getI()->getId() << std::endl;
-        }
-    }*/
+     for (std::vector<BaseParticle*>::const_iterator it = particleHandler.begin(); it != particleHandler.end(); ++it)
+     {
+     std::cout << "Base particle " << (*it)->getId() << " has interactions:" << std::endl;
+     for (std::list<BaseInteraction*>::const_iterator it2 = (*it)->getInteractions().begin(); it2 != (*it)->getInteractions().end(); ++it2)
+     {
+     std::cout << (*it2)->getId() << " between " << (*it2)->getP()->getId() << " and " << (*it2)->getI()->getId() << std::endl;
+     }
+     }*/
 }

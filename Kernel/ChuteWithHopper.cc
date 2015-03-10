@@ -18,9 +18,8 @@
 
 #include <string.h>
 #include "ChuteWithHopper.h"
-//#include "Boundaries/ChuteInsertionBoundary.h"
-//#include "Boundaries/PeriodicBoundary.h"
-//#include "Walls/InfiniteWall.h"
+#include "Boundaries/HopperInsertionBoundary.h"
+#include "Walls/IntersectionOfWalls.h"
 
 ///This is a copy constructor for Chute problems \bug This copy construct is untested
 ChuteWithHopper::ChuteWithHopper(const Chute& other)
@@ -111,7 +110,7 @@ void ChuteWithHopper::addHopper()
 
     Mdouble HopperCornerHeight = hopperHeight_ - 0.5 * (hopperLength_ - hopperExitLength_) / tan(hopperAngle_);
     // Waarom had ik deze ook al weer gecomment?
-    //if (HopperCornerHeight<=0.0) { hopperHeight_ += -HopperCornerHeight + P0.get_Radius(); HopperCornerHeight = P0.get_Radius(); }
+    //if (HopperCornerHeight<=0.0) { hopperHeight_ += -HopperCornerHeight + P0.getRadius(); HopperCornerHeight = P0.getRadius(); }
 
     //first we create the left hopper wall
 
@@ -304,7 +303,7 @@ void ChuteWithHopper::setHopper(Mdouble ExitLength, Mdouble ExitHeight, Mdouble 
     else
         std::cerr << "WARNING : Hopper length must be greater than exit length" << std::endl;
 
-    //std::cout<<"hopperLowestPoint_: "<<get_hopperLowestPoint_()<<", hopperLength_: "<<hopperLength_<<", hopperExitLength_: "<<hopperExitLength_<<", hopperAngle_: "<<hopperAngle_<<", Height: "<<fixed<<setprecision(15)<<setw(20)<<Height<<"comparing height: "<<setprecision(15)<<setw(20)<<(get_hopperLowestPoint_() + 0.5*(hopperLength_+hopperExitLength_) / tan(hopperAngle_))<<std::endl;
+    //std::cout<<"hopperLowestPoint_: "<<getHopperLowestPoint()<<", hopperLength_: "<<hopperLength_<<", hopperExitLength_: "<<hopperExitLength_<<", hopperAngle_: "<<hopperAngle_<<", Height: "<<fixed<<setprecision(15)<<setw(20)<<Height<<"comparing height: "<<setprecision(15)<<setw(20)<<(getHopperLowestPoint() + 0.5*(hopperLength_+hopperExitLength_) / tan(hopperAngle_))<<std::endl;
 
     Mdouble HeightCompare = (getHopperLowestPoint() + 0.5 * (hopperLength_ + hopperExitLength_) / tan(hopperAngle_));
     //This a semi-ugly fix to check wether Height>=Heightcompare and not take into account rounding errors

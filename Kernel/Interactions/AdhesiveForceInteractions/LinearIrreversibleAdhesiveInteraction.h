@@ -19,7 +19,7 @@
 #ifndef LINEARIRREVERSIBLEADHESIVEINTERACTION_H
 #define LINEARIRREVERSIBLEADHESIVEINTERACTION_H
 
-#include "Interactions/LinearReversibleAdhesiveInteraction.h"
+#include "LinearReversibleAdhesiveInteraction.h"
 #include "Math/Vector.h"
 class BaseParticle;
 class LinearIrreversibleAdhesiveSpecies;

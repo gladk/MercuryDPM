@@ -26,7 +26,7 @@
 #include <iomanip>
 #include <Species/LinearViscoelasticSpecies.h>
 
-class SquarePacking : public Mercury3D {
+class SquarePacking : public StatisticsVector<O> {
 
 public:
 
@@ -55,7 +55,7 @@ public:
 
             }	
 		setZMax(0.1);
-		
+
 		//set walls
 	InfiniteWall w0;
 		w0.set(Vec3D(-1, 0, 0), -getXMin());
@@ -75,37 +75,43 @@ public:
 int main(int argc UNUSED, char *argv[] UNUSED)
 {
 	SquarePacking problem;
-	problem.setName("SquarePackingSelftest");
+	problem.setName("SquarePackingSelfTest");
     auto species=problem.speciesHandler.copyAndAddObject(LinearViscoelasticSpecies());
     //set the number of particles
     problem.N=5;
     problem.setSystemDimensions(2);
 	problem.setParticleDimensions(2);
-	species->setDensity(1.9098593*2/3);
+    species->setDensity(6.0/constants::pi*2./3.);
+    //species->setDensity(1.9098593*2/3);
 	problem.setGravity(Vec3D(0.,-1,0.));
 	species->setCollisionTimeAndRestitutionCoefficient(.01,.1,1.);
     problem.setTimeStep(.0002);
 	problem.setTimeMax(1.0);
 	problem.setSaveCount(1000);
-	std::cout << "Relax the packing" << std::endl;
+
+    problem.setCGTimeMin(problem.getTimeMax()*.98);
+    problem.setTimeMaxStat(1e20);
+
+    std::cout << "Relax the packing" << std::endl;
 	problem.solve();
 
 	std::cout << "Get statistics" << std::endl;
-	StatisticsVector<Y> stats("SquarePackingSelftest");
+	StatisticsVector<Y> stats("SquarePackingSelfTest");
+    stats.getStatFile().setName("SquarePackingSelfTest.Y.stat");
 	double n = 500;
-	stats.set_n(n);
-	stats.set_w(.1);
-	stats.set_tminStat(problem.getTimeMax()*.98);
+	stats.setN(n);
+	stats.setCGWidth(.1);
+	stats.setCGTimeMin(problem.getTimeMax()*.98);
 	stats.setTimeMaxStat(1e20);
 	//stats.verbose();
 	//stats.set_boundedDomain(true);
 	stats.statistics_from_fstat_and_data();
 
 	std::cout << "Get fully averaged statistics" << std::endl;
-	StatisticsVector<O> statsO("SquarePackingSelftest");
-	statsO.getStatFile().setName("SquarePackingSelftest.O.stat");
-	statsO.set_tminStat(problem.getTimeMax()*.98);
-	statsO.setTimeMaxStat(1e20);
+	StatisticsVector<O> statsO("SquarePackingSelfTest");
+	statsO.getStatFile().setName("SquarePackingSelfTest.O.stat");
+    statsO.setCGTimeMin(problem.getTimeMax()*.98);
+    statsO.setTimeMaxStat(1e20);
 	statsO.statistics_from_fstat_and_data();
 	// should give you Density 1
 }

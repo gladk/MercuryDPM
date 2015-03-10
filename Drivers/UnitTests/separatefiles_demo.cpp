@@ -21,36 +21,34 @@
 #include <iostream>
 #include <Species/LinearViscoelasticSpecies.h>
 
-class free_fall : public DPMBase{
+class SeparateFilesSelfTest : public DPMBase{
 public:
 
 	void setupInitialConditions()
 	{
-		BaseParticle p0;
-		
-		//This code is solved three times, so you would get three copies of the particles without this check
-		if (particleHandler.getNumberOfObjects() < 1)
-			{
-		
-			p0.setPosition(Vec3D(getXMax()/2,getYMax()/2,0.0));
-			p0.setVelocity(Vec3D(0.0,0.0,0.0));
-			p0.setRadius(0.0005);
-			particleHandler.copyAndAddObject(p0);
-			
-			}
-			
-		else
-			{
-				particleHandler.getObject(0)->setPosition(Vec3D(getXMax()/2,getYMax()/2,0.0));
-				particleHandler.getObject(0)->setVelocity(Vec3D(0.0,0.0,0.0));
-				
-			}
-			
-		//endif
+        setXMax(1.0);
+        setYMax(1.0);
+        setZMax(2.0);
+        setSystemDimensions(3);
+        setParticleDimensions(3);
+        setGravity(Vec3D(0.0,0.0,0.0));
 
+        LinearViscoelasticSpecies* species = speciesHandler.copyAndAddObject(LinearViscoelasticSpecies());
+        species->setDensity(constants::pi/6);
+        species->setStiffness(200000);
 
-        setTimeStep(1e-6);
-		setTimeMax(1e-3);
+        particleHandler.clear();
+        BaseParticle* p = particleHandler.copyAndAddObject(BaseParticle());
+        p->setPosition(Vec3D(0.5,0.5,0.5));
+        p->setVelocity(Vec3D(0.0,0.0,0.0));
+        p->setRadius(0.5);
+        BaseParticle* q = particleHandler.copyAndAddObject(BaseParticle());
+        q->setPosition(Vec3D(0.5,0.5,1.499));
+        q->setVelocity(Vec3D(0.0,0.0,0.0));
+        q->setRadius(0.5);
+
+        setTimeStep(1e-5);
+		setTimeMax(6e-3);
         setSaveCount(helpers::getSaveCountFromNumberOfSavesAndTimeMaxAndTimestep(2, getTimeMax(), getTimeStep()));
 	}
 
@@ -58,9 +56,7 @@ public:
 
 int main(int argc UNUSED, char *argv[] UNUSED)
 {
-	free_fall problem;
-    auto species = problem.speciesHandler.copyAndAddObject(LinearViscoelasticSpecies());
-    species->setDensity(2000);
+	SeparateFilesSelfTest problem;
 
 	problem.setName("nofiles");
     problem.setFileType(FileType::NO_FILE);
@@ -73,5 +69,4 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 	problem.setName("separatefiles");
 	problem.setFileType(FileType::MULTIPLE_FILES_PADDED);
 	problem.solve();
-	
 }

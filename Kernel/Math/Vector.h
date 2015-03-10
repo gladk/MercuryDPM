@@ -28,7 +28,8 @@
 #include <sstream>
 #include <iostream>
 #include <stdlib.h> 
-#include "ExtendedMath.h"
+
+#include "GeneralDefine.h"
 
 /*!
  * \class Vec3D

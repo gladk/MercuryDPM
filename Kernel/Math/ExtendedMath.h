@@ -19,18 +19,12 @@
 #ifndef EXTENDEDMATH_H
 #define EXTENDEDMATH_H
 
-#ifdef HIGH_PRECISION
-typedef long double Mdouble;
-#else 
-typedef double Mdouble;
-#endif
-
-#define UNUSED  __attribute__ ((__unused__))
-
 #include <iostream> //std::istream and std::stringstream
 #include <fstream> //std::fstream
 #include <cmath> 
 #include <limits>
+
+#include "Vector.h"
 
 /*
  * \brief
@@ -74,7 +68,7 @@ namespace mathsFunc
      * \param[in] endCondition The algorithm terminates when abs(max - min) < endCondition
      * \param[in] curVal The value of the function at the current location (on default this value is calculated internally)
      */
-    double goldenSectionSearch(double(*function)(const double), double min, double cur, double max, double endCondition, double curVal = std::numeric_limits<Mdouble>::quiet_NaN());
+    double goldenSectionSearch(double (*function)(const double), double min, double cur, double max, double endCondition, double curVal = std::numeric_limits<Mdouble>::quiet_NaN());
 
     /*!
      * \brief This is a sign function, it returns -1 for negative numbers, 1 for positive numbers and 0 for 0
@@ -89,7 +83,7 @@ namespace mathsFunc
      */
     template<typename T> T square(T val)
     {
-        return val*val;
+        return val * val;
     }
 
     /*!
@@ -97,31 +91,41 @@ namespace mathsFunc
      */
     template<typename T> T cubic(T val)
     {
-        return val*val*val;
+        return val * val * val;
     }
 
     /*!
-     * \brief Compares the difference of two objects with an absolute error, useful in UnitTests.
+     * \brief Compares the difference of two Mdouble with an absolute error, useful in UnitTests
+     * \param[in] v1 The first Mdouble
+     * \param[in] v2 The second Mdouble
+     * \param[in] absError The allowed maximum absolute error
+     * \return False if the two Mdouble are equal
      */
-    template<typename T> bool compare(T v1, T v2, double absError)
-    {
-        return std::abs(v1-v2)>absError;
-    }
+    bool compare(Mdouble v1,Mdouble v2, double absError);
+    /*!
+     * \brief Compares the difference of two Vec3D with an absolute error, useful in UnitTests
+     * \param[in] v1 The first Vec3D
+     * \param[in] v2 The second Vec3D
+     * \param[in] absError The allowed maximum absolute error
+     * \return False if the two Vec3D are equal
+     */
+    bool compare(Vec3D v1, Vec3D v2, double absError);
 
     /*!
      * \brief factorial function
      */
-    template <typename T> constexpr T factorial( const T t ) {
+    template<typename T> constexpr T factorial(const T t)
+    {
 
-        return ( t == 0 ) ? 1 : t * factorial( t - 1 );
+        return (t == 0) ? 1 : t * factorial(t - 1);
 
     }
 
 }
 
-    /*!
-     * \brief Namespace for evaluating the zeroth modified Bessel function of the first kind, I0(x), required in StatisticsPoint.hcc
-     */
+/*!
+ * \brief Namespace for evaluating the zeroth modified Bessel function of the first kind, I0(x), required in StatisticsPoint.hcc
+ */
 namespace besselFunc
 {
     

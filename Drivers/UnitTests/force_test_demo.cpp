@@ -56,8 +56,8 @@ public:
             }
 
 			//set random relative velocity
-			vcn0 = random.getRandomNumber(-0.1,-0.05);
-			vct0 = random.getRandomNumber( 0.05, 0.1);
+			initialNormalRelativeVelocity = random.getRandomNumber(-0.1,-0.05);
+			initialTangentialRelativeVelocity = random.getRandomNumber( 0.05, 0.1);
 		
 			tc = random.getRandomNumber(0.0,1.0e-5);
 			en = random.getRandomNumber(0.5,1.0);	
@@ -74,7 +74,7 @@ public:
 		}
 		
 		// do this for all solves
-		particleHandler.getObject(0)->setVelocity(normal*vcn0+tangent*vct0);
+		particleHandler.getObject(0)->setVelocity(normal*initialNormalRelativeVelocity+tangent*initialTangentialRelativeVelocity);
 		particleHandler.getObject(1)->setVelocity(Vec3D(0.0,0.0,0.0));
 		particleHandler.getObject(0)->setAngularVelocity(Vec3D(0.0,0.0,0.0));
 		particleHandler.getObject(1)->setAngularVelocity(Vec3D(0.0,0.0,0.0));
@@ -86,14 +86,14 @@ public:
 		
  	}
 	
-	Vec3D get_vc() {
+	Vec3D getRelativeVelocity() {
 		return particleHandler.getObject(0)->getVelocity() - particleHandler.getObject(1)->getVelocity() + Vec3D::cross(normal,particleHandler.getObject(0)->getAngularVelocity()*particleHandler.getObject(0)->getRadius() + particleHandler.getObject(1)->getAngularVelocity()*particleHandler.getObject(1)->getRadius());
 	}
 	
-	void get_vc_components(Mdouble& vcn, Mdouble& vct) {
-		Vec3D vc = get_vc();
-		vcn = vc.X / normal.X;
-		vct = vc.Y / tangent.Y;
+	void getRelativeVelocityComponents(Mdouble& normalRelativeVelocity, Mdouble& tangentialRelativeVelocity) {
+		Vec3D relativeVelocity = getRelativeVelocity();
+		normalRelativeVelocity = relativeVelocity.X / normal.X;
+		tangentialRelativeVelocity = relativeVelocity.Y / tangent.Y;
 	}
 	
 	///Calculates collision time for two copies of a particle of species 0
@@ -102,7 +102,7 @@ public:
 	}
 	
 	
-	Mdouble vcn0, vct0;
+	Mdouble initialNormalRelativeVelocity, initialTangentialRelativeVelocity;
 	Vec3D normal, tangent;
 	Mdouble tc, en;
 	Mdouble m12;
@@ -142,8 +142,8 @@ public:
 			//set random relative velocity
 			normal = Vec3D(-1.0,0.0,0.0);
 			tangent = Vec3D(0.0,1.0,0.0);
-			vcn0 = random.getRandomNumber(-0.1,-0.05);
-			vct0 = random.getRandomNumber( 0.05, 0.1);
+			initialNormalRelativeVelocity = random.getRandomNumber(-0.1,-0.05);
+			initialTangentialRelativeVelocity = random.getRandomNumber( 0.05, 0.1);
 			
 			tc = random.getRandomNumber(0.0,1.0e-5);
 			en = random.getRandomNumber(0.5,1.0);
@@ -155,20 +155,20 @@ public:
 		}
 		
 		// do this for all solves
-		particleHandler.getObject(0)->setVelocity(normal*vcn0+tangent*vct0);
+		particleHandler.getObject(0)->setVelocity(normal*initialNormalRelativeVelocity+tangent*initialTangentialRelativeVelocity);
 		particleHandler.getObject(0)->setAngularVelocity(Vec3D(0.0,0.0,0.0));
 		
 		particleHandler.getObject(0)->setPosition(Vec3D(0.0025-particleHandler.getObject(0)->getRadius(),0.0025,0.0025));
 		particleHandler.getObject(0)->setOrientation(Vec3D(0.0,0.0,0.0));
 	}
 	
-	Vec3D get_vc() {
+	Vec3D getRelativeVelocity() {
 		return particleHandler.getObject(0)->getVelocity() + Vec3D::cross(normal,particleHandler.getObject(0)->getAngularVelocity()*particleHandler.getObject(0)->getRadius());
 	}
-	void get_vc_components(Mdouble& vcn, Mdouble& vct) {
-		Vec3D vc = get_vc();
-		vcn = vc.X / normal.X;
-		vct = vc.Y / tangent.Y;
+	void getRelativeVelocityComponents(Mdouble& normalRelativeVelocity, Mdouble& tangentialRelativeVelocity) {
+		Vec3D relativeVelocity = getRelativeVelocity();
+		normalRelativeVelocity = relativeVelocity.X / normal.X;
+		tangentialRelativeVelocity = relativeVelocity.Y / tangent.Y;
 	}
 	
 };
@@ -182,17 +182,17 @@ void particle_particle_test()
 	problem.random.setRandomSeed(5);
 
 	problem.setupInitialConditions();
-	Mdouble vcn, vct, vct_analytic;
+	Mdouble normalRelativeVelocity, tangentialRelativeVelocity, analyticTangentialRelativeVelocity;
 	
 	std::cout << "5: without tangential forces" << std::endl;
 	problem.setName("force_test5");
 	problem.solve();
-	problem.get_vc_components(vcn, vct);
-	std::cout << "vct: analytic=" << problem.vct0 << ", simulation=" << vct << std::endl;
-	std::cout << "vcn: analytic:" << -problem.en*problem.vcn0 << ", simulation=" << vcn << std::endl;
+	problem.getRelativeVelocityComponents(normalRelativeVelocity, tangentialRelativeVelocity);
+	std::cout << "tangentialRelativeVelocity: analytic=" << problem.initialTangentialRelativeVelocity << ", simulation=" << tangentialRelativeVelocity << std::endl;
+	std::cout << "normalRelativeVelocity: analytic:" << -problem.en*problem.initialNormalRelativeVelocity << ", simulation=" << normalRelativeVelocity << std::endl;
 
 	//problem.setAppend_to_files(true);
-	
+
 	std::cout << "6: with Coulomb friction" << std::endl;
 	Mdouble mu = problem.random.getRandomNumber(0.0,1.0);
     problem.species->setSlidingFrictionCoefficient(mu);
@@ -200,18 +200,18 @@ void particle_particle_test()
 	//problem.species->setSlidingStiffness(0.0);
     problem.setName("force_test6");
 	problem.solve();
-	problem.get_vc_components(vcn, vct);
-	vct_analytic = std::max(0.0,problem.vct0 + mu*3.5*(1+problem.en)*problem.vcn0);
-	std::cout << "vct: analytic=" << vct_analytic << ", simulation=" << vct << std::endl;
-	std::cout << "vcn: analytic:" << -problem.en*problem.vcn0 << ", simulation=" << vcn << std::endl;
+	problem.getRelativeVelocityComponents(normalRelativeVelocity, tangentialRelativeVelocity);
+	analyticTangentialRelativeVelocity = std::max(0.0,problem.initialTangentialRelativeVelocity + mu*3.5*(1+problem.en)*problem.initialNormalRelativeVelocity);
+	std::cout << "tangentialRelativeVelocity: analytic=" << analyticTangentialRelativeVelocity << ", simulation=" << tangentialRelativeVelocity << std::endl;
+	std::cout << "normalRelativeVelocity: analytic:" << -problem.en*problem.initialNormalRelativeVelocity << ", simulation=" << normalRelativeVelocity << std::endl;
 	
 	std::cout << "7: with Coulomb friction, spring activated" << std::endl;
 	problem.species->setSlidingStiffness(1.0);
 	//problem.species->setSlidingDissipation(1);
 	problem.setName("force_test7");
 	problem.solve();
-	std::cout << "vct: analytic=" << vct_analytic << ", simulation=" << vct << std::endl;
-	std::cout << "vcn: analytic:" << -problem.en*problem.vcn0 << ", simulation=" << vcn << std::endl;
+	std::cout << "tangentialRelativeVelocity: analytic=" << analyticTangentialRelativeVelocity << ", simulation=" << tangentialRelativeVelocity << std::endl;
+	std::cout << "normalRelativeVelocity: analytic:" << -problem.en*problem.initialNormalRelativeVelocity << ", simulation=" << normalRelativeVelocity << std::endl;
 
 	std::cout << "8: with tangential viscous force" << std::endl;
 	Mdouble et = problem.random.getRandomNumber(-1.0,0.0);
@@ -220,10 +220,10 @@ void particle_particle_test()
 	problem.species->setSlidingStiffness(0.0);
 	problem.setName("force_test8");
 	problem.solve();
-	problem.get_vc_components(vcn, vct);
-	vct_analytic = problem.vct0 * exp(-2.0*3.5*problem.species->getSlidingDissipation()/(2.0*problem.m12) * problem.getCollisionTime(2.0*problem.m12));
-	std::cout << "vct: analytic=" << vct_analytic << ", simulation=" << vct << std::endl;
-	std::cout << "vcn: analytic:" << -problem.en*problem.vcn0 << ", simulation=" << vcn << std::endl;
+	problem.getRelativeVelocityComponents(normalRelativeVelocity, tangentialRelativeVelocity);
+	analyticTangentialRelativeVelocity = problem.initialTangentialRelativeVelocity * exp(-2.0*3.5*problem.species->getSlidingDissipation()/(2.0*problem.m12) * problem.getCollisionTime(2.0*problem.m12));
+	std::cout << "tangentialRelativeVelocity: analytic=" << analyticTangentialRelativeVelocity << ", simulation=" << tangentialRelativeVelocity << std::endl;
+	std::cout << "normalRelativeVelocity: analytic:" << -problem.en*problem.initialNormalRelativeVelocity << ", simulation=" << normalRelativeVelocity << std::endl;
 	
 	std::cout << "9: with tangential elastic force" << std::endl;
 	Mdouble et2 = problem.random.getRandomNumber(0.0,1.0);
@@ -232,10 +232,10 @@ void particle_particle_test()
 	problem.species->setSlidingStiffness(problem.species->getStiffness()/3.5*mathsFunc::square(acos(-et2)/constants::pi));
 	problem.setName("force_test9");
 	problem.solve();
-	problem.get_vc_components(vcn, vct);
-	vct_analytic = problem.vct0 * cos(sqrt(problem.species->getSlidingStiffness()/problem.m12*3.5)* problem.getCollisionTime(2.0*problem.m12));
-	std::cout << "vct: analytic=" << vct_analytic << ", simulation=" << vct << std::endl;
-	std::cout << "vcn: analytic:" << -problem.en*problem.vcn0 << ", simulation=" << vcn << std::endl;
+	problem.getRelativeVelocityComponents(normalRelativeVelocity, tangentialRelativeVelocity);
+	analyticTangentialRelativeVelocity = problem.initialTangentialRelativeVelocity * cos(sqrt(problem.species->getSlidingStiffness()/problem.m12*3.5)* problem.getCollisionTime(2.0*problem.m12));
+	std::cout << "tangentialRelativeVelocity: analytic=" << analyticTangentialRelativeVelocity << ", simulation=" << tangentialRelativeVelocity << std::endl;
+	std::cout << "normalRelativeVelocity: analytic:" << -problem.en*problem.initialNormalRelativeVelocity << ", simulation=" << normalRelativeVelocity << std::endl;
 
 }
 
@@ -248,7 +248,7 @@ void wall_particle_test()
 	wall_particle_collision problem;
     problem.setupInitialConditions();
 
-    Mdouble vcn, vct, vct_analytic;
+    Mdouble normalRelativeVelocity, tangentialRelativeVelocity, analyticTangentialRelativeVelocity;
 	
 	//problem.setAppend_to_files(true);
 	
@@ -256,9 +256,9 @@ void wall_particle_test()
 	problem.setName("force_test0");
 	problem.solve();
 	
-	problem.get_vc_components(vcn, vct);
-	std::cout << "vct: analytic=" << problem.vct0 << ", simulation=" << vct << std::endl;
-	std::cout << "vcn: analytic:" << -problem.en*problem.vcn0 << ", simulation=" << vcn << std::endl;
+	problem.getRelativeVelocityComponents(normalRelativeVelocity, tangentialRelativeVelocity);
+	std::cout << "tangentialRelativeVelocity: analytic=" << problem.initialTangentialRelativeVelocity << ", simulation=" << tangentialRelativeVelocity << std::endl;
+	std::cout << "normalRelativeVelocity: analytic:" << -problem.en*problem.initialNormalRelativeVelocity << ", simulation=" << normalRelativeVelocity << std::endl;
 
 	std::cout << "1: with Coulomb friction" << std::endl;
 	Mdouble mu = problem.random.getRandomNumber(0.0,1.0);
@@ -267,17 +267,17 @@ void wall_particle_test()
 	problem.species->setSlidingStiffness(0.0);
     problem.setName("force_test1");
 	problem.solve();
-	problem.get_vc_components(vcn, vct);
-	vct_analytic = std::max(0.0,problem.vct0 + mu*3.5*(1+problem.en)*problem.vcn0);
-	std::cout << "vct: analytic=" << vct_analytic << ", simulation=" << vct << std::endl;
-	std::cout << "vcn: analytic:" << -problem.en*problem.vcn0 << ", simulation=" << vcn << std::endl;
+	problem.getRelativeVelocityComponents(normalRelativeVelocity, tangentialRelativeVelocity);
+	analyticTangentialRelativeVelocity = std::max(0.0,problem.initialTangentialRelativeVelocity + mu*3.5*(1+problem.en)*problem.initialNormalRelativeVelocity);
+	std::cout << "tangentialRelativeVelocity: analytic=" << analyticTangentialRelativeVelocity << ", simulation=" << tangentialRelativeVelocity << std::endl;
+	std::cout << "normalRelativeVelocity: analytic:" << -problem.en*problem.initialNormalRelativeVelocity << ", simulation=" << normalRelativeVelocity << std::endl;
 
 	std::cout << "2: with Coulomb friction, spring activated" << std::endl;
     problem.species->setSlidingStiffness(1.0);
     problem.setName("force_test2");
 	problem.solve();
-	std::cout << "vct: analytic=" << vct_analytic << ", simulation=" << vct << std::endl;
-	std::cout << "vcn: analytic:" << -problem.en*problem.vcn0 << ", simulation=" << vcn << std::endl;
+	std::cout << "tangentialRelativeVelocity: analytic=" << analyticTangentialRelativeVelocity << ", simulation=" << tangentialRelativeVelocity << std::endl;
+	std::cout << "normalRelativeVelocity: analytic:" << -problem.en*problem.initialNormalRelativeVelocity << ", simulation=" << normalRelativeVelocity << std::endl;
 
 	std::cout << "3: with tangential viscous force" << std::endl;
 	Mdouble et = problem.random.getRandomNumber(-1.0,0.0);
@@ -286,10 +286,10 @@ void wall_particle_test()
 	problem.species->setSlidingStiffness(0.0);
     problem.setName("force_test3");
 	problem.solve();
-	problem.get_vc_components(vcn, vct);
-	vct_analytic = problem.vct0 * exp(-2.0*3.5*problem.species->getSlidingDissipation()/(2.0*problem.m12) * problem.getCollisionTime(2.0*problem.m12));
-	std::cout << "vct: analytic=" << vct_analytic << ", simulation=" << vct << std::endl;
-	std::cout << "vcn: analytic:" << -problem.en*problem.vcn0 << ", simulation=" << vcn << std::endl;
+	problem.getRelativeVelocityComponents(normalRelativeVelocity, tangentialRelativeVelocity);
+	analyticTangentialRelativeVelocity = problem.initialTangentialRelativeVelocity * exp(-2.0*3.5*problem.species->getSlidingDissipation()/(2.0*problem.m12) * problem.getCollisionTime(2.0*problem.m12));
+	std::cout << "tangentialRelativeVelocity: analytic=" << analyticTangentialRelativeVelocity << ", simulation=" << tangentialRelativeVelocity << std::endl;
+	std::cout << "normalRelativeVelocity: analytic:" << -problem.en*problem.initialNormalRelativeVelocity << ", simulation=" << normalRelativeVelocity << std::endl;
 
 	std::cout << "4: with tangential elastic force" << std::endl;
 	Mdouble et2 = problem.random.getRandomNumber(0.0,1.0);
@@ -298,10 +298,10 @@ void wall_particle_test()
 	problem.species->setSlidingStiffness(problem.species->getStiffness()/3.5*mathsFunc::square(acos(-et2)/constants::pi));
 	problem.setName("force_test4");
 	problem.solve();
-	problem.get_vc_components(vcn, vct);
-	vct_analytic = problem.vct0 * cos(sqrt(problem.species->getSlidingStiffness()/problem.m12*3.5)* problem.getCollisionTime(2.0*problem.m12));
-	std::cout << "vct: analytic=" << vct_analytic << ", simulation=" << vct << std::endl;
-	std::cout << "vcn: analytic:" << -problem.en*problem.vcn0 << ", simulation=" << vcn << std::endl;
+	problem.getRelativeVelocityComponents(normalRelativeVelocity, tangentialRelativeVelocity);
+	analyticTangentialRelativeVelocity = problem.initialTangentialRelativeVelocity * cos(sqrt(problem.species->getSlidingStiffness()/problem.m12*3.5)* problem.getCollisionTime(2.0*problem.m12));
+	std::cout << "tangentialRelativeVelocity: analytic=" << analyticTangentialRelativeVelocity << ", simulation=" << tangentialRelativeVelocity << std::endl;
+	std::cout << "normalRelativeVelocity: analytic:" << -problem.en*problem.initialNormalRelativeVelocity << ", simulation=" << normalRelativeVelocity << std::endl;
 }
 
 

@@ -158,6 +158,8 @@ public:
       */
     void copySwitchPointer(const BaseInteractable* from, BaseInteractable* to) const;
 
+    void gatherContactStatistics();
+
 protected:
 
     //Variables that only the derived Interactions have to know about:
@@ -183,6 +185,9 @@ protected:
     void clear();
 
     virtual void reverseHistory();
+
+    Mdouble getEffectiveRadius();
+    Mdouble getEffectiveCorrectedRadius();
 
 private:
 

@@ -18,10 +18,12 @@
 
 #ifndef SPECIES_H
 #define SPECIES_H
-#include "Species/EmptyTangentialSpecies.h"
-#include "Species/EmptyAdhesiveSpecies.h"
+#include "Species/TangentialForceSpecies/EmptyTangentialSpecies.h"
+#include "Species/AdhesiveForceSpecies/EmptyAdhesiveSpecies.h"
 #include "Interactions/Interaction.h"
 class BaseInteraction;
+//class EmptyTangentialSpecies;
+//class EmptyAdhesiveSpecies;
 //template<class NormalForceInteraction, class TangentialForceInteraction> class Interaction;
 
 template<class NormalForceSpecies, class TangentialForceSpecies=EmptyTangentialSpecies, class AdhesiveForceSpecies=EmptyAdhesiveSpecies>

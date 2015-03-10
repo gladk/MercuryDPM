@@ -17,6 +17,7 @@
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
 #include "DPMBase.h"
+#include "Math/Helpers.h"
 
 /// In this file, 5 Particles (4 fixed) are loaded from files 
 /// "5Particles.ini" and "5Particles.restart". The particles are aligned 
@@ -37,13 +38,13 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 
 	helpers::writeToFile("5Particles.restart",
         "restart_version 1.0 name 1Particle4WallsRestartUnitTest_restart\n"
-        "dataFile name 1Particle4WallsRestartUnitTest_restart.data fileType ONE_FILE saveCount 5\n"
-        "fStatFile name 1Particle4WallsRestartUnitTest_restart.fstat fileType ONE_FILE saveCount 5\n"
-        "eneFile name 1Particle4WallsRestartUnitTest_restart.ene fileType ONE_FILE saveCount 1\n"
-        "restartFile name 1Particle4WallsRestartUnitTest_restart.restart fileType ONE_FILE saveCount 5\n"
-        "statFile name 1Particle4WallsRestartUnitTest_restart.stat fileType ONE_FILE saveCount 5\n"
+        "dataFile name 1Particle4WallsRestartUnitTest_restart.data fileType ONE_FILE saveCount 5 counter 0 nextSavedTimeStep 0\n"
+        "fStatFile name 1Particle4WallsRestartUnitTest_restart.fstat fileType ONE_FILE saveCount 5 counter 0 nextSavedTimeStep 0\n"
+        "eneFile name 1Particle4WallsRestartUnitTest_restart.ene fileType ONE_FILE saveCount 1 counter 0 nextSavedTimeStep 0\n"
+        "restartFile name 1Particle4WallsRestartUnitTest_restart.restart fileType ONE_FILE saveCount 5 counter 0 nextSavedTimeStep 0\n"
+        "statFile name 1Particle4WallsRestartUnitTest_restart.stat fileType ONE_FILE saveCount 5 counter 0 nextSavedTimeStep 0\n"
         "xMin 0 xMax 1.6 yMin 0 yMax 1 zMin 0 zMax 1.6\n"
-        "timeStep 1e-05 time 0 timeMax 0.01\n"
+        "timeStep 1e-05 time 0 ntimeSteps 0 timeMax 0.01\n"
         "systemDimensions 3 particleDimensions 3 gravity 0 0 0\n"
         "Species 1\n"
         "LinearViscoelasticSlidingFrictionSpecies id 0 rho 1.9098593 k 200000 disp 0 slidingStiffness 57142.857 slidingDissipation 0 frictionCoefficient 0.5 frictionCoefficientStatic 0.5\n"

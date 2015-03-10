@@ -23,6 +23,7 @@
 #include "Particles/BaseParticle.h"
 #include "InteractionHandler.h"
 #include "SpeciesHandler.h"
+#include "Species/BaseSpecies.h"
 #include "Interactions/BaseInteraction.h"
 
 ///Constructor of the ParticleHandler class. It creates and empty ParticleHandler.

@@ -32,6 +32,8 @@ BaseInteractable::BaseInteractable()
     torque_.setZero();
     indSpecies_ = 0;
     species_ = nullptr;
+    prescribedPosition_ = nullptr;
+	prescribedVelocity_ = nullptr;
 #ifdef DEBUG_CONSTRUCTOR
     std::cout<<"BaseInteractable::BaseInteractable() finished"<<std::endl;
 #endif
@@ -49,6 +51,8 @@ BaseInteractable::BaseInteractable(const BaseInteractable &p)
     torque_ = p.torque_;
     species_ = p.species_;
     indSpecies_ = p.indSpecies_;
+    prescribedPosition_ = p.prescribedPosition_;
+    prescribedVelocity_ = p.prescribedVelocity_;
 #ifdef DEBUG_CONSTRUCTOR
     std::cout<<"BaseInteractable::BaseInteractable(const BaseInteractable &p finished"<<std::endl;
 #endif
@@ -73,7 +77,7 @@ unsigned int BaseInteractable::getIndSpecies() const
 
 void BaseInteractable::setIndSpecies(unsigned int indSpecies)
 {
-    indSpecies_=indSpecies;
+    indSpecies_ = indSpecies;
 }
 
 const BaseSpecies* BaseInteractable::getSpecies() const
@@ -158,13 +162,13 @@ void BaseInteractable::read(std::istream& is)
 }
 
 void BaseInteractable::write(std::ostream& os) const
-{
+        {
     BaseObject::write(os);
     os << " indSpecies " << indSpecies_
-        << " position " << position_
-        << " orientation " << orientation_ << " " << 0.0
-        << " velocity " << velocity_
-        << " angularVelocity " << angularVelocity_ << " " << 0.0
+            << " position " << position_
+            << " orientation " << orientation_ << " " << 0.0
+            << " velocity " << velocity_
+            << " angularVelocity " << angularVelocity_ << " " << 0.0
             << " force " << force_
             << " torque " << torque_;
 }
@@ -181,9 +185,9 @@ void BaseInteractable::addInteraction(BaseInteraction* I)
 
 bool BaseInteractable::removeInteraction(BaseInteraction* I)
 {
-    for (std::list<BaseInteraction*>::iterator it=interactions_.begin(); it != interactions_.end(); ++it)
+    for (std::list<BaseInteraction*>::iterator it = interactions_.begin(); it != interactions_.end(); ++it)
     {
-        if (I==(*it))
+        if (I == (*it))
         {
             //std::cout<<"Removing interaction from "<<getId()<<" between "<<I->getI()->getId()<<" and "<<I->getP()->getId()<<std::endl;
             interactions_.erase(it);
@@ -208,7 +212,7 @@ const Vec3D& BaseInteractable::getAngularVelocity() const
 
 void BaseInteractable::setVelocity(const Vec3D& velocity)
 {
-    velocity_=velocity;
+    velocity_ = velocity;
 }
 void BaseInteractable::setAngularVelocity(const Vec3D& angularVelocity)
 {
@@ -216,21 +220,167 @@ void BaseInteractable::setAngularVelocity(const Vec3D& angularVelocity)
 }
 void BaseInteractable::addVelocity(const Vec3D& velocity)
 {
-    velocity_+=velocity;
+    velocity_ += velocity;
 }
 void BaseInteractable::addAngularVelocity(const Vec3D& angularVelocity)
 {
     angularVelocity_ += angularVelocity;
 }
 const Vec3D BaseInteractable::getVelocityAtContact(const Vec3D& contact) const
-{
+        {
     return getVelocity() - Vec3D::cross(contact - getPosition(), getAngularVelocity());
 }
 
 void BaseInteractable::copyInteractionsForPeriodicParticles(const BaseInteractable &p)
 {
-    for (std::list<BaseInteraction*>::const_iterator it=p.interactions_.begin(); it != p.interactions_.end(); ++it)
+    for (std::list<BaseInteraction*>::const_iterator it = p.interactions_.begin(); it != p.interactions_.end(); ++it)
     {
-        (*it)->copySwitchPointer(&p,this);
+        (*it)->copySwitchPointer(&p, this);
+    }
+}
+
+void BaseInteractable::setPrescribedPosition(std::function<Vec3D (double)> prescribedPosition)
+{
+    prescribedPosition_ = prescribedPosition;
+}
+
+void BaseInteractable::applyPrescribedPosition(double time)
+{
+    if(prescribedPosition_!=nullptr)
+    {
+        setPosition(prescribedPosition_(time));
+    }
+}
+
+void BaseInteractable::setPrescribedVelocity(std::function<Vec3D (double)> prescribedVelocity)
+{
+    prescribedVelocity_ = prescribedVelocity;
+}
+
+void BaseInteractable::applyPrescribedVelocity(double time)
+{
+    if(prescribedVelocity_!=nullptr)
+    {
+        setVelocity(prescribedVelocity_(time));
+    }
+}
+
+void BaseInteractable::setPrescribedOrientation(std::function<Vec3D (double)> prescribedOrientation)
+{
+    prescribedOrientation_ = prescribedOrientation;
+}
+
+void BaseInteractable::applyPrescribedOrientation(double time)
+{
+    if(prescribedOrientation_!=nullptr)
+    {
+        setOrientation(prescribedOrientation_(time));
+    }
+}
+
+void BaseInteractable::setPrescribedAngularVelocity(std::function<Vec3D (double)> prescribedAngularVelocity)
+{
+    prescribedAngularVelocity_ = prescribedAngularVelocity;
+}
+
+void BaseInteractable::applyPrescribedAngularVelocity(double time)
+{
+    if(prescribedAngularVelocity_!=nullptr)
+    {
+        setAngularVelocity(prescribedAngularVelocity_(time));
+    }
+}
+
+void BaseInteractable::integrateBeforeForceComputation(double time, double timeStep)
+{
+    if (prescribedPosition_ != nullptr)
+    {
+        if (prescribedVelocity_ != nullptr)
+        {
+            applyPrescribedPosition(time + timeStep);
+            applyPrescribedVelocity(time + 0.5 * timeStep);
+        }
+        else
+        {
+            applyPrescribedPosition(time + timeStep);
+            setVelocity((prescribedPosition_(time + 0.6 * timeStep) - prescribedPosition_(time + 0.4 * timeStep)) / (0.2 * timeStep));
+        }
+    }
+    else
+    {
+        if (prescribedVelocity_ != nullptr)
+        {
+            applyPrescribedVelocity(time + 0.5 * timeStep);
+            move(getVelocity() * timeStep);
+        }
+        else
+        {
+            move(getVelocity() * timeStep);
+        }
+    }
+    if (prescribedOrientation_ != nullptr)
+    {
+        if (prescribedAngularVelocity_ != nullptr)
+        {
+            applyPrescribedOrientation(time + timeStep);
+            applyPrescribedAngularVelocity(time + 0.5 * timeStep);
+        }
+        else
+        {
+            applyPrescribedOrientation(time + timeStep);
+            setAngularVelocity((prescribedOrientation_(time + 0.6 * timeStep) - prescribedOrientation_(time + 0.4 * timeStep)) / (0.2 * timeStep));
+        }
+    }
+    else
+    {
+        if (prescribedAngularVelocity_ != nullptr)
+        {
+            applyPrescribedAngularVelocity(time + 0.5 * timeStep);
+            rotate(getAngularVelocity() * timeStep);
+        }
+        else
+        {
+            rotate(getAngularVelocity() * timeStep);
+        }
+    }
+}
+
+void BaseInteractable::integrateAfterForceComputation(double time, double timeStep)
+{
+    if (prescribedPosition_ != nullptr)
+    {
+        if (prescribedVelocity_ != nullptr)
+        {
+            applyPrescribedVelocity(time + timeStep);
+        }
+        else
+        {
+            setVelocity((prescribedPosition_(time + 1.1 * timeStep) - prescribedPosition_(time + 0.9 * timeStep)) / (0.2 * timeStep));
+        }
+    }
+    else
+    {
+        if (prescribedVelocity_ != nullptr)
+        {
+            applyPrescribedVelocity(time + 0.5 * timeStep);
+        }
+    }
+    if (prescribedOrientation_ != nullptr)
+    {
+        if (prescribedAngularVelocity_ != nullptr)
+        {
+            applyPrescribedAngularVelocity(time + timeStep);
+        }
+        else
+        {
+            setAngularVelocity((prescribedOrientation_(time + 1.1 * timeStep) - prescribedOrientation_(time + 0.9 * timeStep)) / (0.2 * timeStep));
+        }
+    }
+    else
+    {
+        if (prescribedAngularVelocity_ != nullptr)
+        {
+            applyPrescribedAngularVelocity(time + 0.5 * timeStep);
+        }
     }
 }

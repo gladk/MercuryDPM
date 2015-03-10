@@ -62,8 +62,8 @@ bool Screw::getDistanceAndNormal(const BaseParticle &P, Mdouble &distance, Vec3D
     if (Rsqr > pow(maxR_ + P.getWallInteractionRadius() + thickness_, 2) || P.getPosition().Z > l_ + start_.Z + P.getWallInteractionRadius() + thickness_ || P.getPosition().Z < start_.Z - P.getWallInteractionRadius() - thickness_)
     {
         //std::cout<<"Particle is out of first bound checking"<<std::endl;
-        //std::cout<<"Rule 1: "<<Rsqr<<"<"<<pow(r+P.get_Radius()+thickness_,2)<<std::endl;
-        //std::cout<<"Rule 2: "<<Start.Z-P.get_Radius()-thickness_<<"<"<<P.getPosition().Z<<"<"<<L+Start.Z+P.get_Radius()+thickness_<<std::endl;
+        //std::cout<<"Rule 1: "<<Rsqr<<"<"<<pow(r+P.getRadius()+thickness_,2)<<std::endl;
+        //std::cout<<"Rule 2: "<<Start.Z-P.getRadius()-thickness_<<"<"<<P.getPosition().Z<<"<"<<L+Start.Z+P.getRadius()+thickness_<<std::endl;
         return false;
     }
     double R = sqrt(Rsqr);

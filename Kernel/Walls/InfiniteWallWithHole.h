@@ -78,12 +78,12 @@ public:
     /*!
      * \brief Returns the distance of the wall to the particle. 
      */
-    Mdouble get_wallDistance(const Vec3D &position) const;
+    Mdouble getWallDistance(const Vec3D &position) const;
     
     /*!
      * \brief
      */
-    Mdouble get_holeDistance(const Vec3D &position) const;
+    Mdouble getHoleDistance(const Vec3D &position) const;
     
     /*!
      * \brief Since this function should be called before calculating any Particle-Wall interactions, it can also be used to set the normal vector in case of curved walls.
@@ -118,7 +118,7 @@ public:
     /*!
      * \brief access function for normal
      */
-    Vec3D get_Normal();
+    Vec3D getNormal();
     
     /*!
      * \brief access function for position

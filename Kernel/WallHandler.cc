@@ -16,6 +16,7 @@
 // Copyright 2013 The Mercury Developers Team
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
+#include <Math/Helpers.h>
 #include "WallHandler.h"
 #include "Walls/BaseWall.h"
 #include "Walls/CylindricalWall.h"
@@ -122,22 +123,9 @@ void WallHandler::readObject(std::istream& is)
         copyAndAddObject(coil);
     }
     //for backward compatibility (before svnversion ~2360)
-    else if (type.compare("numIntersectionOfWallss") == 0)
+    else if (type.compare("numFiniteWalls") == 0)
     {
-        int numIntersectionOfWallss;
-        is >> numIntersectionOfWallss;
-        if (numIntersectionOfWallss)
-        {
-            IntersectionOfWalls finiteWallInstance;
-            is >> finiteWallInstance;
-            copyAndAddObject(finiteWallInstance);
-        }
-        else
-        {
-            InfiniteWall infiniteWallInstance;
-            is >> infiniteWallInstance;
-            copyAndAddObject(infiniteWallInstance);
-        }
+        readOldObject(is);
     }
     else
     {
@@ -145,6 +133,40 @@ void WallHandler::readObject(std::istream& is)
         exit(-1);
     }
 }
+
+/// \param[in] is The input stream from which the information is read.
+void WallHandler::readOldObject(std::istream& is)
+{
+    //read in next line
+    std::stringstream line(std::stringstream::in | std::stringstream::out);
+    helpers::getLineFromStringStream(is, line);
+    //std::cout << line.str() << std::endl;
+
+    std::string dummy;
+    Mdouble numWalls, position;
+    Vec3D normal;
+    line >> numWalls;
+
+    if (numWalls==0)
+    {
+        InfiniteWall infiniteWall;
+        line >> dummy >> normal >> dummy >> position;
+        infiniteWall.set(normal, position);
+        copyAndAddObject(infiniteWall);
+    }
+    else
+    {
+        IntersectionOfWalls finiteWallInstance;
+        IntersectionOfWalls intersectionOfWalls;
+        for (unsigned int i=0; i<numWalls; i++)
+        {
+            line >> dummy >> normal >> dummy >> position;
+            intersectionOfWalls.addObject(normal, position);
+        }
+        copyAndAddObject(intersectionOfWalls);
+    }
+}
+
 
 std::string WallHandler::getName() const
 {

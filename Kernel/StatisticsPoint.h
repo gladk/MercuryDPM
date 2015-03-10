@@ -58,45 +58,45 @@ public:
     }
     
     //set and get access functions
-    ///see StatisticsVector::set_CG_type
+    ///see StatisticsVector::setCGShape
     static void set_gb(StatisticsVector<T>* new_gb)
     {
         gb = new_gb;
     }
-    ///see StatisticsVector::set_CG_type
-    void set_CG_type(const char* CG_type)
+    ///see StatisticsVector::setCGShape
+    void setCGShape(const char* CG_type)
     {
-        this->gb->set_CG_type(CG_type);
+        this->gb->setCGShape(CG_type);
     }
-    ///see StatisticsVector::get_CG_type
-    CG get_CG_type() const
+    ///see StatisticsVector::getCGShape
+    CG getCGShape() const
     {
-        return this->gb->get_CG_type();
+        return this->gb->getCGShape();
     }
-    ///see StatisticsVector::set_w2
-    void set_w2(Mdouble new_)
+    ///see StatisticsVector::setCGWidth2
+    void setCGWidth2(Mdouble new_)
     {
-        this->gb->set_w2(new_);
+        this->gb->setCGWidth2(new_);
     }
-    ///see StatisticsVector::get_w2
-    Mdouble get_w2() const
+    ///see StatisticsVector::getCGWidthSquared
+    Mdouble getCGWidthSquared() const
     {
-        return this->gb->get_w2();
+        return this->gb->getCGWidthSquared();
     }
-    ///see StatisticsVector::get_w
-    Mdouble get_w() const
+    ///see StatisticsVector::getCGWidth
+    Mdouble getCGWidth() const
     {
-        return this->gb->get_w();
+        return this->gb->getCGWidth();
     }
-    ///see StatisticsVector::get_cutoff
-    Mdouble get_cutoff()
+    ///see StatisticsVector::getCutoff
+    Mdouble getCutoff()
     {
-        return this->gb->get_cutoff();
+        return this->gb->getCutoff();
     }
-    ///see StatisticsVector::get_cutoff2
-    Mdouble get_cutoff2()
+    ///see StatisticsVector::getCutoff2
+    Mdouble getCutoff2()
     {
-        return this->gb->get_cutoff2();
+        return this->gb->getCutoff2();
     }
     ///see StatisticsVector::getXMaxStat
     Mdouble getXMaxStat()
@@ -129,9 +129,9 @@ public:
         return this->gb->getZMinStat();
     }
     ///see StatisticsVector::get_n
-    void get_n(int& nx_, int& ny_, int& nz_)
+    void getN(int& nx_, int& ny_, int& nz_)
     {
-        this->gb->get_n(nx_, ny_, nz_);
+        this->gb->getN(nx_, ny_, nz_);
     }
     ///see StatisticsVector::evaluatePolynomial
     Mdouble evaluatePolynomial(Mdouble r)
@@ -150,11 +150,11 @@ public:
     }
     
     ///sets #CG_invvolume
-    void set_CG_invvolume();
+    void setCGInverseVolume();
     int nonaveragedDim();
     double averagingVolume();
     ///returns #CG_invvolume
-    Mdouble get_CG_invvolume()
+    Mdouble getCGInverseVolume()
     {
         return this->CG_invvolume;
     }

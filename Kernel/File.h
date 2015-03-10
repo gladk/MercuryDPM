@@ -89,12 +89,12 @@ public:
     /*!
      * \brief Gets File::counter_
      */
-    int getCounter() const;
+    unsigned int getCounter() const;
 
     /*!
-     * \brief Is called at the beginning of solve to set File::counter_ back to -1
-     */
-    void resetCounter();
+      * \brief Sets File::counter_
+      */
+    void setCounter(unsigned int counter);
 
     /*!
      * \brief Sets File::openMode_
@@ -119,18 +119,16 @@ public:
     /*!
      * \brief Gets File::openMode_
      */
-    bool getSaveCurrentTimestep() const;
+    unsigned int getNextSavedTimeStep() const;
 
-    /*!
-     * \brief Sets File::openMode_
-     */
-    void setSaveCurrentTimestep(bool saveCurrentTimestep);
+    void setNextSavedTimeStep(unsigned int nextSavedTimeStep);
+
+    bool saveCurrentTimestep(unsigned int ntimeSteps);
 
     /*!
      * \brief read function, which accepts an std::stringstream as input.
      */
     void read(std::istream& is);
-
 
     /*!
      * \brief print function, which accepts an std::stringstream as input.
@@ -184,9 +182,9 @@ private:
     FileType fileType_;
 
     /*!
-     * \brief Counter needed if multiple files are written/read (-1 by default; as it is increased before files are written)
+     * \brief counts the number of the next file to be opened; needed if multiple files are written/read
      */
-    int counter_;
+    unsigned int counter_;
 
     /*!
      * \brief Indicates how the file should be opened (std::fstream::out by default)
@@ -202,10 +200,9 @@ private:
     unsigned int saveCount_;
 
     /*!
-     * \brief determines if the current timestep is written into the data file
+     * \brief determines how many time steps are skipped before the next stat file is written
      */
-    bool saveCurrentTimestep_;
-
+    unsigned int nextSavedTimeStep_;
 };
 
 #endif /* FILE_H */

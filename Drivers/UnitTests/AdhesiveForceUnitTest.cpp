@@ -16,12 +16,13 @@
 // Copyright 2013 The Mercury Developers Team
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
-#include <Particles/BaseParticle.h>
+#include "Particles/BaseParticle.h"
+#include "Species/Species.h"
 #include "Species/LinearViscoelasticSpecies.h"
 #include "Species/LinearPlasticViscoelasticSpecies.h"
-#include "Species/SlidingFrictionSpecies.h"
-#include "Species/LinearReversibleAdhesiveSpecies.h"
-#include "Species/LinearIrreversibleAdhesiveSpecies.h"
+#include "Species/TangentialForceSpecies/SlidingFrictionSpecies.h"
+#include "Species/AdhesiveForceSpecies/LinearReversibleAdhesiveSpecies.h"
+#include "Species/AdhesiveForceSpecies/LinearIrreversibleAdhesiveSpecies.h"
 #include "DPMBase.h"
 #include "Walls/InfiniteWall.h"
 #include "Logger.h"
@@ -210,12 +211,12 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     
     logger.log(Log::INFO,"Testing particle-particle collision for elastic adhesive forces");
     std::vector<BaseParticle*>::iterator pIt = ParticleParticleInteractionProblem.particleHandler.begin();
-    if (!(*pIt)->getPosition().compareTo(Vec3D(-0.00101593,0.0,0.0), 1e-7))
+    if (!(*pIt)->getPosition().compareTo(Vec3D(-0.00101582359198137,0.0,0.0), 1e-7))
         logger.log(Log::FATAL,"First particle is in the wrong position. It is at %",(*pIt)->getPosition());
     if (!(*pIt)->getVelocity().compareTo(Vec3D(-0.0436824,0.0,0.0)  , 1e-7))
         logger.log(Log::FATAL,"First particle has the wrong velocity. It is at %",(*pIt)->getVelocity());
     ++pIt;
-    if (!(*pIt)->getPosition().compareTo(Vec3D(0.00101593,0.0,0.0), 1e-7))
+    if (!(*pIt)->getPosition().compareTo(Vec3D(0.00101582359198137,0.0,0.0), 1e-7))
         logger.log(Log::FATAL,"Second particle is in the wrong position. It is at %",(*pIt)->getPosition());
     if (!(*pIt)->getVelocity().compareTo(Vec3D(0.0436824,0.0,0.0)  , 1e-7))
         logger.log(Log::FATAL,"Second particle has the wrong velocity. It is at %",(*pIt)->getVelocity());

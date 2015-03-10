@@ -16,8 +16,8 @@
 // Copyright 2013 The Mercury Developers Team
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
-#include "Interactions/SlidingFrictionInteraction.h"
-#include "Species/SlidingFrictionSpecies.h"
+#include "SlidingFrictionInteraction.h"
+#include "Species/TangentialForceSpecies/SlidingFrictionSpecies.h"
 #include "Particles/BaseParticle.h"
 #include "InteractionHandler.h"
 #include <iomanip>

@@ -132,7 +132,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 	Vec3D goodVel;
     std::vector<BaseParticle*>::iterator pIt = problem.particleHandler.begin();
 
-    goodPos=Vec3D(0.009500699457648,0.002,0);
+    goodPos=Vec3D(0.00950076062215577,0.002,0);
     goodVel=Vec3D(-0.005560409816604,0,0);
     if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
     {
@@ -144,7 +144,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     }
     ++pIt;
 
-    goodPos=Vec3D(0.0007251543659281,0.002,0);
+    goodPos=Vec3D(0.000725163257251641,0.002,0);
     goodVel=Vec3D(-0.000808302139899,0,0);
     if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
     {
@@ -156,7 +156,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     }
     ++pIt;
     
-    goodPos=Vec3D(0.009500699457648,0.003,0);
+    goodPos=Vec3D(0.00950076062215577,0.003,0);
     goodVel=Vec3D(-0.005560409816604,0,0);
     if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
     {
@@ -168,7 +168,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     }
     ++pIt;
 
-    goodPos=Vec3D(0.0007251543659281,0.003,0);
+    goodPos=Vec3D(0.000725163257251641,0.003,0);
     goodVel=Vec3D(-0.000808302139899,0,0);
     if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
     {
@@ -180,7 +180,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     }
     ++pIt;
     
-    goodPos=Vec3D(0.0004993005423512,0.004,0);
+    goodPos=Vec3D(0.0004992393778432442,0.004,0);
     goodVel=Vec3D(0.00556040981661,0,0);
     if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
     {
@@ -192,7 +192,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     }
     ++pIt;
 
-    goodPos=Vec3D(0.009274845634069,0.004,0);
+    goodPos=Vec3D(0.00927483674274562,0.004,0);
     goodVel=Vec3D(0.0008083021398896,0,0);
     if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
     {
@@ -204,7 +204,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     }
     ++pIt;
     
-    goodPos=Vec3D(0.0004993005423512,0.005,0);
+    goodPos=Vec3D(0.000499239377843248,0.005,0);
     goodVel=Vec3D(0.00556040981661,0,0);
     if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
     {
@@ -216,7 +216,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     }
     ++pIt;
 
-    goodPos=Vec3D(0.009274845634069,0.005,0);
+    goodPos=Vec3D(0.00927483674274562,0.005,0);
     goodVel=Vec3D(0.0008083021398892,0,0);
     if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
     {
@@ -228,7 +228,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     }
     ++pIt;
 
-    goodPos=Vec3D(0.001499300542352,0.006,0);
+    goodPos=Vec3D(0.00149923937784423,0.006,0);
     goodVel=Vec3D(0.005560409816606,0,0);
     if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
     {
@@ -240,7 +240,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     }
     ++pIt;
     
-    goodPos=Vec3D(0.0002748456340719,0.006,0);
+    goodPos=Vec3D(0.000274836742748357,0.006,0);
     goodVel=Vec3D(0.0008083021398959,0,0);
     if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
     {
@@ -252,7 +252,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     }
     ++pIt;
 
-    goodPos=Vec3D(0.0003690166950911,0.0003690166950911,0);
+    goodPos=Vec3D(0.000368955529803987, 0.000368955529803987,0);
     goodVel=Vec3D(0.005560480643586,0.005560480643586,0);
     if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
     {
@@ -264,7 +264,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     }
     ++pIt;
 
-    goodPos=Vec3D(0.009490212810148,0.009490212810148,0);
+    goodPos=Vec3D(0.0094902039201126, 0.0094902039201126 ,0);
     goodVel=Vec3D(0.0008081850585628,0.0008081850585628,0);
     if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
     {
@@ -276,7 +276,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     }
     ++pIt;
 
-    goodPos=Vec3D(0.009630983304904,0.009630983304904,0.001);
+    goodPos=Vec3D(0.00963104447019111, 0.00963104447019111,0.001);
     goodVel=Vec3D(-0.005560480643562,-0.005560480643562,0);
     if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
     {
@@ -288,7 +288,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     }
     ++pIt;
 
-    goodPos=Vec3D(0.0005097871898444,0.0005097871898444,0.001);
+    goodPos=Vec3D(0.00050979607988006, 0.00050979607988006,0.001);
     goodVel=Vec3D(-0.0008081850586013,-0.0008081850586013,0);
     if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
     {

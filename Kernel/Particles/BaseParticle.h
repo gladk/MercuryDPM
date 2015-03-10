@@ -91,12 +91,12 @@ public:
      * \brief Particle read function, which accepts an std::stringstream as input.
      */
     virtual void read(std::istream& is);
-    
+
     /*!
-     * \brief 
+     * \brief
      */
     virtual void oldRead(std::istream& is);
-    
+
     /*!
      * \brief Particle print function, which accepts an std::stringstream as input.
      */
@@ -321,22 +321,27 @@ public:
     /*!
      * \brief 
      */
-    void integrateBeforeForceComputation(double timeStep);
+    void integrateBeforeForceComputation(double time, double timeStep);
 
     /*!
      * \brief 
      */
-    void integrateAfterForceComputation(double timeStep);
+    void integrateAfterForceComputation(double time, double timeStep);
 
     /*!
      * \brief
      */
     unsigned int getParticleDimensions() const;
 
+    ///\todo TW: this function should be taken out and replaced by setSpecies
+    void setIndSpecies(unsigned int indSpecies);
+
     /*!
-     * \brief
+     * In addition to the functionality of BaseInteractable::setSpecies, this function sets the pointer to the
+     * particleHandler, which is needed to retrieve species information.
      */
-     void setIndSpecies(unsigned int indSpecies);
+    ///\todo TW: this function should also check if the particle is the correct particle for the species type
+    void setSpecies(const BaseSpecies* species);
 
 private:
 

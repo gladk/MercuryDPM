@@ -37,104 +37,93 @@ class InfiniteWall : public BaseWall
 {
 public:
 
-  /*!
-   * \brief
-   */
+    /*!
+     * \brief
+     */
     InfiniteWall();
 
-  /*!
-   * \brief
-   */
+    /*!
+     * \brief
+     */
     InfiniteWall(const InfiniteWall &p);
 
-  /*!
-   * \brief
-   */
+    /*!
+     * \brief
+     */
     virtual ~InfiniteWall();
 
-  /*!
-   * \brief Wall copy method. It calls the copy constructor of this Wall, usefull for polymorfism
-   */
+    /*!
+     * \brief Wall copy method. It calls the copy constructor of this Wall, usefull for polymorfism
+     */
     InfiniteWall* copy() const;
 
-  /*!
-   * \brief
-   */
+    /*!
+     * \brief
+     */
     void clear();
 
-  /*!
-   * \brief Adds a wall to the set of infinite walls, given an outward normal vector s.t. normal*x=normal*point
-   */
+    /*!
+     * \brief Adds a wall to the set of infinite walls, given an outward normal vector s.t. normal*x=normal*point
+     */
     void set(Vec3D normal, Vec3D point);
 
-  /*!
-   * \brief Defines a standard wall, given an outward normal vector s. t. normal*x=position
-   */
+    /*!
+     * \brief Adds a wall to the set of infinite walls, given an outward normal vector s.t. normal*x=normal*point
+     */
+    void setNormal(const Vec3D normal);
+
+    /*!
+     * \brief Defines a standard wall, given an outward normal vector s. t. normal*x=position
+     */
     void set(Vec3D normal, Mdouble position);
 
-  /*!
-   * \brief Allows the wall to be moved to a new position
-   */
+    /*!
+     * \brief Allows the wall to be moved to a new position
+     */
     void move(Mdouble position);
 
-  /*!
-   * \brief Allows the wall to be moved to a new position (also orthogonal to the normal), and setting the velocity
-   */
-    void move(Vec3D velocity, Mdouble dt);
+    /*!
+     * \brief Returns the distance of the wall to the particle.
+     */
+    Mdouble getDistance(const Vec3D &Position) const;
 
-  /*!
-   * \brief Allows the wall to be moved with time
-   */
-    void move_time(Mdouble dt);
-
-  /*!
-   * \brief Returns the distance of the wall to the particle. 
-   */
-    Mdouble get_distance(const Vec3D &Position) const;
-
-  /*!
-   * \brief Since this function should be called before calculating any Particle-Wall interactions, it can also be used to set the normal vector in case of curved walls.
-   */
+    /*!
+     * \brief Since this function should be called before calculating any Particle-Wall interactions, it can also be used to set the normal vector in case of curved walls.
+     */
     bool getDistanceAndNormal(const BaseParticle& P, Mdouble& distance, Vec3D& normal_return) const;
 
-  /*!
-   * \brief reads wall
-   */
+    /*!
+     * \brief reads wall
+     */
     void read(std::istream& is);
 
-  /*!
-   * \brief
-   */
+    /*!
+     * \brief
+     */
     void oldRead(std::istream& is);
-    
-  /*!
-   * \brief outputs wall
-   */
+
+    /*!
+     * \brief outputs wall
+     */
     void write(std::ostream& os) const;
-    
-  /*!
-   * \brief Returns the name of the object
-   */
+
+    /*!
+     * \brief Returns the name of the object
+     */
     virtual std::string getName() const;
 
-  /*!
-   * \brief access function for normal
-   */
-    Vec3D get_Normal() const;
+    /*!
+     * \brief access function for normal
+     */
+    Vec3D getNormal() const;
 
-  /*!
-   * \brief access function for position
-   */
-    Mdouble getPosition() const;
-
-  /*!
-   * \brief
-   */
+    /*!
+     * \brief
+     */
     BaseInteraction* getInteractionWith(BaseParticle *P, Mdouble timeStamp, InteractionHandler* interactionHandler);
 
 private:
     Vec3D normal_; ///<outward unit normal vector
-    Mdouble position_; ///position n*x=p
     Mdouble factor_; ///This is the normal to rescale to unit vectors.
 };
 

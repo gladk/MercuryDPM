@@ -18,9 +18,9 @@
 
 #ifndef SLIDINGFRICTIONSPECIES_H
 #define SLIDINGFRICTIONSPECIES_H
-#include "BaseSpecies.h"
+#include "Species/BaseSpecies.h"
 #include "Math/ExtendedMath.h"
-#include "Interactions/SlidingFrictionInteraction.h"
+#include "Interactions/TangentialForceInteractions/SlidingFrictionInteraction.h"
 class BaseInteractable;
 class BaseInteraction;
 

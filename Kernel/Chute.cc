@@ -18,14 +18,14 @@
 
 #include "Chute.h"
 #include "ChuteBottom.h"
+#include "Particles/BaseParticle.h"
 #include "Boundaries/ChuteInsertionBoundary.h"
 #include "Boundaries/PeriodicBoundary.h"
 #include "Walls/InfiniteWall.h"
 #include <string>
 #include <string.h>
 #include <iomanip>
-#include <Species/LinearViscoelasticSpecies.h>
-#include <Species/SlidingFrictionSpecies.h>
+#include <Species/LinearViscoelasticSlidingFrictionSpecies.h>
 
 #include "Logger.h"
 extern Logger<LOG_MAIN_LEVEL> logger;

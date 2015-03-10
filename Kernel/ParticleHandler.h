@@ -119,6 +119,8 @@ public:
      */
     void readObject(std::istream& is);
 
+    void readOldObject(std::string type, std::istream& is);
+
     /*!
      * \brief Checks if the extrema of this ParticleHandler needs updating.
      */

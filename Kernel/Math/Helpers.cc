@@ -322,7 +322,7 @@ unsigned int helpers::getSaveCountFromNumberOfSavesAndTimeMaxAndTimestep(unsigne
 {
     if (numberOfSaves > 0 && timeMax > 0 && timestep > 0)
     {
-        return static_cast<unsigned int>(ceil(timeMax / timestep / static_cast<double>(numberOfSaves - 1)));
+        return static_cast<unsigned int>(ceil((timeMax+timestep) / timestep / static_cast<double>(numberOfSaves - 1)));
     }
     else
     {

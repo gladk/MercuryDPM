@@ -93,7 +93,7 @@ public:
     /*!
      * \brief 
      */
-    Vec3D& get_normal();
+    Vec3D& getNormal();
     
     /*!
      * \brief 

@@ -64,7 +64,7 @@ public:
         this->Next = Next;
         this->Prev = 0;
         if (Next)
-            index = Next->get_Index() + 1;
+            index = Next->getIndex() + 1;
         else
             index = 0;
     }
@@ -83,7 +83,7 @@ public:
         this->Prev1 = 0;
         this->Prev2 = 0;
         if (Next)
-            index = Next->get_Index() + 1;
+            index = Next->getIndex() + 1;
         else
             index = 0;
     }
@@ -91,7 +91,7 @@ public:
     /*!
      * \brief 
      */
-    BaseParticle* get_P1()
+    BaseParticle* getP1()
     {
         return P1;
     }
@@ -99,7 +99,7 @@ public:
     /*!
      * \brief 
      */
-    BaseParticle* get_P2()
+    BaseParticle* getP2()
     {
         return P2;
     }
@@ -107,7 +107,7 @@ public:
     /*!
      * \brief 
      */
-    BaseParticle* get_OtherParticle(BaseParticle *P)
+    BaseParticle* getOtherParticle(BaseParticle *P)
     {
         if (P1 == P)
             return P2;
@@ -115,7 +115,7 @@ public:
             return P1;
         else
         {
-            std::cout << "Particle* get_OtherParticle(Particle *P), no match for " << P->getIndex() << " posibilities are " << P1->getIndex() << " and " << P2->getIndex() << std::endl;
+            std::cout << "Particle* getOtherParticle(Particle *P), no match for " << P->getIndex() << " posibilities are " << P1->getIndex() << " and " << P2->getIndex() << std::endl;
             return 0;
         }
     }
@@ -123,7 +123,7 @@ public:
     /*!
      * \brief 
      */
-    PossibleContact* get_Next()
+    PossibleContact* getNext()
     {
         return Next;
     }
@@ -131,7 +131,7 @@ public:
     /*!
      * \brief 
      */
-    PossibleContact* get_Next(BaseParticle* P)
+    PossibleContact* getNext(BaseParticle* P)
     {
         if (P1 == P)
             return Next1;
@@ -139,7 +139,7 @@ public:
             return Next2;
         else
         {
-            std::cout << "get_Next(Particle* P), no match for " << P->getIndex() << " posibilities are " << P1->getIndex() << " and " << P2->getIndex() << std::endl;
+            std::cout << "getNext(Particle* P), no match for " << P->getIndex() << " posibilities are " << P1->getIndex() << " and " << P2->getIndex() << std::endl;
             return 0;
         }
     }
@@ -147,7 +147,7 @@ public:
     /*!
      * \brief 
      */
-    PossibleContact* get_Prev()
+    PossibleContact* getPrevious()
     {
         return Prev;
     }
@@ -155,7 +155,7 @@ public:
     /*!
      * \brief 
      */
-    PossibleContact* get_Prev(BaseParticle* P)
+    PossibleContact* getPrevious(BaseParticle* P)
     {
         if (P1 == P)
             return Prev1;
@@ -163,7 +163,7 @@ public:
             return Prev2;
         else
         {
-            std::cout << "PossibleContact* get_Prev(Particle* P), no match for " << P->getIndex() << " posibilities are " << P1->getIndex() << " and " << P2->getIndex() << std::endl;
+            std::cout << "PossibleContact* getPrevious(Particle* P), no match for " << P->getIndex() << " posibilities are " << P1->getIndex() << " and " << P2->getIndex() << std::endl;
             return 0;
         }
     }
@@ -171,7 +171,7 @@ public:
     /*!
      * \brief 
      */
-    PossibleContact* get_Next1()
+    PossibleContact* getNext1()
     {
         return Next1;
     }
@@ -179,7 +179,7 @@ public:
     /*!
      * \brief 
      */
-    PossibleContact* get_Prev1()
+    PossibleContact* getPrevious1()
     {
         return Prev1;
     }
@@ -187,7 +187,7 @@ public:
     /*!
      * \brief 
      */
-    PossibleContact* get_Next2()
+    PossibleContact* getNext2()
     {
         return Next2;
     }
@@ -195,7 +195,7 @@ public:
     /*!
      * \brief 
      */
-    PossibleContact* get_Prev2()
+    PossibleContact* getPrevious2()
     {
         return Prev2;
     }
@@ -203,7 +203,7 @@ public:
     /*!
      * \brief 
      */
-    int get_Index()
+    int getIndex()
     {
         return index;
     }
@@ -211,7 +211,7 @@ public:
     /*!
      * \brief 
      */
-    void set_P1(BaseParticle* P1)
+    void setP1(BaseParticle* P1)
     {
         this->P1 = P1;
     }
@@ -219,7 +219,7 @@ public:
     /*!
      * \brief 
      */
-    void set_P2(BaseParticle* P2)
+    void setP2(BaseParticle* P2)
     {
         this->P2 = P2;
     }
@@ -227,7 +227,7 @@ public:
     /*!
      * \brief 
      */
-    void set_Next(PossibleContact* Next)
+    void setNextPosition(PossibleContact* Next)
     {
         this->Next = Next;
     }
@@ -235,20 +235,20 @@ public:
     /*!
      * \brief 
      */
-    void set_Next(BaseParticle* P, PossibleContact* Next)
+    void setNextPosition(BaseParticle* P, PossibleContact* Next)
     {
         if (P1 == P)
             this->Next1 = Next;
         else if (P2 == P)
             this->Next2 = Next;
         else
-            std::cout << "void set_Next(Particle* P,PossibleContact* Next), no match for " << P->getIndex() << " posibilities are " << P1->getIndex() << " and " << P2->getIndex() << std::endl;
+            std::cout << "void setNextPosition(Particle* P,PossibleContact* Next), no match for " << P->getIndex() << " posibilities are " << P1->getIndex() << " and " << P2->getIndex() << std::endl;
     }
 
     /*!
      * \brief 
      */
-    void set_Prev(PossibleContact* Prev)
+    void setPreviousPosition(PossibleContact* Prev)
     {
         this->Prev = Prev;
     }
@@ -256,20 +256,20 @@ public:
     /*!
      * \brief 
      */
-    void set_Prev(BaseParticle* P, PossibleContact* Prev)
+    void setPreviousPosition(BaseParticle* P, PossibleContact* Prev)
     {
         if (P1 == P)
             this->Prev1 = Prev;
         else if (P2 == P)
             this->Prev2 = Prev;
         else
-            std::cout << "void set_Prev(Particle* P,PossibleContact* Prev), no match for " << P->getIndex() << " posibilities are " << P1->getIndex() << " and " << P2->getIndex() << std::endl;
+            std::cout << "void setPreviousPosition(Particle* P,PossibleContact* Prev), no match for " << P->getIndex() << " posibilities are " << P1->getIndex() << " and " << P2->getIndex() << std::endl;
     }
 
     /*!
      * \brief 
      */
-    void set_Next1(PossibleContact* Next1)
+    void setNextPosition1(PossibleContact* Next1)
     {
         this->Next1 = Next1;
     }
@@ -277,7 +277,7 @@ public:
     /*!
      * \brief 
      */
-    void set_Prev1(PossibleContact* Prev1)
+    void setPreviousPosition1(PossibleContact* Prev1)
     {
         this->Prev1 = Prev1;
     }
@@ -285,7 +285,7 @@ public:
     /*!
      * \brief 
      */
-    void set_Next2(PossibleContact* Next2)
+    void setNextPosition2(PossibleContact* Next2)
     {
         this->Next2 = Next2;
     }
@@ -293,7 +293,7 @@ public:
     /*!
      * \brief 
      */
-    void set_Prev2(PossibleContact* Prev2)
+    void setPreviousPosition2(PossibleContact* Prev2)
     {
         this->Prev2 = Prev2;
     }

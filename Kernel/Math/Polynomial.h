@@ -138,7 +138,7 @@ public:
     /*!
      * \brief Returns the order of the polynomial
      */
-    int get_Order(void)
+    int getOrder(void)
     {
         return coefficients.size() - 1;
     }

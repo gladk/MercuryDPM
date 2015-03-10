@@ -110,7 +110,7 @@ void AngledPeriodicBoundary::shift_position(BaseParticle* P)
 }
 
 // ///returns the shifted particle w/o actually shifting
-// Vec3D AngledPeriodicBoundary::get_shifted_position(Vec3D &Position) {
+// Vec3D AngledPeriodicBoundary::getShiftedPosition(Vec3D &Position) {
 //     if (left_wall) {
 //         return Position + shift;
 //     }
@@ -134,7 +134,7 @@ void AngledPeriodicBoundary::shift_position(BaseParticle* P)
 // }
 
 // ///shift P such that it is closest to Q
-// void AngledPeriodicBoundary::get_close_together(Vec3D &P,Vec3D &Q) {
+// void AngledPeriodicBoundary::getCloseTogether(Vec3D &P,Vec3D &Q) {
 //     Mdouble PQdotn = Vec3D::Dot(P-Q, normal);
 //     Mdouble shift_norm2 = shift.Vec3D::GetLength2();
 //     //Check if P is so far from Q that a shift would move it closer
@@ -171,7 +171,7 @@ std::string AngledPeriodicBoundary::getName() const
     return "AngledPeriodicBoundary";
 }
 
-Vec3D& AngledPeriodicBoundary::get_normal()
+Vec3D& AngledPeriodicBoundary::getNormal()
 {
     if (left_wall)
         return normal_left;

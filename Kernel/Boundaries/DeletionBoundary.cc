@@ -56,7 +56,7 @@ void DeletionBoundary::move(Mdouble distance)
     distance_ = distance * scaleFactor_;
 }
 
-Mdouble DeletionBoundary::get_distance(const Vec3D &position) const
+Mdouble DeletionBoundary::getDistance(const Vec3D &position) const
         {
     return distance_ - Vec3D::dot(position, normal_);
 }
@@ -64,7 +64,7 @@ Mdouble DeletionBoundary::get_distance(const Vec3D &position) const
 //Returns true if the particle is deleted
 bool DeletionBoundary::checkBoundaryAfterParticleMoved(BaseParticle *p, ParticleHandler &pH)
 {
-    if (get_distance(p->getPosition()) < 0)
+    if (getDistance(p->getPosition()) < 0)
     {
         pH.removeObject(p->getIndex());
         return true;

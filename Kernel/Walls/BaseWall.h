@@ -59,33 +59,27 @@ public:
     /*!
      * \brief
      */
-    virtual void move(Mdouble position_);
-    /*!
-     * \brief
-     */
-    virtual void move(Vec3D velocity_, Mdouble dt);
-    /*!
-     * \brief
-     */
-    virtual void move_time(Mdouble dt);
-    /*!
-     * \brief
-     */
     virtual bool getDistanceAndNormal(const BaseParticle& P, Mdouble& distance, Vec3D& normal_return) const = 0;
 
     /*!
      * \brief
      */
     void setHandler(WallHandler* handler);
+
     /*!
      * \brief
      */
     WallHandler* getHandler() const;
 
-    /*!
-     * \brief
-     */
+    ///\todo TW: this function should be taken out and replaced by setSpecies
     void setIndSpecies(unsigned int indSpecies);
+
+    /*!
+     * In addition to the functionality of BaseInteractable::setSpecies, this function sets the pointer to the
+     * wallHandler, which is needed to retrieve species information.
+     */
+    ///\todo TW: this function should also check if the particle is the correct particle for the species type
+    void setSpecies(const BaseSpecies* species);
 
 private:
 

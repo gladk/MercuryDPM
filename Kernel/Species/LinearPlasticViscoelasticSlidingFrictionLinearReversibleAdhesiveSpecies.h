@@ -21,7 +21,7 @@
 
 #include "Species.h"
 #include "LinearViscoelasticSpecies.h"
-#include "SlidingFrictionSpecies.h"
-#include "LinearIrreversibleAdhesiveSpecies.h"
+#include "TangentialForceSpecies/SlidingFrictionSpecies.h"
+#include "AdhesiveForceSpecies/LinearIrreversibleAdhesiveSpecies.h"
 typedef Species<LinearViscoelasticSpecies,SlidingFrictionSpecies,LinearIrreversibleAdhesiveSpecies> LinearViscoelasticSlidingFrictionLinearIrreversibleAdhesiveSpecies;
 #endif

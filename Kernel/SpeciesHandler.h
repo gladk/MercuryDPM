@@ -20,7 +20,7 @@
 #define SPECIESHANDLER_H
 
 #include "BaseHandler.h"
-#include "Species/BaseSpecies.h"
+class BaseSpecies;
 
 /// \brief Container to store all BaseSpecies
 /// \details The SpeciesHandler is a container to store all BaseSpecies. It is implemented by a vector of pointers to BaseSpecies.
@@ -47,6 +47,8 @@ public:
     /// \brief Reads BaseSpecies into the SpeciesHandler from restart data.
     void readObject(std::istream& is);
 
+    BaseSpecies* readOldObject(std::istream& is);
+
     unsigned int getMixedId(const unsigned int id1, const unsigned int id2) const;
 
     template<typename U> U* getMixedObject(const U* S, const U* T);
@@ -55,15 +57,12 @@ public:
 
     const std::vector<BaseSpecies*>& getMixedObjects() const;
 
-    virtual void read(std::istream& is);
-
-    virtual void readVersion1(std::istream& is, unsigned int N);
-
-    void readVersion2(std::istream& is);
-
     virtual void write(std::ostream& os) const;
 
     std::string getName() const;
+
+    /// Check if angular DOF have to be used
+    bool useAngularDOFs();
 
 private:
     ///The list of pointers to the mixed species

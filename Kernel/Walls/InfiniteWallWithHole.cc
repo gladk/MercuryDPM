@@ -96,12 +96,12 @@ void InfiniteWallWithHole::move_time(Mdouble dt)
 }
 
 ///Returns the distance of the wall to the particle. 
-Mdouble InfiniteWallWithHole::get_wallDistance(const Vec3D &position) const
+Mdouble InfiniteWallWithHole::getWallDistance(const Vec3D &position) const
 {
     return position_ - Vec3D::dot(position, normal_);
 }
 
-Mdouble InfiniteWallWithHole::get_holeDistance(const Vec3D &position) const
+Mdouble InfiniteWallWithHole::getHoleDistance(const Vec3D &position) const
 {
     return holeRadius_ - sqrt(pow(position.X, 2) + pow(position.Y, 2));
 }
@@ -109,11 +109,11 @@ Mdouble InfiniteWallWithHole::get_holeDistance(const Vec3D &position) const
 ///Since this function should be called before calculating any Particle-Wall interactions, it can also be used to set the normal vector in case of curved walls.
 bool InfiniteWallWithHole::getDistanceAndNormal(const BaseParticle &P, Mdouble &distance, Vec3D &normal_return) const
 {
-    double wallDistance = get_wallDistance(P.getPosition());
+    double wallDistance = getWallDistance(P.getPosition());
     if (wallDistance >= P.getRadius())
         return false;
     
-    double holeDistance = get_holeDistance(P.getPosition());
+    double holeDistance = getHoleDistance(P.getPosition());
     if (holeDistance >= P.getRadius())
         return false;
     
@@ -204,7 +204,7 @@ std::string InfiniteWallWithHole::getName() const
 }
 
 ///access function for normal
-Vec3D InfiniteWallWithHole::get_Normal()
+Vec3D InfiniteWallWithHole::getNormal()
 {
     return normal_;
 }

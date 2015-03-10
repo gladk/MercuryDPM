@@ -20,6 +20,7 @@
 
 #include "Particles/BaseParticle.h"
 #include "Boundaries/PeriodicBoundary.h"
+#include "Species/LinearViscoelasticSpecies.h"
 
 std::ostream& operator<<(std::ostream& os, const StatType S)
 {
@@ -55,7 +56,7 @@ std::ostream& operator<<(std::ostream& os, const StatType S)
 }
 
 template<StatType T>
-void StatisticsVector<T>::set_w2(Mdouble new_)
+void StatisticsVector<T>::setCGWidth2(Mdouble new_)
 {
     // set w2
     if (new_ > 0.0)
@@ -65,13 +66,13 @@ void StatisticsVector<T>::set_w2(Mdouble new_)
     //(2.0*getXMax()/nx);
     
     // set cutoff radius
-    if (get_CG_type() == HeavisideSphere || get_CG_type() == Polynomial)
+    if (getCGShape() == HeavisideSphere || getCGShape() == Polynomial)
     {
         cutoff = sqrt(w2);
     }
-    else if (get_CG_type() == Gaussian)
+    else if (getCGShape() == Gaussian)
     {
-        if (get_superexact())
+        if (getSuperExact())
             cutoff = 5.0 * sqrt(w2);
         else
             cutoff = 3.0 * sqrt(w2);
@@ -89,7 +90,7 @@ void StatisticsVector<T>::reset_statistics()
 {
     for (unsigned int i = 0; i < Points.size(); i++)
         Points[i].set_zero();
-    if (get_doGradient())
+    if (getDoGradient())
         for (unsigned int i = 0; i < Points.size(); i++)
         {
             dx[i].set_zero();
@@ -125,8 +126,8 @@ void StatisticsVector<T>::constructor()
     // set default values; variables will only be used if the default 
     // is overwritten; thus the default is a nonsense value 
     w2 = 0.0;
-    set_tintStat(0);
-    set_tminStat(-1e20);
+    setCGTimeAveragingInterval(0);
+    setCGTimeMin(-1e20);
     setTimeMaxStat(NAN);
     rmin = 0;
     hmax = 1e20;
@@ -149,19 +150,19 @@ void StatisticsVector<T>::constructor()
     periodicWalls = true;
     format = 0;
     mirrorAtDomainBoundary = false;
-    set_superexact(false);
+    setSuperExact(false);
     VelocityProfile.resize(0); //equivalent to do not use velocityprofile
     setStepSize(1);
     
     // time averaging
-    set_doTimeAverage(true);
+    setDoTimeAverage(true);
     nTimeAverage = 0;
     nTimeAverageReset = -1;
     //calculate variance
-    set_doVariance(false);
+    setDoVariance(false);
     //calculate gradient
-    set_doGradient(false);
-    doublePoints = false;
+    setDoGradient(false);
+    doDoublePoints = false;
     
     // additional stuff
     getStatFile().setFileType(FileType::ONE_FILE);
@@ -253,7 +254,13 @@ void StatisticsVector<T>::constructor(std::string name)
     {
         //write here what to do with Mercury data
         isMDCLR = false;
-        readRestartFile();
+        if (readRestartFile()==0)
+        {
+            std::cout << "no restart file given: using default density 1" << std::endl;
+            ///\todo TWnow do we really need a default species?
+            speciesHandler.copyAndAddObject(LinearViscoelasticSpecies());
+
+        }
         setAppend(false);
         //~ setTimeMaxStat(t+dt); //note:doesn't work if restart data is not the latest
     }
@@ -317,9 +324,9 @@ bool StatisticsVector<T>::loadVelocityProfile(const char* filename)
     getline(is, line_string);
     getline(is, line_string);
     
-    set_nx(nx);
-    set_ny(ny);
-    set_nz(nz);
+    setNX(nx);
+    setNY(ny);
+    setNZ(nz);
     setXMinStat(xmin);
     setYMinStat(ymin);
     setZMinStat(zmin);
@@ -395,22 +402,22 @@ void StatisticsVector<T>::readStatArguments(int argc, char *argv[])
             //CG_type_todo
             if (!strcmp(argv[i + 1], "HeavisideSphere"))
             {
-                set_CG_type(HeavisideSphere);
+                setCGShape(HeavisideSphere);
             }
             else if (!strcmp(argv[i + 1], "Gaussian"))
             {
-                set_CG_type(Gaussian);
+                setCGShape(Gaussian);
             }
             else
             {
-                set_CG_type(argv[i + 1]);
+                setCGShape(argv[i + 1]);
             }
         }
         else if (!strcmp(argv[i], "-w"))
         {
-            double old = get_w();
-            set_w(atof(argv[i + 1]));
-            std::cout << " w changed from " << old << " to " << get_w() << std::endl;
+            double old = getCGWidth();
+            setCGWidth(atof(argv[i + 1]));
+            std::cout << " w changed from " << old << " to " << getCGWidth() << std::endl;
         }
         else if (!strcmp(argv[i], "-help"))
         {
@@ -439,19 +446,19 @@ void StatisticsVector<T>::readStatArguments(int argc, char *argv[])
         }
         else if (!strcmp(argv[i], "-n"))
         {
-            set_n(atoi(argv[i + 1]));
+            setN(atoi(argv[i + 1]));
         }
         else if (!strcmp(argv[i], "-nx"))
         {
-            set_nx(atoi(argv[i + 1]));
+            setNX(atoi(argv[i + 1]));
         }
         else if (!strcmp(argv[i], "-ny"))
         {
-            set_ny(atoi(argv[i + 1]));
+            setNY(atoi(argv[i + 1]));
         }
         else if (!strcmp(argv[i], "-nz"))
         {
-            set_nz(atoi(argv[i + 1]));
+            setNZ(atoi(argv[i + 1]));
         }
         else if (!strcmp(argv[i], "-x"))
         {
@@ -489,15 +496,15 @@ void StatisticsVector<T>::readStatArguments(int argc, char *argv[])
         }
         else if (!strcmp(argv[i], "-periodicwalls"))
         {
-            set_periodicWalls(atoi(argv[i + 1]));
+            setDoPeriodicWalls(atoi(argv[i + 1]));
         }
         else if (!strcmp(argv[i], "-walls"))
         {
-            set_walls(atoi(argv[i + 1]));
+            setCGWidthalls(atoi(argv[i + 1]));
         }
         else if (!strcmp(argv[i], "-verbosity"))
         {
-            set_verbosity(atoi(argv[i + 1]));
+            setVerbosityLevel(atoi(argv[i + 1]));
         }
         else if (!strcmp(argv[i], "-verbose"))
         {
@@ -508,24 +515,24 @@ void StatisticsVector<T>::readStatArguments(int argc, char *argv[])
         {
             format = atoi(argv[i + 1]);
         }
-        else if (!strcmp(argv[i], "-doublePoints"))
+        else if (!strcmp(argv[i], "-doDoublePoints"))
         {
             if (argc <= i + 1 || argv[i + 1][0] == '-')
             {
-                set_doublePoints(true);
+                setDoDoublePoints(true);
                 i--; //no argument
             }
             else
-                set_doublePoints(atoi(argv[i + 1]));
-            std::cout << "set doublePoints=" << get_doublePoints() << std::endl;
+                setDoDoublePoints(atoi(argv[i + 1]));
+            std::cout << "set doDoublePoints=" << getDoDoublePoints() << std::endl;
         }
         else if (!strcmp(argv[i], "-w_over_rmax"))
         {
-            set_w_over_rmax(atof(argv[i + 1]));
+            setCGWidth_over_rmax(atof(argv[i + 1]));
         }
         else if (!strcmp(argv[i], "-tmin"))
         {
-            set_tminStat(atof(argv[i + 1]));
+            setCGTimeMin(atof(argv[i + 1]));
         }
         else if (!strcmp(argv[i], "-tmax"))
         {
@@ -533,9 +540,9 @@ void StatisticsVector<T>::readStatArguments(int argc, char *argv[])
         }
         else if (!strcmp(argv[i], "-tint"))
         {
-            set_tintStat(atof(argv[i + 1]));
+            setCGTimeAveragingInterval(atof(argv[i + 1]));
             //~ } else if (!strcmp(argv[i],"-timesteps")) {
-            //~ set_tintStat(atof(argv[i+1])*getTimeStep());
+            //~ setCGTimeAveragingInterval(atof(argv[i+1])*getTimeStep());
         }
         else if (!strcmp(argv[i], "-stepsize"))
         {
@@ -545,7 +552,7 @@ void StatisticsVector<T>::readStatArguments(int argc, char *argv[])
         else if (!strcmp(argv[i], "-loaddatafile"))
         {
             readDataFile(argv[i + 1]);
-            set_tminStat(getTime());
+            setCGTimeMin(getTime());
             setTimeMaxStat(getTimeMax());
         }
         else if (!strcmp(argv[i], "-statfilename") | !strcmp(argv[i], "-o"))
@@ -556,7 +563,7 @@ void StatisticsVector<T>::readStatArguments(int argc, char *argv[])
         }
         else if (!strcmp(argv[i], "-timeaverage"))
         {
-            set_doTimeAverage(atoi(argv[i + 1]));
+            setDoTimeAverage(atoi(argv[i + 1]));
         }
         else if (!strcmp(argv[i], "-timeaveragereset"))
         {
@@ -567,44 +574,44 @@ void StatisticsVector<T>::readStatArguments(int argc, char *argv[])
             // use default argument if no argument is given
             if (argc <= i + 1 || argv[i + 1][0] == '-')
             {
-                set_doGradient(true);
+                setDoGradient(true);
                 i--; //no argument
             }
             else
-                set_doGradient(atoi(argv[i + 1]));
+                setDoGradient(atoi(argv[i + 1]));
         }
         else if (!strcmp(argv[i], "-timevariance"))
         {
             // use default argument if no argument is given
             if (argc <= i + 1 || argv[i + 1][0] == '-')
             {
-                set_doVariance(true);
+                setDoVariance(true);
                 i--; //no argument
             }
             else
-                set_doVariance(atoi(argv[i + 1]));
+                setDoVariance(atoi(argv[i + 1]));
         }
         else if (!strcmp(argv[i], "-superexact"))
         {
             // use default argument if no argument is given
             if (argc <= i + 1 || argv[i + 1][0] == '-')
             {
-                set_superexact(true);
+                setSuperExact(true);
                 i--; //no argument
             }
             else
-                set_superexact(atoi(argv[i + 1]));
+                setSuperExact(atoi(argv[i + 1]));
         }
         else if (!strcmp(argv[i], "-ignoreFixedParticles"))
         {
             // use default argument if no argument is given
             if (argc <= i + 1 || argv[i + 1][0] == '-')
             {
-                set_ignoreFixedParticles(true);
+                setDoIgnoreFixedParticles(true);
                 i--; //no argument
             }
             else
-                set_ignoreFixedParticles(atoi(argv[i + 1]));
+                setDoIgnoreFixedParticles(atoi(argv[i + 1]));
         }
         else if (!strcmp(argv[i], "-StressTypeForFixedParticles"))
         {
@@ -612,7 +619,7 @@ void StatisticsVector<T>::readStatArguments(int argc, char *argv[])
         }
         else if (!strcmp(argv[i], "-mirrorAtDomainBoundary"))
         {
-            set_mirrorAtDomainBoundary(atof(argv[i + 1]));
+            setMirrorAtDomainBoundary(atof(argv[i + 1]));
         }
         else if (!strcmp(argv[i], "-stattype"))
         {
@@ -704,7 +711,7 @@ void StatisticsVector<T>::print_help()
 }
 
 template<StatType T>
-void StatisticsVector<T>::set_CG_type(const char* new_)
+void StatisticsVector<T>::setCGShape(const char* new_)
 {
     if (!strcmp(new_, "Heaviside"))
     {
@@ -729,12 +736,12 @@ void StatisticsVector<T>::set_CG_type(const char* new_)
     }
     else if (!strcmp(new_, "Gaussian"))
     {
-        set_CG_type(Gaussian);
+        setCGShape(Gaussian);
         return;
     }
     else if (!strcmp(new_, "HeavisideSphere"))
     {
-        set_CG_type(HeavisideSphere);
+        setCGShape(HeavisideSphere);
         return;
     }
     else
@@ -742,14 +749,14 @@ void StatisticsVector<T>::set_CG_type(const char* new_)
         std::cerr << "Error: unknown CG_type: " << new_ << std::endl;
         exit(-1);
     }
-    set_PolynomialName(new_);
-    set_CG_type(Polynomial);
+    setPolynomialName(new_);
+    setCGShape(Polynomial);
 }
 
 template<StatType T>
-void StatisticsVector<T>::set_CG_type(CG new_)
+void StatisticsVector<T>::setCGShape(CG new_)
 {
-    if (new_ == Polynomial && CGPolynomial.get_Order() < 0)
+    if (new_ == Polynomial && CGPolynomial.getOrder() < 0)
     {
         std::cerr << "Polynomial is not specified" << std::endl;
         exit(-1);
@@ -767,17 +774,17 @@ std::string StatisticsVector<T>::printStat()
             << ", ny=" << ny
             << ", nz=" << nz
             << ", CG_type=";
-    if (get_CG_type() == HeavisideSphere)
+    if (getCGShape() == HeavisideSphere)
     {
         ss << "HeavisideSphere";
     }
-    else if (get_CG_type() == Gaussian)
+    else if (getCGShape() == Gaussian)
     {
         ss << "Gaussian";
     }
-    else if (get_CG_type() == Polynomial)
+    else if (getCGShape() == Polynomial)
     {
-        ss << get_PolynomialName();
+        ss << getPolynomialName();
     }
     else
     {
@@ -787,28 +794,28 @@ std::string StatisticsVector<T>::printStat()
     
     ss << ", w=" << sqrt(w2)
             << ", cutoff=" << cutoff
-            << ",\n tStat=[" << get_tminStat() << "," << getTimeMaxStat() << "]"
+            << ",\n tStat=[" << getCGTimeMin() << "," << getTimeMaxStat() << "]"
             << ", xStat=[" << getXMinStat() << "," << getXMaxStat() << "]"
             << ", yStat=[" << getYMinStat() << "," << getYMaxStat() << "]"
             << ", zStat=[" << getZMinStat() << "," << getZMaxStat() << "]"
             << ",\n ignoreFixedParticles=" << ignoreFixedParticles
             << ", StressTypeForFixedParticles=" << StressTypeForFixedParticles
-            << ",\n mirrorAtDomainBoundary=" << get_mirrorAtDomainBoundary()
-            << ",\n doTimeAverage=" << get_doTimeAverage()
-            << ", doVariance=" << get_doVariance()
-            << ", doGradient=" << get_doGradient()
+            << ",\n mirrorAtDomainBoundary=" << getMirrorAtDomainBoundary()
+            << ",\n doTimeAverage=" << getDoTimeAverage()
+            << ", doVariance=" << getDoVariance()
+            << ", doGradient=" << getDoGradient()
             << ", verbosity=" << verbosity
             << std::endl;
     return ss.str();
 }
 
 ///Output names of statistical variables
-///\todo{Thomas: stat file should include all variables such as CGType Stattype gradient timevariance timeaveraged, ...}
+///\todo{Thomas: stat file should include all variables such as CGShape Stattype gradient timevariance timeaveraged, ...}
 template<StatType T>
 std::string StatisticsVector<T>::print_CG()
 {
     std::stringstream ss;
-    ss << "w " << sqrt(get_w2())
+    ss << "w " << sqrt(getCGWidthSquared())
             << " dim " << getSystemDimensions()
             << " domainStat " << getXMinStat() << " " << getXMaxStat()
             << " " << getYMinStat() << " " << getYMaxStat()
@@ -865,26 +872,20 @@ void StatisticsVector<T>::initialiseStatistics()
 {
     reset_statistics();
     
-    StatisticsVector<T>::set_w2(StatisticsVector<T>::get_w2());
+    StatisticsVector<T>::setCGWidth2(StatisticsVector<T>::getCGWidthSquared());
     
     StatisticsVector<T>::setPositions();
     
     //set tmin and tmax if tint is set
-    if (get_tintStat() != 0.0)
+    if (getCGTimeAveragingInterval() != 0.0)
     {
-        set_tminStat(getTime());
-        setTimeMaxStat(get_tminStat() + get_tintStat());
-        std::cout << "tint set, time goes from: " << get_tminStat() << " to: " << getTimeMaxStat() << std::endl;
+        setCGTimeMin(getTime());
+        setTimeMaxStat(getCGTimeMin() + getCGTimeAveragingInterval());
+        std::cout << "tint set, time goes from: " << getCGTimeMin() << " to: " << getTimeMaxStat() << std::endl;
     }
-    
-    ///This creates the file statistics will be saved to
-    //if (!strcmp(getStatFile().getName().c_str(),"")) getStatFile().setName(); //set ouput filename to default unless otherwise specified
-    if (!getStatFile().open())
-    {
-        std::cerr << "Problem opening stat file aborting" << std::endl;
-        exit(-1);
-    };
-    
+
+    getStatFile().open();
+
     getStatFile().getFstream() << Points.begin()->write_variable_names() << std::endl;
     getStatFile().getFstream() << print_CG() << std::endl;
     
@@ -923,12 +924,12 @@ template<StatType T>
 void StatisticsVector<T>::write_statistics()
 {
     std::cout << "writing statistics for t=" << getTime() << std::endl;
-    
+
     // write to .stat file
     getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << getTime() << std::endl;
     for (unsigned int i = 0; i < Points.size(); i++)
         getStatFile().getFstream() << Points[i];
-    if (get_doGradient())
+    if (getDoGradient())
     {
         getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << getTime() << std::endl;
         for (unsigned int i = 0; i < dx.size(); i++)
@@ -946,7 +947,7 @@ void StatisticsVector<T>::write_statistics()
 template<StatType T>
 void StatisticsVector<T>::finishStatistics()
 {
-    if (get_doTimeAverage())
+    if (getDoTimeAverage())
         write_time_average_statistics();
     getStatFile().close();
 }
@@ -956,7 +957,7 @@ void StatisticsVector<T>::processStatistics(bool usethese)
 {
     if (check_current_time_for_statistics() && usethese)
     {
-        if (get_mirrorAtDomainBoundary() != 0.0)
+        if (getMirrorAtDomainBoundary() != 0.0)
         {
             for (unsigned int i = 0; i < Points.size(); i++)
             {
@@ -965,7 +966,7 @@ void StatisticsVector<T>::processStatistics(bool usethese)
                     //add values to the mirrorParticle
                     Points[Points[i].mirrorParticle] += Points[i];
                     Points[i].set_zero();
-                    if (get_doGradient())
+                    if (getDoGradient())
                     {
                         dx[Points[i].mirrorParticle] += dx[i];
                         dy[Points[i].mirrorParticle] += dy[i];
@@ -976,14 +977,14 @@ void StatisticsVector<T>::processStatistics(bool usethese)
         }
         //~ for (unsigned int i=0; i<Points.size(); i++) 
         //~ Points[i].Displacement /= mathsFunc::square(Points[i].Density);
-        if (get_doTimeAverage())
+        if (getDoTimeAverage())
         {
             for (unsigned int i = 0; i < timeAverage.size(); i++)
             {
                 timeAverage[i] += Points[i];
-                if (get_doVariance())
+                if (getDoVariance())
                     timeVariance[i] += Points[i].getSquared();
-                if (get_doGradient())
+                if (getDoGradient())
                 {
                     dxTimeAverage[i] += dx[i];
                     dyTimeAverage[i] += dy[i];
@@ -1027,12 +1028,12 @@ void StatisticsVector<T>::write_time_average_statistics()
         for (unsigned int i = 0; i < timeAverage.size(); i++)
         {
             timeAverage[i].firstTimeAverage(nTimeAverage);
-            if (get_doVariance())
+            if (getDoVariance())
             {
                 timeVariance[i].firstTimeAverage(nTimeAverage);
                 timeVariance[i] -= timeAverage[i].getSquared();
             }
-            if (get_doGradient())
+            if (getDoGradient())
             {
                 dxTimeAverage[i].firstTimeAverage(nTimeAverage);
                 dyTimeAverage[i].firstTimeAverage(nTimeAverage);
@@ -1047,12 +1048,12 @@ void StatisticsVector<T>::write_time_average_statistics()
         for (unsigned int i = 0; i < timeAverage.size(); i++)
         {
             timeAverage[i] /= nTimeAverage;
-            if (get_doVariance())
+            if (getDoVariance())
             {
                 timeVariance[i] /= nTimeAverage;
                 timeVariance[i] -= timeAverage[i].getSquared();
             }
-            if (get_doGradient())
+            if (getDoGradient())
             {
                 dxTimeAverage[i] /= nTimeAverage;
                 dyTimeAverage[i] /= nTimeAverage;
@@ -1062,37 +1063,37 @@ void StatisticsVector<T>::write_time_average_statistics()
     }
     
     // write average to .stat file
-    getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << get_tminStat() << " " << getTime() << std::endl;
+    getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << getCGTimeMin() << " " << getTime() << std::endl;
     for (unsigned int i = 0; i < timeAverage.size(); i++)
         getStatFile().getFstream() << timeAverage[i];
     // write to std::cout
     StatisticsPoint<T> avg = average(timeAverage);
     std::cout << "Averages: " << avg.print() << std::endl;
     
-    if (get_doVariance())
+    if (getDoVariance())
     {
         // write variance to .stat file
-        getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << get_tminStat() << " " << getTime() << " " << std::endl;
+        getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << getCGTimeMin() << " " << getTime() << " " << std::endl;
         for (unsigned int i = 0; i < timeVariance.size(); i++)
             getStatFile().getFstream() << timeVariance[i];
         //StatisticsPoint<T> var = average(timeVariance);
-    } //end if (get_doVariance)
+    } //end if (getDoVariance)
     
-    if (get_doGradient())
+    if (getDoGradient())
     {
         // write variance to .stat file
-        getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << get_tminStat() << " " << getTime() << " " << std::endl;
+        getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << getCGTimeMin() << " " << getTime() << " " << std::endl;
         for (unsigned int i = 0; i < timeAverage.size(); i++)
             getStatFile().getFstream() << dxTimeAverage[i];
-        getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << get_tminStat() << " " << getTime() << " " << std::endl;
+        getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << getCGTimeMin() << " " << getTime() << " " << std::endl;
         for (unsigned int i = 0; i < timeAverage.size(); i++)
             getStatFile().getFstream() << dyTimeAverage[i];
-        getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << get_tminStat() << " " << getTime() << " " << std::endl;
+        getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << getCGTimeMin() << " " << getTime() << " " << std::endl;
         for (unsigned int i = 0; i < timeAverage.size(); i++)
             getStatFile().getFstream() << dzTimeAverage[i];
     }
     
-    set_tminStat(getTime());
+    setCGTimeMin(getTime());
     
 }
 template<StatType T>
@@ -1116,8 +1117,8 @@ void StatisticsVector<T>::statistics_from_fstat_and_data()
     }
     
     //set tminstat to smallest time evaluated
-    if (getTime() >= get_tminStat())
-        set_tminStat(getTime() - getTimeStep());
+    if (getTime() >= getCGTimeMin())
+        setCGTimeMin(getTime() - getTimeStep());
     
     //This opens the file the force data will be recalled from
     //getFStatFile().open(std::fstream::in);
@@ -1158,12 +1159,12 @@ void StatisticsVector<T>::statistics_from_fstat_and_data()
     }
     
     //this increases the file counter
-    if ((getFStatFile().getFileType() == FileType::MULTIPLE_FILES || getFStatFile().getFileType() == FileType::MULTIPLE_FILES_PADDED) && getTime() < get_tminStat())
+    if ((getFStatFile().getFileType() == FileType::MULTIPLE_FILES || getFStatFile().getFileType() == FileType::MULTIPLE_FILES_PADDED) && getTime() < getCGTimeMin())
     {
         if (verbosity > 1)
-            findNextExistingDataFile(get_tminStat());
+            findNextExistingDataFile(getCGTimeMin());
         else
-            findNextExistingDataFile(get_tminStat(), false);
+            findNextExistingDataFile(getCGTimeMin(), false);
         for (int i = 1; i < getDataFile().getCounter(); i++)
             jump_fstat();
         
@@ -1178,7 +1179,7 @@ void StatisticsVector<T>::statistics_from_fstat_and_data()
             std::cout << "reached end t=" << std::setprecision(9) << getTime() << " tmaxStat=" << std::setprecision(9) << getTimeMaxStat() << std::endl;
             break;
         }
-        else if (getTime() >= get_tminStat())
+        else if (getTime() >= getCGTimeMin())
         {
             if (verbosity > 1)
                 std::cout << "Get statistics for t=" << std::setprecision(9) << getTime() << std::endl;
@@ -1201,7 +1202,7 @@ void StatisticsVector<T>::statistics_from_fstat_and_data()
         else
         {
             if (verbosity > 1)
-                std::cout << "Jumping statistics t=" << getTime() << " tminStat()=" << get_tminStat() << std::endl;
+                std::cout << "Jumping statistics t=" << getTime() << " tminStat()=" << getCGTimeMin() << std::endl;
             jump_fstat();
         }
         //if step size>1, skip a number of steps.
@@ -1361,8 +1362,8 @@ void StatisticsVector<T>::statistics_from_p3()
     read_next_from_p3p_file();
     
     //set tminstat to smallest time evaluated
-    if (getTime() >= get_tminStat())
-        set_tminStat(getTime() - getTimeStep());
+    if (getTime() >= getCGTimeMin())
+        setCGTimeMin(getTime() - getTimeStep());
     DPMBase::writeRestartFile();
     
     getDataFile().open(std::fstream::out);
@@ -1412,7 +1413,7 @@ void StatisticsVector<T>::statistics_from_p3()
             std::cout << "reached end t=" << std::setprecision(9) << getTime() << " tmaxStat=" << std::setprecision(9) << getTimeMaxStat() << std::endl;
             break;
         }
-        else if (getTime() >= get_tminStat())
+        else if (getTime() >= getCGTimeMin())
         {
             if (verbosity > 1)
                 std::cout << "Get statistics for t=" << std::setprecision(9) << getTime() << std::endl;
@@ -1437,7 +1438,7 @@ void StatisticsVector<T>::statistics_from_p3()
             if (verbosity > 1)
                 std::cout
                 << "Jumping statistics t=" << getTime()
-                        << " tminStat()=" << get_tminStat() << std::endl;
+                        << " tminStat()=" << getCGTimeMin() << std::endl;
             jump_p3c();
         }
         //if step size>1, skip a number of steps.
@@ -1732,25 +1733,25 @@ void StatisticsVector<T>::setPositions()
             getZMinStat());
     
     int num[3] = {0, 0, 0};
-    if (get_mirrorAtDomainBoundary() != 0.0)
+    if (getMirrorAtDomainBoundary() != 0.0)
     {
         if (statType == X || statType == XY || statType == XZ || statType == XYZ)
         {
             //add so many points to domain on both ends
             //todo: the 8 is arbitrary
-            num[0] = static_cast<int>(std::floor(std::max(get_mirrorAtDomainBoundary(), get_cutoff()) / diff.X));
+            num[0] = static_cast<int>(std::floor(std::max(getMirrorAtDomainBoundary(), getCutoff()) / diff.X));
             nx += 2 * num[0];
             Min.X -= num[0] * diff.X;
         }
         if (statType == Y || statType == XY || statType == YZ || statType == XYZ)
         {
-            num[1] = static_cast<int>(std::floor(std::max(get_mirrorAtDomainBoundary(), get_cutoff()) / diff.Y));
+            num[1] = static_cast<int>(std::floor(std::max(getMirrorAtDomainBoundary(), getCutoff()) / diff.Y));
             ny += 2 * num[1];
             Min.Y -= num[1] * diff.Y;
         }
         if (statType == Z || statType == XZ || statType == XZ || statType == XYZ)
         {
-            num[2] = static_cast<int>(std::floor(std::max(get_mirrorAtDomainBoundary(), get_cutoff()) / diff.Z));
+            num[2] = static_cast<int>(std::floor(std::max(getMirrorAtDomainBoundary(), getCutoff()) / diff.Z));
             nz += 2 * num[2];
             Min.Z -= num[2] * diff.Z;
         }
@@ -1768,12 +1769,12 @@ void StatisticsVector<T>::setPositions()
                     Points[n].setPosition(Vec3D((nx > 1) ? (Min.X + diff.X * (i + 0.5)) : avg.X,
                             (ny > 1) ? (Min.Y + diff.Y * (j + 0.5)) : avg.Y,
                             (nz > 1) ? (Min.Z + diff.Z * (k + 0.5)) : avg.Z));
-                    if (doublePoints)
+                    if (doDoublePoints)
                         Points[n].setPosition(Points[n].getPosition()
                                 - Vec3D((i % 2) ? (0.99 * diff.X) : 0, (j % 2) ? (0.99 * diff.Y) : 0, (k % 2) ? (0.99 * diff.Z) : 0));
-                    Points[n].set_CG_invvolume();
+                    Points[n].setCGInverseVolume();
                     Points[n].set_zero();
-                    if (get_mirrorAtDomainBoundary() != 0.0)
+                    if (getMirrorAtDomainBoundary() != 0.0)
                         if ((i < num[0]) || (i > nx - num[0]) || (j < num[1]) || (j > ny - num[1]) || (k < num[2]) || (k > nz - num[2]))
                         {
                             Points[n].mirrorParticle = n +
@@ -1791,7 +1792,7 @@ void StatisticsVector<T>::setPositions()
             Points[k].setPosition(Points[k].getPosition().getFromCylindricalCoordinates());
         }
     }
-    if (get_doGradient())
+    if (getDoGradient())
     {
         dx.resize(N);
         dy.resize(N);
@@ -1811,7 +1812,7 @@ void StatisticsVector<T>::setPositions()
     }
     
     //Set TimeAverage the same way
-    if (get_doTimeAverage())
+    if (getDoTimeAverage())
     {
         timeAverage.resize(N);
         {
@@ -1827,7 +1828,7 @@ void StatisticsVector<T>::setPositions()
                     }
         }
         
-        if (get_doVariance())
+        if (getDoVariance())
         {
             timeVariance.resize(N);
             for (int n = 0; n < N; n++)
@@ -1838,7 +1839,7 @@ void StatisticsVector<T>::setPositions()
             }
         }
         
-        if (get_doGradient())
+        if (getDoGradient())
         {
             dxTimeAverage.resize(N);
             dyTimeAverage.resize(N);
@@ -1857,7 +1858,7 @@ void StatisticsVector<T>::setPositions()
             }
         }
         
-    } //end if (get_doTimeAverage()) 
+    } //end if (getDoTimeAverage()) 
 }
 
 ///
@@ -2157,7 +2158,7 @@ void StatisticsVector<T>::evaluate_force_statistics(int wp)
             Points[i].CollisionalHeatFlux += P1_P2_CollisionalHeatFlux * psi;
             Points[i].Dissipation += P1_P2_Dissipation * psi;
             Points[i].Potential += P1_P2_Potential * psi;
-            if (get_doGradient())
+            if (getDoGradient())
             {
                 Vec3D d_psi = Points[i].CG_integral_gradient(P1, P2, P1_P2_normal, P1_P2_distance);
                 
@@ -2181,7 +2182,7 @@ void StatisticsVector<T>::evaluate_force_statistics(int wp)
                 dz[i].CollisionalHeatFlux += P1_P2_CollisionalHeatFlux * d_psi.Z;
                 dz[i].Dissipation += P1_P2_Dissipation * d_psi.Z;
                 dz[i].Potential += P1_P2_Potential * d_psi.Z;
-            } //end if get_doGradient
+            } //end if getDoGradient
         } //end if phi
     } // end forall Points
       //std::cout << "NCeval" << counter << std::endl;
@@ -2214,7 +2215,7 @@ void StatisticsVector<T>::evaluate_wall_force_statistics(Vec3D P, int wp)
         {
             Points[i].NormalTraction += P1_P2_NormalTraction * phi;
             Points[i].TangentialTraction += P1_P2_TangentialTraction * phi;
-            if (get_doGradient())
+            if (getDoGradient())
             {
                 ///\todo this has recently been fixed
                 Vec3D d_phi = Points[i].CG_gradient(P, phi);
@@ -2224,7 +2225,7 @@ void StatisticsVector<T>::evaluate_wall_force_statistics(Vec3D P, int wp)
                 dx[i].TangentialTraction += P1_P2_TangentialTraction * d_phi.X;
                 dy[i].TangentialTraction += P1_P2_TangentialTraction * d_phi.Y;
                 dz[i].TangentialTraction += P1_P2_TangentialTraction * d_phi.Z;
-            } //end if get_doGradient
+            } //end if getDoGradient
         } //end if phi
     } // end forall Points
     
@@ -2237,7 +2238,7 @@ void StatisticsVector<T>::outputStatistics()
     {
         ///Because the domain can change in size some stuff has to be updated
         for (unsigned int i = 0; i < Points.size(); i++)
-            Points[i].set_CG_invvolume();
+            Points[i].setCGInverseVolume();
         
         for (std::vector<BaseParticle*>::iterator P = particleHandler.begin(); P != particleHandler.end(); ++P)
         {
@@ -2272,7 +2273,7 @@ void StatisticsVector<T>::evaluate_particle_statistics(std::vector<BaseParticle*
             if (b0)
             {
                 Mdouble dist = b0->getDistance(P1);
-                if (mathsFunc::square(dist - (*P)->getRadius()) < 9.0 * get_w2())
+                if (mathsFunc::square(dist - (*P)->getRadius()) < 9.0 * getCGWidthSquared())
                 {
                     b0->shiftPosition(*P);
                     evaluate_particle_statistics(P, k + 1);
@@ -2324,7 +2325,7 @@ void StatisticsVector<T>::evaluate_particle_statistics(std::vector<BaseParticle*
             Points[i].LocalAngularMomentumFlux += Matrix3D::dyadic(LocalAngularMomentum, (*P)->getVelocity() * phi);
             
             //Note: Displacement is only computed directly if gradients are cmputed
-            if (get_doGradient())
+            if (getDoGradient())
             {
                 
                 Vec3D d_phi = Points[i].CG_gradient((*P)->getPosition(), phi);
@@ -2363,7 +2364,7 @@ void StatisticsVector<T>::evaluate_particle_statistics(std::vector<BaseParticle*
                 dz[i].MomentumFlux += MatrixSymmetric3D::selfDyadic((*P)->getVelocity()) * ((*P)->getMass() * d_phi.Z);
                 dz[i].DisplacementMomentumFlux += MatrixSymmetric3D::selfDyadic((*P)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * getDataFile().getSaveCount())) * ((*P)->getMass() * d_phi.Z);
                 dz[i].EnergyFlux += (*P)->getVelocity() * ((*P)->getMass() * (*P)->getVelocity().getLengthSquared() / 2 * d_phi.Z);
-            } //end if get_doGradient
+            } //end if getDoGradient
         } //end if phi
     } // end forall Points
 }
@@ -2372,51 +2373,51 @@ void StatisticsVector<T>::evaluate_particle_statistics(std::vector<BaseParticle*
 
 //Templated functions
 
-template<> void StatisticsVector<XY>::set_nz(int new_ UNUSED)
+template<> void StatisticsVector<XY>::setNZ(int new_ UNUSED)
 {
     nz = 1;
 }
-template<> void StatisticsVector<XZ>::set_ny(int new_ UNUSED)
+template<> void StatisticsVector<XZ>::setNY(int new_ UNUSED)
 {
     ny = 1;
 }
-template<> void StatisticsVector<YZ>::set_nx(int new_ UNUSED)
+template<> void StatisticsVector<YZ>::setNX(int new_ UNUSED)
 {
     nx = 1;
 }
-template<> void StatisticsVector<X>::set_ny(int new_ UNUSED)
+template<> void StatisticsVector<X>::setNY(int new_ UNUSED)
 {
     ny = 1;
 }
-template<> void StatisticsVector<X>::set_nz(int new_ UNUSED)
+template<> void StatisticsVector<X>::setNZ(int new_ UNUSED)
 {
     nz = 1;
 }
-template<> void StatisticsVector<Y>::set_nx(int new_ UNUSED)
+template<> void StatisticsVector<Y>::setNX(int new_ UNUSED)
 {
     nx = 1;
 }
-template<> void StatisticsVector<Y>::set_nz(int new_ UNUSED)
+template<> void StatisticsVector<Y>::setNZ(int new_ UNUSED)
 {
     nz = 1;
 }
-template<> void StatisticsVector<Z>::set_nx(int new_ UNUSED)
+template<> void StatisticsVector<Z>::setNX(int new_ UNUSED)
 {
     nx = 1;
 }
-template<> void StatisticsVector<Z>::set_ny(int new_ UNUSED)
+template<> void StatisticsVector<Z>::setNY(int new_ UNUSED)
 {
     ny = 1;
 }
-template<> void StatisticsVector<O>::set_nx(int new_ UNUSED)
+template<> void StatisticsVector<O>::setNX(int new_ UNUSED)
 {
     nx = 1;
 }
-template<> void StatisticsVector<O>::set_ny(int new_ UNUSED)
+template<> void StatisticsVector<O>::setNY(int new_ UNUSED)
 {
     ny = 1;
 }
-template<> void StatisticsVector<O>::set_nz(int new_ UNUSED)
+template<> void StatisticsVector<O>::setNZ(int new_ UNUSED)
 {
     nz = 1;
 }
@@ -2481,69 +2482,81 @@ template<> void StatisticsVector<O>::set_statType()
 template<> Mdouble StatisticsVector<RAZ>::setInfinitelyLongDistance()
 {
     ///todo{check}
-    return std::min(std::min(fabs((P1.Z - getZMinStat() + 5 * get_w()) / P1_P2_normal.Z),
-            std::max((getXMaxStat() - P2.X + 5 * sqrt(get_w2())) / P1_P2_normal.X, -(P2.X - getXMinStat() + 5 * sqrt(get_w2())) / P1_P2_normal.X)),
-            std::max((getYMaxStat() - P2.Y + 5 * sqrt(get_w2())) / P1_P2_normal.Y, -(P2.Y - getYMinStat() + 5 * sqrt(get_w2())) / P1_P2_normal.Y));
+    return std::min(std::min(fabs((P1.Z - getZMinStat() + 5 * getCGWidth()) / P1_P2_normal.Z),
+            std::max((getXMaxStat() - P2.X + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.X, -(P2.X - getXMinStat() + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.X)),
+            std::max((getYMaxStat() - P2.Y + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.Y, -(P2.Y - getYMinStat() + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.Y));
 }
 template<> Mdouble StatisticsVector<RA>::setInfinitelyLongDistance()
 {
-    return std::min(std::max((getYMaxStat() - P2.Y + 5 * sqrt(get_w2())) / P1_P2_normal.Y, -(P2.Y - getYMinStat() + 5 * sqrt(get_w2())) / P1_P2_normal.Y),
-            std::max((getXMaxStat() - P2.X + 5 * sqrt(get_w2())) / P1_P2_normal.X, -(P2.X - getXMinStat() + 5 * sqrt(get_w2())) / P1_P2_normal.X));
+    return std::min(std::max((getYMaxStat() - P2.Y + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.Y, -(P2.Y - getYMinStat() + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.Y),
+            std::max((getXMaxStat() - P2.X + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.X, -(P2.X - getXMinStat() + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.X));
 }
 template<> Mdouble StatisticsVector<RZ>::setInfinitelyLongDistance()
 {
-    return std::min(fabs((P1.Z - getZMinStat() + 5 * get_w()) / P1_P2_normal.Z),
-            std::max((getXMaxStat() - P2.X + 5 * sqrt(get_w2())) / P1_P2_normal.X, -(P2.X - getXMinStat() + 5 * sqrt(get_w2())) / P1_P2_normal.X));
+    return std::min(fabs((P1.Z - getZMinStat() + 5 * getCGWidth()) / P1_P2_normal.Z),
+            std::max((getXMaxStat() - P2.X + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.X, -(P2.X - getXMinStat() + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.X));
 }
 template<> Mdouble StatisticsVector<AZ>::setInfinitelyLongDistance()
 {
-    return std::min(fabs((P1.Z - getZMinStat() + 5 * get_w()) / P1_P2_normal.Z),
-            std::max((getYMaxStat() - P2.Y + 5 * sqrt(get_w2())) / P1_P2_normal.Y, -(P2.Y - getYMinStat() + 5 * sqrt(get_w2())) / P1_P2_normal.Y));
+    return std::min(fabs((P1.Z - getZMinStat() + 5 * getCGWidth()) / P1_P2_normal.Z),
+            std::max((getYMaxStat() - P2.Y + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.Y, -(P2.Y - getYMinStat() + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.Y));
 }
 template<> Mdouble StatisticsVector<R>::setInfinitelyLongDistance()
 {
-    return std::max((getXMaxStat() - P2.X + 5 * sqrt(get_w2())) / P1_P2_normal.X, -(P2.X - getXMinStat() + 5 * sqrt(get_w2())) / P1_P2_normal.X);
+    return std::max((getXMaxStat() - P2.X + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.X, -(P2.X - getXMinStat() + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.X);
 }
 template<> Mdouble StatisticsVector<A>::setInfinitelyLongDistance()
 {
-    return std::max((getYMaxStat() - P2.Y + 5 * sqrt(get_w2())) / P1_P2_normal.Y, -(P2.Y - getYMinStat() + 5 * sqrt(get_w2())) / P1_P2_normal.Y);
+    return std::max((getYMaxStat() - P2.Y + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.Y, -(P2.Y - getYMinStat() + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.Y);
 }
 
 template<> Mdouble StatisticsVector<XYZ>::setInfinitelyLongDistance()
 {
-    return std::min(std::min(fabs((P1.Z - getZMinStat() + 5 * get_w()) / P1_P2_normal.Z),
-            std::max((getXMaxStat() - P1.X + 5 * sqrt(get_w2())) / P1_P2_normal.X, -(P1.X - getXMinStat() + 5 * sqrt(get_w2())) / P1_P2_normal.X)),
-            std::max((getYMaxStat() - P1.Y + 5 * sqrt(get_w2())) / P1_P2_normal.Y, -(P1.Y - getYMinStat() + 5 * sqrt(get_w2())) / P1_P2_normal.Y));
+    return std::min(std::min(fabs((P1.Z - getZMinStat() + 5 * getCGWidth()) / P1_P2_normal.Z),
+            std::max((getXMaxStat() - P1.X + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.X, -(P1.X - getXMinStat() + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.X)),
+            std::max((getYMaxStat() - P1.Y + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.Y, -(P1.Y - getYMinStat() + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.Y));
 }
 template<> Mdouble StatisticsVector<XY>::setInfinitelyLongDistance()
 {
-    return std::min(std::max((getYMaxStat() - P1.Y + 5 * sqrt(get_w2())) / P1_P2_normal.Y, -(P1.Y - getYMinStat() + 5 * sqrt(get_w2())) / P1_P2_normal.Y),
-            std::max((getXMaxStat() - P1.X + 5 * sqrt(get_w2())) / P1_P2_normal.X, -(P1.X - getXMinStat() + 5 * sqrt(get_w2())) / P1_P2_normal.X));
+    return std::min(std::max((getYMaxStat() - P1.Y + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.Y, -(P1.Y - getYMinStat() + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.Y),
+            std::max((getXMaxStat() - P1.X + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.X, -(P1.X - getXMinStat() + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.X));
 }
 template<> Mdouble StatisticsVector<XZ>::setInfinitelyLongDistance()
 {
-    return std::min(fabs((P1.Z - getZMinStat() + 5 * get_w()) / P1_P2_normal.Z),
-            std::max((getXMaxStat() - P1.X + 5 * sqrt(get_w2())) / P1_P2_normal.X, -(P1.X - getXMinStat() + 5 * sqrt(get_w2())) / P1_P2_normal.X));
+    return std::min(fabs((P1.Z - getZMinStat() + 5 * getCGWidth()) / P1_P2_normal.Z),
+            std::max((getXMaxStat() - P1.X + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.X, -(P1.X - getXMinStat() + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.X));
 }
 template<> Mdouble StatisticsVector<YZ>::setInfinitelyLongDistance()
 {
-    return std::min(fabs((P1.Z - getZMinStat() + 5 * get_w()) / P1_P2_normal.Z),
-            std::max((getYMaxStat() - P1.Y + 5 * sqrt(get_w2())) / P1_P2_normal.Y, -(P1.Y - getYMinStat() + 5 * sqrt(get_w2())) / P1_P2_normal.Y));
+    return std::min(fabs((P1.Z - getZMinStat() + 5 * getCGWidth()) / P1_P2_normal.Z),
+            std::max((getYMaxStat() - P1.Y + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.Y, -(P1.Y - getYMinStat() + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.Y));
 }
 template<> Mdouble StatisticsVector<X>::setInfinitelyLongDistance()
 {
-    return std::max((getXMaxStat() - P1.X + 5 * sqrt(get_w2())) / P1_P2_normal.X, -(P1.X - getXMinStat() + 5 * sqrt(get_w2())) / P1_P2_normal.X);
+    return std::max((getXMaxStat() - P1.X + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.X, -(P1.X - getXMinStat() + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.X);
 }
 template<> Mdouble StatisticsVector<Y>::setInfinitelyLongDistance()
 {
-    return std::max((getYMaxStat() - P1.Y + 5 * sqrt(get_w2())) / P1_P2_normal.Y, -(P1.Y - getYMinStat() + 5 * sqrt(get_w2())) / P1_P2_normal.Y);
+    return std::max((getYMaxStat() - P1.Y + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.Y, -(P1.Y - getYMinStat() + 5 * sqrt(getCGWidthSquared())) / P1_P2_normal.Y);
 }
 template<> Mdouble StatisticsVector<Z>::setInfinitelyLongDistance()
 {
-    return fabs((P1.Z - getZMinStat() + 5 * get_w()) / P1_P2_normal.Z);
+    return fabs((P1.Z - getZMinStat() + 5 * getCGWidth()) / P1_P2_normal.Z);
 }
 template<> double StatisticsVector<O>::setInfinitelyLongDistance()
 {
     return 0;
 }
 
+template<StatType T>
+void StatisticsVector<T>::writeOutputFiles()
+{
+    if (getStatFile().saveCurrentTimestep(getNtimeSteps()))
+    {
+        outputStatistics();
+        DPMBase::gatherContactStatistics();
+        processStatistics(true);
+    }
+
+    DPMBase::writeOutputFiles();
+}

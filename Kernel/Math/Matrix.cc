@@ -17,6 +17,7 @@
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
 #include "Matrix.h"
+#include "ExtendedMath.h"
 
 Matrix3D::Matrix3D()
 {

@@ -133,23 +133,23 @@ Mdouble LinearViscoelasticSpecies::getCollisionTime(Mdouble mass)
 {
     if (mass <= 0)
     {
-        std::cerr << "Error in getCollisionTime(Mdouble mass) mass is not set or has an unexpected value, (getCollisionTime(" << mass << "))" << std::endl;
+        std::cerr << "Error in getCollisionTime(" << mass << ") mass is not set or has an unexpected value, (getCollisionTime(" << mass << "))" << std::endl;
         exit(-1);
     }
     if (stiffness_ <= 0)
     {
-        std::cerr << "Error in getCollisionTime(Mdouble mass) stiffness is not set or has an unexpected value, (getCollisionTime(" << mass << "), with stiffness=" << stiffness_ << ")" << std::endl;
+        std::cerr << "Error in getCollisionTime(" << mass << ") stiffness=" << stiffness_ << " is not set or has an unexpected value, (getCollisionTime(" << mass << "), with stiffness=" << stiffness_ << ")" << std::endl;
         exit(-1);
     }
     if (dissipation_ < 0)
     {
-        std::cerr << "Error in getCollisionTime(Mdouble mass) dissipation is not set or has an unexpected value, (getCollisionTime(" << mass << "), with dissipation=" << dissipation_ << ")" << std::endl;
+        std::cerr << "Error in getCollisionTime(" << mass << ") dissipation=" << dissipation_ << " is not set or has an unexpected value, (getCollisionTime(" << mass << "), with dissipation=" << dissipation_ << ")" << std::endl;
         exit(-1);
     }
     Mdouble tosqrt = stiffness_ / (.5 * mass) - mathsFunc::square(dissipation_ / mass);
     if (tosqrt <= 0)
     {
-        std::cerr << "Error in getCollisionTime(Mdouble mass) values for mass, stiffness and dissipation would lead to an overdamped system, (getCollisionTime(" << mass << "), with stiffness=" << stiffness_ << " and dissipation=" << dissipation_ << ")" << std::endl;
+        std::cerr << "Error in getCollisionTime(" << mass << ") values for mass, stiffness and dissipation would lead to an overdamped system, (getCollisionTime(" << mass << "), with stiffness=" << stiffness_ << " and dissipation=" << dissipation_ << ")" << std::endl;
         exit(-1);
     }
     return constants::pi / std::sqrt(tosqrt);

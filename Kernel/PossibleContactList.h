@@ -47,12 +47,12 @@ public:
         FirstPossibleContact = new PossibleContact(P1, P2, FirstPossibleContact, P1->getFirstPossibleContact(), P2->getFirstPossibleContact());
         P1->setFirstPossibleContact(FirstPossibleContact);
         P2->setFirstPossibleContact(FirstPossibleContact);
-        if (FirstPossibleContact->get_Next())
-            FirstPossibleContact->get_Next()->set_Prev(FirstPossibleContact);
-        if (FirstPossibleContact->get_Next1())
-            FirstPossibleContact->get_Next1()->set_Prev(P1, FirstPossibleContact);
-        if (FirstPossibleContact->get_Next2())
-            FirstPossibleContact->get_Next2()->set_Prev(P2, FirstPossibleContact);
+        if (FirstPossibleContact->getNext())
+            FirstPossibleContact->getNext()->setPreviousPosition(FirstPossibleContact);
+        if (FirstPossibleContact->getNext1())
+            FirstPossibleContact->getNext1()->setPreviousPosition(P1, FirstPossibleContact);
+        if (FirstPossibleContact->getNext2())
+            FirstPossibleContact->getNext2()->setPreviousPosition(P2, FirstPossibleContact);
     }
 
     /*!
@@ -60,30 +60,30 @@ public:
      */
     void remove_ParticlePosibleContacts(BaseParticle *P)
     {
-        //std::cout<<"Removing all contacts of particle "<<P->get_Index()<<std::endl;
+        //std::cout<<"Removing all contacts of particle "<<P->getIndex()<<std::endl;
         BaseParticle* O;
         PossibleContact* Next;
         PossibleContact* Curr = P->getFirstPossibleContact();
         while (Curr)
         {
-            //std::cout<<"Removing possible contacts index="<<Curr->get_Index()<<" between particle "<<Curr->get_P1()->getIndex()<<" and "<<Curr->get_P2()->getIndex()<<std::endl;
-            Next = Curr->get_Next(P);
-            O = Curr->get_OtherParticle(P);
-            if (Curr->get_Next())
-                Curr->get_Next()->set_Prev(Curr->get_Prev());
+            //std::cout<<"Removing possible contacts index="<<Curr->getIndex()<<" between particle "<<Curr->getP1()->getIndex()<<" and "<<Curr->getP2()->getIndex()<<std::endl;
+            Next = Curr->getNext(P);
+            O = Curr->getOtherParticle(P);
+            if (Curr->getNext())
+                Curr->getNext()->setPreviousPosition(Curr->getPrevious());
             
-            if (Curr->get_Prev())
-                Curr->get_Prev()->set_Next(Curr->get_Next());
+            if (Curr->getPrevious())
+                Curr->getPrevious()->setNextPosition(Curr->getNext());
             else
-                FirstPossibleContact = Curr->get_Next();
+                FirstPossibleContact = Curr->getNext();
             
-            if (Curr->get_Next(O))
-                Curr->get_Next(O)->set_Prev(O, Curr->get_Prev(O));
+            if (Curr->getNext(O))
+                Curr->getNext(O)->setPreviousPosition(O, Curr->getPrevious(O));
             
-            if (Curr->get_Prev(O))
-                Curr->get_Prev(O)->set_Next(O, Curr->get_Next(O));
+            if (Curr->getPrevious(O))
+                Curr->getPrevious(O)->setNextPosition(O, Curr->getNext(O));
             else
-                O->setFirstPossibleContact(Curr->get_Next(O));
+                O->setFirstPossibleContact(Curr->getNext(O));
             delete Curr;
             Curr = Next;
         }
@@ -100,7 +100,7 @@ public:
         while(it!=nullptr)
         {
             os<<*it<<std::endl;
-            it=it->get_Next();
+            it=it->getNext();
         }
     }
 

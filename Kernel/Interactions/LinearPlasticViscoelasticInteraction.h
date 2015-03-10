@@ -20,10 +20,6 @@
 #define LINEARPLASTICVISCOELASTICINTERACTION_H
 
 #include "BaseInteraction.h"
-
-class InteractionHandler;
-class BaseParticle;
-class BaseSpecies;
 class LinearPlasticViscoelasticSpecies;
 class BaseInteractable;
 

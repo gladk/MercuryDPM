@@ -17,7 +17,7 @@
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
 #include "EmptyTangentialInteraction.h"
-#include "Species/EmptyTangentialSpecies.h"
+#include "Species/TangentialForceSpecies/EmptyTangentialSpecies.h"
 #include "Particles/BaseParticle.h"
 #include "InteractionHandler.h"
 #include <iomanip>

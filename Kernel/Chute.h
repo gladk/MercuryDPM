@@ -19,7 +19,6 @@
 #ifndef CHUTE_H
 #define CHUTE_H
 #include "Mercury3D.h"
-#include "Particles/BaseParticle.h"
 
 class InsertionBoundary;
 

@@ -19,8 +19,6 @@
 #ifndef CHUTEWITHHOPPER_H
 #define CHUTEWITHHOPPER_H
 #include "Chute.h"
-#include "Boundaries/HopperInsertionBoundary.h"
-#include "Walls/IntersectionOfWalls.h"
 
 /*!
  * \class ChuteWithHopper

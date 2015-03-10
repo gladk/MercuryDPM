@@ -245,17 +245,17 @@ template<StatType T>
 Mdouble StatisticsPoint<T>::CG_function(const Vec3D &PI)
 {
     Mdouble dist2 = getDistanceSquaredNonAveraged(PI);
-    if (get_CG_type() == HeavisideSphere)
+    if (getCGShape() == HeavisideSphere)
     {
-        return (get_w2() < dist2) ? 0.0 : get_CG_invvolume();
+        return (getCGWidthSquared() < dist2) ? 0.0 : getCGInverseVolume();
     }
-    else if (get_CG_type() == Gaussian)
+    else if (getCGShape() == Gaussian)
     {
-        return (get_cutoff2() < dist2) ? 0.0 : get_CG_invvolume() * exp(-dist2 / (2.0 * get_w2()));
+        return (getCutoff2() < dist2) ? 0.0 : getCGInverseVolume() * exp(-dist2 / (2.0 * getCGWidthSquared()));
     }
-    else if (get_CG_type() == Polynomial)
+    else if (getCGShape() == Polynomial)
     {
-        return (get_cutoff2() < dist2) ? 0.0 : get_CG_invvolume() * evaluatePolynomial(sqrt(dist2) / get_cutoff());
+        return (getCutoff2() < dist2) ? 0.0 : getCGInverseVolume() * evaluatePolynomial(sqrt(dist2) / getCutoff());
     }
     else
     {
@@ -268,25 +268,25 @@ template<StatType T>
 Mdouble StatisticsPoint<T>::CG_function_2D(const Vec3D &PI)
 {
     Mdouble dist2 = getDistanceSquaredNonAveraged(PI);
-    if (get_CG_type() == HeavisideSphere)
+    if (getCGShape() == HeavisideSphere)
     {
-        if (get_w2() < dist2)
+        if (getCGWidthSquared() < dist2)
             return 0.0;
         else
         {
-            Mdouble wn = sqrt(get_w2() - dist2);
-            return get_CG_invvolume() * 2.0 * wn;
-            ///\todo the volume should be calculated in set_CG_invvolume
-            //return get_CG_invvolume()*(std::min(wn,gb->getObjectDistanceLeft()) +std::min(wn,gb->getObjectDistanceRight()));	
+            Mdouble wn = sqrt(getCGWidthSquared() - dist2);
+            return getCGInverseVolume() * 2.0 * wn;
+            ///\todo the volume should be calculated in setCGInverseVolume
+            //return getCGInverseVolume()*(std::min(wn,gb->getObjectDistanceLeft()) +std::min(wn,gb->getObjectDistanceRight()));	
         }
     }
-    else if (get_CG_type() == Gaussian)
+    else if (getCGShape() == Gaussian)
     {
-        return (get_cutoff2() < dist2) ? 0.0 : get_CG_invvolume() * exp(-dist2 / (2.0 * get_w2()));
+        return (getCutoff2() < dist2) ? 0.0 : getCGInverseVolume() * exp(-dist2 / (2.0 * getCGWidthSquared()));
     }
-    else if (get_CG_type() == Polynomial)
+    else if (getCGShape() == Polynomial)
     {
-        return (get_cutoff2() < dist2) ? 0.0 : get_CG_invvolume() * evaluatePolynomial(sqrt(dist2) / get_cutoff());
+        return (getCutoff2() < dist2) ? 0.0 : getCGInverseVolume() * evaluatePolynomial(sqrt(dist2) / getCutoff());
     }
     else
     {
@@ -299,17 +299,17 @@ template<StatType T>
 Mdouble StatisticsPoint<T>::CG_function_1D(const Vec3D &PI)
 {
     Mdouble dist2 = getDistanceSquaredNonAveraged(PI);
-    if (get_CG_type() == HeavisideSphere)
+    if (getCGShape() == HeavisideSphere)
     {
-        return (get_w2() < dist2) ? 0.0 : (get_CG_invvolume() * constants::pi * (get_w2() - dist2));
+        return (getCGWidthSquared() < dist2) ? 0.0 : (getCGInverseVolume() * constants::pi * (getCGWidthSquared() - dist2));
     }
-    else if (get_CG_type() == Gaussian)
+    else if (getCGShape() == Gaussian)
     {
-        return (get_cutoff2() < dist2) ? 0.0 : get_CG_invvolume() * exp(-dist2 / (2.0 * get_w2()));
+        return (getCutoff2() < dist2) ? 0.0 : getCGInverseVolume() * exp(-dist2 / (2.0 * getCGWidthSquared()));
     }
-    else if (get_CG_type() == Polynomial)
+    else if (getCGShape() == Polynomial)
     {
-        return (get_cutoff2() < dist2) ? 0.0 : get_CG_invvolume() * evaluatePolynomial(sqrt(dist2) / get_cutoff());
+        return (getCutoff2() < dist2) ? 0.0 : getCGInverseVolume() * evaluatePolynomial(sqrt(dist2) / getCutoff());
     }
     else
     {
@@ -322,14 +322,14 @@ template<StatType T>
 Vec3D StatisticsPoint<T>::CG_gradient(const Vec3D &P, const Mdouble phi)
 {
     //CG_type_todo
-    if (get_CG_type() == Gaussian)
+    if (getCGShape() == Gaussian)
     {
-        return (P - Position) * (phi / get_w2());
+        return (P - Position) * (phi / getCGWidthSquared());
     }
-    else if (get_CG_type() == Polynomial)
+    else if (getCGShape() == Polynomial)
     {
-        Mdouble r = Vec3D::getLength(Position - P) / get_w();
-        return get_CG_invvolume() * evaluatePolynomialGradient(r) / r / get_w2() * (Position - P);
+        Mdouble r = Vec3D::getLength(Position - P) / getCGWidth();
+        return getCGInverseVolume() * evaluatePolynomialGradient(r) / r / getCGWidthSquared() * (Position - P);
     }
     else
     {
@@ -348,15 +348,15 @@ Vec3D StatisticsPoint<T>::CG_integral_gradient(Vec3D &P1, Vec3D &P2, Vec3D &P1_P
     Mdouble b = dotNonAveraged(P_P2, P1_P2_normal);
     Vec3D tangential = P_P1 - a * P1_P2_normal;
     //CG_type_todo
-    if (get_CG_type() == Gaussian)
+    if (getCGShape() == Gaussian)
     {
-        Mdouble wsq2 = sqrt(2 * get_w2());
-        Mdouble f = sqrt(2 * constants::pi * get_w2());
+        Mdouble wsq2 = sqrt(2 * getCGWidthSquared());
+        Mdouble f = sqrt(2 * constants::pi * getCGWidthSquared());
         return Vec3D(0.0, 0.0, (exp(-mathsFunc::square(a / wsq2)) - exp(-mathsFunc::square(b / wsq2))) / f / (P2.Z - P1.Z));
     }
-    else if (get_CG_type() == Polynomial)
+    else if (getCGShape() == Polynomial)
     {
-        double wn2 = get_w2() - dotNonAveraged(tangential, tangential);
+        double wn2 = getCGWidthSquared() - dotNonAveraged(tangential, tangential);
         if ((wn2 <= 0) | (a * fabs(a) >= wn2) | (b * fabs(b) <= -wn2))
         {
             return Vec3D(0, 0, 0);
@@ -365,30 +365,30 @@ Vec3D StatisticsPoint<T>::CG_integral_gradient(Vec3D &P1, Vec3D &P2, Vec3D &P1_P
         {
             ///\todo The gradient is not centered; thus there is a bias; follow the corrections in CG_integral_gradient_1D
             double wn = std::sqrt(wn2);
-            double w = get_w();
+            double w = getCGWidth();
             double delta = w * 1e-3;
-            double I = get_CG_invvolume() * evaluateIntegral(std::max(a, -wn) / w, std::min(b, wn) / w, tangential.getLength() / w) * w / P1_P2_distance;
+            double I = getCGInverseVolume() * evaluateIntegral(std::max(a, -wn) / w, std::min(b, wn) / w, tangential.getLength() / w) * w / P1_P2_distance;
             Vec3D delta_P_P1 = P_P1 + Vec3D(delta, 0, 0);
             Vec3D delta_P_P2 = P_P2 + Vec3D(delta, 0, 0);
             a = dotNonAveraged(delta_P_P1, P1_P2_normal);
             b = dotNonAveraged(delta_P_P2, P1_P2_normal);
             tangential = delta_P_P1 - a * P1_P2_normal;
-            wn = std::sqrt(get_w2() - dotNonAveraged(tangential, tangential));
-            double Ix = get_CG_invvolume() * evaluateIntegral(std::max(a, -wn) / w, std::min(b, wn) / w, tangential.getLength() / w) * w / P1_P2_distance;
+            wn = std::sqrt(getCGWidthSquared() - dotNonAveraged(tangential, tangential));
+            double Ix = getCGInverseVolume() * evaluateIntegral(std::max(a, -wn) / w, std::min(b, wn) / w, tangential.getLength() / w) * w / P1_P2_distance;
             delta_P_P1 = P_P1 + Vec3D(0, delta, 0);
             delta_P_P2 = P_P2 + Vec3D(0, delta, 0);
             a = dotNonAveraged(delta_P_P1, P1_P2_normal);
             b = dotNonAveraged(delta_P_P2, P1_P2_normal);
             tangential = delta_P_P1 - a * P1_P2_normal;
-            wn = std::sqrt(get_w2() - dotNonAveraged(tangential, tangential));
-            double Iy = get_CG_invvolume() * evaluateIntegral(std::max(a, -wn) / w, std::min(b, wn) / w, tangential.getLength() / w) * w / P1_P2_distance;
+            wn = std::sqrt(getCGWidthSquared() - dotNonAveraged(tangential, tangential));
+            double Iy = getCGInverseVolume() * evaluateIntegral(std::max(a, -wn) / w, std::min(b, wn) / w, tangential.getLength() / w) * w / P1_P2_distance;
             delta_P_P1 = P_P1 + Vec3D(0, 0, delta);
             delta_P_P2 = P_P2 + Vec3D(0, 0, delta);
             a = dotNonAveraged(delta_P_P1, P1_P2_normal);
             b = dotNonAveraged(delta_P_P2, P1_P2_normal);
             tangential = delta_P_P1 - a * P1_P2_normal;
-            wn = std::sqrt(get_w2() - dotNonAveraged(tangential, tangential));
-            double Iz = get_CG_invvolume() * evaluateIntegral(std::max(a, -wn) / w, std::min(b, wn) / w, tangential.getLength() / w) * w / P1_P2_distance;
+            wn = std::sqrt(getCGWidthSquared() - dotNonAveraged(tangential, tangential));
+            double Iz = getCGInverseVolume() * evaluateIntegral(std::max(a, -wn) / w, std::min(b, wn) / w, tangential.getLength() / w) * w / P1_P2_distance;
             return Vec3D(Ix - I, Iy - I, Iz - I) / delta;
         }
     }
@@ -396,7 +396,7 @@ Vec3D StatisticsPoint<T>::CG_integral_gradient(Vec3D &P1, Vec3D &P2, Vec3D &P1_P
     {
         return Vec3D(0, 0, 0);
     }
-    //~ if (get_CG_type()==Gaussian) return Vec3D(0.0,0.0,0.0);
+    //~ if (getCGShape()==Gaussian) return Vec3D(0.0,0.0,0.0);
     //~ else { std::cerr << "error in CG_function" << std::endl; exit(-1); }
 }
 
@@ -409,15 +409,15 @@ Mdouble StatisticsPoint<T>::CG_integral_gradient_1D(Vec3D &P1, Vec3D &P2, Vec3D 
     Mdouble b = dotNonAveraged(P_P2, P1_P2_normal);
     Vec3D tangential = P_P1 - a * P1_P2_normal;
     //CG_type_todo
-    if (get_CG_type() == Gaussian)
+    if (getCGShape() == Gaussian)
     {
-        Mdouble wsq2 = sqrt(2 * get_w2());
-        Mdouble f = sqrt(2 * constants::pi * get_w2());
+        Mdouble wsq2 = sqrt(2 * getCGWidthSquared());
+        Mdouble f = sqrt(2 * constants::pi * getCGWidthSquared());
         return (exp(-mathsFunc::square(a / wsq2)) - exp(-mathsFunc::square(b / wsq2))) / f / (P2.Z - P1.Z);
     }
-    else if (get_CG_type() == Polynomial)
+    else if (getCGShape() == Polynomial)
     {
-        double wn2 = get_w2() - dotNonAveraged(tangential, tangential);
+        double wn2 = getCGWidthSquared() - dotNonAveraged(tangential, tangential);
         if ((wn2 <= 0) | (a * fabs(a) >= wn2) | (b * fabs(b) <= -wn2))
         {
             return 0;
@@ -434,25 +434,25 @@ Mdouble StatisticsPoint<T>::CG_integral_gradient_1D(Vec3D &P1, Vec3D &P2, Vec3D 
         else
         {
             double wn = sqrt(wn2);
-            double w = get_w();
+            double w = getCGWidth();
             ///\todo Thomas: whats the best delta? Somewhere between 1e-7 and 1e-4
             double delta = w * 3e-6;
-            //double I =  get_CG_invvolume()*evaluateIntegral(std::max(a,-wn)/w,std::min(b,wn)/w,dot(tangential,tangential)/w)*w / P1_P2_distance;
+            //double I =  getCGInverseVolume()*evaluateIntegral(std::max(a,-wn)/w,std::min(b,wn)/w,dot(tangential,tangential)/w)*w / P1_P2_distance;
             Vec3D delta_P_P1 = P_P1 + Vec3D(delta, delta, delta);
             Vec3D delta_P_P2 = P_P2 + Vec3D(delta, delta, delta);
             a = dotNonAveraged(delta_P_P1, P1_P2_normal);
             b = dotNonAveraged(delta_P_P2, P1_P2_normal);
             tangential = delta_P_P1 - a * P1_P2_normal;
-            wn = sqrt(get_w2() - dotNonAveraged(tangential, tangential));
-            double I2 = get_CG_invvolume() * evaluateIntegral(std::max(a, -wn) / w, std::min(b, wn) / w, dotNonAveraged(tangential, tangential) / w) * w / P1_P2_distance;
+            wn = sqrt(getCGWidthSquared() - dotNonAveraged(tangential, tangential));
+            double I2 = getCGInverseVolume() * evaluateIntegral(std::max(a, -wn) / w, std::min(b, wn) / w, dotNonAveraged(tangential, tangential) / w) * w / P1_P2_distance;
             
             delta_P_P1 = P_P1 - Vec3D(delta, delta, delta);
             delta_P_P2 = P_P2 - Vec3D(delta, delta, delta);
             a = dotNonAveraged(delta_P_P1, P1_P2_normal);
             b = dotNonAveraged(delta_P_P2, P1_P2_normal);
             tangential = delta_P_P1 - a * P1_P2_normal;
-            wn = sqrt(get_w2() - dotNonAveraged(tangential, tangential));
-            double I1 = get_CG_invvolume() * evaluateIntegral(std::max(a, -wn) / w, std::min(b, wn) / w, dotNonAveraged(tangential, tangential) / w) * w / P1_P2_distance;
+            wn = sqrt(getCGWidthSquared() - dotNonAveraged(tangential, tangential));
+            double I1 = getCGInverseVolume() * evaluateIntegral(std::max(a, -wn) / w, std::min(b, wn) / w, dotNonAveraged(tangential, tangential) / w) * w / P1_P2_distance;
             
             return (I2 - I1) / (2. * delta);
         }
@@ -474,17 +474,17 @@ Mdouble StatisticsPoint<T>::CG_integral(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_norma
     //apply the cutoff in normal direction:
     Vec3D P_P1 = Position - P1;
     Mdouble a = dotNonAveraged(P_P1,P1_P2_normal);
-    if ( a > get_cutoff() ) return 0.0;
+    if ( a > getCutoff() ) return 0.0;
     Vec3D P_P2 = Position - P2;
     Mdouble b = dotNonAveraged(P_P2,P1_P2_normal);
-    if ( -b > get_cutoff() ) return 0.0;
+    if ( -b > getCutoff() ) return 0.0;
     //apply the cutoff in tangential direction:
     Vec3D tangential = P_P1 - a * P1_P2_normal;
-    if (dotNonAveraged(tangential,tangential)>get_cutoff2()) return 0.0;
+    if (dotNonAveraged(tangential,tangential)>getCutoff2()) return 0.0;
     //evaluate:
-    if (get_CG_type()==HeavisideSphere)
+    if (getCGShape()==HeavisideSphere)
     {   
-        Mdouble wn2 = get_w2() - dotNonAveraged(tangential,tangential);
+        Mdouble wn2 = getCGWidthSquared() - dotNonAveraged(tangential,tangential);
         if ((wn2<=0) | (a*fabs(a)>=wn2) | (b*fabs(b)<=-wn2))
         {   
             return 0;
@@ -492,32 +492,32 @@ Mdouble StatisticsPoint<T>::CG_integral(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_norma
         else
         {   
             Mdouble wn = sqrt(wn2);
-            return get_CG_invvolume()*( std::min(b,wn)-std::max(a,-wn) ) / P1_P2_distance;
+            return getCGInverseVolume()*( std::min(b,wn)-std::max(a,-wn) ) / P1_P2_distance;
         }
     }
-    else if (get_CG_type()==Gaussian)
+    else if (getCGShape()==Gaussian)
     { //Gaussian
         static Mdouble InvVolumeExp = compute_Gaussian_invvolume(gb->getSystemDimensions()-1);
-        static Mdouble w_sqrt_2 = constants::sqrt_2*get_w();
+        static Mdouble w_sqrt_2 = constants::sqrt_2*getCGWidth();
         static Mdouble P1_P2_distance_for_cutoff=-1, InvVolumeErf=-1;
         if (P1_P2_distance_for_cutoff!=P1_P2_distance)
         {   
             P1_P2_distance_for_cutoff = P1_P2_distance;
-            Mdouble amax = -get_cutoff();
-            Mdouble bmax = get_cutoff()+P1_P2_distance;
+            Mdouble amax = -getCutoff();
+            Mdouble bmax = getCutoff()+P1_P2_distance;
             InvVolumeErf = P1_P2_distance/(
                     erf(bmax/w_sqrt_2)*bmax+w_sqrt_2/constants::sqrt_pi*exp(-bmax*bmax/(w_sqrt_2*w_sqrt_2))
                     -erf(amax/w_sqrt_2)*amax-w_sqrt_2/constants::sqrt_pi*exp(-amax*amax/(w_sqrt_2*w_sqrt_2)));
-            // std::cout << "InvVolumeErf" << InvVolumeErf << " InvVolumeExp" << InvVolumeExp << " f" << get_CG_invvolume() * sqrt(2*constants::pi*get_w2()) << std::endl;
+            // std::cout << "InvVolumeErf" << InvVolumeErf << " InvVolumeExp" << InvVolumeExp << " f" << getCGInverseVolume() * sqrt(2*constants::pi*getCGWidthSquared()) << std::endl;
         }
-        Mdouble psi=exp(-dotNonAveraged(tangential,tangential)/(2.0*get_w2())) * InvVolumeExp
+        Mdouble psi=exp(-dotNonAveraged(tangential,tangential)/(2.0*getCGWidthSquared())) * InvVolumeExp
         * ( erf(b/w_sqrt_2) - erf(a/w_sqrt_2) ) * InvVolumeErf /2./P1_P2_distance;
         rpsi=Position*psi;
         return psi;
     }
-    else if (get_CG_type()==Polynomial)
+    else if (getCGShape()==Polynomial)
     {   
-        double wn2 = get_w2() - dotNonAveraged(tangential,tangential);
+        double wn2 = getCGWidthSquared() - dotNonAveraged(tangential,tangential);
         if ((wn2<=0) | (a*fabs(a)>=wn2) | (b*fabs(b)<=-wn2))
         {   
             return 0;
@@ -525,8 +525,8 @@ Mdouble StatisticsPoint<T>::CG_integral(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_norma
         else
         {   
             double wn = sqrt(wn2);
-            double w = get_w();
-            return get_CG_invvolume()*evaluateIntegral(std::max(a,-wn)/w,std::min(b,wn)/w,tangential.getLength()/w)*w / P1_P2_distance;
+            double w = getCGWidth();
+            return getCGInverseVolume()*evaluateIntegral(std::max(a,-wn)/w,std::min(b,wn)/w,tangential.getLength()/w)*w / P1_P2_distance;
         }
         //CG_type_todo
     }
@@ -541,19 +541,19 @@ Mdouble StatisticsPoint<T>::CG_integral_2D(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_no
     //apply the cutoff in normal direction:
     Vec3D P_P1 = Position - P1;
     Mdouble a = dotNonAveraged(P_P1, P1_P2_normal);
-    if (a > get_cutoff())
+    if (a > getCutoff())
         return 0.0;
     Vec3D P_P2 = Position - P2;
     Mdouble b = dotNonAveraged(P_P2, P1_P2_normal);
-    if (-b > get_cutoff())
+    if (-b > getCutoff())
         return 0.0;
     //apply the cutoff in tangential direction:
     Vec3D tangential = P_P1 - a * P1_P2_normal;
-    if (dotNonAveraged(tangential, tangential) > get_cutoff2())
+    if (dotNonAveraged(tangential, tangential) > getCutoff2())
         return 0.0;
-    if (get_CG_type() == HeavisideSphere)
+    if (getCGShape() == HeavisideSphere)
     {
-        Mdouble wn2 = get_w2() - dotNonAveraged(tangential, tangential);
+        Mdouble wn2 = getCGWidthSquared() - dotNonAveraged(tangential, tangential);
         if ((wn2 <= 0) || (a * fabs(a) >= wn2) || (b * fabs(b) <= -wn2))
         {
             return 0;
@@ -564,47 +564,47 @@ Mdouble StatisticsPoint<T>::CG_integral_2D(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_no
             //if the normal is parallel to the averaging direction
             if (std::max(fabs(a), fabs(b)) < 1e-20)
             {
-                return get_CG_invvolume() * 2 * wn;
+                return getCGInverseVolume() * 2 * wn;
             }
-            return get_CG_invvolume() / P1_P2_distance
+            return getCGInverseVolume() / P1_P2_distance
                     * (((b >= wn) ? (constants::pi * wn2 / 2.0) : (b * sqrt(wn2 - mathsFunc::square(b)) + wn2 * asin(b / wn)))
                             + ((a <= -wn) ? (constants::pi * wn2 / 2.0) : (-a * sqrt(wn2 - mathsFunc::square(a)) - wn2 * asin(a / wn))));
         }
     }
-    else if (get_CG_type() == Gaussian)
+    else if (getCGShape() == Gaussian)
     { //Gaussian
         if (dotNonAveraged(P1_P2_normal, P1_P2_normal) < 1e-20)
         {
             //since we average parallel to the force line, the CG integral is shaped like the CG function
             ///\todo add rpsi
-            return get_CG_invvolume() * exp(-dotNonAveraged(P_P1, P_P1) / (2.0 * get_w2()));
+            return getCGInverseVolume() * exp(-dotNonAveraged(P_P1, P_P1) / (2.0 * getCGWidthSquared()));
         }
         static Mdouble InvVolumeExp = compute_Gaussian_invvolume(gb->getSystemDimensions() - 2);
-        static Mdouble w_sqrt_2 = constants::sqrt_2 * get_w();
+        static Mdouble w_sqrt_2 = constants::sqrt_2 * getCGWidth();
         static Mdouble P1_P2_distance_for_cutoff = -1, InvVolumeErf = -1;
         if (P1_P2_distance_for_cutoff != P1_P2_distance)
         {
             P1_P2_distance_for_cutoff = P1_P2_distance;
-            Mdouble amax = -get_cutoff();
-            Mdouble bmax = get_cutoff() + P1_P2_distance;
+            Mdouble amax = -getCutoff();
+            Mdouble bmax = getCutoff() + P1_P2_distance;
             InvVolumeErf = P1_P2_distance / (
                     erf(bmax / w_sqrt_2) * bmax + w_sqrt_2 / constants::sqrt_pi * exp(-bmax * bmax / (w_sqrt_2 * w_sqrt_2))
                             - erf(amax / w_sqrt_2) * amax - w_sqrt_2 / constants::sqrt_pi * exp(-amax * amax / (w_sqrt_2 * w_sqrt_2))
                     ) / averagingVolume();
-            //std::cout << "InvVolumeErf" << InvVolumeErf << " InvVolumeExp" << InvVolumeExp << " f" << get_CG_invvolume() * sqrt(2*constants::pi*get_w2()) << std::endl;
+            //std::cout << "InvVolumeErf" << InvVolumeErf << " InvVolumeExp" << InvVolumeExp << " f" << getCGInverseVolume() * sqrt(2*constants::pi*getCGWidthSquared()) << std::endl;
         }
         //Note: use dot(t,t),  GetLength2(t), as dot only works on non-averaged directions
         //we also define rpsi
-        Mdouble psi = exp(-dotNonAveraged(tangential, tangential) / (2.0 * get_w2())) * InvVolumeExp
+        Mdouble psi = exp(-dotNonAveraged(tangential, tangential) / (2.0 * getCGWidthSquared())) * InvVolumeExp
                 * (erf(b / w_sqrt_2) - erf(a / w_sqrt_2)) * InvVolumeErf / 2. / P1_P2_distance;
-        Mdouble phi1 = get_CG_invvolume() * exp(-dotNonAveraged(P_P1, P_P1) / (2.0 * get_w2()));
-        Mdouble phi2 = get_CG_invvolume() * exp(-dotNonAveraged(P_P2, P_P2) / (2.0 * get_w2()));
-        rpsi_scalar = -a / P1_P2_distance * psi + get_w2() / P1_P2_distance / P1_P2_distance * (phi1 - phi2);
+        Mdouble phi1 = getCGInverseVolume() * exp(-dotNonAveraged(P_P1, P_P1) / (2.0 * getCGWidthSquared()));
+        Mdouble phi2 = getCGInverseVolume() * exp(-dotNonAveraged(P_P2, P_P2) / (2.0 * getCGWidthSquared()));
+        rpsi_scalar = -a / P1_P2_distance * psi + getCGWidthSquared() / P1_P2_distance / P1_P2_distance * (phi1 - phi2);
         return psi;
     }
-    else if (get_CG_type() == Polynomial)
+    else if (getCGShape() == Polynomial)
     {
-        double wn2 = get_w2() - dotNonAveraged(tangential, tangential);
+        double wn2 = getCGWidthSquared() - dotNonAveraged(tangential, tangential);
         if ((wn2 <= 0) | (a * fabs(a) >= wn2) | (b * fabs(b) <= -wn2))
         {
             return 0;
@@ -617,8 +617,8 @@ Mdouble StatisticsPoint<T>::CG_integral_2D(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_no
         else
         {
             double wn = sqrt(wn2);
-            double w = get_w();
-            return get_CG_invvolume() * evaluateIntegral(std::max(a, -wn) / w, std::min(b, wn) / w, tangential.getLength() / w) * w / P1_P2_distance;
+            double w = getCGWidth();
+            return getCGInverseVolume() * evaluateIntegral(std::max(a, -wn) / w, std::min(b, wn) / w, tangential.getLength() / w) * w / P1_P2_distance;
         }
         //CG_type_todo
     }
@@ -636,19 +636,19 @@ Mdouble StatisticsPoint<T>::CG_integral_1D(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_no
     //apply the cutoff in normal direction:
     Vec3D P_P1 = Position - P1;
     Mdouble a = dotNonAveraged(P_P1, P1_P2_normal);
-    if (a > get_cutoff())
+    if (a > getCutoff())
         return 0.0;
     Vec3D P_P2 = Position - P2;
     Mdouble b = dotNonAveraged(P_P2, P1_P2_normal);
-    if (-b > get_cutoff())
+    if (-b > getCutoff())
         return 0.0;
     //apply the cutoff in tangential direction:
     Vec3D tangential = P_P1 - a * P1_P2_normal;
-    if (dotNonAveraged(tangential, tangential) > get_cutoff2())
+    if (dotNonAveraged(tangential, tangential) > getCutoff2())
         return 0.0;
-    if (get_CG_type() == HeavisideSphere)
+    if (getCGShape() == HeavisideSphere)
     {
-        Mdouble wn2 = get_w2() - dotNonAveraged(tangential, tangential);
+        Mdouble wn2 = getCGWidthSquared() - dotNonAveraged(tangential, tangential);
         if ((wn2 <= 0) | (a * fabs(a) >= wn2) | (b * fabs(b) <= -wn2))
         {
             return 0;
@@ -658,44 +658,44 @@ Mdouble StatisticsPoint<T>::CG_integral_1D(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_no
             //if the normal is parallel to the averaging direction
             if (std::max(fabs(a), fabs(b)) < 1e-20)
             {
-                return get_CG_invvolume() * constants::pi * wn2;
+                return getCGInverseVolume() * constants::pi * wn2;
             }
             Mdouble wn = sqrt(wn2);
-            return get_CG_invvolume() / P1_P2_distance
+            return getCGInverseVolume() / P1_P2_distance
                     * (((b >= wn) ? (2.0 / 3.0 * constants::pi * wn2 * wn) : (b * constants::pi * (wn2 - mathsFunc::square(b) / 3.0)))
                             - ((a <= -wn) ? (-2.0 / 3.0 * constants::pi * wn2 * wn) : (a * constants::pi * (wn2 - mathsFunc::square(a) / 3.0))));
         }
     }
-    else if (get_CG_type() == Gaussian)
+    else if (getCGShape() == Gaussian)
     { //Gaussian
         if (fabs(b - a) < 1e-20)
         {
-            return get_CG_invvolume() * exp(-dotNonAveraged(P_P1, P_P1) / (2.0 * get_w2()));
+            return getCGInverseVolume() * exp(-dotNonAveraged(P_P1, P_P1) / (2.0 * getCGWidthSquared()));
         }
-        static Mdouble w_sqrt_2 = constants::sqrt_2 * get_w();
+        static Mdouble w_sqrt_2 = constants::sqrt_2 * getCGWidth();
         static Mdouble P1_P2_distance_for_cutoff = -1, InvVolumeErf = -1;
         if (P1_P2_distance_for_cutoff != P1_P2_distance)
         {
             P1_P2_distance_for_cutoff = P1_P2_distance;
-            Mdouble amax = -get_cutoff();
-            Mdouble bmax = get_cutoff() + P1_P2_distance;
+            Mdouble amax = -getCutoff();
+            Mdouble bmax = getCutoff() + P1_P2_distance;
             InvVolumeErf = P1_P2_distance / (
                     erf(bmax / w_sqrt_2) * bmax + w_sqrt_2 / constants::sqrt_pi * exp(-bmax * bmax / (w_sqrt_2 * w_sqrt_2))
                             - erf(amax / w_sqrt_2) * amax - w_sqrt_2 / constants::sqrt_pi * exp(-amax * amax / (w_sqrt_2 * w_sqrt_2))
                     ) / averagingVolume();
-            //std::cout << "InvVolumeErf" << InvVolumeErf << " InvVolumeExp" << InvVolumeExp << " f" << get_CG_invvolume() * sqrt(2*constants::pi*get_w2()) << std::endl;
+            //std::cout << "InvVolumeErf" << InvVolumeErf << " InvVolumeExp" << InvVolumeExp << " f" << getCGInverseVolume() * sqrt(2*constants::pi*getCGWidthSquared()) << std::endl;
         }
         //Note: use dot(t,t),  GetLength2(t), as dot only works on non-averaged directions
         Mdouble psi = (erf(b / w_sqrt_2) - erf(a / w_sqrt_2)) * InvVolumeErf / 2. / P1_P2_distance;
-        Mdouble phi1 = get_CG_invvolume() * exp(-dotNonAveraged(P_P1, P_P1) / (2.0 * get_w2()));
-        Mdouble phi2 = get_CG_invvolume() * exp(-dotNonAveraged(P_P2, P_P2) / (2.0 * get_w2()));
-        rpsi_scalar = -a / P1_P2_distance * psi + get_w2() / P1_P2_distance / P1_P2_distance * (phi1 - phi2);
+        Mdouble phi1 = getCGInverseVolume() * exp(-dotNonAveraged(P_P1, P_P1) / (2.0 * getCGWidthSquared()));
+        Mdouble phi2 = getCGInverseVolume() * exp(-dotNonAveraged(P_P2, P_P2) / (2.0 * getCGWidthSquared()));
+        rpsi_scalar = -a / P1_P2_distance * psi + getCGWidthSquared() / P1_P2_distance / P1_P2_distance * (phi1 - phi2);
         return psi;
     }
-    else if (get_CG_type() == Polynomial)
+    else if (getCGShape() == Polynomial)
     {
         //~ std::cout << setprecision(12) << P1_P2_normal << std::endl;
-        double wn2 = get_w2() - dotNonAveraged(tangential, tangential);
+        double wn2 = getCGWidthSquared() - dotNonAveraged(tangential, tangential);
         if ((wn2 <= 0) | (a * fabs(a) >= wn2) | (b * fabs(b) <= -wn2))
         {
             return 0;
@@ -712,8 +712,8 @@ Mdouble StatisticsPoint<T>::CG_integral_1D(Vec3D &P1, Vec3D &P2, Vec3D &P1_P2_no
         else
         {
             double wn = sqrt(wn2);
-            double w = get_w();
-            return get_CG_invvolume() * evaluateIntegral(std::max(a, -wn) / w, std::min(b, wn) / w, dotNonAveraged(tangential, tangential) / w) * w / P1_P2_distance;
+            double w = getCGWidth();
+            return getCGInverseVolume() * evaluateIntegral(std::max(a, -wn) / w, std::min(b, wn) / w, dotNonAveraged(tangential, tangential) / w) * w / P1_P2_distance;
         }
     }
     else
@@ -911,24 +911,24 @@ double StatisticsPoint<T>::compute_Gaussian_invvolume(int dim)
     }
     
     //this is the prefactor 1/V of phi(r)=1/V*exp(-|r|^2/w^2) for dim=1
-    double CG_invvolume_computed = 1. / (constants::sqrt_2 * constants::sqrt_pi * get_w());
+    double CG_invvolume_computed = 1. / (constants::sqrt_2 * constants::sqrt_pi * getCGWidth());
     //take into account the cutoff radius and the dimension of the problem
     if (dim == 3)
     {
         CG_invvolume_computed = mathsFunc::cubic(CG_invvolume_computed);
         //Wolfram alpha: erf(c/(sqrt(2) w))-(sqrt(2/pi) c e^(-c^2/(2 w^2)))/w
-        CG_invvolume_computed /= erf(get_cutoff() / (constants::sqrt_2 * get_w()))
-                - constants::sqrt_2 / constants::sqrt_pi * get_cutoff() / get_w() * exp(-get_cutoff2() / (2 * get_w2()));
+        CG_invvolume_computed /= erf(getCutoff() / (constants::sqrt_2 * getCGWidth()))
+                - constants::sqrt_2 / constants::sqrt_pi * getCutoff() / getCGWidth() * exp(-getCutoff2() / (2 * getCGWidthSquared()));
     }
     else if (dim == 2)
     {
         CG_invvolume_computed = mathsFunc::square(CG_invvolume_computed);
         //Wolfram alpha: integrate(x*exp(-x^2/(2w^2)),{x,0,c})/integrate(x*exp(-x^2/(2w^2)),{x,0,inf})=1-e^(-c^2/(2 w^2))
-        CG_invvolume_computed /= 1 - exp(-get_cutoff2() / (2 * get_w2()));
+        CG_invvolume_computed /= 1 - exp(-getCutoff2() / (2 * getCGWidthSquared()));
     }
     else
     {
-        CG_invvolume_computed /= erf(get_cutoff() / (constants::sqrt_2 * get_w()));
+        CG_invvolume_computed /= erf(getCutoff() / (constants::sqrt_2 * getCGWidth()));
     }
     return CG_invvolume_computed;
 }
@@ -937,30 +937,30 @@ template<StatType T>
 void StatisticsPoint<T>::set_Heaviside_invvolume()
 {
     ///\todo{Thomas: check 2d case}
-    CG_invvolume = 1.0 / (4.0 / 3.0 * constants::pi * sqrt(get_w2()) * get_w2());
+    CG_invvolume = 1.0 / (4.0 / 3.0 * constants::pi * sqrt(getCGWidthSquared()) * getCGWidthSquared());
 }
 
 template<StatType T>
 void StatisticsPoint<T>::set_Polynomial_invvolume(int dim)
 {
     if (dim == 3)
-        CG_invvolume = 1.0 / (sqrt(get_w2()) * get_w2());
+        CG_invvolume = 1.0 / (sqrt(getCGWidthSquared()) * getCGWidthSquared());
     else if (dim == 2)
-        CG_invvolume = 1.0 / get_w2();
+        CG_invvolume = 1.0 / getCGWidthSquared();
     else
-        CG_invvolume = 1.0 / sqrt(get_w2());
+        CG_invvolume = 1.0 / sqrt(getCGWidthSquared());
 }
 
-template<StatType T> void StatisticsPoint<T>::set_CG_invvolume()
+template<StatType T> void StatisticsPoint<T>::setCGInverseVolume()
 {
-    if (get_CG_type() == HeavisideSphere)
+    if (getCGShape() == HeavisideSphere)
     {
         set_Heaviside_invvolume();
     }
-    else if (get_CG_type() == Gaussian)
+    else if (getCGShape() == Gaussian)
     {
         set_Gaussian_invvolume (nonaveragedDim());
-        } else if (get_CG_type()==Polynomial)
+        } else if (getCGShape()==Polynomial)
         {   
             set_Polynomial_invvolume(nonaveragedDim());
         }
@@ -1098,10 +1098,10 @@ template<> Mdouble StatisticsPoint<RZ>::CG_function(const Vec3D &PI)
     Mdouble R2 = mathsFunc::square(PI.X) + mathsFunc::square(PI.Y);
     Mdouble RI2 = mathsFunc::square(Position.X) + mathsFunc::square(Position.Y);
     Mdouble Z2 = mathsFunc::square(PI.Z - Position.Z);
-    if (get_CG_type() == Gaussian)
+    if (getCGShape() == Gaussian)
     {
-        return (get_cutoff2() < dist2) ? 0.0 : get_CG_invvolume()
-                                                 * exp(-(R2 + RI2 + Z2) / (2.0 * get_w2())) * besselFunc::I0(sqrt(R2 * RI2) / get_w2());
+        return (getCutoff2() < dist2) ? 0.0 : getCGInverseVolume()
+                                                 * exp(-(R2 + RI2 + Z2) / (2.0 * getCGWidthSquared())) * besselFunc::I0(sqrt(R2 * RI2) / getCGWidthSquared());
     }
     else
     {
@@ -1119,10 +1119,10 @@ template<> Mdouble StatisticsPoint<R>::CG_function(const Vec3D &PI)
     Mdouble dist2 = getDistanceSquaredNonAveraged(PI);
     Mdouble R2 = mathsFunc::square(PI.X) + mathsFunc::square(PI.Y);
     Mdouble RI2 = mathsFunc::square(Position.X) + mathsFunc::square(Position.Y);
-    if (get_CG_type() == Gaussian)
+    if (getCGShape() == Gaussian)
     {
-        return (get_cutoff2() < dist2) ? 0.0 : get_CG_invvolume()
-                                                 * exp(-(R2 + RI2) / (2.0 * get_w2())) * besselFunc::I0(sqrt(R2 * RI2) / get_w2());
+        return (getCutoff2() < dist2) ? 0.0 : getCGInverseVolume()
+                                                 * exp(-(R2 + RI2) / (2.0 * getCGWidthSquared())) * besselFunc::I0(sqrt(R2 * RI2) / getCGWidthSquared());
     }
     else
     {
@@ -1162,15 +1162,15 @@ template<> Mdouble StatisticsPoint<Z>::CG_function(const Vec3D &PI)
 }
 template<> Mdouble StatisticsPoint<O>::CG_function(const Vec3D&)
 {
-    return get_CG_invvolume();
+    return getCGInverseVolume();
 }
 
 template<> Vec3D StatisticsPoint<YZ>::CG_gradient(const Vec3D &P, const Mdouble phi)
 {
     //CG_type_todo
-    if (get_CG_type() == Gaussian)
+    if (getCGShape() == Gaussian)
     {
-        return Vec3D(0.0, P.Y - Position.Y, P.Z - Position.Z) * (phi / get_w2());
+        return Vec3D(0.0, P.Y - Position.Y, P.Z - Position.Z) * (phi / getCGWidthSquared());
     }
     else
     {
@@ -1181,9 +1181,9 @@ template<> Vec3D StatisticsPoint<YZ>::CG_gradient(const Vec3D &P, const Mdouble 
 template<> Vec3D StatisticsPoint<XZ>::CG_gradient(const Vec3D &P, const Mdouble phi)
 {
     //CG_type_todo
-    if (get_CG_type() == Gaussian)
+    if (getCGShape() == Gaussian)
     {
-        return Vec3D(P.X - Position.X, 0.0, P.Z - Position.Z) * (phi / get_w2());
+        return Vec3D(P.X - Position.X, 0.0, P.Z - Position.Z) * (phi / getCGWidthSquared());
     }
     else
     {
@@ -1194,9 +1194,9 @@ template<> Vec3D StatisticsPoint<XZ>::CG_gradient(const Vec3D &P, const Mdouble 
 template<> Vec3D StatisticsPoint<XY>::CG_gradient(const Vec3D &P, const Mdouble phi)
 {
     //CG_type_todo
-    if (get_CG_type() == Gaussian)
+    if (getCGShape() == Gaussian)
     {
-        return Vec3D(P.X - Position.X, P.Y - Position.Y, 0.0) * (phi / get_w2());
+        return Vec3D(P.X - Position.X, P.Y - Position.Y, 0.0) * (phi / getCGWidthSquared());
     }
     else
     {
@@ -1208,14 +1208,14 @@ template<> Vec3D StatisticsPoint<XY>::CG_gradient(const Vec3D &P, const Mdouble 
 template<> Vec3D StatisticsPoint<X>::CG_gradient(const Vec3D &P, const Mdouble phi)
 {
     //CG_type_todo
-    if (get_CG_type() == Gaussian)
+    if (getCGShape() == Gaussian)
     {
-        return Vec3D((P.X - Position.X) * (phi / get_w2()), 0.0, 0.0);
+        return Vec3D((P.X - Position.X) * (phi / getCGWidthSquared()), 0.0, 0.0);
     }
-    else if (get_CG_type() == Polynomial)
+    else if (getCGShape() == Polynomial)
     {
-        Mdouble r = fabs(Position.X - P.X) / get_w();
-        return Vec3D(get_CG_invvolume() * evaluatePolynomialGradient(r) / r / get_w2() * (Position.X - P.X), 0, 0);
+        Mdouble r = fabs(Position.X - P.X) / getCGWidth();
+        return Vec3D(getCGInverseVolume() * evaluatePolynomialGradient(r) / r / getCGWidthSquared() * (Position.X - P.X), 0, 0);
     }
     else
     {
@@ -1226,14 +1226,14 @@ template<> Vec3D StatisticsPoint<X>::CG_gradient(const Vec3D &P, const Mdouble p
 template<> Vec3D StatisticsPoint<Y>::CG_gradient(const Vec3D &P, const Mdouble phi)
 {
     //CG_type_todo
-    if (get_CG_type() == Gaussian)
+    if (getCGShape() == Gaussian)
     {
-        return Vec3D(0.0, (P.Y - Position.Y) * (phi / get_w2()), 0.0);
+        return Vec3D(0.0, (P.Y - Position.Y) * (phi / getCGWidthSquared()), 0.0);
     }
-    else if (get_CG_type() == Polynomial)
+    else if (getCGShape() == Polynomial)
     {
-        Mdouble r = fabs(Position.Y - P.Y) / get_w();
-        return Vec3D(0, get_CG_invvolume() * evaluatePolynomialGradient(r) / r / get_w2() * (Position.Y - P.Y), 0);
+        Mdouble r = fabs(Position.Y - P.Y) / getCGWidth();
+        return Vec3D(0, getCGInverseVolume() * evaluatePolynomialGradient(r) / r / getCGWidthSquared() * (Position.Y - P.Y), 0);
     }
     else
     {
@@ -1244,14 +1244,14 @@ template<> Vec3D StatisticsPoint<Y>::CG_gradient(const Vec3D &P, const Mdouble p
 template<> Vec3D StatisticsPoint<Z>::CG_gradient(const Vec3D &P, const Mdouble phi)
 {
     //CG_type_todo
-    if (get_CG_type() == Gaussian)
+    if (getCGShape() == Gaussian)
     {
-        return Vec3D(0.0, 0.0, (P.Z - Position.Z) * (phi / get_w2()));
+        return Vec3D(0.0, 0.0, (P.Z - Position.Z) * (phi / getCGWidthSquared()));
     }
-    else if (get_CG_type() == Polynomial)
+    else if (getCGShape() == Polynomial)
     {
-        Mdouble r = fabs(Position.Z - P.Z) / get_w();
-        return Vec3D(0, 0, get_CG_invvolume() * evaluatePolynomialGradient(r) / r / get_w2() * (Position.Z - P.Z));
+        Mdouble r = fabs(Position.Z - P.Z) / getCGWidth();
+        return Vec3D(0, 0, getCGInverseVolume() * evaluatePolynomialGradient(r) / r / getCGWidthSquared() * (Position.Z - P.Z));
     }
     else
     {
@@ -1271,9 +1271,9 @@ template<> Vec3D StatisticsPoint<O>::CG_gradient(const Vec3D&, const Mdouble)
 //~ Mdouble a = dot(P_P1,P1_P2_normal);
 //~ Mdouble b = dot(P_P2,P1_P2_normal);
 //~ Vec3D tangential = P_P1 - a * P1_P2_normal;
-//~ if (get_CG_type()==Gaussian) {
-//~ Mdouble wsq2 = sqrt(2*get_w2());
-//~ Mdouble f = sqrt(2*constants::pi*get_w2());
+//~ if (getCGShape()==Gaussian) {
+//~ Mdouble wsq2 = sqrt(2*getCGWidthSquared());
+//~ Mdouble f = sqrt(2*constants::pi*getCGWidthSquared());
 //~ return Vec3D(0.0,0.0,(exp(-mathsFunc::square(a/wsq2))-exp(-mathsFunc::square(b/wsq2)))/f/(P2.Z-P1.Z));
 //~ }	else { std::cerr << "error in CG_function" << std::endl; exit(-1); }
 //~ }
@@ -1346,7 +1346,7 @@ template<> Mdouble StatisticsPoint<Z>::CG_integral(Vec3D &P1, Vec3D &P2, Vec3D &
 }
 template<> Mdouble StatisticsPoint<O>::CG_integral(Vec3D &P1, Vec3D &P2 UNUSED, Vec3D &P1_P2_normal UNUSED, Mdouble P1_P2_distance UNUSED, Vec3D& rpsi)
 {   
-    Mdouble psi = get_CG_invvolume();
+    Mdouble psi = getCGInverseVolume();
     rpsi=P1*psi; ///\todo Is that right?
     return psi;
 }

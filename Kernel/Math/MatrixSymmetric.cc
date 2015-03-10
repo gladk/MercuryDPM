@@ -17,6 +17,7 @@
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
 #include "MatrixSymmetric.h"
+#include "ExtendedMath.h"
 
 MatrixSymmetric3D::operator Matrix3D() const
 {

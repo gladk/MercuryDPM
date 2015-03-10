@@ -17,12 +17,10 @@
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
 ///todo{This code is not working as is wanted}
-#include<iostream>
-#include <Species/SlidingFrictionSpecies.h>
-#include <Species/LinearReversibleAdhesiveSpecies.h>
-#include <Species/LinearViscoelasticSpecies.h>
+#include <iostream>
 #include "Mercury2D.h"
 #include "Particles/BaseParticle.h"
+#include "Species/LinearViscoelasticSlidingFrictionLinearReversibleAdhesiveSpecies.h"
 #include "Walls/InfiniteWall.h"
 
 /// In this file 32^2 particles with the same velocity are placed in a
@@ -80,8 +78,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 	
 	///Start off my solving the default problem
  	my_problem_HGRID problem;
-    auto species = new Species<LinearViscoelasticSpecies,SlidingFrictionSpecies,LinearReversibleAdhesiveSpecies>;
-    problem.speciesHandler.addObject(species);
+    auto species = problem.speciesHandler.copyAndAddObject(LinearViscoelasticSlidingFrictionLinearReversibleAdhesiveSpecies());
     species->setDensity(2000);
     species->setDissipation(0.01);
     species->setStiffness(1e4);

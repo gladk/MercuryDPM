@@ -19,6 +19,7 @@
 #include "BaseWall.h"
 #include "DPMBase.h"
 #include "WallHandler.h"
+#include "Species/BaseSpecies.h"
 
 BaseWall::BaseWall()
 {
@@ -58,27 +59,6 @@ void BaseWall::clear()
     std::cout << "BaseWall::clear(), this function shouldn't be called" << std::endl;
 }
 
-///Allows the wall to be moved to a new position
-void BaseWall::move(Mdouble position_ UNUSED)
-{
-    std::cout << "BaseWall:move(Mdouble position_ UNUSED), this function shouldn't be called" << std::endl;
-}
-
-///Allows the wall to be moved to a new position (also orthogonal to the normal), and setting the velocity
-void BaseWall::move(Vec3D velocity, Mdouble timeStep)
-{
-    setVelocity(velocity);
-    setPosition(getPosition()+velocity * timeStep);
-}
-
-
-///Allows the wall to be moved to a new position (also orthogonal to the normal), and setting the velocity
-void BaseWall::move_time(Mdouble dt UNUSED)
-{
-    std::cout << "BaseWall::move_time(Mdouble dt UNUSED), this function shouldn't be called" << std::endl;
-}
-
-
 void BaseWall::setHandler(WallHandler* handler)
 {
     handler_ = handler;
@@ -99,5 +79,22 @@ void BaseWall::setIndSpecies(unsigned int indSpecies)
     else
     {
         BaseInteractable::setIndSpecies(indSpecies);
+    }
+}
+
+void BaseWall::setSpecies(const BaseSpecies* species)
+{
+    BaseInteractable::setSpecies(species);
+
+    //set pointer to the handler, which is needed to retrieve species information
+    if (getHandler()== nullptr)
+    {
+        SpeciesHandler* sH = species->getHandler();
+        if (sH!= nullptr)
+        {
+            DPMBase* dB = sH->getDPMBase();
+            if (dB!= nullptr)
+                setHandler(&dB->wallHandler);
+        }
     }
 }

@@ -53,37 +53,37 @@ int main(int argc, char *argv[]) {
  	if (T==XY) { // averaging in z-direction
  		std::cout << "averaging in z-direction" << std::endl;
  		StatisticsVector<XY> stats(argc, argv);
- 		stats.set_periodicWalls(false);
+ 		stats.setDoPeriodicWalls(false);
  		stats.statistics_from_p3();
 	} else if (T==XZ) { // averaging in y-direction
 		std::cout << "averaging in y-direction" << std::endl;
 		StatisticsVector<XZ> stats(argc, argv);
-		stats.set_periodicWalls(false);
+		stats.setDoPeriodicWalls(false);
 		stats.statistics_from_p3();
  	} else if (T==YZ) { // averaging in x-direction
  		std::cout << "averaging in x-direction" << std::endl;
  		StatisticsVector<YZ> stats(argc, argv);
- 		stats.set_periodicWalls(false);
+ 		stats.setDoPeriodicWalls(false);
  		stats.statistics_from_p3();
  	} else if (T==X) { // averaging in yz-direction
  		std::cout << "averaging in yz-direction" << std::endl;
  		StatisticsVector<X> stats(argc, argv);
- 		stats.set_periodicWalls(false);
+ 		stats.setDoPeriodicWalls(false);
  		stats.statistics_from_p3();
 	} else if (T==Y) { // averaging in yz-direction
  		std::cout << "averaging in xz-direction" << std::endl;
  		StatisticsVector<Y> stats(argc, argv);
- 		stats.set_periodicWalls(false);
+ 		stats.setDoPeriodicWalls(false);
  		stats.statistics_from_p3();
 	} else if (T==Z) { // averaging in yz-direction
 		std::cout << "averaging in xy-direction" << std::endl;
 		StatisticsVector<Z> stats(argc, argv);
-		stats.set_periodicWalls(false);
+		stats.setDoPeriodicWalls(false);
 		stats.statistics_from_p3();
  	} else if (T==O) { // averaging in all directions
  		std::cout << "averaging in xyz-direction" << std::endl;
  		StatisticsVector<O> stats(argc, argv);
- 		stats.set_periodicWalls(false);
+ 		stats.setDoPeriodicWalls(false);
  		stats.statistics_from_p3();
 // 	} else if (T==RAZ) { //no averaging
 // 		std::cout << "cylindrical, no averaging" << std::endl;

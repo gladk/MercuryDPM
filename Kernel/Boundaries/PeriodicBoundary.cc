@@ -149,7 +149,7 @@ bool PeriodicBoundary::isClosestToLeftBoundary() const
 }
 
 /*
- void PeriodicBoundary::get_close_together(Vec3D &P, Vec3D &Q)
+ void PeriodicBoundary::getCloseTogether(Vec3D &P, Vec3D &Q)
  {
  Mdouble PQdotn = Vec3D::Dot(P - Q, normal_);
  Mdouble shift_norm2 = shift.GetLength2();
@@ -201,7 +201,7 @@ std::string PeriodicBoundary::getName() const
 }
 
 /*
- Vec3D& PeriodicBoundary::get_normal()
+ Vec3D& PeriodicBoundary::getNormal()
  {
  return normal_;
  }

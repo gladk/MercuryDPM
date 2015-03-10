@@ -75,7 +75,7 @@ void CircularPeriodicBoundary::createPeriodicParticles(BaseParticle *P, Particle
     //Check if the particle is close to it's inner Radius or is is close to zero alpha (small y)
     if (i > 0 && (R - (P->getInteractionRadius() + pH.getLargestParticle()->getInteractionRadius()) < pow(2.0, i - 1) * innerRadius_ || P->getPosition().Y < (P->getInteractionRadius() + pH.getLargestParticle()->getInteractionRadius())))
     {
-        //std::cout<<"Going to shift because "<<R-P->get_Radius()<<"<"<<pow(2,i-1)*innerRadius<<" or "<<P->getPosition().Y<<"<"<<P->get_Radius()<<std::endl;
+        //std::cout<<"Going to shift because "<<R-P->getRadius()<<"<"<<pow(2,i-1)*innerRadius<<" or "<<P->getPosition().Y<<"<"<<P->getRadius()<<std::endl;
         //std::cout<<*P<<" has been shifted"<<std::endl;
         
         BaseParticle* F0 = P->copy();
@@ -122,7 +122,7 @@ bool CircularPeriodicBoundary::checkBoundaryAfterParticleMoved(BaseParticle *P, 
     
     if (i > 0 && i > oldI) //Particle moves outward so it may have to be deleted
     {
-        //std::cout<<"Particle="<<P->get_Index()<<" moving outward with alpha="<<alpha<<" and pieSize="<<pieSize<<" ";
+        //std::cout<<"Particle="<<P->getIndex()<<" moving outward with alpha="<<alpha<<" and pieSize="<<pieSize<<" ";
         if (alpha < 0 || alpha > pieSize)
         {
             if (alpha > 2.0 * pieSize)
@@ -143,7 +143,7 @@ bool CircularPeriodicBoundary::checkBoundaryAfterParticleMoved(BaseParticle *P, 
     }
     else if (i >= 0 && i < oldI) //Particle moves inward so it has to be coppied
     {
-        //std::cout<<"Particle="<<P->get_Index()<<" moving inward and is thus coppied with alpha="<<alpha<<" and pieSize="<<pieSize<<std::endl;
+        //std::cout<<"Particle="<<P->getIndex()<<" moving inward and is thus coppied with alpha="<<alpha<<" and pieSize="<<pieSize<<std::endl;
         //std::cout<<"i="<<i<<" oldI="<<oldI<<" R="<<R<<" oldR="<<oldR<<std::endl;
         //std::cout<<"Position="<<P->getPosition()<<" Displacement="<<P->get_Displacement()<<std::endl;
         BaseParticle* F0 = P->copy();
@@ -170,12 +170,12 @@ bool CircularPeriodicBoundary::checkBoundaryAfterParticleMoved(BaseParticle *P, 
     }
     else if (i > 0 && alpha < 0)
     {
-        //std::cout<<"Particle="<<P->get_Index()<<" i="<<i<<" R="<<R<<" alpha="<<alpha<<" positive rotated pieSize="<<pieSize<<std::endl;			
+        //std::cout<<"Particle="<<P->getIndex()<<" i="<<i<<" R="<<R<<" alpha="<<alpha<<" positive rotated pieSize="<<pieSize<<std::endl;			
         rotateParticle(P, pieSize);
     }
     else if (i > 0 && alpha > pieSize)
     {
-        //std::cout<<"Particle="<<P->get_Index()<<" i="<<i<<" R="<<R<<" alpha="<<alpha<<" negative rotated pieSize="<<pieSize<<std::endl;			
+        //std::cout<<"Particle="<<P->getIndex()<<" i="<<i<<" R="<<R<<" alpha="<<alpha<<" negative rotated pieSize="<<pieSize<<std::endl;			
         rotateParticle(P, -pieSize);
     }
     return false;

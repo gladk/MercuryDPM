@@ -77,7 +77,7 @@ public:
 int main(int argc UNUSED, char *argv[] UNUSED)
 {
     NewtonsCradleSelftest problem;
-    problem.setName("CubicPackingSelftest");
+    problem.setName("CubicPackingSelfTest");
     auto species=problem.speciesHandler.copyAndAddObject(LinearViscoelasticSpecies());
 
     //set the number of particles
@@ -91,15 +91,15 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     problem.setSaveCount(1000);
     problem.solve();
 
-    StatisticsVector<Z> stats("CubicPackingSelftest");
+    StatisticsVector<Z> stats("CubicPackingSelfTest");
     double n = 500;
-    stats.set_n(n);
-    stats.set_w(.1);
-    stats.set_superexact(false);
-    stats.set_CG_type("Gaussian");
-    stats.set_tminStat(problem.getTimeMax() * .999999);
+    stats.setN(n);
+    stats.setCGWidth(.1);
+    stats.setSuperExact(false);
+    stats.setCGShape("Gaussian");
+    stats.setCGTimeMin(problem.getTimeMax() * .999999);
     stats.setTimeMaxStat(1e20);
-    stats.set_verbosity(0);
+    stats.setVerbosityLevel(0);
     stats.statistics_from_fstat_and_data();
     /// should give you Density 1
 

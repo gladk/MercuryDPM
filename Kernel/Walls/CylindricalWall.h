@@ -85,7 +85,7 @@ public:
    /*!
     * \brief access function for radius
     */
-    double get_Radius();
+    double getRadius() const;
 
     /*!
      * \brief

@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "MercuryBase.h"
+#include "Math/Helpers.h"
 #include "Particles/BaseParticle.h"
 #include "Walls/BaseWall.h"
 

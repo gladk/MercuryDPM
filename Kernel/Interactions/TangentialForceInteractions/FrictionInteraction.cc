@@ -16,8 +16,8 @@
 // Copyright 2013 The Mercury Developers Team
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
-#include "Interactions/FrictionInteraction.h"
-#include "Species/FrictionSpecies.h"
+#include "FrictionInteraction.h"
+#include "Species/TangentialForceSpecies/FrictionSpecies.h"
 #include "Particles/BaseParticle.h"
 #include "InteractionHandler.h"
 #include <iomanip>
@@ -73,33 +73,15 @@ void FrictionInteraction::computeForce()
     //If tangential forces are present
     if (getAbsoluteNormalForce() == 0.0) return;
 
-    Mdouble reducedDiameter;
-    BaseParticle* PParticle = dynamic_cast<BaseParticle*>(getP());
-    BaseParticle* IParticle = dynamic_cast<BaseParticle*>(getI());
-    if (PParticle==nullptr)
-    {
-        std::cerr << "FrictionInteraction::computeForce(): first interactable P is not a particle" << std::endl;
-        exit(-1);
-    }
 
     if (species->getRollingFrictionCoefficient() != 0.0)
     {
         if (species->getRollingStiffness() != 0.0)
         {
-            //Compute the reduced diameter
-            if (IParticle==nullptr) //if particle-wall
-            {
-                reducedDiameter = 2.0 * PParticle->getRadius() - getOverlap();
-            }
-            else
-            {
-                Mdouble diameterP = 2.0 * PParticle->getRadius() - getOverlap();
-                Mdouble diameterI = 2.0 * IParticle->getRadius() - getOverlap();
-                reducedDiameter = diameterP * diameterI / (diameterP + diameterI);
-            }
+            Mdouble effectiveDiameter = 2.0*getEffectiveCorrectedRadius();
 
             //From Luding2008, objective rolling velocity (eq 15) w/o 2.0!
-            Vec3D rollingRelativeVelocity = -reducedDiameter * Vec3D::cross(getNormal(), getP()->getAngularVelocity() - getI()->getAngularVelocity());
+            Vec3D rollingRelativeVelocity = -effectiveDiameter * Vec3D::cross(getNormal(), getP()->getAngularVelocity() - getI()->getAngularVelocity());
 
             //used to Integrate the spring
             rollingSpringVelocity_= rollingRelativeVelocity;
@@ -124,7 +106,7 @@ void FrictionInteraction::computeForce()
                 rollingSpring_ = -(rollingForce + species->getRollingDissipation() * rollingRelativeVelocity) / species->getRollingStiffness();
             }
             //Add (virtual) rolling force to torque
-            addTorque(reducedDiameter * Vec3D::cross(getNormal(), rollingForce));
+            addTorque(effectiveDiameter * Vec3D::cross(getNormal(), rollingForce));
         }
         else //if no spring stiffness is set
         {
@@ -137,21 +119,11 @@ void FrictionInteraction::computeForce()
     {
         if (species->getTorsionStiffness() != 0.0)
         {
-            ///\todo TW: Why do we not use the corrected diameter here, as in the rolling case?
-            //Compute the reduced diameter
-            if (IParticle==0) //if particle-wall
-            {
-                reducedDiameter = 2.0 * PParticle->getRadius();
-            }
-            else
-            {
-                Mdouble diameterP = 2.0 * PParticle->getRadius();
-                Mdouble diameterI = 2.0 * IParticle->getRadius();
-                reducedDiameter = diameterP * diameterI / (diameterP + diameterI);
-            }
+            ///\todo TW: Why do we not use the corrected diameter here, as in the rolling case? And check if Stefan uses radius or diameter
+            Mdouble effectiveDiameter = 2.0*getEffectiveRadius();
 
             //From Luding2008, spin velocity (eq 16) w/o 2.0!
-            Vec3D torsionRelativeVelocity =reducedDiameter * Vec3D::dot(getNormal(), getP()->getAngularVelocity() - getI()->getAngularVelocity()) * getNormal();
+            Vec3D torsionRelativeVelocity = effectiveDiameter * Vec3D::dot(getNormal(), getP()->getAngularVelocity() - getI()->getAngularVelocity()) * getNormal();
 
             //Integrate the spring
             torsionSpringVelocity_= torsionRelativeVelocity;
@@ -176,7 +148,7 @@ void FrictionInteraction::computeForce()
                 torsionSpring_ = -(torsionForce + species->getTorsionDissipation() * torsionRelativeVelocity) / species->getTorsionStiffness();
             }
             //Add (virtual) rolling force to torque
-            addTorque(reducedDiameter * torsionForce);
+            addTorque(effectiveDiameter * torsionForce);
         }
         else //if no spring stiffness is set
         {

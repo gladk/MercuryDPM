@@ -108,7 +108,7 @@ std::string CylindricalWall::getName() const
 }
 
 ///access function for radius
-double CylindricalWall::get_Radius()
+double CylindricalWall::getRadius() const
 {
     return radius_;
 }

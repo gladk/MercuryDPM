@@ -122,11 +122,6 @@ public:
     void setSaveCount(unsigned int saveCount);
 
     /*!
-     * \brief Sets File::saveCurrentTimestep_ for all file types (ene, data, fstat, restart, stat)
-     */
-    void setSaveCurrentTimestep(bool saveCurrentTimestep);
-
-    /*!
      * \brief 
      */
     void setFileType(FileType fileType);
@@ -146,6 +141,12 @@ public:
     void read(std::istream& is);
 
     void write(std::ostream& os) const;
+
+    void openFiles();
+
+    void closeFiles();
+
+    void setNextSavedTimeStep(unsigned int nextSavedTimeStep);
 
 private:
     /*!

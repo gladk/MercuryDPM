@@ -106,7 +106,7 @@ public:
 
     /*
     ///shift P such that it is closest to Q
-    void get_close_together(Vec3D &P, Vec3D &Q);
+    void getCloseTogether(Vec3D &P, Vec3D &Q);
     */
     
   /*!
@@ -130,7 +130,7 @@ public:
     virtual std::string getName() const;
     
     /*
-    Vec3D& get_normal();
+    Vec3D& getNormal();
      */
     
   /*!

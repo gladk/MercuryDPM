@@ -60,9 +60,10 @@ public:
 		particleHandler.copyAndAddObject(P1);
 				
 		double mass=1.0;
-        setTimeStep(species->computePlasticTimeStep(mass));
-		setTimeMax(getTimeStep()*50.0);
+        setTimeStep(species->computePlasticTimeStep(mass)*2.0);
+		setTimeMax(getTimeStep()*100.0);
         setFileType(FileType::ONE_FILE);
+        setSaveCount(1);
 	}
 
     void set_chi(double new_){chi=new_;}
@@ -81,33 +82,24 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     PlasticForceUnitTestProblem.setParticleDimensions(3);
     PlasticForceUnitTestProblem.setSystemDimensions(3);
 
-    logger.log(Log::INFO,"Testing particle particles collision for elastic plastic forces. \n This will be done for serveral values of scalled relavtive velcoity chi");
+    logger.log(Log::INFO,"Testing particle particles collision for elastic plastic forces. \n"
+        "This will be done for serveral values of scaled relative velocity chi");
     
     //PlasticForceUnitTestProblem.getRestartFile().getFstream().precision(20);
     
 	//Set up constant data that will be used
     const std::vector<double> chi = {0.34, 0.69, 1.1, 1.37};
     const std::vector<Vec3D> leftFinalVecloity = {
-        Vec3D(0.010311781840019284065,0.0,0.0),
-        Vec3D(0.020926851381221030224,0.0,0.0),
-        Vec3D(0.020350598448288736986,0.0,0.0),
-        Vec3D(-0.056711454231062746745,0.0,0.0)};
+        Vec3D(-0.032721738352012,0.0,0.0),
+        Vec3D(-0.0138683231953154,0.0,0.0),
+        Vec3D(-0.0204655358555405,0.0,0.0),
+        Vec3D(-0.163049415300304,0.0,0.0)};
     const std::vector<Vec3D> leftFinalPosition = {
-        Vec3D(1.0052627425443687592,1.0,1.0),
-        Vec3D(1.0106802716341605208,1.0,1.0),
-        Vec3D(1.0169290993940285350,1.0,1.0),
-        Vec3D(1.0195286604375108919,1.0,1.0)};
-    const std::vector<Vec3D> rightFinalVelocity = {
-        Vec3D(-0.010311781840019284065,0.0,0.0),
-        Vec3D(-0.020926851381221030224,0.0,0.0),
-        Vec3D(-0.020350598448288736986,0.0,0.0),
-        Vec3D( 0.056711454231062746745,0.0,0.0)};
-    const std::vector<Vec3D> rightFinalPosition = {
-        Vec3D(1.9947372574556312408,1.0,1.0),
-        Vec3D(1.9893197283658394792,1.0,1.0),
-        Vec3D(1.9830709006059714650,1.0,1.0),
-        Vec3D(1.9804713395624891081,1.0,1.0)};
-    
+        Vec3D(0.995546292935715,1.0,1.0),
+        Vec3D(1.00695193269955,1.0,1.0),
+        Vec3D(1.00840467123501,1.0,1.0),
+        Vec3D(0.969386085767181,1.0,1.0)};
+
     //Loop over all test cases
 	for (int i=0; i<4; i++)
     {
@@ -125,12 +117,6 @@ int main(int argc UNUSED, char *argv[] UNUSED)
                 logger.log(Log::FATAL,"Left particle is in the wrong position. It is at % and should be %",(*pIt)->getPosition(),leftFinalPosition[i]);
         if (!(*pIt)->getVelocity().compareTo(leftFinalVecloity[i]  , 1e-10))
                 logger.log(Log::FATAL,"Left particle has the wrong velocity. It is at % and should be %",(*pIt)->getVelocity(),leftFinalVecloity[i]);
-        ++pIt;
-        if (!(*pIt)->getPosition().compareTo(rightFinalPosition[i], 1e-10))
-                logger.log(Log::FATAL,"Second particle is in the wrong position. It is at % and should be %",(*pIt)->getPosition(),rightFinalPosition[i]);
-        if (!(*pIt)->getVelocity().compareTo(rightFinalVelocity[i] , 1e-10))
-                logger.log(Log::FATAL,"Second particle has the wrong velocity. It is at % and it should be %",(*pIt)->getVelocity(),rightFinalVelocity[i]);
-            
     }
 
 	//to display use

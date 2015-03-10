@@ -16,26 +16,35 @@
 // Copyright 2013 The Mercury Developers Team
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
-#ifndef EMPTYTANGENTIALSPECIES_H
-#define EMPTYTANGENTIALSPECIES_H
-#include "BaseSpecies.h"
-#include "Math/ExtendedMath.h"
-class BaseInteractable;
-class BaseInteraction;
-class EmptyTangentialInteraction;
+#ifndef HERTZIANVISCOELASTICINTERACTION_H
+#define HERTZIANVISCOELASTICINTERACTION_H
 
-//Note the getVelocity can for some Species be dependent on which point on the Species is meant.
-class EmptyTangentialSpecies : public virtual BaseSpecies
+#include "BaseInteraction.h"
+class BaseInteractable;
+class HertzianViscoelasticSpecies;
+
+class HertzianViscoelasticInteraction : public virtual BaseInteraction
 {
 public:
-    typedef EmptyTangentialInteraction InteractionType;
-    EmptyTangentialSpecies();
-    EmptyTangentialSpecies(const EmptyTangentialSpecies &s);
-    virtual ~EmptyTangentialSpecies();
+    typedef HertzianViscoelasticSpecies SpeciesType;
+
+    HertzianViscoelasticInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
+    HertzianViscoelasticInteraction(const HertzianViscoelasticInteraction &p);
+    virtual ~HertzianViscoelasticInteraction();
+    HertzianViscoelasticInteraction* copy() const;
+
+    void computeForce();
+
+    ///Interaction read function, which accepts an std::stringstream as input.
     void read(std::istream& is);
+
+    ///Interaction print function, which accepts an std::stringstream as input.
     void write(std::ostream& os) const;
-    std::string getBaseName() const;
-    bool getUseAngularDOFs() const;
-    void mix(EmptyTangentialSpecies* const S, EmptyTangentialSpecies* const T);
+
+    std::string getName() const;
+
+    Mdouble getElasticEnergy() const;
+
+    const HertzianViscoelasticSpecies* getSpecies() const;
 };
 #endif

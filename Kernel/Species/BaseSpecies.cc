@@ -107,12 +107,14 @@ Mdouble BaseSpecies::getInteractionDistance() const
 void BaseSpecies::setDensity(Mdouble density)
 {
     if (density >= 0)
+    {
         density_ = density;
         if (getHandler())
             getHandler()->getDPMBase()->particleHandler.computeAllMasses(getIndex());
+    }
     else
     {
-        std::cerr << "Error in setDensity" << std::endl;
+        std::cerr << "Error in setDensity(" << density << ")" << std::endl;
         exit(-1);
     }
 }

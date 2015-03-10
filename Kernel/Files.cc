@@ -25,9 +25,9 @@ Files::Files()
     getDataFile().getFstream().precision(13);
     getFStatFile().getFstream().precision(13);
     getEneFile().getFstream().precision(13);
+    getRestartFile().getFstream().precision(15);
     getStatFile().getFstream().precision(5);
     getStatFile().getFstream().setf(std::ios::left);
-    getRestartFile().getFstream().precision(8);
 }
 
 Files::~Files()
@@ -104,15 +104,6 @@ void Files::setSaveCount(unsigned int saveCount)
     getEneFile().setSaveCount(saveCount);
 }
 
-void Files::setSaveCurrentTimestep(bool saveCurrentTimestep)
-{
-    getDataFile().setSaveCurrentTimestep(saveCurrentTimestep);
-    getFStatFile().setSaveCurrentTimestep(saveCurrentTimestep);
-    getRestartFile().setSaveCurrentTimestep(saveCurrentTimestep);
-    getStatFile().setSaveCurrentTimestep(saveCurrentTimestep);
-    getEneFile().setSaveCurrentTimestep(saveCurrentTimestep);
-}
-
 void Files::setName(const std::string& name)
 {
     this->name_ = name;
@@ -148,11 +139,11 @@ void Files::setFileType(FileType fileType)
 
 void Files::resetFileCounter()
 {
-    getDataFile().resetCounter();
-    getFStatFile().resetCounter();
-    getRestartFile().resetCounter();
-    getStatFile().resetCounter();
-    getEneFile().resetCounter();
+    getDataFile().setCounter(0);
+    getFStatFile().setCounter(0);
+    getRestartFile().setCounter(0);
+    getStatFile().setCounter(0);
+    getEneFile().setCounter(0);
 }
 
 void Files::setOpenMode(std::fstream::openmode openMode)
@@ -186,3 +177,29 @@ void Files::write(std::ostream& os) const
     os << "statFile " << statFile_ << std::endl;
 }
 
+void Files::openFiles()
+{
+    getDataFile().open();
+    getFStatFile().open();
+    getRestartFile().open();
+    //getStatFile().open();
+    getEneFile().open();
+}
+
+void Files::closeFiles()
+{
+    getDataFile().close();
+    getFStatFile().close();
+    getRestartFile().close();
+    getStatFile().close();
+    getEneFile().close();
+}
+
+void Files::setNextSavedTimeStep(unsigned int nextSavedTimeStep)
+{
+    getDataFile().setNextSavedTimeStep(nextSavedTimeStep);
+    getFStatFile().setNextSavedTimeStep(nextSavedTimeStep);
+    getRestartFile().setNextSavedTimeStep(nextSavedTimeStep);
+    getStatFile().setNextSavedTimeStep(nextSavedTimeStep);
+    getEneFile().setNextSavedTimeStep(nextSavedTimeStep);
+}

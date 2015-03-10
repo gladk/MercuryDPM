@@ -80,7 +80,6 @@ std::istream& operator>>(std::istream&is, FileType&fileType)
 File::File()
 {
     saveCount_ = 0;
-    saveCurrentTimestep_ = false;
 
     // file name has to be set by the user
     name_ = "";
@@ -92,7 +91,8 @@ File::File()
     
     // file counter set to 0 by default
     counter_ = 0;
-    
+    nextSavedTimeStep_ = 0;
+
     // file output file by default
     openMode_ = std::fstream::out;
 }
@@ -155,9 +155,14 @@ void File::setFileType(FileType fileType)
     this->fileType_ = fileType;
 }
 
-int File::getCounter() const
+unsigned int File::getCounter() const
 {
     return counter_;
+}
+
+void File::setCounter(unsigned int counter)
+{
+    counter_ = counter;
 }
 
 bool File::openNextFile()
@@ -179,12 +184,6 @@ bool File::openNextFile()
     }
 }
 
-void File::resetCounter()
-{
-    counter_ = 0;
-    counter_--;
-    //increaseCounter(-getCounter());
-}
 
 std::fstream::openmode File::getOpenMode() const
 {
@@ -193,7 +192,7 @@ std::fstream::openmode File::getOpenMode() const
 
 void File::setOpenMode(std::fstream::openmode openMode)
 {
-    this->openMode_ = openMode;
+    openMode_ = openMode;
 }
 
 unsigned int File::getSaveCount() const
@@ -203,43 +202,54 @@ unsigned int File::getSaveCount() const
 
 void File::setSaveCount(unsigned int saveCount)
 {
-    this->saveCount_ = saveCount;
+    saveCount_ = saveCount;
 }
 
-bool File::getSaveCurrentTimestep() const
+unsigned int File::getNextSavedTimeStep() const
 {
-    return saveCurrentTimestep_;
+    return nextSavedTimeStep_;
 }
 
-void File::setSaveCurrentTimestep(bool saveCurrentTimestep)
+void File::setNextSavedTimeStep(unsigned int nextSavedTimeStep)
 {
-    this->saveCurrentTimestep_ = saveCurrentTimestep;
+    nextSavedTimeStep_ = nextSavedTimeStep;
 }
+
+bool File::saveCurrentTimestep(unsigned int ntimeSteps)
+{
+    //check if this timestep should be written, if the file type is not NO_FILE, then open the file and check if the file was successfully opened
+    //std::cout << (ntimeSteps>=nextSavedTimeStep_) << " " <<  (getFileType()!= FileType::NO_FILE) << std::endl;
+    return ntimeSteps>=nextSavedTimeStep_ && getFileType()!= FileType::NO_FILE && open();
+}
+
 
 bool File::open()
 {
-    //open new file
-    ///\todo{check if filename is set, and openMode}
-
     if (getName().compare("") == 0)
     {
         std::cerr << "Error: Name must be set before opening file" << std::endl;
         throw;
     }
 
-    fstream_.open(getFullName().c_str(), openMode_);
+    //close old file if multi-file output
+    if (fileType_==FileType::MULTIPLE_FILES||fileType_==FileType::MULTIPLE_FILES_PADDED)
+        fstream_.close();
+
+    //open new file for multi-file output
+	///bug{DK we should check for fstream_.fail() however this break selftest, Thomas will ook at this}
     if (!fstream_.is_open())
     {
-        std::cerr << "Error in opening " << getFullName() << std::endl;
-        return false;
+        fstream_.open(getFullName().c_str(), openMode_);
+        if (!fstream_.is_open())
+        {
+            std::cerr << "Error in opening " << getFullName() << std::endl;
+            return false;
+        }
     }
-    else
-    {
-        //std::cerr << "Opening " << getFullName();
-        //if (openMode_==std::fstream::out) std::cerr << " for writing" << std::endl;
-        //else if (openMode_==std::fstream::in) std::cerr << " for reading" << std::endl;
-        return true;
-    }
+
+    nextSavedTimeStep_ += saveCount_;
+    counter_++;
+    return true;
 }
 
 bool File::open(std::fstream::openmode openMode)
@@ -254,32 +264,24 @@ void File::close()
     //std::cerr << "Closing " << getFullName() << std::endl;
 }
 
-//friend std::ostream& File::operator <<(std::ostream& os, const File& file)
-//{
-//    os << file.fstream_;
-//    return os;
-//}
-//
-//friend std::istream& File::operator >>(std::istream& is, File& file)
-//{
-//    is >> file.fstream_;
-//    return is;
-//}
-
 void File::read(std::istream& is)
 {
     std::string dummy;
     is >> dummy >> name_;
     is >> dummy >> fileType_;
     is >> dummy >> saveCount_;
+    is >> dummy >> counter_;
+    is >> dummy >> nextSavedTimeStep_;
 }
 
 ///BaseParticle print function, which accepts an os std::stringstream as input. It prints human readable BaseParticle information to the std::stringstream
 void File::write(std::ostream& os) const
-        {
+{
     os << "name " << name_;
     os << " fileType " << fileType_;
     os << " saveCount " << saveCount_;
+    os << " counter " << counter_;
+    os << " nextSavedTimeStep " << nextSavedTimeStep_;
 }
 
 std::ostream& operator <<(std::ostream& os, const File& o)
