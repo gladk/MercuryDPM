@@ -25,48 +25,71 @@
 
 #include "FilesAndRunNumber.h"
 #include "Math/ExtendedMath.h"
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <vector>
 
+/*!
+ * 
+ */
 FilesAndRunNumber::FilesAndRunNumber()
 {
     constructor();
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout << "FilesAndRunNumber::FilesAndRunNumber() finished"<<std::endl;
+    std::cout << "FilesAndRunNumber::FilesAndRunNumber() finished" << std::endl;
 #endif
 }
 
+/*!
+ * \param[in] other
+ */
 FilesAndRunNumber::FilesAndRunNumber(const FilesAndRunNumber& other)
-        : Files(other)
+: Files(other)
 {
     runNumber_ = other.runNumber_;
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout << "FilesAndRunNumber::FilesAndRunNumber(FilesAndRunNumber& other) finished"<<std::endl;
+    std::cout << "FilesAndRunNumber::FilesAndRunNumber(FilesAndRunNumber& other) finished" << std::endl;
 #endif
 }
 
+/*!
+ * 
+ */
+FilesAndRunNumber::~FilesAndRunNumber()
+{
+#ifdef DEBUG_CONSTRUCTOR
+    std::cout << "FilesAndRunNumber::~FilesAndRunNumber() finished" << std::endl;
+#endif
+}
+
+/*!
+ * \details Initialises the runNumber_ = 0
+ */
 void FilesAndRunNumber::constructor()
 {
     runNumber_ = 0;
 }
 
+/*!
+ * 
+ */
 void FilesAndRunNumber::autoNumber()
 {
     setRunNumber(readRunNumberFromFile());
     incrementRunNumberInFile();
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////This procedures gets the run number from the counter and increments the number stored in the file///
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*!
+ * \details The procedure below reads the counter in from a file stored on the disk. 
+ * Increments the number stored on the disk and then returns the current counter.
+ */
 int FilesAndRunNumber::readRunNumberFromFile()
-//This procedure reads the counter in from a file stores on the disk. Increaments the number stored on the disk and then returns the current counter.
 {
     int counter;
-    
+
     FILE *counter_file;
     if ((counter_file = fopen("COUNTER_DONOTDEL", "r+")) == nullptr)
     {
@@ -103,31 +126,36 @@ int FilesAndRunNumber::readRunNumberFromFile()
             return counter;
         }
     }
-    
+
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////This overrides the default counter value///
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*!
+ * \param[in] runNumber
+ */
 void FilesAndRunNumber::setRunNumber(int runNumber)
 {
     runNumber_ = runNumber;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////This returns the current value of the counter///
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*!
+ * \returns runNumber_
+ */
 int FilesAndRunNumber::getRunNumber() const
 {
     return runNumber_;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////This increaments the value of the counter stored on the disk and resaves it to the COUNTER file. This allows overriding of the run number
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+/*!
+ * \details In order to increment the counter stored in COUNTER_DONOTDEL, we initialise two fstream objects counter_file, counter_file2 and
+ * an integer type temp_counter. First we open the file COUNTER_DONOTDEL, check if everything went fine with the opening. If yes, we extract the
+ * runNumber (counter) into the temp_counter. Increment the temp_counter and then write it into COUNTER_DONOTDEL. This is how we increment the
+ * counter in the file.
+ */
 void FilesAndRunNumber::incrementRunNumberInFile()
 {
     std::fstream counter_file, counter_file2;
     int temp_counter;
-    
+
     counter_file.open("COUNTER_DONOTDEL", std::ios::in);
     if (counter_file.fail())
     {
@@ -135,12 +163,12 @@ void FilesAndRunNumber::incrementRunNumberInFile()
         counter_file.close();
         exit(0);
     }
-    
+
     counter_file >> temp_counter;
     counter_file.close();
-    
+
     temp_counter++;
-    
+
     counter_file2.open("COUNTER_DONOTDEL", std::ios::out);
     if (counter_file2.fail())
     {
@@ -148,43 +176,73 @@ void FilesAndRunNumber::incrementRunNumberInFile()
         counter_file2.close();
         exit(0);
     }
-    
+
     counter_file2 << temp_counter;
-    
+
     counter_file2.close();
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///This turns the counter into a two index numbers for doing parameter studies///
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*!
+ * \details Lets say size_x = 2 and size_y = 5, counter stored in COUNTER_DONOTDEL =1. The study_size = 10.
+ * Substituting these values into the below algorithm implies that study_num = 0 or 1, everytime the code is executed the counter gets incremented and hence determined
+ * the values of study_num, i and j which is returned as a std::vector<int>
+ * \param[in] size_x
+ * \param[in] size_y
+ * \returns std::vector<int>
+ */
 std::vector<int> FilesAndRunNumber::get2DParametersFromRunNumber(int size_x, int size_y)
 {
     std::vector<int> temp(3);
-    
+
     int counter = getRunNumber();
-    
+
     int study_size = size_x * size_y;
-    
+
     int study_num = (counter - 1) / study_size;
-    
+
     counter = counter - study_size * study_num;
     int i = ((counter - 1) % size_x) + 1;
     int j = (counter - i) / size_x + 1;
     std::cout << "Counter: " << counter << " i: " << i << " j: " << j << std::endl;
-    
+
     temp[0] = study_num;
     temp[1] = i;
     temp[2] = j;
-    
+
     return (temp);
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// This launch a new program with the name passed///
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*!
+ * \param[in] name
+ * \param[in] quick
+ * \return int
+ */
 int FilesAndRunNumber::launchNewRun(const char* name, bool quick UNUSED)
 {
     std::stringstream com("");
     com << name << " &";
     return system(com.str().c_str());
+}
+
+/*!
+ * \param[in,out] is
+ */
+void FilesAndRunNumber::read(std::istream& is)
+{
+    std::string dummy;
+    is >> std::ws;
+    if (is.peek() == 'r')
+        is >> dummy >> runNumber_;
+    Files::read(is);
+}
+
+/*!
+ * \param[in,out] os
+ */
+void FilesAndRunNumber::write(std::ostream& os) const
+{
+    //only write the run number if it is different from 0
+    if (runNumber_ != 0)
+        os << " runNumber " << runNumber_;
+    Files::write(os);
 }

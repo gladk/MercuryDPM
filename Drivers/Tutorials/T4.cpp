@@ -43,7 +43,7 @@ p0.setVelocity(Vec3D(0.0,0.0,0.0));
 particleHandler.copyAndAddObject(p0);
 
 InfiniteWall w0;
-w0.set(Vec3D(0.0,0.0,-1.0),-getZMin());
+w0.set(Vec3D(0.0,0.0,-1.0),Vec3D(0.0,0.0,getZMin()));
 wallHandler.copyAndAddObject(w0);
 }
 

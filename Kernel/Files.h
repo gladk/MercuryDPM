@@ -30,11 +30,13 @@
 
 /*!
  * \class Files
- * \brief The class File provides an fstream variable for reading/writing.
- * \details The class also stores extra information like \n
- * - the file name,\n
- * - the file type (one file or multiple files), and\n
- * - the opening mode (input/ output/ appended output).
+ * Files is defined in the header Files.h, which includes definitions from another header called "File.h"
+ * \brief Every simulation requires data files to store all the information necessary for visualisation and analysis.
+ *  The class File provides an fstream variable for reading/writing i.e. input and output.
+ * \details The class also allows one to store additional information like \n
+ * - the name of the file,\n
+ * - the type of the file (no file or one file or multiple files), File::fileType_, and\n
+ * - the opening mode which basically defines if one is using the file for reading or writing purposes (input/ output/ appended output).
  */
 class Files
 {
@@ -42,148 +44,158 @@ public:
     
 //Constructors
     /*!
-     * \brief constructor
+     * \brief A constructor
      */    
     Files();
 
     /*!
-     * \brief destructor
+     * \brief A destructor, watch out its a virtual destructor.
      */
     virtual ~Files();
 
     /*!
-     * \brief 
-     * \todo add const
+     * \brief Copy constructor
+     * \todo add const? I believe it has been added.
      */
     Files(const Files& other);
             
-//setters and getters
+    //setters and getters
     
     /*!
-     * \brief const's taken out!
+     * \brief The non const version. Allows one to edit the File::dataFile_
      */
     File& getDataFile();
 
     /*!
-     * \brief 
+     * \brief The non const version. Allows to edit the File::eneFile_
      */
     File& getEneFile();
 
     /*!
-     * \brief 
+     * \brief The non const version. Allows to edit the File::fstatFile_
      */
     File& getFStatFile();
 
     /*!
-     * \brief 
+     * \brief The non const version. Allows to edit the File::restartFile_
      */
     File& getRestartFile();
 
     /*!
-     * \brief 
+     * \brief The non const version. Allows to edit the File::statFile_
      */
     File& getStatFile();
     
     /*!
-     * \brief 
+     * \brief The const version. Does not allow for any editing of the File::dataFile_
      */
     const File& getDataFile() const;
 
     /*!
-     * \brief 
+     * \brief The const version. Does not allow for any editing of the File::eneFile_
      */
     const File& getEneFile() const;
 
     /*!
-     * \brief 
+     * \brief The const version. Does not allow for any editing of the File::fstatFile_
      */
     const File& getFStatFile() const;
 
     /*!
-     * \brief 
+     * \brief The const version. Does not allow for any editing of the File::restartFile_
      */
     const File& getRestartFile() const;
 
     /*!
-     * \brief 
+     * \brief The const version. Does not allow for any editing of the File::statFile_
      */
     const File& getStatFile() const;
 
     /*!
-     * \brief 
+     * \brief Returns the name of the file. Does not allow to change it though.
      */
     const std::string& getName() const;
 
     /*!
-     * \brief 
+     * \brief Allows to set the name of all the files (ene, data, fstat, restart, stat)
      */
     void setName(const std::string& name);
 
     /*!
-     * \brief 
+     * \brief Calls setName(std::string)
      */
     void setName(const char* name);
 
     /*!
-     * \brief Sets File::saveCount_ for all file types (ene, data, fstat, restart, stat)
+     * \brief Sets File::saveCount_ for all files (ene, data, fstat, restart, stat)
      */
     void setSaveCount(unsigned int saveCount);
 
     /*!
-     * \brief 
+     * \brief Sets File::fileType_ for all files (ene, data, fstat, restart, stat)
      */
     void setFileType(FileType fileType);
 
     /*!
-     * \brief 
+     * \brief Sets File::openMode_ for all files (ene, data, fstat, restart, stat)
      */
     void setOpenMode(std::fstream::openmode openMode);
 
-//other member functions
+    //other member functions
     
     /*!
-     * \brief 
+     * \brief Resets the file counter for each file i.e. for ene, data, fstat, restart, stat)
      */
     void resetFileCounter();
-
+    /*!
+     * \brief Extracts data from the input stream (which is basically a file you want to read from) into name_, restartFile_ ....
+     */
     void read(std::istream& is);
-
+    /*!
+    * \brief Writes data into a file from the member variables name_, restartFile_, dataFile_ etc.
+    */
     void write(std::ostream& os) const;
-
+    /*!
+    * \brief Opens all the files (ene, data, fstat, restart, stat) for reading and writing purposes.
+    */
     void openFiles();
-
+    /*!
+    * \brief Closes all files (ene, data, fstat, restart, stat) that were opened to read or write.
+    */
     void closeFiles();
-
+    /*!
+    * \brief Sets the next time step for all the files (ene, data, fstat, restart, stat) at which the data is to be written or saved.
+    */
     void setNextSavedTimeStep(unsigned int nextSavedTimeStep);
 
 private:
     /*!
-     * \brief File class to handle in- and output into a .data file
+     * \brief An instance of class File to handle in- and output into a .data file
      */
     File dataFile_;
 
     /*!
-     * \brief File class to handle in- and output into a .fstat file
+     * \brief An instance of class File to handle in- and output into a .fstat file
      */
     File fStatFile_;
 
     /*!
-     * \brief File class to handle in- and output into a .ene file
+     * \brief An instance of class File to handle in- and output into a .ene file
      */
     File eneFile_;
 
     /*!
-     * \brief File class to handle in- and output into a .restart file
+     * \brief An instance of class File to handle in- and output into a .restart file
      */
     File restartFile_;
 
     /*!
-     * \brief File class to handle in- and output into a .stat file
+     * \brief An instance of class File to handle in- and output into a .stat file
      */
     File statFile_;
 
     /*!
-     * \brief the name of the problem, used, e.g., for the output files
+     * \brief the name of the problem, used, e.g., for the files
      */
     std::string name_;
     

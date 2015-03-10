@@ -72,6 +72,7 @@ void InfiniteWallWithHole::clear()
 }
 
 ///Defines a standard wall, given an outward normal vector s. t. normal*x=position
+///\todo Since InfiniteWall:set is deprecated, should we deprecate this format as well (and similar formats in other walls)? \author weinhartt
 void InfiniteWallWithHole::set(Vec3D normal, Mdouble position, Mdouble holeRadius)
 {
     //factor is used to set n to unit length 
@@ -82,18 +83,18 @@ void InfiniteWallWithHole::set(Vec3D normal, Mdouble position, Mdouble holeRadiu
 }
 
 ///Allows the wall to be moved to a new position
-void InfiniteWallWithHole::move(Mdouble position)
+void InfiniteWallWithHole::moveTo(Mdouble position)
 {
     position_ = position * factor_;
 }
 
-///Allows the wall to be moved to a new position (also orthogonal to the normal), and setting the velocity
-///\todo InfiniteWallWithHole::move and InfiniteWall::move can be removed once the position is set by the general position vector
-void InfiniteWallWithHole::move(Vec3D velocity, Mdouble dt)
-{
-    setVelocity(velocity);
-    position_ += Vec3D::dot(getVelocity(), normal_) * dt;
-}
+/////Allows the wall to be moved to a new position (also orthogonal to the normal), and setting the velocity
+/////\todo InfiniteWallWithHole::move and InfiniteWall::move can be removed once the position is set by the general position vector
+//void InfiniteWallWithHole::move(Vec3D velocity, Mdouble dt)
+//{
+//    setVelocity(velocity);
+//    position_ += Vec3D::dot(getVelocity(), normal_) * dt;
+//}
 
 ///\todo TW: generalize the move function for all walls
 ///Allows the wall to be moved with time

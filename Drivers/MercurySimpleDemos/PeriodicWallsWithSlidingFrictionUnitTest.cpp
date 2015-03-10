@@ -27,8 +27,7 @@
 #include "Mercury3D.h"
 #include "Boundaries/PeriodicBoundary.h"
 #include "Particles/BaseParticle.h"
-#include "Logger.h"
-extern Logger<LOG_MAIN_LEVEL> logger;
+#include <Logger.h>
 
 ///This test is a UnitTest for:
 ///Periodic Particles in combination with HGrid
@@ -39,16 +38,15 @@ class PeriodicWallsWithSlidingFrictionUnitTest : public Mercury3D
 {
     void setupInitialConditions()
     {
-       auto species = speciesHandler.copyAndAddObject(LinearViscoelasticFrictionSpecies());
+        auto species = speciesHandler.copyAndAddObject(LinearViscoelasticFrictionSpecies());
         species->setDensity(constants::pi / 6.0);
 
-        setName("PeriodicWallsWithSlidingFrictionUnitTest");
         double stiffness = 1e5;
         setParticleDimensions(2);
         species->setDensity(2500);
         species->setStiffness(stiffness);
         species->setSlidingStiffness(2.0 / 7.0 * stiffness);
-	    species->setSlidingFrictionCoefficient(0.5);
+	species->setSlidingFrictionCoefficient(0.5);
         species->setRollingStiffness(2.0 / 5.0 * stiffness);
         species->setRollingFrictionCoefficient(0.5);
         species->setTorsionStiffness(2.0 / 5.0 * stiffness);
@@ -124,46 +122,47 @@ protected:
         static bool SecondParticlRemoved = false;
         if (getTime() > 3.5e-2 && FirstParticleRemoved == false)
         {
-            logger.log(Log::VERBOSE, "Just before removing first particle");
+            logger(VERBOSE, "Just before removing first particle");
             for (auto it = interactionHandler.begin(); it != interactionHandler.end(); ++it)
             {
-                logger.log(Log::VERBOSE, "Interaction between particle (id=% index=%) and particle (id=% index=%) delta=%)", (*it)->getP()->getId(), (*it)->getP()->getIndex(), (*it)->getI()->getId(), (*it)->getI()->getIndex(), (*it)->getTimeStamp());
+                logger(VERBOSE, "Interaction between particle (id=% index=%) and particle (id=% index=%) delta=%)", (*it)->getP()->getId(), (*it)->getP()->getIndex(), (*it)->getI()->getId(), (*it)->getI()->getIndex(), (*it)->getTimeStamp());
             }
 
             FirstParticleRemoved = true;
             particleHandler.removeObject(1);
 
-            logger.log(Log::VERBOSE, "Just after removing first particle");
+            logger(VERBOSE, "Just after removing first particle");
             for (auto it = interactionHandler.begin(); it != interactionHandler.end(); ++it)
             {
-                logger.log(Log::VERBOSE, "Interaction between particle (id=% index=%) and particle (id=% index=%) delta=%)", (*it)->getP()->getId(), (*it)->getP()->getIndex(), (*it)->getI()->getId(), (*it)->getI()->getIndex(), (*it)->getTimeStamp());
+                logger(VERBOSE, "Interaction between particle (id=% index=%) and particle (id=% index=%) delta=%)", (*it)->getP()->getId(), (*it)->getP()->getIndex(), (*it)->getI()->getId(), (*it)->getI()->getIndex(), (*it)->getTimeStamp());
             }
-            logger.log(Log::VERBOSE, "What should have happened:");
-            logger.log(Log::VERBOSE, "First the particle (id=1,index=1) is removed");
-            logger.log(Log::VERBOSE, "This causes the particle (id=7,index=7) to move to (id=7,index=1)");
-            logger.log(Log::VERBOSE, "So the tangential spring witch was between particle (id=7,index=1) and (id=6,index=6) should be move to the last particle and reversed");
+            logger(VERBOSE, "What should have happened:");
+            logger(VERBOSE, "First the particle (id=1,index=1) is removed");
+            logger(VERBOSE, "This causes the particle (id=7,index=7) to move to (id=7,index=1)");
+            logger(VERBOSE, "So the tangential spring witch was between particle (id=7,index=1) and (id=6,index=6) should be move to the last particle and reversed");
         }
 
         if (getTime() > 4.5e-2 && SecondParticlRemoved == false)
         {
-            logger.log(Log::VERBOSE, "Just before removing second particle");
+            logger(VERBOSE, "Just before removing second particle");
             for (auto it = interactionHandler.begin(); it != interactionHandler.end(); ++it)
             {
-                logger.log(Log::VERBOSE, "Interaction between particle (id=% index=%) and particle (id=% index=%) delta=%)", (*it)->getP()->getId(), (*it)->getP()->getIndex(), (*it)->getI()->getId(), (*it)->getI()->getIndex(), (*it)->getTimeStamp());
+                logger(VERBOSE, "Interaction between particle (id=% index=%) and particle (id=% index=%) delta=%)", (*it)->getP()->getId(), (*it)->getP()->getIndex(), (*it)->getI()->getId(), (*it)->getI()->getIndex(), (*it)->getTimeStamp());
             }
 
             SecondParticlRemoved = true;
             particleHandler.removeObject(0);
 
-            logger.log(Log::VERBOSE, "Just after removing second particle");
+            logger(VERBOSE, "Just after removing second particle");
+            //TW: here this code seems to create a segmentation fault on my Mac
             for (auto it = interactionHandler.begin(); it != interactionHandler.end(); ++it)
             {
-                logger.log(Log::VERBOSE, "Interaction between particle (id=% index=%) and particle (id=% index=%) delta=%)", (*it)->getP()->getId(), (*it)->getP()->getIndex(), (*it)->getI()->getId(), (*it)->getI()->getIndex(), (*it)->getTimeStamp());
+                logger(VERBOSE, "Interaction between particle (id=% index=%) and particle (id=% index=%) delta=%)", (*it)->getP()->getId(), (*it)->getP()->getIndex(), (*it)->getI()->getId(), (*it)->getI()->getIndex(), (*it)->getTimeStamp());
             }
-            logger.log(Log::VERBOSE, "What should have happened:");
-            logger.log(Log::VERBOSE, "First the particle (id=0,index=0) is removed");
-            logger.log(Log::VERBOSE, "This causes the particle (id=6,index=6) to move to (id=0,index=0)");
-            logger.log(Log::VERBOSE, "So the tangential spring between particle (id=6,index=6) and (id=7,index=1) should be move to the last particle and reversed");
+            logger(VERBOSE, "What should have happened:");
+            logger(VERBOSE, "First the particle (id=0,index=0) is removed");
+            logger(VERBOSE, "This causes the particle (id=6,index=6) to move to (id=0,index=0)");
+            logger(VERBOSE, "So the tangential spring between particle (id=6,index=6) and (id=7,index=1) should be move to the last particle and reversed");
         }
     }
 
@@ -173,10 +172,12 @@ protected:
 };
 
 int main(int argc UNUSED, char *argv[] UNUSED)
-{
+{    
     ///Start off by solving the default problem
     PeriodicWallsWithSlidingFrictionUnitTest periodicWallsWithSlidingFrictionUnitTest;
     periodicWallsWithSlidingFrictionUnitTest.solve();
+    
+    periodicWallsWithSlidingFrictionUnitTest.setName("PeriodicWallsWithSlidingFrictionUnitTest");
 
     BaseParticle* PNormal;
     BaseParticle* PCase1;
@@ -187,23 +188,23 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     PCase2 = periodicWallsWithSlidingFrictionUnitTest.particleHandler.getObject(2);
 
     shift = Vec3D(-0.58, -0.4, 0.0);
-    if (!PCase1->getPosition().compareTo(PNormal->getPosition() + shift, 1e-10))
+    if (!PCase1->getPosition().isEqualTo(PNormal->getPosition() + shift, 1e-10))
     {
-        logger.log(Log::FATAL, "E0 The particle is in the wrong position. It is %, however is should be %", PCase1->getPosition(), PNormal->getPosition() + shift);
+        logger(FATAL, "E0 The particle is in the wrong position. It is %, however is should be %", PCase1->getPosition(), PNormal->getPosition() + shift);
     }
-    if (!PCase1->getVelocity().compareTo(PNormal->getVelocity(), 1e-10))
+    if (!PCase1->getVelocity().isEqualTo(PNormal->getVelocity(), 1e-10))
     {
-        logger.log(Log::FATAL, "E1 The particle has the wrong velocity. It is %, however is should be %", PCase1->getVelocity(), PNormal->getVelocity());
+        logger(FATAL, "E1 The particle has the wrong velocity. It is %, however is should be %", PCase1->getVelocity(), PNormal->getVelocity());
     }
 
     shift = Vec3D(0.0, -0.779, 0.0);
-    if (!PCase2->getPosition().compareTo(PNormal->getPosition() + shift, 1e-10))
+    if (!PCase2->getPosition().isEqualTo(PNormal->getPosition() + shift, 1e-10))
     {
-        logger.log(Log::FATAL, "E2 The particle is in the wrong position. It is %, however is should be %", PCase2->getPosition(), PNormal->getPosition() + shift);
+        logger(FATAL, "E2 The particle is in the wrong position. It is %, however is should be %", PCase2->getPosition(), PNormal->getPosition() + shift);
     }
-    if (!PCase2->getVelocity().compareTo(PNormal->getVelocity(), 1e-10))
+    if (!PCase2->getVelocity().isEqualTo(PNormal->getVelocity(), 1e-10))
     {
-        logger.log(Log::FATAL, "E3 The particle has the wrong velocity. It is %, however is should be %", PCase2->getVelocity(), PNormal->getVelocity());
+        logger(FATAL, "E3 The particle has the wrong velocity. It is %, however is should be %", PCase2->getVelocity(), PNormal->getVelocity());
     }
 
     PNormal = periodicWallsWithSlidingFrictionUnitTest.particleHandler.getObject(5);
@@ -211,23 +212,23 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     PCase2 = periodicWallsWithSlidingFrictionUnitTest.particleHandler.getObject(3);
 
     shift = Vec3D(1.0 - 0.58, -0.4, 0.0);
-    if (!PCase1->getPosition().compareTo(PNormal->getPosition() + shift, 1e-10))
+    if (!PCase1->getPosition().isEqualTo(PNormal->getPosition() + shift, 1e-10))
     {
         std::cout << PNormal->getPosition() - PCase1->getPosition() << " " << PNormal->getPosition() + PCase1->getPosition() << std::endl;
-        logger.log(Log::FATAL, "E4 The particle is in the wrong position. It is %, however is should be %", PCase1->getPosition(), PNormal->getPosition() + shift);
+        logger(FATAL, "E4 The particle is in the wrong position. It is %, however is should be %", PCase1->getPosition(), PNormal->getPosition() + shift);
     }
-    if (!PCase1->getVelocity().compareTo(PNormal->getVelocity(), 1e-10))
+    if (!PCase1->getVelocity().isEqualTo(PNormal->getVelocity(), 1e-10))
     {
-        logger.log(Log::FATAL, "E5 The particle has the wrong velocity. It is %, however is should be %", PCase1->getVelocity(), PNormal->getVelocity());
+        logger(FATAL, "E5 The particle has the wrong velocity. It is %, however is should be %", PCase1->getVelocity(), PNormal->getVelocity());
     }
 
     shift = Vec3D(0.0, 1.0 - 0.779, 0.0);
-    if (!PCase2->getPosition().compareTo(PNormal->getPosition() + shift, 1e-10))
+    if (!PCase2->getPosition().isEqualTo(PNormal->getPosition() + shift, 1e-10))
     {
-        logger.log(Log::FATAL, "E6 The particle is in the wrong position. It is %, however is should be %", PCase2->getPosition(), PNormal->getPosition() + shift);
+        logger(FATAL, "E6 The particle is in the wrong position. It is %, however is should be %", PCase2->getPosition(), PNormal->getPosition() + shift);
     }
-    if (!PCase2->getVelocity().compareTo(PNormal->getVelocity(), 1e-10))
+    if (!PCase2->getVelocity().isEqualTo(PNormal->getVelocity(), 1e-10))
     {
-        logger.log(Log::FATAL, "E7 The particle has the wrong velocity. It is %, however is should be %", PCase2->getVelocity(), PNormal->getVelocity());
+        logger(FATAL, "E7 The particle has the wrong velocity. It is %, however is should be %", PCase2->getVelocity(), PNormal->getVelocity());
     }
 }

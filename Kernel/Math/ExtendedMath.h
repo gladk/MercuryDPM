@@ -108,24 +108,22 @@ namespace mathsFunc
      * \param[in] absError The allowed maximum absolute error
      * \return False if the two Mdouble are equal
      */
-    bool compare(Mdouble v1,Mdouble v2, double absError);
+    bool isEqual(Mdouble v1,Mdouble v2, double absError);
     /*!
      * \brief Compares the difference of two Vec3D with an absolute error, useful in UnitTests
      * \param[in] v1 The first Vec3D
      * \param[in] v2 The second Vec3D
      * \param[in] absError The allowed maximum absolute error
-     * \return False if the two Vec3D are equal
+     * \return true if the two Vec3D are equal
      */
-    bool compare(Vec3D v1, Vec3D v2, double absError);
+    bool isEqual(Vec3D v1, Vec3D v2, double absError);
 
     /*!
      * \brief factorial function
      */
     template<typename T> constexpr T factorial(const T t)
     {
-
         return (t == 0) ? 1 : t * factorial(t - 1);
-
     }
 
 }

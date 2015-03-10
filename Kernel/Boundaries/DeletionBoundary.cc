@@ -29,6 +29,9 @@
 #include "ParticleHandler.h"
 #include "Particles/BaseParticle.h"
 
+/*!
+ * \details Default constructor (calls the parent-constructor of BaseBoundary as well)
+ */
 DeletionBoundary::DeletionBoundary()
         : BaseBoundary()
 {
@@ -39,6 +42,9 @@ DeletionBoundary::DeletionBoundary()
 #endif
 }
 
+/*!
+ * \details Destructor
+ */
 DeletionBoundary::~DeletionBoundary()
 {
 #ifdef DEBUG_DESTRUCTOR
@@ -46,11 +52,30 @@ DeletionBoundary::~DeletionBoundary()
 #endif   
 }
 
+/*!
+ * \details Copy function, which creates a copy and returns a pointer to that copy
+ * (on the heap)
+ * \return pointer to the copy
+ */
 DeletionBoundary* DeletionBoundary::copy() const
 {
     return new DeletionBoundary(*this);
 }
 
+/*!
+ * \details Defines the placing of the (2D) boundary based on the given normal 
+ * and distance.
+ * \param[in] normal boundary normal vector
+ * \param[in] distance 'distance' between the origin and the boundary,
+ * such that the following relation is satisfied:
+ * \f[     
+ * \mathbf{r} \cdot \mathbf{\hat{n}} = d
+ * \f]
+ * in which \f$ \mathbf{\hat{n}} \f$ and \f$ d \f$ are the given normal vector and
+ * distance, respectively. 
+ * NB: If the distance is the ACTUAL distance from the origin, the normal vector 
+ * must be of UNIT LENGTH for the placing of the boundary to be done correctly.
+ */
 void DeletionBoundary::set(const Vec3D& normal, Mdouble distance)
 {
     scaleFactor_ = 1. / std::sqrt(Vec3D::dot(normal, normal));
@@ -58,18 +83,35 @@ void DeletionBoundary::set(const Vec3D& normal, Mdouble distance)
     distance_ = distance * scaleFactor_;
 }
 
+/*!
+ * \details Resets the boundary's 'distance' from the origin to be the one given.
+ * \param[in] distance the new 'distance' between boundary and origin.
+ * see also comments of DeletionBoundary::set().
+ */
 void DeletionBoundary::move(Mdouble distance)
 {
     distance_ = distance * scaleFactor_;
 }
 
-Mdouble DeletionBoundary::getDistance(const Vec3D &position) const
+/*!
+ * \details Calculates the shortest distance between the wall and given position.
+ * \param[in] position the position of which the distance should be calculated.
+ */
+Mdouble DeletionBoundary::getDistance(const Vec3D& position) const
         {
     return distance_ - Vec3D::dot(position, normal_);
 }
 
-//Returns true if the particle is deleted
-bool DeletionBoundary::checkBoundaryAfterParticleMoved(BaseParticle *p, ParticleHandler &pH)
+/*!
+ * \details Checks if particle has passed the boundary, and if so, deletes the 
+ * particle.
+ * \param[in] p pointer to the particle which is to be checked
+ * \param[out] pH the particle's ParticleHandler, from which
+ * the particle is removed in case it has passed the boundary. 
+ * \return TRUE if the particle has actually passed the boundary and is 
+ * thus deleted.
+ */
+bool DeletionBoundary::checkBoundaryAfterParticleMoved(BaseParticle* p, ParticleHandler& pH)
 {
     if (getDistance(p->getPosition()) < 0)
     {
@@ -80,6 +122,10 @@ bool DeletionBoundary::checkBoundaryAfterParticleMoved(BaseParticle *p, Particle
         return false;
 }
 
+/*!
+ * \details Reads a number of boundary properties from the given std::istream.
+ * \param[in,out] is   the istream
+ */
 void DeletionBoundary::read(std::istream& is)
 {
     BaseBoundary::read(is);
@@ -89,12 +135,21 @@ void DeletionBoundary::read(std::istream& is)
             >> dummy >> distance_;
 }
 
+/*!
+ * \details the deprecated version of the read-method. Should not be used by new 
+ * users!
+ * \deprecated Should be gone by Mercury 2.0. Use DeletionBoundary::read() instead.
+ */
 void DeletionBoundary::oldRead(std::istream& is)
 {
     std::string dummy;
     is >> dummy >> normal_ >> dummy >> scaleFactor_ >> dummy >> distance_;
 }
 
+/*!
+ * \details Writes the boundary properties to an std::ostream. 
+ * \param[out] os   the ostream the properties are to be written to.
+ */
 void DeletionBoundary::write(std::ostream& os) const
         {
     BaseBoundary::write(os);
@@ -103,6 +158,10 @@ void DeletionBoundary::write(std::ostream& os) const
             << " distance " << distance_;
 }
 
+/*!
+ * \details Returns the object's class name (i.e. 'DeletionBoundary').
+ * \return the object's class name
+ */
 std::string DeletionBoundary::getName() const
 {
     return "DeletionBoundary";

@@ -30,72 +30,104 @@
 #include "Math/Vector.h"
 
 /*!
- * \class Screw
- * \brief This function defines a archimedes screw in the z-direction from a (constant)  starting point, a (constant) length L, a (constant) radius r, a (constant) number or revelations N and a (constant) rotation speed (rev/s)
+ * \brief This function defines an Archimedes' screw in the z-direction from a (constant)  starting point, a (constant) length L, a (constant) radius r, a (constant) number or revelations N and a (constant) rotation speed (rev/s)
  *
- * \details q is a new coordinate going from 0 to 1 and t is the time, x=xs+r*cos(2*pi    *(offset+N*q)), y=ys+r*sin(2*pi*(offset+N*q)), z=zs+q*L
+ * \details q is a new coordinate going from 0 to 1 and t is the time, x=xs+r*cos(2*pi*(offset+N*q)), y=ys+r*sin(2*pi*(offset+N*q)), z=zs+q*L
+ * \todo IFCD: Can these details about class Screw be made more clear? I don't understand them.
  */
-
 class Screw : public BaseWall
 {
 public:
     
     /*!
-     * \brief
+     * \brief Default constructor: make a screw with default parameters.
      */
     Screw();
-
+    
     /*!
-     * \brief
+     * \brief Copy constructor, copies another Screw.
      */
-    Screw(Vec3D Start, double L, double R, double N, double omega, double thickness);
+    Screw(const Screw& other);
 
     /*!
-     * \brief
+     * \brief Constructor in which all parameters of the screw are set.
      */
-    virtual Screw* copy() const;
-
+    Screw(Vec3D start, Mdouble l, Mdouble r, Mdouble n, Mdouble omega, Mdouble thickness);
+    
     /*!
-     * \brief
+     * \brief Default destructor.
      */
-    bool getDistanceAndNormal(const BaseParticle& P, Mdouble& distance, Vec3D& normal_return) const;
+    ~Screw();
 
     /*!
-     * \brief Allows the wall to be moved to a new position (also orthogonal to the normal), and setting the velocity
+     * \brief Copy this screw and return a pointer to the copy.
+     */
+    Screw* copy() const final;
+
+    /*!
+     * \brief Compute the distance from the Screw for a given BaseParticle and return if there is a collision. If there is a collision, also return the normal vector of the interaction point.
+     */
+    bool getDistanceAndNormal(const BaseParticle& P, Mdouble& distance, Vec3D& normal_return) const final;
+
+    /*!
+     * \brief Rotate the Screw for a period dt, so that the offset_ changes with omega_*dt.
      */
     void move_time(Mdouble dt);
 
     /*!
-     * \brief reads wall
+     * \brief Reads a Screw from an input stream, for example a restart file.
      */
-    void read(std::istream& is);
+    void read(std::istream& is) override;
 
     /*!
-     * \brief
+     * \brief Reads a Screw in the old style from an input stream, for example a restart file old style.
      */
     void oldRead(std::istream& is);
 
     /*!
-     * \brief outputs wall
+     * \brief Writes this Screw to an output stream, for example a restart file.
      */
-    void write(std::ostream& os) const;
+    void write(std::ostream& os) const override;
 
     /*!
-     * \brief Returns the name of the object
+     * \brief Returns the name of the object, here the string "Screw".
      */
-    virtual std::string getName() const;
+    std::string getName() const final;
 
     /*!
-     * \brief
+     * \brief Get the interaction between this Screw and given BaseParticle at a given time.
      */
-    BaseInteraction* getInteractionWith(BaseParticle *P, Mdouble timeStamp, InteractionHandler* interactionHandler);
+    BaseInteraction* getInteractionWith(BaseParticle* p, Mdouble timeStamp, InteractionHandler* interactionHandler) final;
 
 private:
-    Vec3D start_; ///
     /*!
-     * \brief
+     * \brief The centre of the lower end of the screw.
      */
-    double l_, maxR_, n_, omega_, offset_, thickness_;
+    Vec3D start_;
+    /*!
+     * \brief The length of the Screw.
+     */
+    Mdouble l_;
+    /*!
+     * \brief The outer radius of the Screw.
+     */
+    Mdouble maxR_;
+    /*!
+     * \brief The number of revelations.
+     */
+    Mdouble n_;
+    /*!
+     * \brief Rotation speed in rev/s.
+     */
+    Mdouble omega_;
+    /*!
+     * \brief The angle that describes how much the Screw has turned, going from 0 to 1 for a rotation. 
+     */
+    Mdouble offset_;
+    /*!
+     * \brief The thickness of the Screw.
+     */
+    Mdouble thickness_;
 };
 
 #endif

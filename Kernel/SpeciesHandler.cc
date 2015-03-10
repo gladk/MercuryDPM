@@ -50,376 +50,399 @@
 
 #include "Species/LinearViscoelasticFrictionLiquidBridgeWilletSpecies.h"
 
-///Constructor of the SpeciesHandler class. It creates and empty SpeciesHandler.
+/*!
+ * \details Constructor of the SpeciesHandler class. It creates an empty SpeciesHandler.
+ */
 SpeciesHandler::SpeciesHandler()
 {
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout << "SpeciesHandler::SpeciesHandler() finished" << std::endl;
+    logger(DEBUG, "SpeciesHandler::SpeciesHandler() finished");
 #endif
 }
 
-/// \param[in] WH The SpeciesHandler that has to be copied.
-SpeciesHandler::SpeciesHandler(const SpeciesHandler &other)
-//    : BaseHandler<ParticleSpecies>()
+/*!
+ * \param[in] other The SpeciesHandler that has to be copied.
+ */
+SpeciesHandler::SpeciesHandler(const SpeciesHandler& other)
 {
-    clear();
     setDPMBase(other.getDPMBase());
     copyContentsFromOtherHandler(other);
-//    mixedObjects_ = other.getMixedObjects();
-    /* Instead of copying over the mixed objects pointers we reconstruct them.
-    ** Currently probably leaking memory of the old ones in the process. Who's
-    ** responsible for handling the old species? @dducks
-    ** Jira #MDPM-71
-    */
-    mixedObjects_.clear();
-    for (BaseSpecies * mixSpec : other.mixedObjects_) {
+    for (BaseSpecies* mixSpec : other.mixedObjects_) 
+    {
       mixedObjects_.push_back(mixSpec->copy());
       mixedObjects_.back()->setHandler(this);
     }
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout << "SpeciesHandler::SpeciesHandler(const SpeciesHandler &other) finished" << std::endl;
+    logger(DEBUG, "SpeciesHandler::SpeciesHandler(const SpeciesHandler &other) finished");
 #endif
 }
 
-/// \param[in] rhs The BoundaryHandler on the right hand side of the assignment.
+/*!
+ * \param[in] rhs The BoundaryHandler on the right hand side of the assignment.
+ * \return The SpeciesHandler that is a copy of the input SpeciesHandler rhs.
+ */
 SpeciesHandler SpeciesHandler::operator =(const SpeciesHandler& rhs)
 {
     if (this != &rhs)
     {
         clear();
         copyContentsFromOtherHandler(rhs);
-    //    mixedObjects_ = rhs.getMixedObjects();
-        //POTENTIAL LEAK HERE: Jira bug #MDPM-71
-        //Who is responsible for memory mgmt of species?
+        for (BaseSpecies* mixSpec : mixedObjects_)
+        {
+            delete mixSpec;
+        }
         mixedObjects_.clear();
-        for (BaseSpecies * mixSpec : rhs.mixedObjects_) {
+        for (BaseSpecies* mixSpec : rhs.mixedObjects_) 
+        {
             mixedObjects_.push_back(mixSpec->copy());
             mixedObjects_.back()->setHandler(this);
         }
     }
 
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout << "SpeciesHandler SpeciesHandler::operator =(const SpeciesHandler& rhs)" << std::endl;
+    Logger(DEBUG, "SpeciesHandler SpeciesHandler::operator =(const SpeciesHandler& rhs)");
 #endif
-    ///\todo TW: the assignment operator doesn't copy the mixed objects
     return *this;
 }
-
+/*!
+ * \details Destructor: first destroys the objects of the BaseHandler, then destroys the mixedObjects
+ */
 SpeciesHandler::~SpeciesHandler()
 {
-    for (BaseSpecies* o : mixedObjects_)
+    clear(); //this deletes everything that comes from the BaseHandler.
+    /*for (BaseSpecies* o : mixedObjects_)
+    {
         delete o;
+    }*/
+    for (BaseSpecies* mixSpec : mixedObjects_)
+    {
+        delete mixSpec;
+    }
     mixedObjects_.clear();
 #ifdef DEBUG_DESTRUCTOR
-    std::cout << "SpeciesHandler::~SpeciesHandler() finished" << std::endl;
+    logger(DEBUG, "SpeciesHandler::~SpeciesHandler() finished");
 #endif
 }
-
-/// \param[in] is The input stream from which the information is read.
+/*!
+ * \param[in] is The input stream from which the information is read.
+ * \details First determine the type of the object we want to read, then read
+ * the actual object. After that, clear the mixed objects and read the mixed objects.
+ */ 
 void SpeciesHandler::readObject(std::istream& is)
 {
     std::string type;
     is >> type;
-    if (type.compare("LinearViscoelasticSpecies") == 0)
+    if (type == "LinearViscoelasticSpecies")
     {
         LinearViscoelasticSpecies species;
         is >> species;
         copyAndAddObject(species);
     }
-    else if (type.compare("LinearPlasticViscoelasticSpecies") == 0)
+    else if (type == "LinearPlasticViscoelasticSpecies")
     {
         LinearPlasticViscoelasticSpecies species;
         is >> species;
         copyAndAddObject(species);
     }
-    else if (type.compare("LinearViscoelasticSlidingFrictionSpecies") == 0)
+    else if (type == "LinearViscoelasticSlidingFrictionSpecies")
     {
         LinearViscoelasticSlidingFrictionSpecies species;
         is >> species;
         copyAndAddObject(species);
     }
-    else if (type.compare("LinearPlasticViscoelasticSlidingFrictionSpecies") == 0)
+    else if (type == "LinearPlasticViscoelasticSlidingFrictionSpecies")
     {
         LinearPlasticViscoelasticSlidingFrictionSpecies species;
         is >> species;
         copyAndAddObject(species);
     }
-    else if (type.compare("LinearViscoelasticFrictionSpecies") == 0)
+    else if (type == "LinearViscoelasticFrictionSpecies")
     {
         LinearViscoelasticFrictionSpecies species;
         is >> species;
         copyAndAddObject(species);
     }
-    else if (type.compare("LinearPlasticViscoelasticFrictionSpecies") == 0)
+    else if (type == "LinearPlasticViscoelasticFrictionSpecies")
     {
         LinearPlasticViscoelasticFrictionSpecies species;
         is >> species;
         copyAndAddObject(species);
     }
-    else if (type.compare("LinearViscoelasticIrreversibleAdhesiveSpecies") == 0)
+    else if (type == "LinearViscoelasticIrreversibleAdhesiveSpecies")
     {
         LinearViscoelasticIrreversibleAdhesiveSpecies species;
         is >> species;
         copyAndAddObject(species);
     }
-    else if (type.compare("LinearPlasticViscoelasticIrreversibleAdhesiveSpecies") == 0)
+    else if (type == "LinearPlasticViscoelasticIrreversibleAdhesiveSpecies")
     {
         LinearPlasticViscoelasticIrreversibleAdhesiveSpecies species;
         is >> species;
         copyAndAddObject(species);
     }
-    else if (type.compare("LinearViscoelasticSlidingFrictionIrreversibleAdhesiveSpecies") == 0)
+    else if (type == "LinearViscoelasticSlidingFrictionIrreversibleAdhesiveSpecies")
     {
         LinearViscoelasticSlidingFrictionIrreversibleAdhesiveSpecies species;
         is >> species;
         copyAndAddObject(species);
     }
-    else if (type.compare("LinearPlasticViscoelasticSlidingFrictionIrreversibleAdhesiveSpecies") == 0)
+    else if (type == "LinearPlasticViscoelasticSlidingFrictionIrreversibleAdhesiveSpecies")
     {
         LinearPlasticViscoelasticSlidingFrictionIrreversibleAdhesiveSpecies species;
         is >> species;
         copyAndAddObject(species);
     }
-    else if (type.compare("LinearViscoelasticFrictionIrreversibleAdhesiveSpecies") == 0)
+    else if (type == "LinearViscoelasticFrictionIrreversibleAdhesiveSpecies")
     {
         LinearViscoelasticFrictionIrreversibleAdhesiveSpecies species;
         is >> species;
         copyAndAddObject(species);
     }
-    else if (type.compare("LinearPlasticViscoelasticFrictionIrreversibleAdhesiveSpecies") == 0)
+    else if (type == "LinearPlasticViscoelasticFrictionIrreversibleAdhesiveSpecies")
     {
         LinearPlasticViscoelasticFrictionIrreversibleAdhesiveSpecies species;
         is >> species;
         copyAndAddObject(species);
     }        
-    else if (type.compare("LinearViscoelasticReversibleAdhesiveSpecies") == 0)
+    else if (type == "LinearViscoelasticReversibleAdhesiveSpecies")
     {
         LinearViscoelasticReversibleAdhesiveSpecies species;
         is >> species;
         copyAndAddObject(species);
     }
-    else if (type.compare("LinearPlasticViscoelasticReversibleAdhesiveSpecies") == 0)
+    else if (type == "LinearPlasticViscoelasticReversibleAdhesiveSpecies")
     {
         LinearPlasticViscoelasticReversibleAdhesiveSpecies species;
         is >> species;
         copyAndAddObject(species);
     }
-    else if (type.compare("LinearViscoelasticSlidingFrictionReversibleAdhesiveSpecies") == 0)
+    else if (type == "LinearViscoelasticSlidingFrictionReversibleAdhesiveSpecies")
     {
         LinearViscoelasticSlidingFrictionReversibleAdhesiveSpecies species;
         is >> species;
         copyAndAddObject(species);
     }
-    else if (type.compare("LinearPlasticViscoelasticSlidingFrictionReversibleAdhesiveSpecies") == 0)
+    else if (type == "LinearPlasticViscoelasticSlidingFrictionReversibleAdhesiveSpecies")
     {
         LinearPlasticViscoelasticSlidingFrictionReversibleAdhesiveSpecies species;
         is >> species;
         copyAndAddObject(species);
     }
-    else if (type.compare("LinearViscoelasticFrictionReversibleAdhesiveSpecies") == 0)
+    else if (type == "LinearViscoelasticFrictionReversibleAdhesiveSpecies")
     {
         LinearViscoelasticFrictionReversibleAdhesiveSpecies species;
         is >> species;
         copyAndAddObject(species);
     }
-    else if (type.compare("LinearPlasticViscoelasticFrictionReversibleAdhesiveSpecies") == 0)
+    else if (type == "LinearPlasticViscoelasticFrictionReversibleAdhesiveSpecies")
     {
         LinearPlasticViscoelasticFrictionReversibleAdhesiveSpecies species;
         is >> species;
         copyAndAddObject(species);
     }
-    else if (type.compare("LinearViscoelasticFrictionLiquidBridgeWilletSpecies") == 0)
+    else if (type == "LinearViscoelasticFrictionLiquidBridgeWilletSpecies")
     {
         LinearViscoelasticFrictionLiquidBridgeWilletSpecies species;
         is >> species;
         copyAndAddObject(species);
     }
-    else if (type.compare("k") == 0) //for backwards compatibility
+    else if (type == "k") //for backwards compatibility
     {
         addObject(readOldObject(is));
     }
     else
-    {
-        std::cerr << "Species type: " << type << " not understood in restart file" << std::endl;
+    {        
         std::stringstream line(std::stringstream::in | std::stringstream::out);
         helpers::getLineFromStringStream(is, line);
-        std::cout << line.str() << std::endl;
-        exit(-1);
+        logger(ERROR, "Species type % not understood in restart file. %", type, line.str());
     }
 
     //remove the default mixed species
-    for (unsigned int i =0; i+1 < getNumberOfObjects(); i++)
+    for (unsigned int i = 0; i + 1 < getNumberOfObjects(); i++)
     {
         ///\todo TW why does deleting these objects create a segmentation fault
+        ///How do you create the segmentation fault? \author weinhartt
+        ///\todo IFCD how does the numbering of mixedSpecies_ work?
+        ///the numbering of mixed species is 01, 02, 12, 03, 13, 23, 04, 14, 24, 34, 
+        ///i.e. if you add the n-th ParticleSpecies, then you have to add n-1 MixedSpecies. 
+        ///So here I remove the last n-1 MixedSpecies and add n-1 new ones. \author weinhartt 
         delete mixedObjects_.back();
         mixedObjects_.pop_back();
     }
 
+    //Read the mixed species.
     for (unsigned int i = 0; i+1 < getNumberOfObjects(); i++)
     {
         is >> type;
-        if (type.compare("LinearViscoelasticMixedSpecies") == 0)
+        if (type == "LinearViscoelasticMixedSpecies")
         {
             LinearViscoelasticMixedSpecies species;
             is >> species;
             mixedObjects_.push_back(species.copy());
         }
-        else if (type.compare("LinearPlasticViscoelasticMixedSpecies") == 0)
+        else if (type == "LinearPlasticViscoelasticMixedSpecies")
         {
             LinearPlasticViscoelasticMixedSpecies species;
             is >> species;
             mixedObjects_.push_back(species.copy());
         }
-        else if (type.compare("LinearViscoelasticSlidingFrictionMixedSpecies") == 0)
+        else if (type == "LinearViscoelasticSlidingFrictionMixedSpecies")
         {
             LinearViscoelasticSlidingFrictionMixedSpecies species;
             is >> species;
             mixedObjects_.push_back(species.copy());
         }
-        else if (type.compare("LinearPlasticViscoelasticSlidingFrictionMixedSpecies") == 0)
+        else if (type == "LinearPlasticViscoelasticSlidingFrictionMixedSpecies")
         {
             LinearPlasticViscoelasticSlidingFrictionMixedSpecies species;
             is >> species;
             mixedObjects_.push_back(species.copy());
         }
-        else if (type.compare("LinearViscoelasticFrictionMixedSpecies") == 0)
+        else if (type == "LinearViscoelasticFrictionMixedSpecies")
         {
             LinearViscoelasticFrictionMixedSpecies species;
             is >> species;
             mixedObjects_.push_back(species.copy());
         }
-        else if (type.compare("LinearPlasticViscoelasticFrictionMixedSpecies") == 0)
+        else if (type == "LinearPlasticViscoelasticFrictionMixedSpecies")
         {
             LinearPlasticViscoelasticFrictionMixedSpecies species;
             is >> species;
             mixedObjects_.push_back(species.copy());
         }
-        else if (type.compare("LinearViscoelasticIrreversibleAdhesiveMixedSpecies") == 0)
+        else if (type == "LinearViscoelasticIrreversibleAdhesiveMixedSpecies")
         {
             LinearViscoelasticIrreversibleAdhesiveMixedSpecies species;
             is >> species;
             mixedObjects_.push_back(species.copy());
         }
-        else if (type.compare("LinearPlasticViscoelasticIrreversibleAdhesiveMixedSpecies") == 0)
+        else if (type == "LinearPlasticViscoelasticIrreversibleAdhesiveMixedSpecies")
         {
             LinearPlasticViscoelasticIrreversibleAdhesiveMixedSpecies species;
             is >> species;
             mixedObjects_.push_back(species.copy());
         }
-        else if (type.compare("LinearViscoelasticSlidingFrictionIrreversibleAdhesiveMixedSpecies") == 0)
+        else if (type == "LinearViscoelasticSlidingFrictionIrreversibleAdhesiveMixedSpecies")
         {
             LinearViscoelasticSlidingFrictionIrreversibleAdhesiveMixedSpecies species;
             is >> species;
             mixedObjects_.push_back(species.copy());
         }
-        else if (type.compare("LinearPlasticViscoelasticSlidingFrictionIrreversibleAdhesiveMixedSpecies") == 0)
+        else if (type == "LinearPlasticViscoelasticSlidingFrictionIrreversibleAdhesiveMixedSpecies")
         {
             LinearPlasticViscoelasticSlidingFrictionIrreversibleAdhesiveMixedSpecies species;
             is >> species;
             mixedObjects_.push_back(species.copy());
         }
-        else if (type.compare("LinearViscoelasticFrictionIrreversibleAdhesiveMixedSpecies") == 0)
+        else if (type == "LinearViscoelasticFrictionIrreversibleAdhesiveMixedSpecies")
         {
             LinearViscoelasticFrictionIrreversibleAdhesiveMixedSpecies species;
             is >> species;
             mixedObjects_.push_back(species.copy());
         }
-        else if (type.compare("LinearPlasticViscoelasticFrictionIrreversibleAdhesiveMixedSpecies") == 0)
+        else if (type == "LinearPlasticViscoelasticFrictionIrreversibleAdhesiveMixedSpecies")
         {
             LinearPlasticViscoelasticFrictionIrreversibleAdhesiveMixedSpecies species;
             is >> species;
             mixedObjects_.push_back(species.copy());
         }        
-        else if (type.compare("LinearViscoelasticReversibleAdhesiveMixedSpecies") == 0)
+        else if (type == "LinearViscoelasticReversibleAdhesiveMixedSpecies")
         {
             LinearViscoelasticReversibleAdhesiveMixedSpecies species;
             is >> species;
             mixedObjects_.push_back(species.copy());
         }
-        else if (type.compare("LinearPlasticViscoelasticReversibleAdhesiveMixedSpecies") == 0)
+        else if (type == "LinearPlasticViscoelasticReversibleAdhesiveMixedSpecies")
         {
             LinearPlasticViscoelasticReversibleAdhesiveMixedSpecies species;
             is >> species;
             mixedObjects_.push_back(species.copy());
         }
-        else if (type.compare("LinearViscoelasticSlidingFrictionReversibleAdhesiveMixedSpecies") == 0)
+        else if (type == "LinearViscoelasticSlidingFrictionReversibleAdhesiveMixedSpecies")
         {
             LinearViscoelasticSlidingFrictionReversibleAdhesiveMixedSpecies species;
             is >> species;
             mixedObjects_.push_back(species.copy());
         }
-        else if (type.compare("LinearPlasticViscoelasticSlidingFrictionReversibleAdhesiveMixedSpecies") == 0)
+        else if (type == "LinearPlasticViscoelasticSlidingFrictionReversibleAdhesiveMixedSpecies")
         {
             LinearPlasticViscoelasticSlidingFrictionReversibleAdhesiveMixedSpecies species;
             is >> species;
             mixedObjects_.push_back(species.copy());
         }
-        else if (type.compare("LinearViscoelasticFrictionReversibleAdhesiveMixedSpecies") == 0)
+        else if (type == "LinearViscoelasticFrictionReversibleAdhesiveMixedSpecies")
         {
             LinearViscoelasticFrictionReversibleAdhesiveMixedSpecies species;
             is >> species;
             mixedObjects_.push_back(species.copy());
         }
-        else if (type.compare("LinearPlasticViscoelasticFrictionReversibleAdhesiveMixedSpecies") == 0)
+        else if (type == "LinearPlasticViscoelasticFrictionReversibleAdhesiveMixedSpecies")
         {
             LinearPlasticViscoelasticFrictionReversibleAdhesiveMixedSpecies species;
             is >> species;
         }
-        else if (type.compare("LinearViscoelasticFrictionLiquidBridgeWilletMixedSpecies") == 0)
+        else if (type == "LinearViscoelasticFrictionLiquidBridgeWilletMixedSpecies")
         {
             LinearViscoelasticFrictionLiquidBridgeWilletMixedSpecies species;
             is >> species;
         }
-        else if (type.compare("k") == 0) //for backwards compatibility
+        else if (type == "k") //for backwards compatibility
         {
             mixedObjects_.push_back(readOldObject(is));
         }
         else
         {
-            std::cerr << "Species type: " << type << " not understood in restart file" << std::endl;
-            exit(-1);
+            logger(ERROR, "Species type: % not understood in restart file", type);
         }
     }
 }
 
-/// \param[in] is The input stream from which the information is read.
+/*!
+ * \param[in] is The input stream from which the information is read.
+ * \return A pointer to the ParticleSpecies that has just been read.
+ * \details To read the old object, we first make a stringstream of the line that
+ * describes this ParticleSpecies. After that, we read the properties one by one, 
+ * first the stiffness and after that the other properties. We stop when we either
+ * reach the end of the file(eof) or if a string is not recognized as a property.
+ */
 ParticleSpecies* SpeciesHandler::readOldObject(std::istream& is)
 {
     //read in next line
     std::stringstream line(std::stringstream::in | std::stringstream::out);
     helpers::getLineFromStringStream(is, line);
 
-    //read out each property
-    std::string dummy;
-    Mdouble density, particleDimension, stiffness, dissipation, slidingFrictionCoefficient, slidingFrictionCoefficientStatic=0, slidingStiffness, slidingDissipation;
+    //read each property
+    std::string property;
+    unsigned int particleDimension=0;
+    Mdouble density=0.0, stiffness=0.0, dissipation=0.0, slidingFrictionCoefficient=0.0, slidingFrictionCoefficientStatic=0.0, slidingStiffness=0.0, slidingDissipation=0.0;
     line >> stiffness;
     while (true)
     {
-        line >> dummy;
-        if (!dummy.compare("disp"))
+        line >> property;
+        if (property == "disp")
             line >> dissipation;
-        else if (!dummy.compare("rho"))
+        else if (property == "rho")
             line >> density;
-        else if (!dummy.compare("kt"))
+        else if (property == "kt")
             line >> slidingStiffness;
-        else if (!dummy.compare("dispt"))
+        else if (property == "dispt")
             line >> slidingDissipation;
-        else if (!dummy.compare("mu"))
+        else if (property == "mu")
             line >> slidingFrictionCoefficient;
-        else if (!dummy.compare("mus"))
+        else if (property == "mus")
             line >> slidingFrictionCoefficientStatic;
-        else if (!dummy.compare("dim_particle"))
+        else if (property == "dim_particle")
         {
             line >> particleDimension;
             getDPMBase()->setParticleDimensions(particleDimension);
         }
-        else if (!dummy.compare("(mixed)"))
+        else if (property == "(mixed)")
         {
             density = 0;
         }
         else
         {
-            std::cerr << "Warning: " << dummy << "is not a species property" << std::endl;
+            logger(WARN, "Warning: % is not a species property", property);
             break;
         }
         if (line.eof())
@@ -427,7 +450,7 @@ ParticleSpecies* SpeciesHandler::readOldObject(std::istream& is)
     }
 
     //create the correct species
-    if (slidingFrictionCoefficient==0)
+    if (slidingFrictionCoefficient == 0.0)
     {
         LinearViscoelasticSpecies* species = new LinearViscoelasticSpecies;
         species->setDensity(density);
@@ -444,41 +467,65 @@ ParticleSpecies* SpeciesHandler::readOldObject(std::istream& is)
         species->setSlidingStiffness(slidingStiffness);
         species->setSlidingDissipation(slidingDissipation);
         species->setSlidingFrictionCoefficient(slidingFrictionCoefficient);
-        if (slidingFrictionCoefficientStatic==0)
+        if (slidingFrictionCoefficientStatic == 0.0)
             slidingFrictionCoefficientStatic = slidingFrictionCoefficient;
         species->setSlidingFrictionCoefficientStatic(slidingFrictionCoefficientStatic);
         return species;
     }
 }
 
-
+/*!
+ * \param[in] id1 Id of the first species. 
+ * \param[in] id2 Id of the second species.
+ * \return An unsigned integer that denotes the Id of the mixed species.
+ * \details The numbering of the mixed species is 0-1,  0-2, 1-2,  0-3, 1-3, 2-3,  0-4, 1-4, 2-4, 3-4, ...,
+ * where each pair of numbers a and b denotes the mixed species between ParticleSpecies a and b.
+ * Thus, first compute which id has a higher value, the id of the mixed species
+ * is then given by (maxId*(maxId-1))/2 + minId.
+ */
 unsigned int SpeciesHandler::getMixedId(const unsigned int id1, const unsigned int id2) const
 {
     unsigned int maxId = std::max(id1,id2);
     return (maxId*(maxId-1))/2 + std::min(id1,id2);
 }
 
+/*!
+ * \param[in] S A pointer to the first ParticleSpecies.
+ * \param[in] T A pointer to the second ParticleSpecies.
+ * \return A pointer to the MixedSpecies between the ParticleSpecies S and T.
+ */
 template<class U> typename U::MixedSpeciesType* SpeciesHandler::getMixedObject(const U* S, const U* T)
 {
     return dynamic_cast<typename U::MixedSpeciesType*>(getMixedObject(S->getIndex(),T->getIndex()));
 }
 
+/*!
+ * \return A reference to the vector of pointers of all the mixedObjects.
+ */
 const std::vector<BaseSpecies*>& SpeciesHandler::getMixedObjects() const
 {
     return mixedObjects_;
 }
 
+/*!
+ * \param[in] id1 Id of the first BaseSpecies.
+ * \param[in] id2 Id of the second BaseSpecies.
+ * \return A pointer to an object that is a MixedSpecies of both input Species.
+ * \todo This function should probably be made private. The user should use the function
+ * SpeciesHandler::getMixedObject(const U* S, const U* T), which deals with pointers.
+ */
 BaseSpecies* SpeciesHandler::getMixedObject(const unsigned int id1, const unsigned int id2)
 {
-    if (id1==id2)
-        return getObject(id1);
+    if (id1 == id2)
+    {
+      return getObject(id1);
+    }
     else
     {
         if (std::max(id1,id2) >= getNumberOfObjects())
         {
-            std::cerr << "In: Object* SpeciesHandler::getMixedObject(const unsigned int id) const" << std::endl;
-            std::cerr << "No Object exist with index " << std::max(id1,id2) << " number of objects is " << getNumberOfObjects() << std::endl;
-            throw;
+            logger(ERROR, "In: Object* SpeciesHandler::getMixedObject(const unsigned int id) const. No Object exist with index %, number of objects is %", std::max(id1, id2), getNumberOfObjects());
+            return nullptr;
         }
         else
         {
@@ -486,35 +533,53 @@ BaseSpecies* SpeciesHandler::getMixedObject(const unsigned int id1, const unsign
         }        
     }
 }
-
-void SpeciesHandler::addObject(ParticleSpecies* const O)
+/*!
+ * \param[in] S A pointer to the ParticleSpecies that has to be added.
+ * \details First, add the ParticleSpecies to the vector of ParticleSpecies (object_), 
+ * then construct all MixedSpecies. Tell the ParticleSpecies that this is its 
+ * handler and compute all masses and whether it should use angular degrees of freedom.
+ * 
+ * Note: The MixedSpecies objects are initialized with 
+ * averaged values from both species: e.g., the mixedSpecies between Species A 
+ * and B will have a stiffness \$fk=(1/k_a+1/k_b)^{-1}\$f, you have to change 
+ * the MixedSpecies properties if you don't like these defaults.
+ */
+void SpeciesHandler::addObject(ParticleSpecies* const S)
 {
-    BaseHandler<ParticleSpecies>::addObject(O);
-    std::cout << "Part / Mix: "
-              << objects_.size() << " / "
-              << mixedObjects_.size() << std::endl;
-    for (unsigned int id =0; id+1 < getNumberOfObjects(); id++)
+    BaseHandler<ParticleSpecies>::addObject(S);
+    logger(INFO, "Part / Mix: % / %", objects_.size(), mixedObjects_.size());
+    for (unsigned int id = 0; id + 1 < getNumberOfObjects(); ++id)
     {
-        mixedObjects_.push_back(O->copyMixed());
+        mixedObjects_.push_back(S->copyMixed());
         mixedObjects_.back()->setIndex(id);
         mixedObjects_.back()->setId(getNumberOfObjects()-1);
-        mixedObjects_.back()->mix(O,getObject(id));
+        mixedObjects_.back()->mixAll(S,getObject(id));
     }
-    O->setHandler(this);
-    getDPMBase()->particleHandler.computeAllMasses(O->getIndex());
+    S->setHandler(this);
+    getDPMBase()->particleHandler.computeAllMasses(S->getIndex());
+	getDPMBase()->setRotation(useAngularDOFs());
 	getDPMBase()->setRotation(useAngularDOFs());
 }
 
+/*!
+ * \param[in] id The identity of the ParticleSpecies that must be removed.
+ * \details First remove the object itself, then remove all mixed species for this
+ * ParticleSpecies.
+ */
 void SpeciesHandler::removeObject(unsigned const int id)
 {
     BaseHandler<ParticleSpecies>::removeObject(id);
-    for (unsigned int id2 =0; id2 < getNumberOfObjects(); id2++)
+    for (unsigned int id2 = 0; id2 < getNumberOfObjects(); ++id2)
     {
         mixedObjects_.erase(mixedObjects_.begin()+getMixedId(id, id2));
     }
 	getDPMBase()->setRotation(useAngularDOFs());
 }
-
+/*!
+ * \param[in] os The output stream where the object needs to be written to.
+ * \details First write "Species" and the amount of species in this handler,
+ * then write all ParticleSpecies and MixedSpecies.
+ */
 void SpeciesHandler::write(std::ostream& os) const
 {
     os << "Species " << getNumberOfObjects() << std::endl;
@@ -535,6 +600,11 @@ void SpeciesHandler::write(std::ostream& os) const
     there is a reason. Curernt architecture does not allow this
     \todo define new restart format. @dducks
     
+    The code is written such that it writes PS0, then PS1 and MS01, then PS2 and 
+    MS02, MS12, and so on (PS=ParticleSpecies, MS=MixedSpecies). We can change 
+    the restart format, but we should write the read(os) function such that 
+    it can also read the old format @weinhartt
+    
     for (ParticleSpecies * spec : objects_) {
       os << *spec << std::endl;
     }
@@ -543,12 +613,17 @@ void SpeciesHandler::write(std::ostream& os) const
     }
     */
 }
-
+/*!
+ * \return The string "SpeciesHandler"
+ */
 std::string SpeciesHandler::getName() const
 {
     return "SpeciesHandler";
 }
 
+/*!
+ * \return The boolean which says whether or not AnuglarDOFs must be used in this handler.
+ */
 bool SpeciesHandler::useAngularDOFs()
 {
     for (unsigned int i = 0; i < getNumberOfObjects(); i++)
@@ -564,8 +639,10 @@ bool SpeciesHandler::useAngularDOFs()
     return false;
 }
 
-//instantiate templated munctions
-template LinearViscoelasticSpecies::MixedSpeciesType * SpeciesHandler::getMixedObject(const LinearViscoelasticSpecies*,const LinearViscoelasticSpecies*);
+//instantiate templated functions
+//template<class U> typename U::MixedSpeciesType* SpeciesHandler::getMixedObject(const U* S, const U* T)
+
+template LinearViscoelasticSpecies::MixedSpeciesType* SpeciesHandler::getMixedObject(const LinearViscoelasticSpecies*,const LinearViscoelasticSpecies*);
 template LinearPlasticViscoelasticSpecies::MixedSpeciesType* SpeciesHandler::getMixedObject(const LinearPlasticViscoelasticSpecies*,const LinearPlasticViscoelasticSpecies*);
 template LinearViscoelasticSlidingFrictionSpecies::MixedSpeciesType* SpeciesHandler::getMixedObject(const LinearViscoelasticSlidingFrictionSpecies*,const LinearViscoelasticSlidingFrictionSpecies*);
 template LinearPlasticViscoelasticSlidingFrictionSpecies::MixedSpeciesType* SpeciesHandler::getMixedObject(const LinearPlasticViscoelasticSlidingFrictionSpecies*,const LinearPlasticViscoelasticSlidingFrictionSpecies*);

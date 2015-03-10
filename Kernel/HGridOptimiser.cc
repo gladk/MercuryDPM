@@ -1047,7 +1047,7 @@ void HGridOptimiser::histNumberParticlesPerCell(std::vector<double>& hGridCellSi
     {
         double l = particlesPerLevel[i] / cellsPerLevel[i];
         std::cout << "Histogram for level " << i << ":";
-        for (double k = 0; k <= 10; k++)
+        for (unsigned int k = 0; k <= 10; k++)
         {
             std::cout << " " << std::setw(8) << std::floor(std::pow(l, k) * std::exp(-l) / mathsFunc::factorial(k)*1e4*cellsPerLevel[i]);
         }

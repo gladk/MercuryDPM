@@ -1,9 +1,9 @@
 restart_version 1.0 name combinedfiles
-dataFile name combinedfiles.data fileType ONE_FILE saveCount 601 counter 2 nextSavedTimeStep 1202
-fStatFile name combinedfiles.fstat fileType ONE_FILE saveCount 601 counter 2 nextSavedTimeStep 1202
-eneFile name combinedfiles.ene fileType ONE_FILE saveCount 601 counter 2 nextSavedTimeStep 1202
-restartFile name combinedfiles.restart fileType ONE_FILE saveCount 601 counter 2 nextSavedTimeStep 1202
-statFile name combinedfiles.stat fileType ONE_FILE saveCount 601 counter 0 nextSavedTimeStep 601
+dataFile    fileType ONE_FILE saveCount 601 counter 2 nextSavedTimeStep 1202
+fStatFile   fileType ONE_FILE saveCount 601 counter 2 nextSavedTimeStep 1202
+eneFile     fileType ONE_FILE saveCount 601 counter 2 nextSavedTimeStep 1202
+restartFile fileType ONE_FILE saveCount 601 counter 2 nextSavedTimeStep 1202
+statFile    fileType ONE_FILE saveCount 601 counter 0 nextSavedTimeStep 601
 xMin 0 xMax 1 yMin 0 yMax 1 zMin 0 zMax 2
 timeStep 1e-05 time 0.00600999999999992 ntimeSteps 601 timeMax 0.006
 systemDimensions 3 particleDimensions 3 gravity 0 0 0

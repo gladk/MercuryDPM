@@ -32,7 +32,6 @@ class BaseParticle;
 class BaseInteractable;
 
 ParticleSpecies::ParticleSpecies()
-        : BaseSpecies()
 {
     density_ = 0.0;
 #ifdef DEBUG_CONSTRUCTOR
@@ -40,8 +39,10 @@ ParticleSpecies::ParticleSpecies()
 #endif
 }
 
+/*!
+ * \param[in] p the species that is copied
+ */
 ParticleSpecies::ParticleSpecies(const ParticleSpecies &p)
-        : BaseSpecies(p)
 {
     density_=p.density_;
 #ifdef DEBUG_CONSTRUCTOR
@@ -56,18 +57,9 @@ ParticleSpecies::~ParticleSpecies()
 #endif
 }
 
-void ParticleSpecies::clear()
-{
-    std::cout << "ParticleSpecies::clear(), this function shouldn't be called" << std::endl;
-}
-
-/////ParticleSpecies copy method. It calls to copy constructor of this ParticleSpecies, useful for polymorphism
-//ParticleSpecies* ParticleSpecies::copy() const
-//{
-//    return new ParticleSpecies(*this);
-//}
-
-///ParticleSpecies print function, which accepts an os std::stringstream as input. It prints human readable ParticleSpecies information to the std::stringstream
+/*!
+ * \param[out] os output stream (typically the restart file)
+ */
 void ParticleSpecies::write(std::ostream& os) const
 {
     //note we inherit from BaseObject, not BaseParticle
@@ -75,6 +67,9 @@ void ParticleSpecies::write(std::ostream& os) const
     os << " density " << density_;
 }
 
+/*!
+ * \param[in] is input stream (typically the restart file)
+ */
 void ParticleSpecies::read(std::istream& is)
 {
     BaseSpecies::read(is);
@@ -82,13 +77,17 @@ void ParticleSpecies::read(std::istream& is)
     is >> dummy >> density_;
 }
 
+/*!
+ * \return a string containing the name of the species (minus the word "Species")
+ */
 std::string ParticleSpecies::getBaseName() const
 {
     return "Particle";
 }
 
-///\todo recalculate masses when setting dim_particle or rho
-///Allows the density to be changed
+/*!
+ * \param[in] density the particle density
+ */
 void ParticleSpecies::setDensity(Mdouble density)
 {
     if (density >= 0)
@@ -104,7 +103,9 @@ void ParticleSpecies::setDensity(Mdouble density)
     }
 }
 
-///Allows the density to be accessed
+/*!
+ * \return the particle density
+ */
 Mdouble ParticleSpecies::getDensity() const
 {
     return density_;
@@ -117,7 +118,7 @@ BaseInteraction* ParticleSpecies::getNewInteraction(BaseInteractable* P, BaseInt
 
 Mdouble ParticleSpecies::getMassFromRadius(const Mdouble radius)
 {
-    int particleDimensions = getHandler()->getDPMBase()->getParticleDimensions();
+    unsigned int particleDimensions = getHandler()->getDPMBase()->getParticleDimensions();
     if (particleDimensions == 3)
     {
         return 4.0 / 3.0 * constants::pi * radius * radius * radius * getDensity();

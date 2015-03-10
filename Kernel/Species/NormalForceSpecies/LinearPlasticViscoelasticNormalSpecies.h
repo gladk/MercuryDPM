@@ -28,76 +28,126 @@
 #include "Species/BaseSpecies.h"
 #include "Math/ExtendedMath.h"
 #include "Interactions/NormalForceInteractions/LinearPlasticViscoelasticInteraction.h"
-class SpeciesHandler;
-//class BaseParticle;
-class BaseParticle;
-class BaseInteractable;
-class BaseInteraction;
 
-//Note the getVelocity can for some Species be dependent on which point on the Species is meant.
+/*!
+ * \brief LinearPlasticViscoelasticNormalSpecies contains the parameters used to describe a plastic-cohesive normal force (Stefan Ludings plastic-cohesive force model).
+ * \details See LinearPlasticViscoelasticNormalInteraction::computeForce for a description of the force law.
+ */
 class LinearPlasticViscoelasticNormalSpecies : public virtual BaseSpecies
 {
 public:
+    ///\brief The correct Interaction type for this FrictionForceSpecies
     typedef LinearPlasticViscoelasticInteraction InteractionType;
+
+    ///\brief The default constructor.
     LinearPlasticViscoelasticNormalSpecies();
+
+    ///\brief The default copy constructor.
     LinearPlasticViscoelasticNormalSpecies(const LinearPlasticViscoelasticNormalSpecies &p);
+
+    ///\brief The default destructor.
     virtual ~LinearPlasticViscoelasticNormalSpecies();
-    LinearPlasticViscoelasticNormalSpecies* copy() const;
+
+    /// \brief Reads the species properties from an input stream.
     void read(std::istream& is);
+
+    /// \brief Writes the species properties to an output stream.
     void write(std::ostream& os) const;
-    void clear();
+
+    /// \brief Used in Species::getName to obtain a unique name for each Species.
     std::string getBaseName() const;
-    BaseInteraction* getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
 
 // Species-specific functions
 
-    ///create values for mixed species
+    ///\brief creates default values for mixed species
     void mix(LinearPlasticViscoelasticNormalSpecies* const S, LinearPlasticViscoelasticNormalSpecies* const T);
+
+    ///Set k, disp such that is matches a given tc and eps for a collision of two different masses.
+    ///Recall the resitution constant is a function of k, disp and the mass of each particle in the collision
+    /// See also setCollisionTimeAndRestitutionCoefficient(Mdouble tc, Mdouble eps, Mdouble mass)
+    void setCollisionTimeAndRestitutionCoefficient(Mdouble tc, Mdouble eps, Mdouble mass);
 
 //setters and getters
 
-    ///Acccess functions for the plastic model
+    /*!
+     * \brief Sets all parameters of the linear plastic-viscoelastic normal force at once.
+     */
     void setPlasticParameters(Mdouble loadingStiffness, Mdouble unloadingStiffnessMax, Mdouble cohesionStiffness, Mdouble penetrationDepthMax);
 
-    ///gets k_1 in the plastic model
+    /*!
+     * \brief Returns the loading stiffness of the linear plastic-viscoelastic normal force.
+     */
     Mdouble getLoadingStiffness() const;
 
-    ///gets k_2^max in the plastic model
+    /*!
+     * \brief Returns the maximum unloading stiffness of the linear plastic-viscoelastic normal force.
+     */
     Mdouble getUnloadingStiffnessMax() const;
 
-    ///gets k_c in the plastic model
+    /*!
+     * \brief Returns the cohesive stiffness of the linear plastic-viscoelastic normal force.
+     */
     Mdouble getCohesionStiffness() const;
 
-    ///gets phi_f in the plastic model (consider renaming)
+    /*!
+     * \brief Returns the maximum penetration depth of the linear plastic-viscoelastic normal force.
+     */
     Mdouble getPenetrationDepthMax() const;
 
+    /*!
+     * \brief Sets the loading stiffness of the linear plastic-viscoelastic normal force.
+     */
     void setLoadingStiffness(Mdouble loadingStiffness);
 
+    /*!
+     * \brief Sets the maximum unloading stiffness of the linear plastic-viscoelastic normal force.
+     */
     void setUnloadingStiffnessMax(Mdouble unloadingStiffnessMax);
 
+    /*!
+     * \brief Sets the cohesive stiffness of the linear plastic-viscoelastic normal force.
+     */
     void setCohesionStiffness(Mdouble cohesionStiffness);
 
+    /*!
+     * \brief Sets the maximum penetration depth of the linear plastic-viscoelastic normal force.
+     */
     void setPenetrationDepthMax(Mdouble penetrationDepthMax);
 
+    /*!
+     * \brief Sets the linear dissipation coefficient of the linear plastic-viscoelastic normal force.
+     */
     void setDissipation(Mdouble dissipation);
 
-    ///Allows the spring and dissipation constants to be changed simultaneously
-    void setLoadingStiffnessAndDissipation(helpers::KAndDisp new_);
+    /*!
+     * \brief Allows the spring and dissipation constants to be changed simultaneously.
+     */
+    MERCURY_DEPRECATED void setLoadingStiffnessAndDissipation(helpers::KAndDisp new_);
 
+    /*!
+     * \brief Returns the optimal time step to resolve a collision of two particles of a given mass.
+     */
     Mdouble computeTimeStep(Mdouble mass);
 
-    ///Allows the normal dissipation to be accessed
+    /*!
+     * \brief Allows the normal dissipation to be accessed.
+     */
     Mdouble getDissipation() const;
 
-    ///Allows the dimension of the particle (f.e. for mass) to be accessed
-    bool getUseAngularDOFs() const;
-
 private:
-    Mdouble loadingStiffness_; ///<(normal) spring constant
-    Mdouble unloadingStiffnessMax_; ///<for plastic deformations; the maximum elastic constant
-    Mdouble cohesionStiffness_; ///<for plastic deformations; the adhesive spring constant
-    Mdouble penetrationDepthMax_; ///<for plastic deformations; the depth (relative to the normalized radius) at which kpmax is used
-    Mdouble dissipation_; ///<(normal) viscosity
+    ///(normal) spring constant (k_1)
+    Mdouble loadingStiffness_; 
 
+    ///the maximum elastic constant (k_2^max) for plastic deformations
+    Mdouble unloadingStiffnessMax_; 
+
+    ///the adhesive spring constant (k^c) for plastic deformations
+    Mdouble cohesionStiffness_; 
+
+    ///the depth (relative to the normalized radius) at which k_2^max is used (phi_f)
+    Mdouble penetrationDepthMax_; 
+
+    ///linear dissipation coefficient
+    Mdouble dissipation_; 
 };
 #endif

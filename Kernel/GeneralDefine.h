@@ -32,7 +32,11 @@ typedef long double Mdouble;
 typedef double Mdouble;
 #endif
 
+#define MERCURY_DEPRECATED [[deprecated]]
+
 #define UNUSED  __attribute__ ((__unused__))
+
+#define NaN std::numeric_limits<Mdouble>::quiet_NaN()
 
 #endif
 

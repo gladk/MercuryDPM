@@ -32,47 +32,88 @@
 class BaseParticle;
 class FrictionSpecies;
 class BaseInteractable;
-
+/*!
+ * \class FrictionInteraction
+ * \brief This class allows one to take all three types of frictional interactions 
+ *        into account. The sliding, rolling and torsional frictional interaction.
+ *        See 
+ */
 class FrictionInteraction : public SlidingFrictionInteraction
 {
 public:
+    /*!
+     * \brief An alias for FrictionSpecies.
+     */
     typedef FrictionSpecies SpeciesType;
+    /*!
+     * \brief Constructor.
+     */    
     FrictionInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
+    /*!
+     * \brief Copy constructor.
+     */
     FrictionInteraction(const FrictionInteraction &p);
+    /*!
+     * \brief Destructor.
+     */
     virtual ~FrictionInteraction();
-
-    void computeForce();
-
-    ///Interaction read function, which accepts an std::stringstream as input.
+    /*!
+     * \brief Computes the forces arising due to all three types of friction, i.e.,
+     *        sliding, rolling and torsional.
+     */
+    void computeFrictionForce();
+    /*!
+     * \brief Interaction read function, which accepts an std::istream as input.
+     */    
     void read(std::istream& is);
-
-    ///Interaction print function, which accepts an std::stringstream as input.
+    /*!
+     * \brief Interaction print function, which accepts an std::ostream as input.
+     */    
     void write(std::ostream& os) const;
-
-    //currently, only tangential forces have an integratable part (the spring)
+    /*!
+     * \brief Computes the amount of compression in all the springs, i.e., increments the rollingSpring_,
+     *        slidingSpring_ (see SlidingFrictionInteraction.cc) and torsionSpring_. 
+     */    
     void integrate(Mdouble timeStep);
-
+    /*!
+     * \brief Returns the global amount of energy stored in all the springs (rolling, sliding and torsional).
+     */
     Mdouble getElasticEnergy() const;
-
-    std::string getName() const;
-
+    /*!
+     * \brief Returns interaction name/type.
+     */
+    std::string getBaseName() const;
+    /*!
+     * \brief Returns a const pointer of type FrictionSpecies*.
+     */
     const FrictionSpecies* getSpecies() const;
-
+    /*!
+     * \brief A useful feature if one wants to return to the initial state of the springs. However, 
+     *        reverse history decrements the current state to the state corresponding to previous time step. 
+     *        Decrements the state or value of rollingSpring_, torsionSpring_ and slidingSpring_.
+     */
     void reverseHistory();
 
-//setters and getters
-
 private:
-    //set in integrate, used in compute force
+    /*!
+     * \brief Stores the amount of rolling spring compression. Set in integrate(), used in computing
+     *        frictional force due to rolling.
+     */    
     Vec3D rollingSpring_;
-
-    //set in compute force, used in integrate
+    /*!
+     * \brief Stores the rate at which the rolling spring compresses or relaxes. Set in computeFrictionForce(), used in
+     *        computing the amount of compression in rolling spring. Used in integrate().
+     */
     Vec3D rollingSpringVelocity_;
-
-    //set in integrate, used in compute force
+    /*!
+     * \brief Stores the amount of torsional spring compression. Set in integrate(), used in computing
+     *        frictional force due to torsion.
+     */
     Vec3D torsionSpring_;
-
-    //set in compute force, used in integrate
+    /*!
+     * \brief Stores the rate at which the torsional spring compresses or relaxes. Set in computeFrictionForce(), used in
+     *        computing the amount of compression in torsion spring. Used in integrate().
+     */   
     Vec3D torsionSpringVelocity_;
 };
 #endif

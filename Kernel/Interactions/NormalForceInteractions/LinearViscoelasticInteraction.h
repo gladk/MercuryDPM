@@ -30,28 +30,56 @@
 class BaseInteractable;
 class LinearViscoelasticNormalSpecies;
 
+/*!
+ * \class LinearViscoelasticInteraction
+ * \brief Enables one to compute normal forces in case of a linear visco-elastic interaction.
+ */
 class LinearViscoelasticInteraction : public virtual BaseInteraction
 {
 public:
+    /*!
+     * \brief An alias for LinearViscoelasticNormalSpecies
+     */
     typedef LinearViscoelasticNormalSpecies SpeciesType;
-
+    /*!
+     * \brief Constructor.
+     */
     LinearViscoelasticInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
+    /*!
+     * \brief Copy constructor.
+     */
     LinearViscoelasticInteraction(const LinearViscoelasticInteraction &p);
+    /*!
+     * \brief Destructor.
+     */
     virtual ~LinearViscoelasticInteraction();
+    /*!
+     * \brief Creates a copy of an object of this class. (Deep copy)
+     */
     LinearViscoelasticInteraction* copy() const;
-
-    void computeForce();
-
-    ///Interaction read function, which accepts an std::stringstream as input.
+    /*!
+     * \brief Computes the normal force caused due to normal collision between particles or particle-wall.
+     */
+    void computeNormalForce();
+    /*!
+     * \brief Interaction read function, which accepts an std::istream as input.
+     */    
     void read(std::istream& is);
-
-    ///Interaction print function, which accepts an std::stringstream as input.
+    /*!
+     * \brief Interaction write function, which accepts an std::ostream as input.
+     */    
     void write(std::ostream& os) const;
-
-    std::string getName() const;
-
+    /*!
+     * \brief Returns the type/name of interaction (linear visco-elastic interaction).
+     */
+    std::string getBaseName() const;
+    /*!
+     * \brief Returns the amount of energy stored in the spring due to head on collision.
+     */
     Mdouble getElasticEnergy() const;
-
+    /*!
+     * \brief Returns a const pointer of type LinearViscoelasticNormalSpecies*
+     */
     const LinearViscoelasticNormalSpecies* getSpecies() const;
 };
 #endif

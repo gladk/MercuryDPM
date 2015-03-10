@@ -46,6 +46,8 @@ enum class RNGType
  * \brief This is a class that generates random numbers i.e. named the Random Number Generator (RNG). 
  * \details This is a stand-along class; but is encapsulated (used) by the MD class.
  * To make it architecture safe the both LCG and function is hard codes i.e. does not use the internal C++ one.
+ * \todo (AT) implement new C++-standard RNG instead of this one (Kudos on the hard work done here though ;).
+ * NB: maybe something for Mercury 2?
  */
 class RNG
 {

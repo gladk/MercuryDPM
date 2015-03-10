@@ -201,7 +201,7 @@ public:
     /*!
      * \brief
      */
-    int readNextArgument(int& i, int argc, char *argv[]);
+    bool readNextArgument(int& i, int argc, char *argv[]);
 
 protected:
     /*!

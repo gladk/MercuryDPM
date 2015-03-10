@@ -39,6 +39,9 @@
 #include "Boundaries/PeriodicBoundary.h"
 #include "Boundaries/CircularPeriodicBoundary.h"
 #include "Boundaries/DeletionBoundary.h"
+#include "Boundaries/LeesEdwardsBoundary.h"
+
+#include "Species/LinearViscoelasticSpecies.h"
 
 #include "Particles/BaseParticle.h"
 
@@ -49,6 +52,8 @@ public:
     
     void setupInitialConditions()
     {
+        speciesHandler.copyAndAddObject(LinearViscoelasticSpecies());
+		
         Coil coil(Vec3D(0.1, 0.2, 0.3), 0.4, 0.5, 0.6, 0.7, 0.8);
         
         CylindricalWall cylindricalWall;
@@ -57,13 +62,13 @@ public:
         AxisymmetricIntersectionOfWalls axisymmetricIntersectionOfWalls;
         axisymmetricIntersectionOfWalls.setPosition(Vec3D(0.1,0.2,0.3));
         axisymmetricIntersectionOfWalls.setOrientation(Vec3D(0.4,0.5,0.6));
-        axisymmetricIntersectionOfWalls.addObject(Vec3D(0.7,0.8,0.9),0.11);
+        axisymmetricIntersectionOfWalls.addObject(Vec3D(0.7,0.8,0.9),0.11*Vec3D(0.7,0.8,0.9));
 
         IntersectionOfWalls intersectionOfWalls;
         intersectionOfWalls.addObject(Vec3D(0.1, 0.2, 0.3), Vec3D(0.4, 0.5, 0.6));
         
         InfiniteWall infiniteWall;
-        infiniteWall.set(Vec3D(0.1, 0.2, 0.3), 0.4);
+        infiniteWall.set(Vec3D(0.1, 0.2, 0.3), 0.4*Vec3D(0.1, 0.2, 0.3));
         
         InfiniteWallWithHole infiniteWallWithHole;
         infiniteWallWithHole.set(Vec3D(0.1, 0.2, 0.3), 0.4, 0.5);
@@ -97,6 +102,14 @@ public:
 
         DeletionBoundary deletionBoundary;
         deletionBoundary.set(Vec3D(0.1, 0.2, 0.3), 3.14);
+        
+        LeesEdwardsBoundary leesEdwardsBoundary;
+		leesEdwardsBoundary.set(
+            [&] (double time UNUSED){
+                return 0.1;},
+            [&] (double time UNUSED) {
+                return 0.2;},
+            0.3,0.4,0.5,0.6);
 
         boundaryHandler.copyAndAddObject(angledPeriodicBoundary);
         boundaryHandler.copyAndAddObject(chuteInsertionBoundary);
@@ -105,6 +118,7 @@ public:
         boundaryHandler.copyAndAddObject(periodicBoundary);
         boundaryHandler.copyAndAddObject(circularPeriodicBoundary);
         boundaryHandler.copyAndAddObject(deletionBoundary);
+        boundaryHandler.copyAndAddObject(leesEdwardsBoundary);
         
         BaseParticle baseParticle;
         particleHandler.copyAndAddObject(baseParticle);
@@ -117,10 +131,15 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     FullRestartTest normal;
     normal.setName("FullRestartTest_Normal");
     normal.setupInitialConditions();
+    normal.getRestartFile().open();
     normal.writeRestartFile();
     
     FullRestartTest restart;
     restart.readRestartFile("FullRestartTest_Normal.restart");
     restart.setName("FullRestartTest_Restart");
+    restart.getRestartFile().close();
+    restart.getRestartFile().setOpenMode(std::fstream::out);
+    restart.getRestartFile().open();
     restart.writeRestartFile();
+    restart.write(std::cout);
 }

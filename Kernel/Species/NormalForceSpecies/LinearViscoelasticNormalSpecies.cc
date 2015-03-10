@@ -32,7 +32,6 @@ class BaseParticle;
 class BaseInteractable;
 
 LinearViscoelasticNormalSpecies::LinearViscoelasticNormalSpecies()
-        : BaseSpecies()
 {
     stiffness_ = 0;
     dissipation_ = 0;
@@ -41,8 +40,10 @@ LinearViscoelasticNormalSpecies::LinearViscoelasticNormalSpecies()
 #endif
 }
 
+/*!
+ * \param[in] the species that is copied
+ */
 LinearViscoelasticNormalSpecies::LinearViscoelasticNormalSpecies(const LinearViscoelasticNormalSpecies &p)
-        : BaseSpecies(p)
 {
     stiffness_ = p.stiffness_;
     dissipation_ = p.dissipation_;
@@ -58,24 +59,18 @@ LinearViscoelasticNormalSpecies::~LinearViscoelasticNormalSpecies()
 #endif
 }
 
-void LinearViscoelasticNormalSpecies::clear()
-{
-    std::cout << "LinearViscoelasticNormalSpecies::clear(), this function shouldn't be called" << std::endl;
-}
-
-///LinearViscoelasticNormalSpecies copy method. It calls to copy constructor of this LinearViscoelasticNormalSpecies, useful for polymorphism
-LinearViscoelasticNormalSpecies* LinearViscoelasticNormalSpecies::copy() const
-{
-    return new LinearViscoelasticNormalSpecies(*this);
-}
-
-///LinearViscoelasticNormalSpecies print function, which accepts an os std::stringstream as input. It prints human readable LinearViscoelasticNormalSpecies information to the std::stringstream
+/*!
+ * \param[out] output stream (typically the restart file)
+ */
 void LinearViscoelasticNormalSpecies::write(std::ostream& os) const
 {
     os << " stiffness " << stiffness_
             << " dissipation " << dissipation_;
 }
 
+/*!
+ * \param[in] input stream (typically the restart file)
+ */
 void LinearViscoelasticNormalSpecies::read(std::istream& is)
 {
     std::string dummy;
@@ -83,6 +78,9 @@ void LinearViscoelasticNormalSpecies::read(std::istream& is)
             >> dummy >> dissipation_;
 }
 
+/*!
+ * \return a string containing the name of the species (minus the word "Species")
+ */
 std::string LinearViscoelasticNormalSpecies::getBaseName() const
 {
     return "LinearViscoelastic";
@@ -172,43 +170,49 @@ Mdouble LinearViscoelasticNormalSpecies::getMaximumVelocity(Mdouble radius, Mdou
     return radius * std::sqrt(stiffness_ / (.5 * mass));
 }
 
-bool LinearViscoelasticNormalSpecies::getUseAngularDOFs() const
+/*!
+ * \details Sets k, disp such that it matches a given tc and eps for a collision of two copies of P
+ * \param[in] stiffness stiffness
+ * \param[in] eps restitution coefficient
+ * \param[in] mass effective particle mass, \f$\frac{2}{1/m1+1/m2}\f$
+ */
+void LinearViscoelasticNormalSpecies::setStiffnessAndRestitutionCoefficient(Mdouble stiffness, Mdouble eps, Mdouble mass)
 {
-    return false;
-}
-
-///Sets k, disp such that it matches a given tc and eps for a collision of two copies of P
-void LinearViscoelasticNormalSpecies::setStiffnessAndRestitutionCoefficient(Mdouble k_, Mdouble eps, Mdouble mass)
-{
-    stiffness_ = k_;
+    stiffness_ = stiffness;
     dissipation_ = -std::sqrt(2.0 * mass * stiffness_ / (constants::sqr_pi + mathsFunc::square(log(eps)))) * log(eps);
 }
 
-///Sets k, disp such that it matches a given tc and eps for a collision of two copies of equal mass m
+/*!
+ * \details Sets k, disp such that it matches a given tc and eps for a collision of two copies of equal mass m
+ * \param[in] tc collision time
+ * \param[in] eps restitution coefficient
+ * \param[in] mass effective particle mass, \f$\frac{2}{1/m1+1/m2}\f$
+ */
 void LinearViscoelasticNormalSpecies::setCollisionTimeAndRestitutionCoefficient(Mdouble tc, Mdouble eps, Mdouble mass)
 {
     dissipation_ = -mass / tc * std::log(eps);
     stiffness_ = .5 * mass * (mathsFunc::square(constants::pi / tc) + mathsFunc::square(dissipation_ / mass));
 }
 
-///Set k, disp such that is matches a given tc and eps for a collision of two different masses.
-///Recall the resitution constant is a function of k, disp and the mass of each particle in the collision
-/// See also setCollisionTimeAndRestitutionCoefficient(Mdouble tc, Mdouble eps, Mdouble mass)
+/*!
+ * \details Set k, disp such that is matches a given tc and eps for a collision of two different masses.
+ * Recall the resitution constant is a function of k, disp and the mass of each particle in the collision
+ * See also setCollisionTimeAndRestitutionCoefficient(Mdouble tc, Mdouble eps, Mdouble mass)
+ * \param[in] collision time
+ */
 void LinearViscoelasticNormalSpecies::setCollisionTimeAndRestitutionCoefficient(Mdouble collisionTime, Mdouble restitutionCoefficient, Mdouble mass1, Mdouble mass2)
 {
     Mdouble reduced_mass = mass1 * mass2 / (mass1 + mass2);
     setCollisionTimeAndRestitutionCoefficient(collisionTime, restitutionCoefficient, 2.0 * reduced_mass);
 }
 
-///create values for mixed species
+/*!
+ * \details For all parameters we assume that the harmonic mean of the parameters of the 
+ * original two species is a sensible default.
+ * \param[in] S,T the two species whose properties are mixed to create the new species
+ */
 void LinearViscoelasticNormalSpecies::mix(LinearViscoelasticNormalSpecies* const S, LinearViscoelasticNormalSpecies* const T)
 {
-    BaseSpecies::mix(S, T);
     stiffness_ = average(S->getStiffness(), T->getStiffness());
     dissipation_ = average(S->getDissipation(), T->getDissipation());
-}
-
-BaseInteraction* LinearViscoelasticNormalSpecies::getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
-{
-    return new LinearViscoelasticInteraction(P, I, timeStamp);
 }

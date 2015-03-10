@@ -27,6 +27,37 @@
 #include "Particles/BaseParticle.h"
 #include "Math/RNG.h"
 
+/*!
+ * \details Default constructor; sets every data member to 0.
+ */
+CubeInsertionBoundary::CubeInsertionBoundary(): InsertionBoundary()
+{
+    posMin_ = Vec3D(0.0, 0.0, 0.0);
+    posMax_ = Vec3D(0.0, 0.0, 0.0);
+    velMin_ = Vec3D(0.0, 0.0, 0.0);
+    velMax_ = Vec3D(0.0, 0.0, 0.0);
+    radMin_ = 0;
+    radMax_ = 0;
+}
+
+/*!
+ * \details Copy constructor
+ */
+CubeInsertionBoundary::CubeInsertionBoundary(const CubeInsertionBoundary& other) 
+        : InsertionBoundary(other)
+{
+    posMin_ = other.posMin_;
+    posMax_ = other.posMax_;
+    velMin_ = other.velMin_;
+    velMax_ = other.posMax_;
+    radMin_ = other.radMin_;
+    radMax_ = other.radMax_;
+}
+
+/*!
+ * \details Copy method; creates a copy on the heap and returns its pointer. 
+ * \return      pointer to the copy on the heap
+ */
 CubeInsertionBoundary* CubeInsertionBoundary::copy() const
 {
 #ifdef DEBUG_CONSTRUCTOR
@@ -35,6 +66,22 @@ CubeInsertionBoundary* CubeInsertionBoundary::copy() const
     return new CubeInsertionBoundary(*this);
 }
 
+/*!
+ * \details Sets all the properties of the cuboidal insertion boundary. 
+ * \param[in] particleToCopy    Pointer to the BaseParticle which is used as a basis
+ *                              for the particles to be inserted
+ * \param[in] maxFailed         The maximum number of times the insertion of a 
+ *                              particle may be tried and failed before the insertion
+ *                              of particles is considered done
+ *                              NB: this property is used in the parent's 
+ *                              InsertionBoundary::checkBoundaryBeforeTimeStep().
+ * \param[in] posMin            First defining corner of cuboidal insertion boundary
+ * \param[in] posMax            Second defining corner of cuboidal insertion boundary
+ * \param[in] velMin            Minimum velocity of inserted particles
+ * \param[in] velMax            Maximum velocity of inserted particles
+ * \param[in] radMin            Minimum radius of inserted particles
+ * \param[in] radMax            Maximum radius of inserted particles
+ */
 void CubeInsertionBoundary::set(BaseParticle* particleToCopy, int maxFailed, Vec3D posMin, Vec3D posMax, Vec3D velMin, Vec3D velMax, double radMin, double radMax)
 {
     setParticleToCopy(particleToCopy);
@@ -47,7 +94,17 @@ void CubeInsertionBoundary::set(BaseParticle* particleToCopy, int maxFailed, Vec
     radMax_ = radMax;
 }
 
-BaseParticle* CubeInsertionBoundary::generateParticle(RNG &random)
+/*!
+ * \details Generates a particle with random position (although within the boundary,
+ * of course), velocity and radius and returns its pointer.
+ * \param[in] random    Random number generator
+ */
+// Irana: where is the delete of P? There is a new in copy()
+// Bram: @Irana: The Particle is only CREATED in the InsertionBoundary. Deletion  
+// is done either by a DeletionBoundary, or at the end of a program (in that case, 
+// ~ParticleHandler -> ~BaseHandler -> BaseHandler::clear(), where first the individual
+// objects are deleted, followed by the clearance of the std::vector with object pointers).
+BaseParticle* CubeInsertionBoundary::generateParticle(RNG& random)
 {
     BaseParticle* P = getParticleToCopy()->copy();
     Vec3D pos, vel;
@@ -65,6 +122,10 @@ BaseParticle* CubeInsertionBoundary::generateParticle(RNG &random)
     return P;
 }
 
+/*!
+ * \details Reads the boundary properties from an istream
+ * \param[in,out] is        the istream
+ */
 void CubeInsertionBoundary::read(std::istream& is)
 {
     InsertionBoundary::read(is);
@@ -77,6 +138,10 @@ void CubeInsertionBoundary::read(std::istream& is)
             >> dummy >> radMax_;
 }
 
+/*!
+ * \details Deprecated version of read().
+ * \deprecated Should be gone by Mercury 2.0. Instead, use CubeInsertionBoundary::read().
+ */
 void CubeInsertionBoundary::oldRead(std::istream& is)
 {
     int maxFailed;
@@ -91,8 +156,12 @@ void CubeInsertionBoundary::oldRead(std::istream& is)
     setMaxFailed(maxFailed);
 }
 
+/*!
+ * \details Writes boundary's properties to an ostream
+ * \param[in] os    the ostream
+ */
 void CubeInsertionBoundary::write(std::ostream& os) const
-        {
+{
     InsertionBoundary::write(os);
     os << " posMin " << posMin_
             << " posMax " << posMax_
@@ -102,6 +171,10 @@ void CubeInsertionBoundary::write(std::ostream& os) const
             << " radMax " << radMax_;
 }
 
+/*!
+ * \details Returns the name of the object class
+ * \return      the object's class' name, i.e. 'CubeInsertionBoundary'
+ */
 std::string CubeInsertionBoundary::getName() const
 {
     return "CubeInsertionBoundary";

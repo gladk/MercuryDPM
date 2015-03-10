@@ -38,15 +38,40 @@ class ParticleSpecies : public virtual BaseSpecies
 public:
     typedef BaseInteraction InteractionType;
 
+    ///\brief The default constructor.
     ParticleSpecies();
+
+    ///\brief The default copy constructor.
     ParticleSpecies(const ParticleSpecies &p);
+
+    ///\brief The default destructor.
     virtual ~ParticleSpecies();
-    ParticleSpecies* copy() const=0;
+    
+    /*!
+     * \brief Creates a deep copy of the object from which it is called.
+     * \details See BaseSpecies::copy for details
+     */
+    virtual ParticleSpecies* copy() const=0;
+
+    /*!
+     * \brief Creates a new MixedSpecies with the same force properties as the 
+     * Species from which it is called. See Species::copyMixed for details
+     */
     virtual BaseSpecies* copyMixed() const=0;
+
+    /// \brief Reads the species properties from an input stream.
     void read(std::istream& is);
+
+    /// \brief Writes the species properties to an output stream.
     void write(std::ostream& os) const;
-    void clear();
+
+    /// \brief Used in Species::getName to obtain a unique name for each Species.
     std::string getBaseName() const;
+
+    /*!
+     * \brief When a contact between two particles is determined, an Interaction 
+     * object is created, as the type of Interaction depends on the Species type.
+     */
     BaseInteraction* getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
 
     ///Allows the density to be changed
@@ -65,6 +90,9 @@ public:
     virtual void computeMass(BaseParticle* p) const;
 
 private:
+    /*!
+     * \brief The particle mass density. 
+     */
     Mdouble density_;
 };
 #endif

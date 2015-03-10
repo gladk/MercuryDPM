@@ -34,44 +34,54 @@ class RNG;
 
     /*!
      * \class CubeInsertionBoundary
-     * \brief
+     * \brief It's an insertion boundary which has cuboidal shape (yes, 'CuboidalInsertionBoundary' 
+     * would have been the correct name).
+     * \todo define constructors and destructor
      */
 
 class  CubeInsertionBoundary : public InsertionBoundary
 {
 public:
     /*!
-     * \brief
+     * \brief Constructor; sets everything to 0.
+     */
+    CubeInsertionBoundary();
+    
+    /*!
+     * \brief Copy constructor with deep copy.
+     */
+    CubeInsertionBoundary(const CubeInsertionBoundary& other);
+    
+    /*!
+     * \brief Creates a copy on the heap and returns a pointer.
      */
     virtual CubeInsertionBoundary* copy() const;
     
     /*!
-     * \brief
-     * \param[in]
+     * \brief Sets the properties of the cuboidal insertion boundary
      */
     void set(BaseParticle* particleToCopy, int maxFailed,Vec3D posMin, Vec3D posMax, Vec3D velMin, Vec3D velMax, double radMin, double radMax);
     
     /*!
-     * \brief
-     * \param[in]
-     * \return
+     * \brief Generates a particle with random position, radius and velocity 
      */
     virtual BaseParticle* generateParticle(RNG &random);
     
     /*!
-     * \brief reads wall
+     * \brief reads boundary properties from istream
      */
-    void read(std::istream& is);
+    void read(std::istream& is) override;
 
     /*!
-     * \brief
+     * \brief deprecated version of CubeInsertionBoundary::read().
      */
+    MERCURY_DEPRECATED
     void oldRead(std::istream& is);
     
     /*!
-     * \brief outputs wall
+     * \brief writes boundary properties to ostream
      */
-    void write(std::ostream& os) const;
+    void write(std::ostream& os) const override;
     
     /*!
      * \brief Returns the name of the object
@@ -80,11 +90,12 @@ public:
     
 private:
     /*!
-     * \brief
+     * \brief Minimal and maximal positions defining the boundary's boundaries,
+     * and minimum and maximum velocity of the particles to be inserted.
      */
     Vec3D posMin_, posMax_, velMin_, velMax_;
     /*!
-     * \brief
+     * \brief minimum and maximum radii of the particles to be inserted
      */
     double radMin_, radMax_;
 };

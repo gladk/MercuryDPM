@@ -28,40 +28,57 @@
 
 // --- Declaring a logger.
 // --- This allows you to redefine LogLevels based on command line options.
-#ifndef LOG_MAIN_LEVEL
-#define LOG_MAIN_LEVEL
+#ifndef HG_LOGLEVEL_SELFTEST
+#define HG_LOGLEVEL_SELFTEST Log::DEFAULT
 #endif
-Logger<LOG_MAIN_LEVEL> log("Main");
+Logger<HG_LOGLEVEL_SELFTEST> unitLogger("UnitTester");
 
-void logMessage(std::string, std::string);
-
-int main(int argc, char** argv) {
-    
-    int x = 3;
-    //Basic use cases
-    log.log(Log::ERROR, "Oopsie!");
-    log.log(Log::FATAL, "Mweh. x = %", x);
-    log.log(Log::DEBUG, "You won't see me!");
-    log.log(Log::WARN, "Escapes are possible! %\% sure!", 100.01f);
-    
-    //Usage case for redefining with an function
-    loggerOutput->onWarn = logMessage;
-    log.log(Log::WARN, "Custom logger! % + % = %, %!",
-            3, 5, 3+5, "yay");
-    
-    //Usage case for redefining with a lambda func
-    loggerOutput->onFatal = [](std::string module, std::string message) {
-        std::cerr << "A fatal error has occurred."
-        << "\n  Module: " << module
-        << "\n  Message: " << message << std::endl;
-//        std::exit(-1);
-    };
-    
-    log.log(Log::FATAL, "Null pointer passed!");
-    std::cout << "You shouldn't see me." << std::endl;
-    return 0;
+/* Since we're testing the logger, lets not use the logger itself... */
+void assertOrDie(bool condition, std::string message) {
+  if (!condition) {
+    std::cerr << "Assert failed: " << message << std::endl;
+    std::exit(1);
+  }
 }
 
-void logMessage(std::string module, std::string msg) {
-    std::cout << "Custom logger. Module " << module << ": " << msg << std::endl;
+int main() {
+    int x = 3;
+    bool hasLogged = false;
+    std::string lastMessage;
+    std::string lastModule;
+    auto tmpLogger = [&](std::string module, std::string msg) {
+      lastMessage = msg;
+      lastModule = module;
+      hasLogged = true;
+    };
+    loggerOutput->onFatal   = tmpLogger;
+    loggerOutput->onError   = tmpLogger;
+    loggerOutput->onWarn    = tmpLogger;
+    loggerOutput->onInfo    = tmpLogger;
+    loggerOutput->onVerbose = tmpLogger;
+    loggerOutput->onDebug   = tmpLogger;
+    
+    //Basic usage cases:
+    unitLogger(ERROR, "Oopsie!"); //An error!
+    assertOrDie(hasLogged, "No output detected!");
+    hasLogged = false;
+    
+    unitLogger(FATAL, "Mweh. x = %", x);
+    assertOrDie(hasLogged, "No output detected!");
+    assertOrDie(lastMessage == "Mweh. x = 3", "Substitution gone wrong!");
+    hasLogged = false;
+    
+    unitLogger(DEBUG, "You won't see me!");
+    assertOrDie(!hasLogged, "Output detected!");
+    
+    unitLogger(WARN, "Escapes are possible! %\% sure!", 100.01f);
+    assertOrDie(lastMessage == "Escapes are possible! 100.01% sure!", "Escape gone wrong!");
+    //Usage case for redefining with an function
+
+    unitLogger(FATAL, "Test");
+    assertOrDie(lastModule == "UnitTester", "Module was incorrect!");
+    logger(FATAL, "Test");
+    assertOrDie(lastModule != "UnitTester", "Module was incorrect!");
+
+    return 0;    
 }

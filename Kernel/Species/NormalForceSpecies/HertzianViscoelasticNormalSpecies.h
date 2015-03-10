@@ -28,73 +28,83 @@
 #include "Species/BaseSpecies.h"
 #include "Math/ExtendedMath.h"
 #include "Interactions/NormalForceInteractions/HertzianViscoelasticInteraction.h"
-//class SpeciesHandler;
-class BaseInteractable;
-class BaseInteraction;
 
-//Note the getVelocity can for some Species be dependent on which point on the Species is meant.
+/*!
+ * \brief HertzianViscoelasticNormalSpecies contains the parameters used to describe a Hertzian normal force (The Mindlin model).
+ * \details See HertzianViscoelasticNormalInteraction::computeForce for a description of the force law.
+ */
 class HertzianViscoelasticNormalSpecies : public virtual BaseSpecies
 {
 public:
+    ///\brief The correct Interaction type for this FrictionForceSpecies
     typedef HertzianViscoelasticInteraction InteractionType;
 
+    ///\brief The default constructor.
     HertzianViscoelasticNormalSpecies();
+
+    ///\brief The default copy constructor.
     HertzianViscoelasticNormalSpecies(const HertzianViscoelasticNormalSpecies &p);
+
+    ///\brief The default destructor.
     virtual ~HertzianViscoelasticNormalSpecies();
-    HertzianViscoelasticNormalSpecies* copy() const;
+
+    /// \brief Reads the species properties from an input stream.
     void read(std::istream& is);
+
+    /// \brief Writes the species properties to an output stream.
     void write(std::ostream& os) const;
-    void clear();
+
+    /// \brief Used in Species::getName to obtain a unique name for each Species.
     std::string getBaseName() const;
-    BaseInteraction* getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
 
 // Species-specific functions
 
-    ///Calculates the maximum velocity allowed for a collision of two copies of P (for higher velocities particles could pass through each other)
-    Mdouble getMaximumVelocity(Mdouble radius, Mdouble mass);
+//    ///Calculates the maximum velocity allowed for a collision of two copies of P (for higher velocities particles could pass through each other)
+//    Mdouble getMaximumVelocity(Mdouble radius, Mdouble mass);
+//
+//    ///Sets k, disp such that it matches a given tc and eps for a collision of two copies of P
+//    void setStiffnessAndRestitutionCoefficient(Mdouble k_, Mdouble eps, Mdouble mass);
+//
+//    ///Sets k, disp such that it matches a given tc and eps for a collision of two copies of equal mass m
+//    void setCollisionTimeAndRestitutionCoefficient(Mdouble tc, Mdouble eps, Mdouble mass);
+//
+//    ///Set k, disp such that is matches a given tc and eps for a collision of two different masses.
+//    ///Recall the resitution constant is a function of k, disp and the mass of each particle in the collision
+//    /// See also setCollisionTimeAndRestitutionCoefficient(Mdouble tc, Mdouble eps, Mdouble mass)
+//    void setCollisionTimeAndRestitutionCoefficient(Mdouble collisionTime, Mdouble restitutionCoefficient, Mdouble mass1, Mdouble mass2);
+//
+//    /*!
+//     * \brief Calculates collision time for two copies of a particle of given disp, k, mass
+//     */
+//    Mdouble getCollisionTime(Mdouble mass);
+//
+//    /*!
+//     * \brief Calculates restitution coefficient for two copies of given disp, k, mass
+//     */
+//    Mdouble getRestitutionCoefficient(Mdouble mass);
 
-    ///Sets k, disp such that it matches a given tc and eps for a collision of two copies of P
-    void setStiffnessAndRestitutionCoefficient(Mdouble k_, Mdouble eps, Mdouble mass);
-
-    ///Sets k, disp such that it matches a given tc and eps for a collision of two copies of equal mass m
-    void setCollisionTimeAndRestitutionCoefficient(Mdouble tc, Mdouble eps, Mdouble mass);
-
-    ///Set k, disp such that is matches a given tc and eps for a collision of two different masses.
-    ///Recall the resitution constant is a function of k, disp and the mass of each particle in the collision
-    /// See also setCollisionTimeAndRestitutionCoefficient(Mdouble tc, Mdouble eps, Mdouble mass)
-    void setCollisionTimeAndRestitutionCoefficient(Mdouble collisionTime, Mdouble restitutionCoefficient, Mdouble mass1, Mdouble mass2);
-
-    /*!
-     * \brief Calculates collision time for two copies of a particle of given disp, k, mass
-     */
-    Mdouble getCollisionTime(Mdouble mass);
-
-    /*!
-     * \brief Calculates restitution coefficient for two copies of given disp, k, mass
-     */
-    Mdouble getRestitutionCoefficient(Mdouble mass);
-
-    ///create values for mixed species
+    ///\brief creates default values for mixed species
     void mix(HertzianViscoelasticNormalSpecies* const SBase, HertzianViscoelasticNormalSpecies* const TBase);
 
 //setters and getters
 
-    ///Allows the spring constant to be changed
+    ///\brief Allows the spring constant to be changed
     void setElasticModulus(Mdouble elasticModulus);
 
-    ///Allows the spring constant to be accessed
+    ///\brief Allows the spring constant to be accessed
     Mdouble getElasticModulus() const;
 
+    ///\brief Allows the normal dissipation to be changed
     void setDissipation(Mdouble dissipation);
 
-    ///Allows the normal dissipation to be accessed
+    ///\brief Allows the normal dissipation to be accessed
     Mdouble getDissipation() const;
 
-    ///Allows the dimension of the particle (f.e. for mass) to be accessed
-    bool getUseAngularDOFs() const;
-
 private:
-    Mdouble elasticModulus_; ///<(normal) spring constant
-    Mdouble dissipation_; ///<(normal) viscosity
+    ///\brief normal spring constant
+    Mdouble elasticModulus_; 
+
+    ///\brief normal dissipation constant
+    Mdouble dissipation_; 
 };
 #endif

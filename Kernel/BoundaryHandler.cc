@@ -38,13 +38,14 @@
 #include "Boundaries/PeriodicBoundary.h"
 #include "Boundaries/CircularPeriodicBoundary.h"
 #include "Boundaries/DeletionBoundary.h"
+#include "Boundaries/LeesEdwardsBoundary.h"
 
 
 ///Constructor of the ParticleHandler class. It creates and empty ParticleHandler.
 BoundaryHandler::BoundaryHandler()
 {
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout << "BoundaryHandler::BoundaryHandler() finished" << std::endl;
+    logger(DEBUG, "BoundaryHandler::BoundaryHandler() finished");
 #endif
 }
 
@@ -54,11 +55,11 @@ BoundaryHandler::BoundaryHandler(const BoundaryHandler &BH)
 {
     copyContentsFromOtherHandler(BH);
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout << "BoundaryHandler::BoundaryHandler(const BoundaryHandler &BH) finished" << std::endl;
+    logger(DEBUG, "BoundaryHandler::BoundaryHandler(const BoundaryHandler &BH) finished");
 #endif
 }
 
-/// \param[in] rhs The BoundaryHandler on the right hand side of the assignment.
+///\param[in] rhs The BoundaryHandler on the right hand side of the assignment.
 BoundaryHandler BoundaryHandler::operator =(const BoundaryHandler& rhs)
 {
     if (this != &rhs)
@@ -67,19 +68,21 @@ BoundaryHandler BoundaryHandler::operator =(const BoundaryHandler& rhs)
         copyContentsFromOtherHandler(rhs);
     }
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout << "BoundaryHandler BoundaryHandler::operator =(const BoundaryHandler& rhs)" << std::endl;
+    logger(DEBUG, "BoundaryHandler BoundaryHandler::operator =(const BoundaryHandler& rhs)");
 #endif
     return *this;
 }
 
+///Default destructor. Note that the delete for all boundaries is done in the BaseHandler.
 BoundaryHandler::~BoundaryHandler()
 {
 #ifdef DEBUG_DESTRUCTOR
-    std::cout << "BoundaryHandler::~BoundaryHandler() finished" << std::endl;
+    logger(DEBUG, "BoundaryHandler::~BoundaryHandler() finished");
 #endif
 }
 
-/// \param[in] P A pointer to the BaseBoundary (or derived class) that has to be added.
+///\param[in] P A pointer to the BaseBoundary (or derived class) that has to be added.
+///Add the object and tell the object that this is his handler.
 void BoundaryHandler::addObject(BaseBoundary* P)
 {
     //Puts the particle in the Particle list
@@ -88,67 +91,77 @@ void BoundaryHandler::addObject(BaseBoundary* P)
     P->setHandler(this);
 }
 
-/// \param[in] is The input stream from which the information is read.
+///\param[in] is The input stream from which the information is read.
+///First read the type of boundary, then compare the type to all existing types. 
+///When the correct type is found, read it with the >> operator, copy it and add it to the handler.
 void BoundaryHandler::readObject(std::istream& is)
 {
+    //Note that compare returns 0 if the strings are the same.
     std::string type;
     is >> type;
-    if (type.compare("AngledPeriodicBoundary") == 0)
+    if (type == "AngledPeriodicBoundary")
     {
         AngledPeriodicBoundary AngledPeriodicBoundary;
         is >> AngledPeriodicBoundary;
         copyAndAddObject(AngledPeriodicBoundary);
     }
-    else if (type.compare("ChuteInsertionBoundary") == 0)
+    else if (type == "ChuteInsertionBoundary")
     {
         ChuteInsertionBoundary chuteInsertionBoundary;
         is >> chuteInsertionBoundary;
         copyAndAddObject(chuteInsertionBoundary);
     }
-    else if (type.compare("CubeInsertionBoundary") == 0)
+    else if (type == "CubeInsertionBoundary")
     {
         CubeInsertionBoundary cubeInsertionBoundary;
         is >> cubeInsertionBoundary;
         copyAndAddObject(cubeInsertionBoundary);
     }
-    else if (type.compare("CircularPeriodicBoundary") == 0)
+    else if (type == "CircularPeriodicBoundary")
     {
         CircularPeriodicBoundary circularPeriodicBoundary;
         is >> circularPeriodicBoundary;
         copyAndAddObject(circularPeriodicBoundary);
     }
-    else if (type.compare("DeletionBoundary") == 0)
+    else if (type == "DeletionBoundary")
     {
         DeletionBoundary deletionBoundary;
         is >> deletionBoundary;
         copyAndAddObject(deletionBoundary);
     }
-    else if (type.compare("HopperInsertionBoundary") == 0)
+    else if (type == "HopperInsertionBoundary")
     {
         HopperInsertionBoundary hopperInsertionBoundary;
         is >> hopperInsertionBoundary;
         copyAndAddObject(hopperInsertionBoundary);
     }
-    else if (type.compare("PeriodicBoundary") == 0)
+    else if (type == "PeriodicBoundary")
     {
         PeriodicBoundary periodicBoundary;
         is >> periodicBoundary;
         copyAndAddObject(periodicBoundary);
     }
+    else if (type.compare("LeesEdwardsBoundary") == 0)
+    {
+        LeesEdwardsBoundary leesEdwardsBoundary;
+        is >> leesEdwardsBoundary;
+        copyAndAddObject(leesEdwardsBoundary);
+    }    
     //for backward compatibility (before svnversion ~2360)
-    else if (type.compare("normal") == 0)
+    else if (type == "normal")
     {
         readOldObject(is);
     }
     else
     {
-        std::cerr << "Boundary type: " << type << " not understood in restart file" << std::endl;
-        exit(-1);
+        logger(ERROR, "Boundary type: % not understood in restart file.", type);       
     }
 }
 
-
-/// \param[in] is The input stream from which the information is read.
+///\param[in] is The input stream from which the information is read.
+///Get the normal, position left and position right for a periodic boundary from the 
+///stream is, and construct a new periodic boundary from it.
+///The boundaries that are written like that are outdated, this function is there for backward compatability.
 void BoundaryHandler::readOldObject(std::istream& is)
 {
     //read in next line
@@ -165,8 +178,7 @@ void BoundaryHandler::readOldObject(std::istream& is)
     copyAndAddObject(periodicBoundary);
 }
 
-
-
+/// \return The string "BoundaryHandler"
 std::string BoundaryHandler::getName() const
 {
     return "BoundaryHandler";

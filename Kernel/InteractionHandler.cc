@@ -22,8 +22,6 @@
 //ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -35,7 +33,9 @@
 #include "Interactions/BaseInteraction.h"
 #include "DPMBase.h"
 
-///Constructor of the ParticleHandler class. It creates and empty ParticleHandler.
+/*!
+ * Constructor of the ParticleHandler class. It creates and empty ParticleHandler.
+ */
 InteractionHandler::InteractionHandler()
 {
 #ifdef DEBUG_CONSTRUCTOR
@@ -43,9 +43,11 @@ InteractionHandler::InteractionHandler()
 #endif
 }
 
-/// \param[in] BH The InteractionHandler that has to be copied.
-InteractionHandler::InteractionHandler(const InteractionHandler &IH UNUSED)
-        : BaseHandler()
+/*!
+ * \param[in] IH The InteractionHandler that has to be copied.
+ */
+InteractionHandler::InteractionHandler(const InteractionHandler& IH UNUSED)
+: BaseHandler()
 {
     //By default interactions are not copied.
 #ifdef DEBUG_CONSTRUCTOR
@@ -53,7 +55,9 @@ InteractionHandler::InteractionHandler(const InteractionHandler &IH UNUSED)
 #endif
 }
 
-/// \param[in] rhs The BoundaryHandler on the right hand side of the assignment.
+/*!
+ * \param[in] rhs The BoundaryHandler on the right hand side of the assignment.
+ */
 InteractionHandler InteractionHandler::operator =(const InteractionHandler& rhs)
 {
     if (this != &rhs)
@@ -73,7 +77,9 @@ InteractionHandler::~InteractionHandler()
 #endif
 }
 
-/// \param[in] P A pointer to the BaseInteraction (or derived class) that has to be added.
+/*!
+ * \param[in] P A pointer to the BaseInteraction (or derived class) that has to be added.
+ */
 void InteractionHandler::addObject(BaseInteraction* I)
 {
     //Puts the particle in the Particle list
@@ -82,6 +88,11 @@ void InteractionHandler::addObject(BaseInteraction* I)
     I->setHandler(this);
 }
 
+/*!
+ * \param[in] P the first BaseInteractable by which the interaction is defined.
+ * \param[in] I the first BaseInteractable by which the interaction is defined.
+ * \return the Interaction between the BaseInteractable's P and I, if it exists.
+ */
 BaseInteraction* InteractionHandler::getExistingInteraction(BaseInteractable* P, BaseInteractable* I)
 {
     //for particle-particle collision it is assumed BaseInteractable P has a lower index then I, so we only have to check for I, not P
@@ -92,12 +103,20 @@ BaseInteraction* InteractionHandler::getExistingInteraction(BaseInteractable* P,
             return *it;
         }
     }
-    return 0;
+    return nullptr;
 }
 
+/*!
+ * \details Returns a pointer to the existing Interaction, if the Interaction 
+ * already exists otherwise creates a new Interaction and returns a pointer to it.
+ * \param[in] P the first BaseInteractable by which the interaction is defined.
+ * \param[in] I the first BaseInteractable by which the interaction is defined.
+ * \param[in] timeStamp the current value of DPMBase::time_.
+ * \return the Interaction between the BaseInteractable's P and I
+ */
 BaseInteraction* InteractionHandler::getInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
 {
-    BaseSpecies* species = getDPMBase()->speciesHandler.getMixedObject(P->getIndSpecies(),I->getIndSpecies());
+    BaseSpecies* species = getDPMBase()->speciesHandler.getMixedObject(P->getIndSpecies(), I->getIndSpecies());
 
     //std::cout << "Trying to reconnect to BaseInteraction between P=" << P->getId() << " and " << I->getId() << std::endl;
     BaseInteraction* C = getExistingInteraction(P, I);
@@ -117,16 +136,19 @@ BaseInteraction* InteractionHandler::getInteraction(BaseInteractable* P, BaseInt
     return C;
 }
 
+/*!
+ * \details Deleting an interaction between two object where one of them is periodic 
+ * is difficult, because its interaction information has to be saved.
+ * When an interaction is removed the periodic particle has to be stored in the I pointer
+ * So when an interaction is removed where P is normal and I is periodic, 
+ * and the information is new it will be transfered when the index of P is 
+ * lower than the index of the real particle of I. 
+ * \param[in] the id of the Interaction that needs to be deleted.
+ */
 void InteractionHandler::removeObjectKeepingPeriodics(unsigned const int id)
 {
     BaseInteraction* iMain = getObject(id);
-    
-    //std::cout<<"InteractionHandler::removeObject("<<id<<") P="<<iMain->getP()->getId()<<" I="<<iMain->getI()->getId()<<std::endl;
 
-    // When deleting an interaction between object where one of them is periodic becomes difficult, because its interaction information has to be saved
-    // Now when an interaction is removed the periodic particle has to be the I pointer
-    // So when an interaction is removed where P is normal and I is periodic, and the information is new it will be transfered when the index of P is lower then the index of the real particle of I. 
-    
     BaseParticle* P = dynamic_cast<BaseParticle*>(iMain->getP());
     BaseParticle* I = dynamic_cast<BaseParticle*>(iMain->getI());
     if (P && I)
@@ -169,6 +191,13 @@ void InteractionHandler::removeObjectKeepingPeriodics(unsigned const int id)
     BaseHandler<BaseInteraction>::removeObject(id);
 }
 
+/*!
+ * \details Each interaction contains a time stamp, which stores the last time 
+ * that an interaction object has been called. Thus, one can see that an 
+ * interaction has ended by comparing the time stamp with the last value of DPMBase::time_.
+ * This function erases all interactions that have ended. 
+ * \param[in] lastTimeStep the last used value of DPMBase::time_.
+ */
 void InteractionHandler::eraseOldInteractions(Mdouble lastTimeStep)
 {
     //std::cout<<"void InteractionHandler::eraseOldInteractions(Mdouble lastTimeStep)"<<std::endl;
@@ -186,11 +215,18 @@ void InteractionHandler::eraseOldInteractions(Mdouble lastTimeStep)
     }
 }
 
+/*!
+ * \return the string InteractionHandler
+ */
 std::string InteractionHandler::getName() const
 {
     return "InteractionHandler";
 }
 
+/*!
+ * \param[in] os The output stream where the InteractionHandler must be written
+ *  to, usually a restart file.
+ */
 void InteractionHandler::write(std::ostream& os) const
 {
     os << "Interactions " << getNumberOfObjects() << std::endl;
@@ -198,7 +234,9 @@ void InteractionHandler::write(std::ostream& os) const
         os << (**it) << std::endl;
 }
 
-/// \param[in] is The input stream from which the information is read.
+/*!
+ * \param[in] is The input stream from which the information is read.
+ */
 void InteractionHandler::readObject(std::istream& is)
 {
     std::string type, dummy, idType;
@@ -210,7 +248,7 @@ void InteractionHandler::readObject(std::istream& is)
     line >> type >> idType >> id0 >> id1 >> dummy >> timeStamp;
     ///\todo TW: Change identifier in restart file from id to index; is there any reason the id should be kept after restarting, once this is done? (Note, the id is set to the old one in the particle handler because interactions store id, not indices; also note id's are slow
     BaseInteraction* C;
-    if (idType.compare("particleIds")==0)
+    if (idType.compare("particleIds") == 0)
         C = getInteraction(getDPMBase()->particleHandler.getObjectById(id0), getDPMBase()->particleHandler.getObjectById(id1), timeStamp);
     else
         C = getInteraction(getDPMBase()->particleHandler.getObjectById(id0), getDPMBase()->wallHandler.getObjectById(id1), timeStamp);

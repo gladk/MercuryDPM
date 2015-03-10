@@ -26,10 +26,19 @@
 #include "Matrix.h"
 #include "ExtendedMath.h"
 
+/*!
+ * \details default constructor, which is empty (i.e., only creates the object)
+ */
 Matrix3D::Matrix3D()
 {
 }
 
+/*!
+ *  \details Alternative constructor. Let's you specify ALL 9 elements of the 3x3
+ *  matrix. 
+ *  \param[in] [all] xx/xy/xz /yx/yy/yz /zx/zy/zz are all nine elements (left-to-right,
+ *   top-to-bottom) of the 3D matrix.
+ */
 Matrix3D::Matrix3D(const Mdouble xx, const Mdouble xy, const Mdouble xz, const Mdouble yx, const Mdouble yy, const Mdouble yz, const Mdouble zx, const Mdouble zy, const Mdouble zz)
 {
     XX = xx;
@@ -43,16 +52,29 @@ Matrix3D::Matrix3D(const Mdouble xx, const Mdouble xy, const Mdouble xz, const M
     ZZ = zz;
 }
 
+/*!
+ *  \details Sets all elements to zero. 
+ */
 void Matrix3D::setZero()
 {
     XX = XY = XZ = YX = YY = YZ = ZX = ZY = ZZ = 0.0;
 }
 
+/*!
+ * \details Returns the sum of the diagonal elements of the maxtrix, divided by 
+ * the total number of diagonal elements.
+ * \return resulting scalar
+ */
 Mdouble Matrix3D::trace() const
 {
     return (XX + YY + ZZ) / 3;
 }
 
+/*!
+ * \details Addition of this matrix with given one
+ * \param[in] A     Matrix to be added
+ * \return resulting matrix
+ */
 Matrix3D Matrix3D::operator +(const Matrix3D& A) const
         {
     return Matrix3D(XX + A.XX, XY + A.XY, XZ + A.XZ,
@@ -60,6 +82,12 @@ Matrix3D Matrix3D::operator +(const Matrix3D& A) const
             ZX + A.ZX, ZY + A.ZY, ZZ + A.ZZ);
 }
 
+/*!
+ * \details Substraction of given matrix from this one
+ * \param[in] A     Matrix to be substracted
+ * \return resulting matrix
+ * 
+ */
 Matrix3D Matrix3D::operator -(const Matrix3D& A) const
         {
     return Matrix3D(XX - A.XX, XY - A.XY, XZ - A.XZ,
@@ -67,6 +95,11 @@ Matrix3D Matrix3D::operator -(const Matrix3D& A) const
             ZX - A.ZX, ZY - A.ZY, ZZ - A.ZZ);
 }
 
+/*!
+ * \details Addition of scalar
+ * \param[in] a     Scalar to be added
+ * \return resulting matrix
+ */
 Matrix3D Matrix3D::operator +(const Mdouble a) const
         {
     return Matrix3D(XX + a, XY + a, XZ + a,
@@ -74,6 +107,11 @@ Matrix3D Matrix3D::operator +(const Mdouble a) const
             ZX + a, ZY + a, ZZ + a);
 }
 
+/*!
+ * \details Substraction of scalar
+ * \param[in] a     Scalar to be substracted
+ * \return resulting matrix
+ */
 Matrix3D Matrix3D::operator -(const Mdouble a) const
         {
     return Matrix3D(XX - a, XY - a, XZ - a,
@@ -81,13 +119,11 @@ Matrix3D Matrix3D::operator -(const Mdouble a) const
             ZX - a, ZY - a, ZZ - a);
 }
 
-Vec3D operator *(const Matrix3D& A, const Vec3D& b)
-{
-    return Vec3D(A.XX * b.X + A.XY * b.Y + A.XZ * b.Z,
-            A.YX * b.X + A.YY * b.Y + A.YZ * b.Z,
-            A.ZX * b.X + A.ZY * b.Y + A.ZZ * b.Z);
-}
-
+/*!
+ * \details Multiplication with scalar
+ * \param[in] a     Scalar to be multiplied with
+ * \return resulting matrix
+ */
 Matrix3D Matrix3D::operator *(const Mdouble a) const
         {
     return Matrix3D(XX * a, XY * a, XZ * a,
@@ -95,6 +131,11 @@ Matrix3D Matrix3D::operator *(const Mdouble a) const
             ZX * a, ZY * a, ZZ * a);
 }
 
+/*!
+ * \details Multiplication with vector
+ * \param[in] a Vector to be multiplied with
+ * \return Resulting vector
+ */
 Vec3D Matrix3D::operator *(const Vec3D& a) const
         {
     return Vec3D(XX * a.X + XY * a.Y + XZ * a.Z,
@@ -102,6 +143,11 @@ Vec3D Matrix3D::operator *(const Vec3D& a) const
             ZX * a.X + ZY * a.Y + ZZ * a.Z);
 }
 
+/*!
+ * \details Division by a scalar
+ * \param[in] a     scalar to be divided by
+ * \return resulting matrix
+ */
 Matrix3D Matrix3D::operator /(const Mdouble a) const
         {
     return Matrix3D(XX / a, XY / a, XZ / a,
@@ -109,6 +155,12 @@ Matrix3D Matrix3D::operator /(const Mdouble a) const
             ZX / a, ZY / a, ZZ / a);
 }
 
+/*!
+ * \details Adds all elements of a matrix to an ostream
+ * \param[out] os   output stream
+ * \param[in] A     3D matrix
+ * \return output stream with matrix elements added
+ */
 std::ostream& operator <<(std::ostream& os, const Matrix3D& A)
 {
     os << A.XX << ' ' << A.XY << ' ' << A.XZ << ' '
@@ -117,12 +169,23 @@ std::ostream& operator <<(std::ostream& os, const Matrix3D& A)
     return os;
 }
 
+/*!
+ * \details Reads the elements of a matrix from an istream
+ * \param[in,out] is    input stream
+ * \param[out] A        3D matrix
+ * \return is input stream after the read operation.
+ */
 std::istream& operator >>(std::istream& is, Matrix3D& A)
 {
     is >> A.XX >> A.XY >> A.XZ >> A.YX >> A.YY >> A.YZ >> A.ZX >> A.ZY >> A.ZZ;
     return is;
 }
 
+/*!
+ * \details Adds all elements of a given matrix to its own
+ * \param[in] A     3D matrix to be added
+ * \return (reference to) resulting (this) matrix
+ */
 Matrix3D& Matrix3D::operator +=(const Matrix3D& A)
 {
     XX += A.XX;
@@ -137,6 +200,11 @@ Matrix3D& Matrix3D::operator +=(const Matrix3D& A)
     return *this;
 }
 
+/*!
+ * \details Substract all elements of a given matrix from its own
+ * \param[in] A     3D matrix to be substracted
+ * \return (reference to) resulting (this) matrix
+ */
 Matrix3D& Matrix3D::operator -=(const Matrix3D& A)
 {
     XX -= A.XX;
@@ -151,6 +219,11 @@ Matrix3D& Matrix3D::operator -=(const Matrix3D& A)
     return *this;
 }
 
+/*!
+ * \details Division by a scalar
+ * \param[in] a     scalar to be divided by
+ * \return (reference to) resulting (this) matrix
+ */
 Matrix3D& Matrix3D::operator /=(const Mdouble a)
 {
     XX /= a;
@@ -165,6 +238,11 @@ Matrix3D& Matrix3D::operator /=(const Mdouble a)
     return *this;
 }
 
+/*!
+ * \details Squares all the elements in given matrix
+ * \param[in] A     Matrix to be pointwise squared
+ * \return Resulting matrix
+ */
 Matrix3D Matrix3D::square(const Matrix3D& A)
 {
     return Matrix3D(mathsFunc::square(A.XX), mathsFunc::square(A.XY), mathsFunc::square(A.XZ),
@@ -172,6 +250,11 @@ Matrix3D Matrix3D::square(const Matrix3D& A)
             mathsFunc::square(A.ZX), mathsFunc::square(A.ZY), mathsFunc::square(A.ZZ));
 }
 
+/*!
+ * \details Takes the square root of all the elements in given matrix
+ * \param[in] A     Matrix to be pointwise square rooted
+ * \return Resulting matrix
+ */
 Matrix3D Matrix3D::sqrt(const Matrix3D& A)
 {
     return Matrix3D(std::sqrt(A.XX), std::sqrt(A.XY), std::sqrt(A.XZ),
@@ -179,6 +262,12 @@ Matrix3D Matrix3D::sqrt(const Matrix3D& A)
             std::sqrt(A.ZX), std::sqrt(A.ZY), std::sqrt(A.ZZ));
 }
 
+/*!
+ * \details Dyadic product of two vectors
+ * \param[in] a     first vector
+ * \param[in] b     second vector
+ * \return Resulting matrix
+ */
 Matrix3D Matrix3D::dyadic(const Vec3D& a, const Vec3D& b)
 {
     return Matrix3D(a.X * b.X, a.X * b.Y, a.X * b.Z,
@@ -186,6 +275,13 @@ Matrix3D Matrix3D::dyadic(const Vec3D& a, const Vec3D& b)
             a.Z * b.X, a.Z * b.Y, a.Z * b.Z);
 }
 
+/*!
+ * \details Returns a matrix, who's columns are the inner product of a given vector
+ * with the corresponding columns of a given matrix
+ * \param[in] a     vector
+ * \param[in] B     matrix
+ * \return Resulting matrix
+ */
 Matrix3D Matrix3D::cross(const Vec3D& a, const Matrix3D& B)
 {
     return Matrix3D(

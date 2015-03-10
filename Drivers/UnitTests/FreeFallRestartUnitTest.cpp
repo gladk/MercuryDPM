@@ -35,8 +35,7 @@
 #include "Walls/InfiniteWall.h"
 #include <iostream>
 #include <Species/LinearViscoelasticSpecies.h>
-#include "Logger.h"
-extern Logger<LOG_MAIN_LEVEL> logger;
+#include <Logger.h>
 
 class FreeFall : public DPMBase{
 public:
@@ -44,13 +43,13 @@ public:
 	void setupInitialConditions()
 	{
 		InfiniteWall w0;
-		w0.set(Vec3D(-1,0,0), -getXMin());
+		w0.set(Vec3D(-1,0,0), Vec3D(getXMin(),0,0));
 		wallHandler.copyAndAddObject(w0);
-		w0.set(Vec3D( 1,0,0),  getXMax());
+		w0.set(Vec3D( 1,0,0), Vec3D(getXMax(),0,0));
 		wallHandler.copyAndAddObject(w0);
-		w0.set(Vec3D(0,-1,0), -getYMin());
+		w0.set(Vec3D(0,-1,0), Vec3D(0, getYMin(),0));
 		wallHandler.copyAndAddObject(w0);
-		w0.set(Vec3D(0, 1,0),  getYMax());
+		w0.set(Vec3D(0, 1,0), Vec3D(0, getYMax(),0));
 		wallHandler.copyAndAddObject(w0);
 		
 		BaseParticle p0;
@@ -91,27 +90,27 @@ int main(int argc, char *argv[])
     //On first pass i.e. code being called as a selftest, it enters here and call the code again 3 times with different arguments.
 	if (argc==1)
         {
-            logger.log(Log::INFO,"Case 1: not restarted");
+            logger(INFO,"Case 1: not restarted");
 		    if (system("./FreeFallRestartUnitTest -tmax 0.4 -name FreeFallRestartUnitTest_NoRestart"))
-                       logger.log(Log::FATAL, "code did not run");
+                       logger(FATAL, "code did not run");
 
-            logger.log(Log::INFO,"Case 2: restarted at t=0.2");
+            logger(INFO,"Case 2: restarted at t=0.2");
 		    //restarted at t=0.2
 
 		    if (system("./FreeFallRestartUnitTest -tmax 0.2 -name FreeFallRestartUnitTest_Restarted"))
-                       logger.log(Log::FATAL, "code did not run");
+                       logger(FATAL, "code did not run");
 		
             if (system("./FreeFallRestartUnitTest -r FreeFallRestartUnitTest_Restarted -tmax 0.4"))
-                       logger.log(Log::FATAL,"code did not run");
+                       logger(FATAL,"code did not run");
 
 		
-            logger.log(Log::FATAL,"Case 3: restarted at t=0.2; using separate data files");
+            logger(INFO,"Case 3: restarted at t=0.2; using separate data files");
 
 
 		    if (system("./FreeFallRestartUnitTest -tmax 0.2 -name FreeFallRestartUnitTest_SeparateFiles -fileTypeData 2"))
-                       logger.log(Log::FATAL,"code did not run");
+                       logger(FATAL,"code did not run");
 		    if (system("./FreeFallRestartUnitTest -r FreeFallRestartUnitTest_SeparateFiles -tmax 0.4 "))
-                       logger.log(Log::FATAL,"code did not run");
+                       logger(FATAL,"code did not run");
 	} else
 	{
 	    runFreeFall(argc, argv);
@@ -123,7 +122,7 @@ int main(int argc, char *argv[])
 	//../sc/fpdiff.py ./free_fall_restart.fstat ./free_fall_no_restart.fstat
       
     //Final stage now we check what we get.
-    logger.log(Log::INFO,"Finished running, now comparing");
+    logger(INFO,"Finished running, now comparing");
 	
 	FreeFall FreeFallProblemReload;
     FreeFall FreeFallProblemReloadRestart;
@@ -140,15 +139,17 @@ int main(int argc, char *argv[])
     {
       //  if (!(*FreeFallProblemReloadIt))->getTimeMax()
         
-        if (!(*FreeFallProblemReloadIt)->getPosition().compareTo((*FreeFallProblemReloadRestartIt)->getPosition(),1e-6))
+        if (!(*FreeFallProblemReloadIt)->getPosition().isEqualTo((*FreeFallProblemReloadRestartIt)->getPosition(),1e-6))
         {
-            logger.log(Log::FATAL,"Particles is not in the same place after restart. Before it was % and now it is %.",(*FreeFallProblemReloadIt)->getPosition(),(*FreeFallProblemReloadRestartIt)->getPosition());
+            logger(FATAL,"Particles is not in the same place after restart. Before it was % and now it is %.",(*FreeFallProblemReloadIt)->getPosition(),(*FreeFallProblemReloadRestartIt)->getPosition());
         }
-        if (!(*FreeFallProblemReloadIt)->getPosition().compareTo((*FreeFallProblemReloadSplitFilesIt)->getPosition(), 1e-10))
+        if (!(*FreeFallProblemReloadIt)->getPosition().isEqualTo((*FreeFallProblemReloadSplitFilesIt)->getPosition(), 1e-10))
         {
-             logger.log(Log::FATAL,"Particles velocities are not the same place. Before it was % and now it is %.",(*FreeFallProblemReloadIt)->getVelocity(),(*FreeFallProblemReloadRestartIt)->getVelocity());
+             logger(FATAL,"Particles velocities are not the same place. Before it was % and now it is %.",(*FreeFallProblemReloadIt)->getVelocity(),(*FreeFallProblemReloadRestartIt)->getVelocity());
         }
         ++FreeFallProblemReloadRestartIt;
         ++FreeFallProblemReloadSplitFilesIt;
     }
+    
+    return 0;
 }

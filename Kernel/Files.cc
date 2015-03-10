@@ -27,6 +27,9 @@
 #include <iostream>
 #include "Files.h"
 
+/*!
+ * \details The constructor which sets the file precision for DataFile, FStatFile, EneFile, RestartFile, StatFile.
+ */
 Files::Files()
 {
     //constructor();
@@ -42,67 +45,95 @@ Files::~Files()
 {
     // TODO Auto-generated destructor stub
 }
-
+/*!
+* \details Also sets the name of Files to be the same as the one from which one makes a copy.
+* \param[in] other (A const reference of the object to be copied)
+*/
 Files::Files(const Files& other)
 {
     //constructor();
     setName(other.getName());
 }
-
+/*! 
+ * \returns File& (A reference of object type File i.e. File& dataFile_)
+ */
 File& Files::getDataFile()
 {
     return dataFile_;
 }
-
+/*! 
+ * \returns File& (A reference of object type File i.e. File& eneFile_)
+ */
 File& Files::getEneFile()
 {
     return eneFile_;
 }
-
+/*! 
+ * \returns File& (A reference of object type File i.e. File& fStatFile_)
+ */
 File& Files::getFStatFile()
 {
     return fStatFile_;
 }
-
+/*! 
+ * \returns File& (A reference of object type File i.e. File& restartFile_)
+ */
 File& Files::getRestartFile()
 {
     return restartFile_;
 }
-
+/*! 
+ * \returns File& (A reference of object type File i.e. File& statFile_)
+ */
 File& Files::getStatFile()
 {
     return statFile_;
 }
+/*! 
+ * \returns const File& (A const reference of object type File i.e. const File& dataFile_)
+ */
 const File& Files::getDataFile() const
 {
     return dataFile_;
 }
-
+/*! 
+ * \returns const File& (A const reference of object type File i.e. const File& eneFile_)
+ */
 const File& Files::getEneFile() const
 {
     return eneFile_;
 }
-
+/*! 
+ * \returns const File& (A const reference of object type File i.e. const File& fstatFile_)
+ */
 const File& Files::getFStatFile() const
 {
     return fStatFile_;
 }
-
+/*! 
+ * \returns const File& (A const reference of object type File i.e. const File& restartFile_)
+ */
 const File& Files::getRestartFile() const
 {
     return restartFile_;
 }
-
+/*! 
+ * \returns const File& (A const reference of object type File i.e. const File& statFile_)
+ */
 const File& Files::getStatFile() const
 {
     return statFile_;
 }
-
+/*! 
+ * \returns const File& (A const reference of object type std::string i.e. const std::string& name_)
+ */
 const std::string& Files::getName() const
 {
     return name_;
 }
-
+/*!
+ * \param[in] saveCount
+ */
 void Files::setSaveCount(unsigned int saveCount)
 {
     getDataFile().setSaveCount(saveCount);
@@ -111,22 +142,29 @@ void Files::setSaveCount(unsigned int saveCount)
     getStatFile().setSaveCount(saveCount);
     getEneFile().setSaveCount(saveCount);
 }
-
+/*!
+ * \param[in] name
+ */
 void Files::setName(const std::string& name)
 {
-    this->name_ = name;
+    name_ = name; // was before this->name_ = name
     getDataFile().setName(name_ + ".data");
     getFStatFile().setName(name_ + ".fstat");
     getRestartFile().setName(name_ + ".restart");
     getStatFile().setName(name_ + ".stat");
     getEneFile().setName(name_ + ".ene");
 }
-
+/*!
+ * \param[in] name
+ */
 void Files::setName(const char* name)
 {
     setName(std::string(name));
 }
-
+/*!
+ * \details Calls the setFileType() function from the File.h, which basically sets the File::fileType_
+ * \param[in] fileType (an object of enum class FileType)
+ */
 void Files::setFileType(FileType fileType)
 {
     getDataFile().setFileType(fileType);
@@ -144,7 +182,9 @@ void Files::setFileType(FileType fileType)
 //    getStatFile().openNextFile(counter);
 //    getEneFile().openNextFile(counter);
 //}
-
+/*!
+ * \details This implicitly calles the setCounter() function defined in File.h
+ */
 void Files::resetFileCounter()
 {
     getDataFile().setCounter(0);
@@ -153,7 +193,9 @@ void Files::resetFileCounter()
     getStatFile().setCounter(0);
     getEneFile().setCounter(0);
 }
-
+/*!
+ * \param[in] openmode 
+ */
 void Files::setOpenMode(std::fstream::openmode openMode)
 {
     getDataFile().setOpenMode(openMode);
@@ -162,7 +204,9 @@ void Files::setOpenMode(std::fstream::openmode openMode)
     getStatFile().setOpenMode(openMode);
     getEneFile().setOpenMode(openMode);
 }
-
+/*!
+ * \param[in,out] is (a reference of the input stream)
+ */
 void Files::read(std::istream& is)
 {
     std::string dummy;
@@ -173,18 +217,24 @@ void Files::read(std::istream& is)
     is >> dummy >> restartFile_;
     is >> dummy >> statFile_;
 }
-
-///BaseParticle print function, which accepts an os std::stringstream as input. It prints human readable BaseParticle information to the std::stringstream
+/*!
+ * \details 
+ * \param[in,out] os 
+ * We pass the std::ostream& os (which is basically the file into which you want the data to be written into) as an input argument,
+ * As the output stream is modified in the write function below, it is also the output variable (do not confuse \param[out] with the return variable)
+ */
 void Files::write(std::ostream& os) const
 {
     os << " name " << name_<< std::endl;
-    os << "dataFile " << dataFile_ << std::endl;
-    os << "fStatFile " << fStatFile_ << std::endl;
-    os << "eneFile " << eneFile_ << std::endl;
+    os << "dataFile    " << dataFile_ << std::endl;
+    os << "fStatFile   " << fStatFile_ << std::endl;
+    os << "eneFile     " << eneFile_ << std::endl;
     os << "restartFile " << restartFile_ << std::endl;
-    os << "statFile " << statFile_ << std::endl;
+    os << "statFile    " << statFile_ << std::endl;
 }
-
+/*!
+ *
+ */
 void Files::openFiles()
 {
     getDataFile().open();
@@ -193,7 +243,9 @@ void Files::openFiles()
     //getStatFile().open();
     getEneFile().open();
 }
-
+/*!
+ * 
+ */
 void Files::closeFiles()
 {
     getDataFile().close();
@@ -202,7 +254,9 @@ void Files::closeFiles()
     getStatFile().close();
     getEneFile().close();
 }
-
+/*!
+ * \param[in] nextSavedTimeStep
+ */
 void Files::setNextSavedTimeStep(unsigned int nextSavedTimeStep)
 {
     getDataFile().setNextSavedTimeStep(nextSavedTimeStep);

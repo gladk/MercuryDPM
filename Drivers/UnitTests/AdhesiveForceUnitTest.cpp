@@ -33,7 +33,6 @@
 #include "DPMBase.h"
 #include "Walls/InfiniteWall.h"
 #include "Logger.h"
-extern Logger<LOG_MAIN_LEVEL> logger;
 
 ///This code is written to test short-distance non-contact
 ///forces such as van-der-Waals or liquid bridge forces. 
@@ -199,7 +198,7 @@ protected:
 		
    		wallHandler.clear();
 		InfiniteWall w;
-		w.set(Vec3D(-1, 0, 0), -getXMin());
+		w.set(Vec3D(-1, 0, 0), Vec3D(getXMin(), 0, 0));
 		wallHandler.copyAndAddObject(w);
      
 		setTimeMax(getTimeStep()*250*4);
@@ -216,44 +215,44 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 	ParticleParticleInteraction ParticleParticleInteractionProblem;
 	ParticleParticleInteractionProblem.solve();
     
-    logger.log(Log::INFO,"Testing particle-particle collision for elastic adhesive forces");
+    logger(INFO,"Testing particle-particle collision for elastic adhesive forces");
     std::vector<BaseParticle*>::iterator pIt = ParticleParticleInteractionProblem.particleHandler.begin();
-    if (!(*pIt)->getPosition().compareTo(Vec3D(-0.00101582359198137,0.0,0.0), 1e-7))
-        logger.log(Log::FATAL,"First particle is in the wrong position. It is at %",(*pIt)->getPosition());
-    if (!(*pIt)->getVelocity().compareTo(Vec3D(-0.0436824,0.0,0.0)  , 1e-7))
-        logger.log(Log::FATAL,"First particle has the wrong velocity. It is at %",(*pIt)->getVelocity());
+    if (!(*pIt)->getPosition().isEqualTo(Vec3D(-0.00101582359198137,0.0,0.0), 1e-7))
+        logger(FATAL,"First particle is in the wrong position. It is at %",(*pIt)->getPosition());
+    if (!(*pIt)->getVelocity().isEqualTo(Vec3D(-0.0436824,0.0,0.0)  , 1e-7))
+        logger(FATAL,"First particle has the wrong velocity. It is at %",(*pIt)->getVelocity());
     ++pIt;
-    if (!(*pIt)->getPosition().compareTo(Vec3D(0.00101582359198137,0.0,0.0), 1e-7))
-        logger.log(Log::FATAL,"Second particle is in the wrong position. It is at %",(*pIt)->getPosition());
-    if (!(*pIt)->getVelocity().compareTo(Vec3D(0.0436824,0.0,0.0)  , 1e-7))
-        logger.log(Log::FATAL,"Second particle has the wrong velocity. It is at %",(*pIt)->getVelocity());
+    if (!(*pIt)->getPosition().isEqualTo(Vec3D(0.00101582359198137,0.0,0.0), 1e-7))
+        logger(FATAL,"Second particle is in the wrong position. It is at %",(*pIt)->getPosition());
+    if (!(*pIt)->getVelocity().isEqualTo(Vec3D(0.0436824,0.0,0.0)  , 1e-7))
+        logger(FATAL,"Second particle has the wrong velocity. It is at %",(*pIt)->getVelocity());
 
     //Second test Particle Particle interaction with a plastic force (non reverseable)
 	ParticleParticleInteractionWithPlasticForces ParticleParticleInteractionWithPlasticForcesProblem;
 	ParticleParticleInteractionWithPlasticForcesProblem.solve();
     
-    logger.log(Log::INFO,"Testing particle particles collision for plastic adhesive forces");
+    logger(INFO,"Testing particle particles collision for plastic adhesive forces");
     std::vector<BaseParticle*>::iterator pIt2 = ParticleParticleInteractionWithPlasticForcesProblem.particleHandler.begin();
-    if (!(*pIt2)->getPosition().compareTo(Vec3D(-0.00107858,0.0,0.0), 1e-7))
-        logger.log(Log::FATAL,"First particle is in the wrong position. It is at %",(*pIt2)->getPosition());
-    if (!(*pIt2)->getVelocity().compareTo(Vec3D(-0.0352526,0.0,0.0)  , 1e-7))
-        logger.log(Log::FATAL,"First particle has the wrong velocity. It is at %",(*pIt2)->getVelocity());
+    if (!(*pIt2)->getPosition().isEqualTo(Vec3D(-0.00107858,0.0,0.0), 1e-7))
+        logger(FATAL,"First particle is in the wrong position. It is at %",(*pIt2)->getPosition());
+    if (!(*pIt2)->getVelocity().isEqualTo(Vec3D(-0.0352526,0.0,0.0)  , 1e-7))
+        logger(FATAL,"First particle has the wrong velocity. It is at %",(*pIt2)->getVelocity());
     ++pIt2;
-    if (!(*pIt2)->getPosition().compareTo(Vec3D(0.00107858,0.0,0.0), 1e-7))
-        logger.log(Log::FATAL,"Second particle is in the wrong position. It is at %",(*pIt2)->getPosition());
-    if (!(*pIt2)->getVelocity().compareTo(Vec3D(0.0352526,0.0,0.0)  , 1e-7))
-        logger.log(Log::FATAL,"Second particle has the wrong velocity. It is at %",(*pIt2)->getVelocity());
+    if (!(*pIt2)->getPosition().isEqualTo(Vec3D(0.00107858,0.0,0.0), 1e-7))
+        logger(FATAL,"Second particle is in the wrong position. It is at %",(*pIt2)->getPosition());
+    if (!(*pIt2)->getVelocity().isEqualTo(Vec3D(0.0352526,0.0,0.0)  , 1e-7))
+        logger(FATAL,"Second particle has the wrong velocity. It is at %",(*pIt2)->getVelocity());
     
     //Final test Particle-Wall interactions with a plastic force (non reversable)
 	ParticleWallInteraction ParticleWallInteraction;
 	ParticleWallInteraction.solve();
     
-    logger.log(Log::INFO,"Testing particle-wall collision for plastic adhesive forces");
+    logger(INFO,"Testing particle-wall collision for plastic adhesive forces");
     std::vector<BaseParticle*>::iterator pIt3 = ParticleWallInteraction.particleHandler.begin();
-    if (!(*pIt3)->getPosition().compareTo(Vec3D(0.00104381,0.0,0.0), 1e-7))
-        logger.log(Log::FATAL,"The particle is in the wrong position. It is at %",(*pIt3)->getPosition());
-    if (!(*pIt3)->getVelocity().compareTo(Vec3D(0.0362122,0.0,0.0)  , 1e-7))
-        logger.log(Log::FATAL,"The particle has the wrong velocity. It is at %",(*pIt3)->getVelocity());
+    if (!(*pIt3)->getPosition().isEqualTo(Vec3D(0.00104381,0.0,0.0), 1e-7))
+        logger(FATAL,"The particle is in the wrong position. It is at %",(*pIt3)->getPosition());
+    if (!(*pIt3)->getVelocity().isEqualTo(Vec3D(0.0362122,0.0,0.0)  , 1e-7))
+        logger(FATAL,"The particle has the wrong velocity. It is at %",(*pIt3)->getVelocity());
    
     return 0;
 }

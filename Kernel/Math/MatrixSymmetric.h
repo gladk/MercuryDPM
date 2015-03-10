@@ -37,92 +37,92 @@ class MatrixSymmetric3D
 {
 public:
     /*!
-     * \brief 
+     * \brief The six distinctive matrix elements
      */    
     Mdouble XX, XY, XZ, YY, YZ, ZZ;
 
     /*!
-     * \brief 
+     * \brief Casting operator; casts MatrixSymmetric3D to Matrix3D
      */
     operator Matrix3D() const;
 
     /*!
-     * \brief 
+     * \brief Default constructor
      */
-    MatrixSymmetric3D(void);
+    MatrixSymmetric3D();
 
     /*!
-     * \brief 
+     * \brief Alternative constructor, with all (6) elements as arguments
      */
     MatrixSymmetric3D(const Mdouble xx, const Mdouble xy, const Mdouble xz, const Mdouble yy, const Mdouble yz, const Mdouble zz);
 
     /*!
-     * \brief 
+     * \brief Sets all elements to zero.
      */
     void setZero();
 
     /*!
-     * \brief 
+     * \brief Returns the MEAN of the diagonal elements (i.e. the trace divided by three).
      */
     Mdouble trace() const;
 
     /*!
-     * \brief 
+     * \brief Matrix addition.
      */
     MatrixSymmetric3D operator +(const MatrixSymmetric3D &A) const;
 
     /*!
-     * \brief 
+     * \brief Matrix substraction.
      */
     MatrixSymmetric3D operator -(const MatrixSymmetric3D &A) const;
 
     /*!
-     * \brief 
+     * \brief Scalar addition.
      */
     MatrixSymmetric3D operator +(const Mdouble a) const;
 
     /*!
-     * \brief 
+     * \brief Scalar substraction.
      */
     MatrixSymmetric3D operator -(const Mdouble a) const;
 
     /*!
-     * \brief 
+     * \brief Vector multiplication.
      */
     friend Vec3D operator *(const MatrixSymmetric3D& A, const Vec3D& b);
 
     /*!
-     * \brief 
+     * \brief Scalar multiplication.
      */
     MatrixSymmetric3D operator *(const Mdouble a) const;
 
     /*!
-     * \brief 
+     * \brief Scalar division.
      */
     MatrixSymmetric3D operator /(const Mdouble a) const;
 
     /*!
-     * \brief 
+     * \brief Add elements to an ostream.
      */
     friend std::ostream& operator<<(std::ostream& os, const MatrixSymmetric3D& A);
 
     /*!
-     * \brief 
+     * \brief Add elements to an istream
      */
     friend std::istream& operator>>(std::istream& is, MatrixSymmetric3D& A);
 
     /*!
-     * \brief 
+     * \brief Matrix addition
      */
     MatrixSymmetric3D& operator+=(const MatrixSymmetric3D& A);
 
     /*!
-     * \brief 
+     * \brief Matrix substraction
      */
     MatrixSymmetric3D& operator-=(const MatrixSymmetric3D& A);
 
     /*!
-     * \brief 
+     * \brief Scalar division
      */
     MatrixSymmetric3D& operator/=(const Mdouble a);
 
@@ -142,7 +142,7 @@ public:
     static MatrixSymmetric3D selfDyadic(const Vec3D& a);
 
     /*!
-     * \brief Calculates the symmetrized dyadic product of two Vec3D: \f$ \frac{1}{2}(a \otimes b + b \otimes a) \f$
+     * \brief Calculates the symmetrised dyadic product of two Vec3D: \f$ \frac{1}{2}(a \otimes b + b \otimes a) \f$
      */
     static MatrixSymmetric3D symmetrisedDyadic(const Vec3D&  a, const Vec3D& b);
 };

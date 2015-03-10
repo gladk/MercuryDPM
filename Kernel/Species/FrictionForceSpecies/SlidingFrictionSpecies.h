@@ -28,21 +28,33 @@
 #include "Species/BaseSpecies.h"
 #include "Math/ExtendedMath.h"
 #include "Interactions/FrictionForceInteractions/SlidingFrictionInteraction.h"
-class BaseInteractable;
-class BaseInteraction;
 
-//Note the getVelocity can for some Species be dependent on which point on the Species is meant.
+/*!
+ * \brief SlidingFrictionSpecies contains the parameters used to describe sliding friction.
+ * \details See SlidingFrictionInteraction::computeForce for a description of the force law.
+ */
 class SlidingFrictionSpecies : public virtual BaseSpecies
 {
 public:
+    ///\brief The correct Interaction type for this FrictionForceSpecies
     typedef SlidingFrictionInteraction InteractionType;
+
+    ///\brief The default constructor.
     SlidingFrictionSpecies();
+
+    ///\brief The default copy constructor.
     SlidingFrictionSpecies(const SlidingFrictionSpecies &s);
+
+    ///\brief The default destructor.
     virtual ~SlidingFrictionSpecies();
-    virtual SlidingFrictionSpecies* copy() const;
-    virtual void read(std::istream& is);
-    virtual void write(std::ostream& os) const;
-    virtual void clear();
+
+    /// \brief Reads the species properties from an input stream.
+    void read(std::istream& is);
+
+    /// \brief Writes the species properties to an output stream.
+    void write(std::ostream& os) const;
+
+    /// \brief Used in Species::getName to obtain a unique name for each Species.
     virtual std::string getBaseName() const;
 
 //setters and getters
@@ -51,7 +63,6 @@ public:
 
     ///Allows the spring constant to be accessed
     Mdouble getSlidingStiffness() const;
-
 
     ///Allows the tangential viscosity to be changed
     void setSlidingDissipation(Mdouble new_dispt);
@@ -66,25 +77,54 @@ public:
     ///Allows the (dynamic) Coulomb friction coefficient to be accessed
     Mdouble getSlidingFrictionCoefficient() const;
 
+    ///Allows the static Coulomb friction coefficient to be changed
     void setSlidingFrictionCoefficientStatic(Mdouble new_mu);
 
+    ///Allows the static Coulomb friction coefficient to be accessed
     Mdouble getSlidingFrictionCoefficientStatic() const;
 
-    virtual BaseInteraction* getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
+    /*!
+     * \brief allocates a new SlidingFrictionInteraction object and returns a pointer to it.
+     */
+    BaseInteraction* getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
 
+    /*!
+     * \brief Returns true if torques have to be calculated.
+     */
     bool getUseAngularDOFs() const;
 
+    ///\brief creates default values for mixed species
     void mix(SlidingFrictionSpecies* const S, SlidingFrictionSpecies* const T);
 
     ///Sets k, disp, kt, dispt such that it matches a given tc and eps for a collision of two particles of masses m0,m1
     void setCollisionTimeAndNormalAndTangentialRestitutionCoefficient(Mdouble tc, Mdouble eps, Mdouble beta, Mdouble mass);
 
+    ///Sets k, disp, kt (with dispt=0) such that it matches a given tc and eps for a collision of two particles of mass m
     void setCollisionTimeAndNormalAndTangentialRestitutionCoefficientNoDispt(Mdouble tc, Mdouble eps, Mdouble beta, Mdouble mass);
 
 private:
+    /*! 
+     * \brief tangential stiffness. 
+     * \details Typically set to 2/7 of the stiffness of the normal force, as  
+     * both the tangential and the normal spring have the same oscillation  
+     * frequency (and thus require the same timeStep)in this case. 
+     */
     Mdouble slidingStiffness_;
-    Mdouble slidingDissipation_; ///<tangential viscosity: should satisfy \f$4*dispt*dt<mass, dispt \approx disp\f$
-    Mdouble slidingFrictionCoefficient_; ///< (dynamic) Coulomb friction coefficient
-    Mdouble slidingFrictionCoefficientStatic_; ///<static Coulomb friction coefficient (by default set equal to mu)
+    
+    /*! 
+     * \brief tangential dissipation coefficient. 
+     * \details Typically set to 2/7 of the normal force dissipation, as both
+     * the tangential and the normal spring have the same restitution coefficients 
+     * (if the tangential and normal stiffnesses also have a ratio of 2/7). 
+     * should always satisfy \f$4*dispt*dt<mass, dispt \approx disp\f$, otherwise 
+     * the restitution is zero and the particles stick.
+     */
+    Mdouble slidingDissipation_; 
+    
+    /// (dynamic) Coulomb friction coefficient
+    Mdouble slidingFrictionCoefficient_; 
+    
+    /// static Coulomb friction coefficient (by default set equal to mu)
+    Mdouble slidingFrictionCoefficientStatic_; 
 };
 #endif

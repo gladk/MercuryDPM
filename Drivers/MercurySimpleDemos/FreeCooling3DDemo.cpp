@@ -30,59 +30,68 @@
 #include "Mercury3D.h"
 #include "Particles/BaseParticle.h"
 #include "Walls/InfiniteWall.h"
+#include "MercuryTime.h"
 
-/// In this file 10^3 particles with the same velocity are placed in a tri-axial box. This makes them collide with the walls and eachother. Afterwards the same run is performed with hgrid on. It tests the working (and speedup) of the hgrid.
+/*!
+ * In this file 10^3 particles with the same velocity are placed in a tri-axial box. 
+ * This makes them collide with the walls and eachother. 
+ * Afterwards the same run is performed with hgrid on. 
+ * It tests the working (and speedup) of the hgrid.
+ */
 
-class FreeCooling3DDemoProblem : public Mercury3D{
+class FreeCooling3DDemoProblem : public Mercury3D
+{
 public:
 	
 	void setupInitialConditions()
 	{
-		int N1=static_cast<int>(pow(N,0.33))+1;	
+		unsigned int N1 = static_cast<unsigned int>(pow(N, 0.33)) + 1;	
 		BaseParticle p0;		
-		for (int i=0;i<N;i++)
+		for (unsigned int i = 0; i < N; i++)
 		{
-			int ix=static_cast<int>(i%N1);
-			int iz=static_cast<int>(i/N1/N1);
-			int iy=(i-ix-N1*N1*iz)/N1;
+			unsigned int ix = static_cast<unsigned int>(i%N1);
+			unsigned int iz = static_cast<unsigned int>(i/N1/N1);
+			unsigned int iy = (i - ix - N1 * N1 * iz) / N1;
 		
-			double x=(getXMax()-getXMin())*(ix+1)/(N1+1);
-			double y=(getYMax()-getYMin())*(iy+1)/(N1+1);
-			double z=(getZMax()-getZMin())*(iz+1)/(N1+1);
+			double x = (getXMax() - getXMin()) * (ix + 1) / (N1 + 1);
+			double y = (getYMax() - getYMin()) * (iy+1) / (N1 + 1);
+			double z = (getZMax() - getZMin()) * (iz + 1) / (N1 + 1);
 			
-		
 			p0.setPosition(Vec3D(x,y,z));
-			p0.setVelocity(Vec3D(0.1,0.1,0.1));
-			p0.setRadius(0.0001);
+			p0.setVelocity(20*Vec3D(0.1,0.1,0.1));
+			p0.setRadius(0.002);
 			particleHandler.copyAndAddObject(p0);
 		}
 		
 		wallHandler.clear();
 		InfiniteWall w0;
-		w0.set(Vec3D(-1, 0, 0), -getXMin());
+		w0.set(Vec3D(-1.0, 0.0, 0.0), Vec3D(getXMin(), 0, 0));
 		wallHandler.copyAndAddObject(w0);
-		w0.set(Vec3D( 1, 0, 0),  getXMax());
+		w0.set(Vec3D(1.0, 0.0, 0.0), Vec3D(getXMax(), 0, 0));
 		wallHandler.copyAndAddObject(w0);
-		w0.set(Vec3D( 0,-1, 0), -getYMin());
+		w0.set(Vec3D(0.0,-1.0, 0.0), Vec3D(0, getYMin(), 0));
 		wallHandler.copyAndAddObject(w0);
-		w0.set(Vec3D( 0, 1, 0),  getYMax());
+		w0.set(Vec3D(0.0, 1.0, 0.0), Vec3D(0, getYMax(), 0));
 		wallHandler.copyAndAddObject(w0);
-		w0.set(Vec3D( 0, 0,-1), -getZMin());
+		w0.set(Vec3D(0.0, 0.0,-1.0), Vec3D(0, 0, getZMin()));
 		wallHandler.copyAndAddObject(w0);
-		w0.set(Vec3D( 0, 0, 1),  getZMax());
+		w0.set(Vec3D(0.0, 0.0, 1.0), Vec3D(0, 0, getZMax()));
 		wallHandler.copyAndAddObject(w0);
 	}
 	
-	int N;
+    ///\brief Number of particles in the system.
+	unsigned int N;
 };
 
 int main(int argc UNUSED, char *argv[] UNUSED)
 {
-	std::cout<<"In this file 10^3 particles with the same velocity are placed "
+	std::cout << "In this file 10^3 particles with the same velocity are placed "
 	"in a tri-axial box. This makes them collide with the walls and eachother. "
 	"Afterwards the same run is performed with hgrid on. It tests the working "
-	"(and speedup) of the hgrid."<<std::endl;
+	"(and speedup) of the hgrid." << std::endl;
 	
+    Time time;
+    time.tic();
 	///Start off my solving the default problem
  	FreeCooling3DDemoProblem problem;
     auto species = new LinearViscoelasticSpecies;
@@ -91,18 +100,21 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     species->setDissipation(0.005);
     species->setStiffness(1e3);
 
+    problem.setXMax(0.1);
+    problem.setYMax(0.1);
+    problem.setZMax(0.1);
     problem.N=1000;
- 	problem.setName("FreeCooling3DDemo");
-	problem.setGravity(Vec3D(0.0,0.0,0.0));
+    problem.setName("FreeCooling3DDemo");
+    problem.setGravity(Vec3D(0.0,0.0,0.0));
     problem.setTimeStep(5e-5);
-	problem.setSaveCount(4);
- 	problem.setTimeMax(0.08);
+    problem.setSaveCount(4);
+    problem.setTimeMax(0.08);
     problem.setSystemDimensions(3);
-	problem.setZMax(0.01);
     
-        problem.setHGridMaxLevels(1);
-	problem.setHGridCellOverSizeRatio(1.2);
-	problem.setHGridUpdateEachTimeStep(false);    
-	problem.solve();
+    problem.setHGridMaxLevels(1);
+    problem.setHGridCellOverSizeRatio(1.2);
+    problem.setHGridUpdateEachTimeStep(false);    
+    problem.solve();
+    
+    std::cout << "Total time to run this simulation: " << time.toc() << "s" << std::endl;
 }
-

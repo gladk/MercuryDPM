@@ -30,107 +30,146 @@
 #include "BaseWall.h"
 #include "InfiniteWall.h"
 #include "Math/Vector.h"
+#include "Logger.h"
 
 /*!
- * \class IntersectionOfWalls
- * \brief A finite wall is convex polygon defined by a set of normals normal_i and positions position_i. A particle touches a finite wall if position_i-normal_i*x<=radius for all i.
+ * \brief A IntersectionOfWalls is convex polygon defined as an intersection of InfiniteWall's.
+ * \details A IntersectionOfWalls can be defined as the intersection of a set 
+ * of InfiniteWalls, defined by the normal vector into the wall and a point on the wall.
+ * For an example see Tutorial T8.
+ * A particle touches a finite wall if position_i-normal_i*x<=radius for all InfiniteWall's i.
+ * 
  * \image html Walls/finiteWall.jpg
  */
-
 class IntersectionOfWalls : public BaseWall
 {
 public:
     /*!
-     * \brief
+     * \brief Default constructor.
      */
     IntersectionOfWalls();
-
+    
     /*!
-     * \brief Wall copy method. It calls the copy contrustor of this Wall, usefull for polymorfism
+     * \brief Copy constructor.
      */
-    virtual IntersectionOfWalls* copy() const;
-
+    IntersectionOfWalls(const IntersectionOfWalls& other);
+    
     /*!
-     * \brief
+     * \brief Destructor.
      */
-    void clear();
+    virtual ~IntersectionOfWalls();
+    
+    /*!
+     * Copy assignment operator.
+     */
+    IntersectionOfWalls& operator=(const IntersectionOfWalls& other);
 
     /*!
-     * \brief Adds a wall to the set of finite walls, given an outward normal vector s.t. normal*x=normal*point
+     * \brief Wall copy method. It calls the copy constructor of this Wall, useful for polymorphism
+     */
+    virtual IntersectionOfWalls* copy() const override;
+
+    /*!
+     * \brief Removes all parts of the walls.
+     */
+    virtual void clear() override;
+
+    /*!
+     * \brief Adds a wall to the set of infinite walls, given an outward normal vector s.t. normal*x=normal*point
      */
     void addObject(Vec3D normal, Vec3D point);
 
     /*!
      * \brief Adds a wall to the set of finite walls, given an outward normal vector s. t. normal*x=position
+     * \deprecated Don't use this function, instead use the function addObject(Vec3D, Vec3D).
      */
-    void addObject(Vec3D normal_, Mdouble position_);
+    MERCURY_DEPRECATED
+    void addObject(Vec3D normal, Mdouble position);
 
     /*!
-     * \brief
+     * \brief Creates an open prism which is a polygon between the points, except the first and last point,  and extends infinitely in the PrismAxis direction.
      */
-    void createOpenPrism(std::vector<Vec3D> Points, Vec3D PrismAxis);
+    void createOpenPrism(std::vector<Vec3D> points, Vec3D prismAxis);
 
     /*!
-     * \brief
+     * \brief Creates an open prism which is a polygon between the points and extends infinitely in the PrismAxis direction.
      */
-    void createPrism(std::vector<Vec3D> Points, Vec3D PrismAxis);
+    void createPrism(std::vector<Vec3D> points, Vec3D prismAxis);
 
     /*!
-     * \brief
+     * \brief Creates an open prism which is a polygon between the points, except the first and last point, and extends infinitely in the direction perpendicular to the first and second wall.
      */
-    void createOpenPrism(std::vector<Vec3D> Points);
+    void createOpenPrism(std::vector<Vec3D> points);
 
     /*!
-     * \brief
+     * \brief Creates an open prism which is a polygon between the points and extends infinitely in the direction perpendicular to the first and second wall.
      */
-    void createPrism(std::vector<Vec3D> Points);
+    void createPrism(std::vector<Vec3D> points);
 
     /*!
-     * \brief Since this function should be called before calculating any Particle-Wall interactions, it can also be used to set the normal vector in case of curved walls.
+     * \brief Compute the distance from the wall for a given BaseParticle and return if there is a collision. If there is a collision, also return the normal vector.
      */
-    bool getDistanceAndNormal(const BaseParticle& P, Mdouble& distance, Vec3D& normal_return) const;
+    bool getDistanceAndNormal(const BaseParticle& p, Mdouble& distance, Vec3D& normal_return) const override;
 
     /*!
-     * \brief
+     * \brief Compute the distance from the wall for a given BaseParticle and return if there is an interaction. If there is an interaction, also return the normal vector.
      */
-    bool getDistanceAndNormal(const Vec3D& postition, Mdouble wallInteractionRadius, Mdouble &distance, Vec3D &normal_return) const;
+    bool getDistanceAndNormal(const Vec3D& postition, Mdouble wallInteractionRadius, Mdouble& distance, Vec3D& normal_return) const;
 
     /*!
-     * \brief
-     * \param[in]
+     * \brief Move the IntersectionOfWalls to a new position, which is a Vec3D from the old position.
      */
     void move(const Vec3D& move);
     
     /*!
-     * \brief reads wall
+     * \brief Reads an IntersectionOfWalls from an input stream, for example a restart file.
      */
     void read(std::istream& is);
 
     /*!
-     * \brief
-     */
-    void oldRead(std::istream& is);
-
-    /*!
-     * \brief outputs wall
+     * \brief Writes an IntersectionOfWalls to an output stream, for example a restart file.
      */
     void write(std::ostream& os) const;
 
     /*!
-     * \brief Returns the name of the object
+     * \brief Returns the name of the object, here the string "IntersectionOfWalls".
      */
-    virtual std::string getName() const;
+    virtual std::string getName() const override;
 
     /*!
-     * \brief
+     * \brief Get the interaction between this IntersectionOfWalls and given BaseParticle at a given time.
      */
-    BaseInteraction* getInteractionWith(BaseParticle *P, Mdouble timeStamp, InteractionHandler* interactionHandler);
+    BaseInteraction* getInteractionWith(BaseParticle* p, Mdouble timeStamp, InteractionHandler* interactionHandler);
 
 private:
-    std::vector<InfiniteWall> objects_; ///
-    std::vector<Vec3D> A_; ///A[n*(n-1)/2+m] is a point on the intersecting line between walls m and n, m<n
-    std::vector<Vec3D> AB_; ///AB[n*(n-1)/2+m] is the direction of the intersecting line between walls m and n, m<n
-    std::vector<Vec3D> C_; ///C[(n-2)*(n-1)*n/6+(m-1)*m/2+l] is a point intersecting walls l, m and n, l<m<n
+    /*!
+     * \brief The wall "segments"/directions that together make up the finite wall. 
+     * \details An intersection of walls exists of a number of infinite walls that
+     * are cut of at the intersection points. These InfiniteWall are saved in this
+     * vector called iWObjects_.
+     */
+    std::vector<InfiniteWall> wallObjects_;
+    
+    /*!
+     * \brief A vector that stores a point for each intersecting line between two different InfiniteWall.
+     * \details A[n*(n-1)/2+m] is a point on the intersecting line between walls
+     *  m and n, m<n.
+     */    
+    std::vector<Vec3D> A_;
+    
+    /*!
+     * \brief A vector that stores the direction of the intersecting lines between two different InfiniteWall.
+     * \details AB[n*(n-1)/2+m] is the direction of the intersecting line between
+     *  walls m and n, m<n.
+     */
+    std::vector<Vec3D> AB_;
+    
+    /*!
+     * \brief A vector that stores the intersection point of three different InfiniteWall.
+     * \details C[(n-2)*(n-1)*n/6+(m-1)*m/2+l] is a point intersecting walls 
+     * l, m and n, l<m<n
+     */
+    std::vector<Vec3D> C_;
 };
 
 #endif

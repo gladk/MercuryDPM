@@ -25,15 +25,17 @@
 
 #include "EmptyFrictionSpecies.h"
 
-EmptyFrictionSpecies::EmptyFrictionSpecies() : BaseSpecies()
+EmptyFrictionSpecies::EmptyFrictionSpecies()
 {
 #ifdef DEBUG_CONSTRUCTOR
     std::cout<<"EmptySpecies::EmptySpecies() finished"<<std::endl;
 #endif
 }
 
-EmptyFrictionSpecies::EmptyFrictionSpecies(const EmptyFrictionSpecies &s)
-        : BaseSpecies(s)
+/*!
+ * \param[in] the species that is copied
+ */
+EmptyFrictionSpecies::EmptyFrictionSpecies(const EmptyFrictionSpecies &s UNUSED)
 {
 #ifdef DEBUG_CONSTRUCTOR
     std::cout<<"EmptySpecies::EmptySpecies(const EmptySpecies &p) finished"<<std::endl;
@@ -47,26 +49,41 @@ EmptyFrictionSpecies::~EmptyFrictionSpecies()
 #endif   
 }
 
-///EmptySpecies print function, which accepts an os std::stringstream as input. It prints human readable EmptySpecies information to the std::stringstream
+/*!
+ * \param[out] output stream (typically the restart file)
+ */
 void EmptyFrictionSpecies::write(std::ostream& os UNUSED) const
 {
 }
 
+/*!
+ * \param[in] input stream (typically the restart file)
+ */
 void EmptyFrictionSpecies::read(std::istream& is UNUSED)
 {
 }
 
-//the name is set such that the full name does not extend
+/*!
+ * \return a string containing the name of the species (minus the word "Species")
+ */
 std::string EmptyFrictionSpecies::getBaseName() const
 {
     return "";
 }
 
-///create values for mixed species
+/*!
+ * \param[in] S,T the two species whose properties are mixed to create the new species
+ */
 void EmptyFrictionSpecies::mix(EmptyFrictionSpecies* const S UNUSED, EmptyFrictionSpecies* const T UNUSED)
 {
 }
 
+/*!
+ * \details Returns true for any FrictionForceSpecies except EmptyFrictionSpecies, 
+ * because for spherical particles, torques are only caused by tangential forces. 
+ * See SpeciesHandler::useAngularDOFs for more details
+ * \return false
+ */
 bool EmptyFrictionSpecies::getUseAngularDOFs() const
 {
     return false;

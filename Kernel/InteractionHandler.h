@@ -22,25 +22,22 @@
 //ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
 #ifndef INTERACTIONHANDLER_H
 #define INTERACTIONHANDLER_H
 #include "BaseHandler.h"
 #include "Interactions/BaseInteraction.h"
-
 class SpeciesHandler;
-/*!
- * \class InteractionHandler
- * \brief Container to store all BaseInteraction
- * \details The InteractionHandler is a container to store all BaseInteraction. It is implemented by a vector of pointers to BaseInteraction.
- */
 
+/*!
+ * \brief Container to store Interaction objects.
+ * \details The InteractionHandler is a container to store all Interaction objects. 
+ * It is implemented as a vector of BaseInteraction pointers.
+ */
 class InteractionHandler : public BaseHandler<BaseInteraction>
 {
 public:
     /*!
-     * \brief Default constructor, it simply creates an empty InteractionHandler.
+     * \brief Default constructor, it creates an empty InteractionHandler.
      */
     InteractionHandler();
 
@@ -55,42 +52,50 @@ public:
     InteractionHandler operator =(const InteractionHandler& rhs);
     
     /*!
-     * \brief Destructor, it simply destructs the InteractionHandler and all BaseInteraction it contains.
+     * \brief Destructor, it destructs the InteractionHandler and all BaseInteraction it contains.
      */
     ~InteractionHandler();
 
     /*!
-     * \brief Adds a BaseInteraction to the InteractionHandler.
+     * \brief Adds an Interaction to the InteractionHandler.
      */
     void addObject(BaseInteraction* I);
 
     /*!
-     * \brief Reads BaseInteraction into the InteractionHandler from restart data.
+     * \brief Reads an Interaction into the InteractionHandler from restart data.
      */
     void readObject(std::istream& is);
 
     /*!
-     * \brief 
+     * \brief Returns the Interaction between the BaseInteractable's P and I if 
+     * it exists, otherwise returns a null pointer.
      */
     BaseInteraction* getExistingInteraction(BaseInteractable* P, BaseInteractable* I);
     
     /*!
-     * \brief 
+     * \brief Returns the Interaction between the BaseInteractable's P and I.
      */
     BaseInteraction* getInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
 
     /*!
-     * \brief 
+     * \brief Removes interactions of periodic particles when the periodic 
+     * particles get deleted (see DPMBase::removeDuplicatePeriodicParticles) 
      */
-    virtual void removeObjectKeepingPeriodics(unsigned const int id);
+    void removeObjectKeepingPeriodics(unsigned const int id);
     
     /*!
-     * \brief 
+     * \brief erases interactions which have an old timestamp.
      */
     void eraseOldInteractions(Mdouble lastTimeStep);
 
+    /*!
+     * \brief Writes the InteractionHandler to an output stream, for example a restart file.
+     */
     void write(std::ostream& os) const;
 
+    /*!
+     * \brief Returns the name of the object
+     */
     std::string getName() const;
 };
 #endif

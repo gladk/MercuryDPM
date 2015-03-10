@@ -34,7 +34,8 @@ class BaseParticle;
 
     /*!
      * \class DeletionBoundary
-     * \brief
+     * \brief Used for removing particles from the problem.
+     * Inherits from BaseBoundary.
      */
 class DeletionBoundary : public BaseBoundary
 {
@@ -48,46 +49,43 @@ public:
      */    
     ~DeletionBoundary();
     /*!
-     * \brief
+     * \brief Copy method; creates copy on the heap and returns a pointer to it.
      */    
     DeletionBoundary* copy() const;
     
     /*!
-     * \brief
-     * \param[in]
+     * \brief Sets boundary position based on a normal and distance.
      */
     void set(const Vec3D& normal, Mdouble distance);
     
     /*!
-     * \brief
-     * \param[in]
+     * \brief Sets the boundary's distance property to the given one.
      */
     void move(Mdouble position);
     
     /*!
-     * \brief
-     * \param[in]
+     * \brief Returns the shortest distance between the boundary and given position.
      */
     Mdouble getDistance(const Vec3D &position) const;
     
     /*!
-     * \brief
-     * \return Returns true if the particle is deleted
+     * \brief Checks if particle passed the boundary and deletes the particle if so.
      */
     bool checkBoundaryAfterParticleMoved(BaseParticle *p, ParticleHandler &pH);
 
     /*!
-     * \brief reads the DeletionBoundary
+     * \brief Reads some boundary properties from an std::istream.
      */
     void read(std::istream& is);
 
     /*!
-     * \brief
+     * \brief Deprecated read method. use DeletionBoundary::read() instead.
      */
+    MERCURY_DEPRECATED
     void oldRead(std::istream& is);
 
     /*!
-     * \brief outputs the DeletionBoundary
+     * \brief Writes the boundary properties to an std::ostream.
      */
     void write(std::ostream& os) const;
     
@@ -102,11 +100,16 @@ private:
      */
     Vec3D normal_; 
     /*!
-     * \brief This is the normal to rescale the normal vector to a unit vectors.  
+     * \brief This is the factor to rescale the given normal vector to a unit vectors. 
+     * \details NB: Not only the normal vector is rescaled by this factor, also 
+     * the 'distance' from the origin of the boundary is scaled by this factor! Also,
+     * once the boundary position is set with DeletionBoundary::set(), the arguments 
+     * of any reset of the distance_ property  (i.e. usage of DeletionBoundary::move()) 
+     * will be rescaled by the same factor!
      */
     Mdouble scaleFactor_; 
     /*!
-     * \brief position n*x=p
+     * \brief The boundary's distance from the origin.
      */
     Mdouble distance_;
 };

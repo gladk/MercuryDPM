@@ -29,6 +29,7 @@
 #include "Species/FrictionForceSpecies/SlidingFrictionSpecies.h"
 #include "Boundaries/PeriodicBoundary.h"
 #include "Walls/InfiniteWall.h"
+#include <Logger.h>
 
 ChuteBottom::ChuteBottom()
 {
@@ -86,11 +87,15 @@ void ChuteBottom::makeRoughBottom(Chute &chute)
         Mdouble collisionTime= helpers::computeCollisionTimeFromKAndDispAndEffectiveMass(species->getStiffness(),speciesHandler.getObject(0)->getDensity(),effectiveMass);
         species->setCollisionTimeAndRestitutionCoefficient(10.0*collisionTime,0.2,effectiveMass);
         setTimeStep(10.0 * 0.02 * helpers::computeCollisionTimeFromKAndDispAndEffectiveMass(species->getStiffness(),speciesHandler.getObject(0)->getDensity(),effectiveMass));
-    }
+        ///\todo the above should be replaced with sth like this (and setTimeMax(getTimeStep() * 1e4);), but this would break the selftest and old codes
+//        Mdouble effectiveMass = 0.5*speciesHandler.getObject(0)->getMassFromRadius(0.5 * (getMinInflowParticleRadius() + getMaxInflowParticleRadius()));
+//        Mdouble collisionTime = species->getCollisionTime(2.0*effectiveMass);
+//        species->setCollisionTimeAndRestitutionCoefficient(10.0*collisionTime,0.2,2.0*effectiveMass);
+//        setTimeStep(0.2*collisionTime);
+      }
     else
     {
-        std::cerr << "ChuteBottom::makeRoughBottom: Warning: species type does not allow setting the parameters" << std::endl;
-        exit(-1);
+        logger(WARN,"[ChuteBottom::makeRoughBottom()] species type does not allow setting the parameters.");
     }
     auto species2 = dynamic_cast<SlidingFrictionSpecies*>(speciesHandler.getObject(0));
     if (species2 != nullptr)
@@ -100,7 +105,6 @@ void ChuteBottom::makeRoughBottom(Chute &chute)
     //set_number_of_saves(2);
     setSaveCount(100);
 
-    //solve
     solve();
 
     //createBottom
@@ -111,7 +115,7 @@ void ChuteBottom::makeRoughBottom(Chute &chute)
     }
 
     std::cout << "Thickness" << thickness_ << std::endl;
-    ///todo{Dinant is not a fan of this alogirm (i.e. poping back stuff while in iterator}
+    ///todo{Dinant is not a fan of this algorithm (i.e. popping back stuff while in iterator}
     //now cut a slice of width 2*MaxInflowParticleRadius
     for (std::vector<BaseParticle*>::iterator it = particleHandler.begin(); it != particleHandler.end();)
     {
@@ -163,7 +167,7 @@ void ChuteBottom::setupInitialConditions()
     if (isBottomPeriodic_)
     {
         InfiniteWall w0;
-        w0.set(Vec3D(0.0, 0.0, -1.0), -getZMin() + getInflowParticleRadius());
+        w0.set(Vec3D(0.0, 0.0, -1.0), Vec3D(0, 0, getZMin() - getInflowParticleRadius()));
         wallHandler.copyAndAddObject(w0);
         PeriodicBoundary b0;
         b0.set(Vec3D(1.0, 0.0, 0.0), getXMin(), getXMax());
@@ -174,15 +178,15 @@ void ChuteBottom::setupInitialConditions()
     else
     {
         InfiniteWall w0;
-        w0.set(Vec3D(0.0, 0.0, -1.0), -getZMin() + getInflowParticleRadius());
+        w0.set(Vec3D(0.0, 0.0, -1.0), Vec3D(0, 0, getZMin() - getInflowParticleRadius()));
         wallHandler.copyAndAddObject(w0);
-        w0.set(Vec3D(-1.0, 0.0, 0.0), -getXMin());
+        w0.set(Vec3D(-1.0, 0.0, 0.0), Vec3D(getXMin(), 0, 0));
         wallHandler.copyAndAddObject(w0);
-        w0.set(Vec3D(1.0, 0.0, 0.0), getXMax());
+        w0.set(Vec3D( 1.0, 0.0, 0.0), Vec3D(getXMax(), 0, 0));
         wallHandler.copyAndAddObject(w0);
-        w0.set(Vec3D(0.0, -1.0, 0.0), -getYMin());
+        w0.set(Vec3D(0.0,-1.0, 0.0), Vec3D(0, getYMin(), 0));
         wallHandler.copyAndAddObject(w0);
-        w0.set(Vec3D(0.0, 1.0, 0.0), getYMax());
+        w0.set(Vec3D(0.0, 1.0, 0.0), Vec3D(0, getYMax(), 0));
         wallHandler.copyAndAddObject(w0);
     }
 
@@ -253,8 +257,7 @@ void ChuteBottom::setThickness(Mdouble new_)
         thickness_ = new_;
     else
     {
-        std::cerr << "Error: thickness " << new_ << " negative" << std::endl;
-        exit(-1);
+        logger(ERROR,"[ChuteBottom::setThickness()] thickness % negative.", new_);
     }
 }
 Mdouble ChuteBottom::getIsBottomPeriodic()

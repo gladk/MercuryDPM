@@ -32,31 +32,40 @@ BaseWall::BaseWall()
 {
     handler_ = 0;
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout<<"BaseWall::BaseWall() finished"<<std::endl;
+    logger(DEBUG, "BaseWall::BaseWall() finished");
 #endif
 }
 
-BaseWall::BaseWall(const BaseWall &p)
-        : BaseInteractable(p)
+/*!
+ * \param[in] w Wall that must be copied.
+ */
+BaseWall::BaseWall(const BaseWall& w)
+        : BaseInteractable(w)
 {
-    handler_ = p.handler_;
+    handler_ = w.handler_;
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout<<"BaseWall::BaseWall(const BaseWall &p) finished"<<std::endl;
+    logger(DEBUG, "BaseWall::BaseWall(const BaseWall &p) finished");
 #endif
 }
 
 BaseWall::~BaseWall()
 {
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout<<"BaseWall::~BaseWall() finished"<<std::endl;
+    logger(DEBUG, "BaseWall::~BaseWall() finished");
 #endif   
 }
 
+/*!
+ * \param[in] is Input stream from which the BaseWall is read.
+ */
 void BaseWall::read(std::istream& is)
 {
     BaseInteractable::read(is);
 }
 
+/*!
+ * \param[in] os Output stream the BaseWall has to be written to.
+ */
 void BaseWall::write(std::ostream& os) const
 {
     BaseInteractable::write(os);
@@ -64,20 +73,29 @@ void BaseWall::write(std::ostream& os) const
 
 void BaseWall::clear()
 {
-    std::cout << "BaseWall::clear(), this function shouldn't be called" << std::endl;
+    logger(WARN, "BaseWall::clear(), this function shouldn't be called");
 }
 
+/*!
+ * \param[in] handler A pointer to the BaseHandler that handles this wall.
+ */
 void BaseWall::setHandler(WallHandler* handler)
 {
     handler_ = handler;
     setSpecies(getHandler()->getDPMBase()->speciesHandler.getObject(getIndSpecies()));
 }
 
+/*!
+ * \return A pointer to the WallHandler that manages this BaseWall.
+ */
 WallHandler* BaseWall::getHandler() const
 {
     return handler_;
 }
 
+/*!
+ * \param[in] indSpecies The index of the species of this BaseWall in the SpeciesHandler.
+ */
 void BaseWall::setIndSpecies(unsigned int indSpecies)
 {
     if(handler_!=nullptr)
@@ -90,18 +108,23 @@ void BaseWall::setIndSpecies(unsigned int indSpecies)
     }
 }
 
+/*!
+ * \param[in] species The species this BaseWall is made of.
+ * \details In addition to the functionality of BaseInteractable::setSpecies, this function sets the pointer to the
+ * wallHandler, which is needed to retrieve species information.
+ */
 void BaseWall::setSpecies(const ParticleSpecies* species)
 {
     BaseInteractable::setSpecies(species);
 
     //set pointer to the handler, which is needed to retrieve species information
-    if (getHandler()== nullptr)
+    if (getHandler() == nullptr)
     {
         SpeciesHandler* sH = species->getHandler();
-        if (sH!= nullptr)
+        if (sH != nullptr)
         {
             DPMBase* dB = sH->getDPMBase();
-            if (dB!= nullptr)
+            if (dB != nullptr)
                 setHandler(&dB->wallHandler);
         }
     }

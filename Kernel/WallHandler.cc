@@ -35,36 +35,41 @@
 #include "Walls/Screw.h"
 #include "Walls/Coil.h"
 
-///Constructor of the WallHandler class. It creates and empty WallHandler.
+/*!
+ * Constructor of the WallHandler class. It creates and empty WallHandler.
+ */
 WallHandler::WallHandler()
 {
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout << "WallHandler::WallHandler() finished" << std::endl;
+    logger(DEBUG, "WallHandler::WallHandler() finished");
 #endif
 }
 
-/// \param[in] WH The WallHandler that has to be copied.
+/*! 
+ * \param[in] WH The WallHandler that has to be copied.
+ */
 WallHandler::WallHandler(const WallHandler &WH)
-: BaseHandler<BaseWall>()
 {
     setDPMBase(WH.getDPMBase());
     copyContentsFromOtherHandler(WH);
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout << "WallHandler::WallHandler(const WallHandler &PH) finished" << std::endl;
+    logger(DEBUG, "WallHandler::WallHandler(const WallHandler &PH) finished");
 #endif
 }
 
-/// \param[in] rhs The WallHandler on the right hand side of the assignment.
+/*!
+ * \param[in] rhs The WallHandler on the right hand side of the assignment.
+ */
 WallHandler WallHandler::operator =(const WallHandler& rhs)
 {
-    /// \bug this calls the copy constructor again (weird and ciccular)
-if (this != &rhs)
+    if(this != &rhs)
     {
         clear();
+        setDPMBase(rhs.getDPMBase());
         copyContentsFromOtherHandler(rhs);
     }
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout << "WallHandler::operator = (const WallHandler& rhs) finished" << std::endl;
+    logger(DEBUG, "WallHandler::operator = (const WallHandler& rhs) finished");
 #endif
     return *this;
 }
@@ -72,112 +77,125 @@ if (this != &rhs)
 WallHandler::~WallHandler()
 {
 #ifdef DEBUG_DESTRUCTOR
-    std::cout << "WallHandler::~WallHandler() finished" << std::endl;
+    logger(DEBUG, "WallHandler::~WallHandler() finished");
 #endif
 }
 
-/// \param[in] W A pointer to the BaseWall (or derived class) that has to be added.
+/*!
+ * \param[in] W A pointer to the BaseWall (or derived class) that has to be added.
+ * \details First the new BaseWall is added to the vector of BaseWall, then it is 
+ * told that this is its handler.
+ */ 
 void WallHandler::addObject(BaseWall* W)
 {
-    //Puts the particle in the Particle list
+    //Puts the wall in the Wall list
     BaseHandler<BaseWall>::addObject(W);
     //set the particleHandler pointer
     W->setHandler(this);
 }
 
-/// \param[in] is The input stream from which the information is read.
+/*!
+ * \param[in] is The input stream from which the information is read.
+ */
 void WallHandler::readObject(std::istream& is)
 {
     std::string type;
     is >> type;
-    if (type.compare("CylindricalWall") == 0)
+    if (type == "CylindricalWall")
     {
         CylindricalWall cylindricalWall;
         is >> cylindricalWall;
         copyAndAddObject(cylindricalWall);
     }
-    else if (type.compare("AxisymmetricIntersectionOfWalls") == 0)
+    else if (type == "AxisymmetricIntersectionOfWalls")
     {
         AxisymmetricIntersectionOfWalls axisymmetricIntersectionOfWalls;
         is >> axisymmetricIntersectionOfWalls;
         copyAndAddObject(axisymmetricIntersectionOfWalls);
     }
-    else if (type.compare("IntersectionOfWalls") == 0)
+    else if (type == "IntersectionOfWalls")
     {
         IntersectionOfWalls intersectionOfWalls;
         is >> intersectionOfWalls;
         copyAndAddObject(intersectionOfWalls);
     }
-    else if (type.compare("InfiniteWall") == 0)
+    else if (type == "InfiniteWall")
     {
         InfiniteWall infiniteWall;
         is >> infiniteWall;
         copyAndAddObject(infiniteWall);
     }
-    else if (type.compare("InfiniteWallWithHole") == 0)
+    else if (type == "InfiniteWallWithHole")
     {
         InfiniteWallWithHole infiniteWallWithHole;
         is >> infiniteWallWithHole;
         copyAndAddObject(infiniteWallWithHole);
     }
-    else if (type.compare("Screw") == 0)
+    else if (type == "Screw")
     {
         Screw screw;
         is >> screw;
         copyAndAddObject(screw);
     }
-    else if (type.compare("Coil") == 0)
+    else if (type == "Coil")
     {
         Coil coil;
         is >> coil;
         copyAndAddObject(coil);
     }
     //for backward compatibility (before svnversion ~2360)
-    else if (type.compare("numFiniteWalls") == 0)
+    else if (type == "numFiniteWalls")
     {
         readOldObject(is);
     }
     else
     {
-        std::cerr << "Wall type: " << type << " not understood in restart file" << std::endl;
-        exit(-1);
+        logger(ERROR, "Wall type: % not understood in restart file", type);
     }
 }
 
-/// \param[in] is The input stream from which the information is read.
+/*!
+ * \param[in] is The input stream from which the information is read.
+ * \details First determine whether or not the wall is an infinite wall. If it is
+ * an infinite wall, read the normal and position and add the wall to the handler.
+ * If it is a  finite wall, read the normal and position of each part and construct
+ * an IntersectionOfWalls from it, which can then be added to the handler.
+ */
 void WallHandler::readOldObject(std::istream& is)
 {
     //read in next line
     std::stringstream line(std::stringstream::in | std::stringstream::out);
     helpers::getLineFromStringStream(is, line);
-    //std::cout << line.str() << std::endl;
+    logger(VERBOSE, line.str());
 
     std::string dummy;
-    Mdouble numWalls, position;
+    unsigned int numWalls;
+    Mdouble position;
     Vec3D normal;
     line >> numWalls;
 
-    if (numWalls==0)
+    if (numWalls == 0)
     {
         InfiniteWall infiniteWall;
         line >> dummy >> normal >> dummy >> position;
-        infiniteWall.set(normal, position);
+        infiniteWall.set(normal, position*normal);
         copyAndAddObject(infiniteWall);
     }
     else
     {
-        IntersectionOfWalls finiteWallInstance;
         IntersectionOfWalls intersectionOfWalls;
-        for (unsigned int i=0; i<numWalls; i++)
+        for (unsigned int i = 0; i < numWalls; ++i)
         {
             line >> dummy >> normal >> dummy >> position;
-            intersectionOfWalls.addObject(normal, position);
+            intersectionOfWalls.addObject(normal, position*normal);
         }
         copyAndAddObject(intersectionOfWalls);
     }
 }
 
-
+/*!
+ * \return The string "WallHandler".
+ */
 std::string WallHandler::getName() const
 {
     return "WallHandler";

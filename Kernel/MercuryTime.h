@@ -31,68 +31,145 @@
 #include <string.h>
 #include <sstream>
 
-/** Allows timing of algorithms; accurate up to 0.01 sec. 
- * Calculates time used for computing in clocks, not total time.
+/*!
+ * \brief Allows for timing the algorithms; accurate up to 0.01 sec. 
+ * \details Calculates the amount of computational time used, in seconds. Works on
+ *        the same concept of stopwatch, where one presses start and stops when needed.
+ *        The difference returns the total time used up.
  */
 class Time
 {
-    
 public:
+
+    /*!
+     * \brief This is like a start button of a stopwatch. Assigns the variable
+     *        start with the current number of clock ticks.
+     */
     void tic()
     {
-        start = clock();
+        start = clock(); //clock tics
     }
+
+    /*!
+     * \brief This is like a stop button of a stopwatch. Assigns the variable finish
+     *        to the current value of ticks returned by clock().
+     * \return However, it also returns the total real time in seconds.
+     */
     Mdouble toc()
     {
         finish = clock();
         return (Mdouble(finish) - Mdouble(start)) / CLOCKS_PER_SEC;
     }
-    
+
 private:
-    clock_t start, finish;
-    
+    /*!
+     * \brief Stores the number of clock ticks, called by Time::tic().
+     */
+    clock_t start;
+
+    /*!
+     * \brief Stores the number of clock ticks, called by Time::toc().
+     */
+    clock_t finish;
 };
 
-///estimates the time in seconds when tmax should be reached
+/*!
+ * \brief Estimates the total time, in seconds, left to reach the end of any simulation.
+ * First, the class needs to be initialized by calling set. 
+ * After the class is initialized, an estimate of the total remaining time of the
+ * simulation can be found by calling getTime2Finish. 
+ * The estimate is based on rate at which the simulation time progressed since initialization.
+ 
+ * E.g., assume that the class has been initialized at simulation time 0, with final time 10.
+ * Then, getTime2Finish is called after 1 hour at simulation time 2.
+ * Since the code required 0.5 hours per simulation time unit and there are 8 
+ * simulation time units left, it is likely to finish in 4 hours.
+ */
 class Time2Finish
 {
-    
 public:
-    void set(Mdouble t, Mdouble tmax)
+
+    /*!
+     * \brief Initialises the variable start with the current value of clock 
+     *        ticks, the current time and the final time of the simulation.
+     * \param[in] t     current simulation time.
+     * \param[in] tMax  total simulation time for which the simulation is set to run.
+     */
+    void set(Mdouble t, Mdouble tMax)
     {
-        start = clock();
-        t_ = t;
-        tmax_ = tmax;
+        startTime_ = clock();
+        time_ = t;
+        timeMax_ = tMax;
     }
-    
+
+    /*!
+     * \brief Estimates the total time, in seconds, left to reach the end of any simulation.
+     * After the class is initialized, an estimate of the total remaining time of the
+     * simulation can be found by calling getTime2Finish. 
+     * The estimate is based on rate at which the simulation time progressed since initialization.
+     *
+     * E.g., assume that the class has been initialized at simulation time 0, with final time 10.
+     * Then, getTime2Finish is called after 1 hour at simulation time 2.
+     * Since the code required 0.5 hours per simulation time unit and there are 8 
+     * simulation time units left, it is likely to finish in 4 hours.
+     * \param[in] t     current simulation time.
+     * \return Mdouble  time, in seconds, left to reach the end of any simulation
+     */
     Mdouble getTime2Finish(Mdouble t)
     {
         clock_t finish = clock();
-        Mdouble elapsedTime = (Mdouble(finish) - Mdouble(start)) / CLOCKS_PER_SEC;
-        Mdouble time2Finish = elapsedTime * (tmax_ - t_) / (t - t_);
-        start = finish;
-        t_ = t;
-        return time2Finish;
+        Mdouble elapsedTime = (Mdouble(finish) - Mdouble(startTime_)) / CLOCKS_PER_SEC;
+
+        if (fabs(time_ - t) < 1.e-9)
+        {
+            std::cout << "Choose an other value for t" << std::endl;
+            return 0;
+        }
+        else
+        {
+            Mdouble time2Finish = elapsedTime * (timeMax_ - time_) / (t - time_);
+            startTime_ = finish;
+            time_ = t;
+            return time2Finish;
+        }
     }
-    
+
+    /*!
+     * \brief Returns the estimated finish time based on the amount of time left to finish.
+     * \param[in] t current simulation time
+     * \return time of the day, in hours, at which the simulation is predicted to end
+     */
     std::string getFinishTime(Mdouble t)
     {
+        // gets the estimated time left to finish.
         Mdouble time2Finish = getTime2Finish(t);
+
+        // adds to the estimated time to current time and also type-casting Mdouble to time_t.
         time_t finish = time(nullptr) + time2Finish;
+
         std::stringstream ss;
+
         //write estimated end time
         ss << ctime(&finish);
+
         //decrement put pointer by one to avoid line break
         ss.seekp((long) ss.tellp() - 1);
+
         //write time to finish
         ss << " (" << time2Finish / 3600 << "h)";
         return ss.str();
     }
-    
+
 private:
-    clock_t start;
-    Mdouble t_, tmax_;
-    
+    /// Stores the current number of clock ticks at the start.
+    clock_t startTime_;
+
+    /// Stores the simulation time (DPM units)
+    Mdouble time_;
+
+    /// Stores the total simulation time (DPM units)
+    Mdouble timeMax_;
+
 };
 
 #endif

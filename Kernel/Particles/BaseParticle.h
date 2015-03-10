@@ -42,6 +42,7 @@ class BaseInteraction;
 #ifdef CONTACT_LIST_HGRID
 class PossibleContact;
 #endif
+
 /*!
  * \class BaseParticle
  * \brief
@@ -50,7 +51,7 @@ class BaseParticle : public BaseInteractable
 {
 public:
     /*!
-     * \brief Basic Particle constructors, creates an Particle at (0,0,0) with radius, mass and inertia equal to 1
+     * \brief Basic Particle constructor, creates an Particle at (0,0,0) with radius, mass and inertia equal to 1
      */
     BaseParticle();
 
@@ -90,248 +91,265 @@ public:
     void unfix();
 
     /*!
-     * \brief Particle read function, which accepts an std::stringstream as input.
+     * \brief Particle read function, which accepts an std::istream as input.
      */
     virtual void read(std::istream& is);
 
     /*!
-     * \brief
+     * \deprecated Should NOT BE USED by any new users! Is expected to be obsolete 
+     * by Mercury 2.0. Please use BaseParticle::read() instead. 
+     * \brief deprecated version of the read function.
      */
+    MERCURY_DEPRECATED
     virtual void oldRead(std::istream& is);
 
     /*!
-     * \brief Particle print function, which accepts an std::stringstream as input.
+     * \brief Particle print function, which accepts an std::ostream as input.
      */
     virtual void write(std::ostream& os) const;
-    
+
     /*!
      * \brief Returns the name of the object
      */
     virtual std::string getName() const;
 
     /*!
-     * \brief 
+     * \brief Adds particle's HGrid level and cell coordinates to an ostream
      */
     void printHGrid(std::ostream& os) const;
 
     /*!
-     * \brief 
+     * \brief Returns particle's HGrid level
      */
     unsigned int getHGridLevel() const;
 
     /*!
-     * \brief 
+     * \brief Returns pointer to next object in particle's HGrid level & cell
      */
     BaseParticle* getHGridNextObject() const;
 
     /*!
-     * \brief 
+     * \brief Returns pointer to previous object in particle's HGrid level & cell
      */
     BaseParticle* getHGridPrevObject() const;
 
-    #ifdef CONTACT_LIST_HGRID
+#ifdef CONTACT_LIST_HGRID
 
     /*!
      * \brief 
      */
     PossibleContact* getFirstPossibleContact() const;
-    #endif
+#endif
 
     /*!
-     * \brief 
+     * \brief Returns particle's HGrid cell X-coordinate
      */
     int getHGridX() const;
 
     /*!
-     * \brief 
+     * \brief Returns particle's HGrid cell Y-coordinate
      */
     int getHGridY() const;
 
     /*!
-     * \brief 
+     * \brief Returns particle's HGrid cell Z-coordinate
      */
     int getHGridZ() const;
 
     /*!
-     * \brief 
+     * \brief Returns the particle's inertia_ 
      */
     Mdouble getInertia() const;
 
     /*!
-     * \brief 
+     * \brief Returns the particle's invInertia_
      */
     Mdouble getInvInertia() const;
 
     /*!
-     * \brief 
+     * \brief Returns the particle's invMass_
      */
     Mdouble getInvMass() const;
 
     /*!
-     * \brief 
+     * \brief Calculates the particle's kinetic energy
      */
     Mdouble getKineticEnergy() const;
 
     /*!
-     * \brief 
+     * \brief Returns the particle's mass_
      */
     Mdouble getMass() const;
 
     /*!
-     * \brief 
+     * \brief Returns the 'original' particle this one's a periodic copy of
      */
     BaseParticle* getPeriodicFromParticle() const;
 
     /*!
-     * \brief 
+     * \brief Returns the particle's radius_
      */
     Mdouble getRadius() const;
 
     /*!
-     * \brief 
+     * \brief Returns the particle's interaction radius, which might be different
+     * from radius_ (e.g., when dealing with wet particles)
      */
     Mdouble getInteractionRadius() const;
 
     /*!
-     * \brief 
+     * \brief Returns the interaction radius for interaction with walls. See also
+     * BaseParticle::getInteractionRadius().
      */
     Mdouble getWallInteractionRadius() const;
 
     /*!
-     * \brief 
+     * \brief Returns the particle's displacement relative to the previous time step
      */
     const Vec3D& getDisplacement() const;
 
     /*!
-     * \brief 
+     * \brief Returns the particle's position in the previous time step
      */
     const Vec3D& getPreviousPosition() const;
 
     /*!
      * \brief 
+     * \todo see .cc file. 
+     * \TWH
      */
     const Vec3D getDisplacement2(Mdouble xmin, Mdouble xmax, Mdouble ymin, Mdouble ymax, Mdouble zmin, Mdouble zmax, Mdouble t) const;
 
     /*!
-     * \brief 
+     * \brief Sets the particle's inertia_ (and adjusts invInertia_ accordingly)
      */
-    void setInertia(const Mdouble _new);
+    void setInertia(const Mdouble newInertia);
 
     /*!
-     * \brief 
+     * \brief Sets the particle's inertia_ to 'infinite' (1e20) and its invInertia_
+     * to 0.
      */
     void setInfiniteInertia();
 
     /*!
-     * \brief 
+     * \brief Assigns the pointer to the 'original' particle this one's a 
+     * periodic copy of.
      */
-    void setPeriodicFromParticle(BaseParticle* _new);
+    void setPeriodicFromParticle(BaseParticle* p);
 
+    /*!
+     * \brief Sets the particle's HGrid cell X-coordinate
+     */
+    void setHGridX(const int x);
+
+    /*!
+     * \brief Sets the particle's HGrid cell Y-coordinate
+     */
+    void setHGridY(const int y);
+
+    /*!
+     * \brief Sets the particle's HGrid cell Z-coordinate
+     */
+    void setHGridZ(const int z);
+
+    /*!
+     * \brief Sets the particle's HGrid level
+     */
+    void setHGridLevel(const unsigned int level);
+
+    /*!
+     * \brief Sets the pointer to the next object in the particle's HGrid cell
+     * & level.
+     */
+    void setHGridNextObject(BaseParticle* p);
+
+    /*!
+     * \brief Sets the pointer to the previous object in the particle's HGrid cell
+     * & level.
+     */
+    void setHGridPrevObject(BaseParticle* p);
+
+#ifdef CONTACT_LIST_HGRID
     /*!
      * \brief 
      */
-    void setHGridX(const int _new);
+    void setFirstPossibleContact(PossibleContact* PC);
+#endif
 
     /*!
-     * \brief 
+     * \brief Sets the particle's radius_ (and adjusts the mass_ accordingly, 
+     * based on the particle's species)
      */
-    void setHGridY(const int _new);
+    void setRadius(const Mdouble radius);
 
     /*!
-     * \brief 
+     * \brief Sets the particle's mass
      */
-    void setHGridZ(const int _new);
+    void setMass(const Mdouble mass);
+
 
     /*!
-     * \brief 
+     * \brief Sets the particle's displacement (= difference between current 
+     * position and that of the previous time step)
      */
-    void setHGridLevel(const unsigned int _new);
+    void setDisplacement(const Vec3D& disp);
 
     /*!
-     * \brief 
+     * \brief Sets the particle's position in the previous time step
      */
-    void setHGridNextObject(BaseParticle* _new);
+    void setPreviousPosition(const Vec3D& pos);
 
     /*!
-     * \brief 
+     * \brief Adds a vector to the particle's previousPosition_
      */
-    void setHGridPrevObject(BaseParticle* _new);
+    void movePrevious(const Vec3D& posMove);
 
-    #ifdef CONTACT_LIST_HGRID
     /*!
-     * \brief 
+     * \brief Increases the particle's velocity_ by the given vector
      */
-    void setFirstPossibleContact (PossibleContact* PC);
-    #endif
+    void accelerate(const Vec3D& vel);
 
     /*!
-     * \brief 
+     * \brief Increases the particle's angularVelocity_ by the given vector
      */
-    void setRadius(const Mdouble _new);
+    void angularAccelerate(const Vec3D& angVel);
 
     /*!
-     * \brief 
+     * \brief Adds a vector to the particle's displacement_
      */
-    void setMass(const Mdouble _new);
-
-
-    /*!
-     * \brief 
-     */
-    void setDisplacement(const Vec3D& _new);
+    void addDisplacement(const Vec3D& addDisp);
 
     /*!
-     * \brief 
-     */
-    void setPreviousPosition(const Vec3D& _new);
-
-    /*!
-     * \brief 
-     */
-    void movePrevious(const Vec3D& _new);
-
-    /*!
-     * \brief 
-     */
-    void accelerate(const Vec3D& _new);
-
-    /*!
-     * \brief 
-     */
-    void angularAccelerate(const Vec3D& _new);
-
-    /*!
-     * \brief 
-     */
-    void addDisplacement(const Vec3D& _new);
-
-    /*!
-     * \brief 
+     * \brief Sets the pointer to the particle's ParticleHandler
      */
     void setHandler(ParticleHandler* handler);
 
     /*!
-     * \brief 
+     * \brief Returns pointer to the particle's ParticleHandler
      */
     ParticleHandler* getHandler() const;
 
     /*!
-     * \brief 
+     * \brief Checks if particle is in interaction with given particle P, and if 
+     * so, returns pointer to the associated BaseInteraction object (else returns 0).
      */
     BaseInteraction* getInteractionWith(BaseParticle *P, Mdouble timeStamp, InteractionHandler* interactionHandler);
 
     /*!
-     * \brief 
+     * \brief First step of <a href="http://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet">Velocity Verlet</a> 
+     * integration.
+     * 
      */
     void integrateBeforeForceComputation(double time, double timeStep);
 
     /*!
-     * \brief 
+     * \brief Second step of <a href="http://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet">Velocity Verlet</a> 
+     * integration.
      */
     void integrateAfterForceComputation(double time, double timeStep);
 
     /*!
-     * \brief
+     * \brief Returns the particle's dimensions (either 2 or 3).
      */
     unsigned int getParticleDimensions() const;
 
@@ -348,7 +366,7 @@ public:
 private:
 
     /*!
-     * \brief 
+     * \brief Pointer to the particle's ParticleHandler container
      */
     ParticleHandler* handler_;
 
@@ -364,7 +382,7 @@ private:
     unsigned int HGridLevel_; ///Grid level for the object
     BaseParticle* HGridNextObject_; ///Pointer to the next Particle in the same HGrid cell
     BaseParticle* HGridPrevObject_; ///Pointer to the previous Particle in the same HGrid cell
-    
+
     ///Particle attributes
     Mdouble mass_; ///Particle mass_
     Mdouble invMass_; ///Inverse Particle mass (for computation optimization)
@@ -374,6 +392,6 @@ private:
     BaseParticle * periodicFromParticle_; ///Pointer to originating Particle
 
     Vec3D displacement_; ///Displacement (only used in StatisticsVector, StatisticsPoint)
-    Vec3D previousPosition_;///
+    Vec3D previousPosition_; /// Particle's position at previous time step
 };
 #endif

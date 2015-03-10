@@ -32,6 +32,11 @@
 #include <fstream>
 #include <DPMBase.h>
 
+/*!
+ * \param[in] P
+ * \param[in] I
+ * \param[in] timeStamp
+ */
 FrictionInteraction::FrictionInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
     : BaseInteraction(P, I, timeStamp), SlidingFrictionInteraction(P, I, timeStamp)
 {
@@ -41,31 +46,39 @@ FrictionInteraction::FrictionInteraction(BaseInteractable* P, BaseInteractable* 
     std::cout<<"FrictionInteraction::FrictionInteraction() finished"<<std::endl;
 #endif
 }
-
-FrictionInteraction::FrictionInteraction(const FrictionInteraction &p)
+/*!
+ * \param[in] p
+ */
+FrictionInteraction::FrictionInteraction(const FrictionInteraction& p)
     : BaseInteraction(p), SlidingFrictionInteraction(p)
 {
     rollingSpring_=p.rollingSpring_;
     torsionSpring_=p.torsionSpring_;
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout<<"FrictionInteraction::FrictionInteraction(const FrictionInteraction &p finished"<<std::endl;
+    std::cout<<"FrictionInteraction::FrictionInteraction(const FrictionInteraction& p) finished"<<std::endl;
 #endif
 }
-
+/*!
+ *
+ */
 FrictionInteraction::~FrictionInteraction()
 {
 #ifdef DEBUG_DESTRUCTOR
     std::cout<<"FrictionInteraction::~FrictionInteraction() finished"<<std::endl;
 #endif
 }
-
+/*!
+ * \param[in/out] os
+ */
 void FrictionInteraction::write(std::ostream& os) const
 {
     SlidingFrictionInteraction::write(os);
     os << " rollingSpring " << rollingSpring_;
     os << " torsionSpring " << torsionSpring_;
 }
-
+/*!
+ * \param[in/out] is
+ */
 void FrictionInteraction::read(std::istream& is)
 {
     SlidingFrictionInteraction::read(is);
@@ -73,10 +86,12 @@ void FrictionInteraction::read(std::istream& is)
     is >> dummy >> rollingSpring_;
     is >> dummy >> torsionSpring_;
 }
-
-void FrictionInteraction::computeForce()
+/*!
+ * \details Calls the slidingFrictionInteraction::computeFrictionForce() as well, see slidingFrictionInteraction.cc.
+ */
+void FrictionInteraction::computeFrictionForce()
 {
-    SlidingFrictionInteraction::computeForce();
+    SlidingFrictionInteraction::computeFrictionForce();
 
     const FrictionSpecies* species = getSpecies();
     //If tangential forces are present
@@ -119,7 +134,7 @@ void FrictionInteraction::computeForce()
         }
         else //if no spring stiffness is set
         {
-            std::cerr << "FrictionInteraction::computeForce(): Rolling stiffness is zero" << std::endl;
+            std::cerr << "FrictionInteraction::computeFrictionForce(): Rolling stiffness is zero" << std::endl;
             exit(-1);
         }
     } //end if rolling force
@@ -161,36 +176,46 @@ void FrictionInteraction::computeForce()
         }
         else //if no spring stiffness is set
         {
-            std::cerr << "FrictionInteraction::computeForce(): Torsion stiffness is zero" << std::endl;
+            std::cerr << "FrictionInteraction::computeFrictionForce(): Torsion stiffness is zero" << std::endl;
             exit(-1);
         }
     } //end if torsion force
 }
-
+/*!
+ * \param[in] timeStep
+ */
 void FrictionInteraction::integrate(Mdouble timeStep)
 {
     SlidingFrictionInteraction::integrate(timeStep);
     rollingSpring_ += rollingSpringVelocity_ * timeStep;
     torsionSpring_ += Vec3D::dot(torsionSpring_ + torsionSpringVelocity_ * timeStep, getNormal()) * getNormal();
 }
-
+/*!
+ * \return Mdouble
+ */
 Mdouble FrictionInteraction::getElasticEnergy() const
 {
     return SlidingFrictionInteraction::getElasticEnergy()
         +  0.5 * getSpecies()->getRollingStiffness() * rollingSpring_.getLengthSquared()
         +  0.5 * getSpecies()->getTorsionStiffness() * torsionSpring_.getLengthSquared();
 }
-
+/*!
+ * \return const FrictionSpecies*
+ */
 const FrictionSpecies* FrictionInteraction::getSpecies() const
 {
     return dynamic_cast<const FrictionSpecies*>(getBaseSpecies());
 }
-
-std::string FrictionInteraction::getName() const
+/*!
+ * \return std::string
+ */
+std::string FrictionInteraction::getBaseName() const
 {
     return "Friction";
 }
-
+/*!
+ *
+ */
 void FrictionInteraction::reverseHistory()
 {
     SlidingFrictionInteraction::reverseHistory();

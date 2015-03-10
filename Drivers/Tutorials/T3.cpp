@@ -47,7 +47,7 @@ particleHandler.copyAndAddObject(p0);
 
 //! [T3:infiniteWall]
 InfiniteWall w0;
-w0.set(Vec3D(0.0,0.0,-1.0),-getZMin());
+w0.set(Vec3D(0.0,0.0,-1.0),Vec3D(0, 0, getZMin()));
 wallHandler.copyAndAddObject(w0);
 //! [T3:infiniteWall]
 }

@@ -38,6 +38,7 @@ add_library(DPMBase STATIC
 	Boundaries/HopperInsertionBoundary.cc
 	Boundaries/InsertionBoundary.cc
 	Boundaries/MaserBoundary.cc
+	Boundaries/LeesEdwardsBoundary.cc
 	
 	Walls/BaseWall.cc
 	Walls/Coil.cc
@@ -74,7 +75,11 @@ add_library(DPMBase STATIC
     Species/AdhesiveForceSpecies/LiquidBridgeWilletSpecies.cc
 
 	Particles/BaseParticle.cc
+    ${Mercury_BINARY_DIR}/Kernel/CMakeDefinitions.cc
 )
+if(Mercury_BACKTRACE_DEMANGLE)
+  target_link_libraries(DPMBase dl)
+endif()
 
 #Could later create a 2D and 3D library seperatly, but sure how many we want to create
 add_library(MercuryBase STATIC

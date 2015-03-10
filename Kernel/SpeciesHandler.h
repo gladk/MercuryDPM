@@ -32,32 +32,36 @@ class BaseSpecies;
 class ParticleSpecies;
 
 /// \brief Container to store all ParticleSpecies
-/// \details The SpeciesHandler is a container to store all ParticleSpecies. It is implemented by a vector of pointers to ParticleSpecies.
+/// \details The SpeciesHandler is a container to store all ParticleSpecies. 
+/// It is implemented by a vector of pointers to ParticleSpecies.
 class SpeciesHandler : public BaseHandler<ParticleSpecies>
 {
 public:
-    /// \brief Default constructor, it simply creates an empty SpeciesHandler.
+    /// \brief Default constructor, it creates an empty SpeciesHandler.
     SpeciesHandler();
 
     /// \brief Copy constructor, it copies the SpeciesHandler and all ParticleSpecies it contains.
     SpeciesHandler(const SpeciesHandler&other);
 
-    /// \brief Assignment operator.
+    /// \brief Copy assignment operator.
     SpeciesHandler operator =(const SpeciesHandler& rhs);
     
-    /// \brief Destructor, it simply destructs the SpeciesHandler and all ParticleSpecies it contains.
+    /// \brief Destructor, it destructs the SpeciesHandler and all ParticleSpecies it contains.
     ~SpeciesHandler();
 
     /// \brief Adds a new ParticleSpecies to the SpeciesHandler.
     virtual void addObject(ParticleSpecies* const S);
 
+    ///\brief Remove the ParticleSpecies with given id.
     void removeObject(unsigned const int id);
 
-    /// \brief Reads ParticleSpecies into the SpeciesHandler from restart data.
+    /// \brief Reads Species data into the SpeciesHandler from restart file.
     void readObject(std::istream& is);
 
+    /// \brief Reads ParticleSpecies into the SpeciesHandler from old-style restart data.
     ParticleSpecies* readOldObject(std::istream& is);
 
+    /// \brief Gets the Id of the behaviour between two given species.
     unsigned int getMixedId(const unsigned int id1, const unsigned int id2) const;
 
     template<typename U> typename U::MixedSpeciesType* getMixedObject(const U* S, const U* T);
@@ -69,15 +73,19 @@ public:
 //    LinearViscoelasticFrictionMixedSpecies* getMixedObject(const LinearViscoelasticFrictionSpecies*,const LinearViscoelasticFrictionSpecies*);
 //    LinearPlasticViscoelasticFrictionMixedSpecies* getMixedObject(const LinearPlasticViscoelasticFrictionSpecies*,const LinearPlasticViscoelasticFrictionSpecies*);
 
+    /// \brief Gets the mixed object that is constructed from two given species.
     BaseSpecies* getMixedObject(const unsigned int id1, const unsigned int id2);
 
+    /// \brief Returns a pointer to the vector of all mixed objects.
     const std::vector<BaseSpecies*>& getMixedObjects() const;
 
+    /// \brief Write all the species and mixed species to an output stream.
     virtual void write(std::ostream& os) const;
 
+    /// \brief Returns the name of the handler, namely the string "SpeciesHandler".
     std::string getName() const;
 
-    /// Check if angular DOF have to be used
+    /// \brief Check if angular DOF have to be used
     bool useAngularDOFs();
 
 private:

@@ -31,6 +31,11 @@
 #include <iomanip>
 #include <fstream>
 
+/*!
+ * \param[in] P
+ * \param[in] I
+ * \param[in] timeStamp
+ */
 ReversibleAdhesiveInteraction::ReversibleAdhesiveInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
     : BaseInteraction(P, I, timeStamp)
 {
@@ -39,6 +44,9 @@ ReversibleAdhesiveInteraction::ReversibleAdhesiveInteraction(BaseInteractable* P
 #endif
 }
 
+/*!
+ * \param[in] p
+ */
 ReversibleAdhesiveInteraction::ReversibleAdhesiveInteraction(const ReversibleAdhesiveInteraction &p)
     : BaseInteraction(p)
 {
@@ -47,6 +55,9 @@ ReversibleAdhesiveInteraction::ReversibleAdhesiveInteraction(const ReversibleAdh
 #endif
 }
 
+/*!
+ *
+ */
 ReversibleAdhesiveInteraction::~ReversibleAdhesiveInteraction()
 {
 #ifdef DEBUG_DESTRUCTOR
@@ -54,15 +65,23 @@ ReversibleAdhesiveInteraction::~ReversibleAdhesiveInteraction()
 #endif
 }
 
+/*!
+ * \param[in] os
+ */
 void ReversibleAdhesiveInteraction::write(std::ostream& os  UNUSED) const
 {}
 
+/*!
+ * \param[in] is
+ */
 void ReversibleAdhesiveInteraction::read(std::istream& is  UNUSED)
 {}
-
-void ReversibleAdhesiveInteraction::computeForce()
+/*!
+ *
+ */
+void ReversibleAdhesiveInteraction::computeAdhesionForce()
 {
-    //std::cout << "ReversibleAdhesiveInteraction::computeForce" << std::endl;
+    //std::cout << "ReversibleAdhesiveInteraction::computeAdhesionForce" << std::endl;
     const ReversibleAdhesiveSpecies* species = getSpecies();
 
     if (getOverlap()>=0)
@@ -71,18 +90,25 @@ void ReversibleAdhesiveInteraction::computeForce()
         addForce(getNormal() * (-species->getAdhesionStiffness() *getOverlap() - species->getAdhesionForceMax()));
 }
 
+/*!
+ * \todo @TW 
+ * \return Mdouble
+ */
 Mdouble ReversibleAdhesiveInteraction::getElasticEnergy() const
 {
-    ///\todo TW
-    return 0.0;
+    return 0.0; //@TW
 }
-
-const ReversibleAdhesiveSpecies *ReversibleAdhesiveInteraction::getSpecies() const
+/*!
+ * \return a constant pointer to an instance of this class.
+ */
+const ReversibleAdhesiveSpecies* ReversibleAdhesiveInteraction::getSpecies() const
 {
-    return dynamic_cast<const ReversibleAdhesiveSpecies *>(getBaseSpecies());
+    return dynamic_cast<const ReversibleAdhesiveSpecies *> (getBaseSpecies()); //downcast
 }
-
-std::string ReversibleAdhesiveInteraction::getName() const
+/*!
+ * \return std::string
+ */
+std::string ReversibleAdhesiveInteraction::getBaseName() const
 {
     return "ReversibleAdhesive";
 }

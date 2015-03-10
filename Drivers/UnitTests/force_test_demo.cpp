@@ -132,7 +132,7 @@ public:
 			
 			
 			InfiniteWall w0;
-			w0.set(Vec3D(1, 0, 0), 0.0025);
+			w0.set(Vec3D(1, 0, 0), Vec3D(0.0025, 0, 0));
 			wallHandler.copyAndAddObject(w0);
 			
 			BaseParticle P0;

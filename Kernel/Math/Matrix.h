@@ -37,7 +37,7 @@ class Matrix3D
 {
 public:
     /*!
-     * \brief 
+     * \brief all nine matrix elements
      */    
     Mdouble XX, XY, XZ, YX, YY, YZ, ZX, ZY, ZZ;
 
@@ -47,82 +47,77 @@ public:
     Matrix3D();
 
     /*!
-     * \brief 
+     * \brief Alternative constructor, which let you define all elements
      */    
     Matrix3D(const Mdouble xx, const Mdouble xy, const Mdouble xz, const Mdouble yx, const Mdouble yy, const Mdouble yz, const Mdouble zx, const Mdouble zy, const Mdouble zz);
     
     /*!
-     * \brief 
+     * \brief Sets all elements to zero.
      */
     void setZero();
     
     /*!
-     * \brief 
+     * \brief Mean of the diagonal elements
      */
     double trace() const;
     
     /*!
-     * \brief 
+     * \brief Matrix addition
      */
     Matrix3D operator +(const Matrix3D& A) const;
     
     /*!
-     * \brief 
+     * \brief Matrix substraction 
      */
     Matrix3D operator -(const Matrix3D& A) const;
     
     /*!
-     * \brief 
+     * \brief Scalar addition
      */
     Matrix3D operator +(const Mdouble a) const;
     
     /*!
-     * \brief 
+     * \brief Scalar substraction
      */
     Matrix3D operator -(const Mdouble a) const;
     
     /*!
-     * \brief 
-     */
-    friend Vec3D operator *(const Matrix3D& A, const Vec3D& b);
-    
-    /*!
-     * \brief 
+     * \brief Scalar multiplication
      */
     Matrix3D operator *(const Mdouble a) const;
     
     /*!
-     * \brief 
+     * \brief Vector mltiplication
      */
     Vec3D operator *(const Vec3D& a) const;
     
     /*!
-     * \brief 
+     * \brief Scalar division
      */
     Matrix3D operator /(const Mdouble a) const;
     
     /*!
-     * \brief 
+     * \brief Add elements to ostream
      */
     friend std::ostream& operator<<(std::ostream& os, const Matrix3D &A);
     
     /*!
-     * \brief 
+     * \brief Add elements to istream
      */
     friend std::istream& operator>>(std::istream& is, Matrix3D &A);
     
     /*!
-     * \brief 
+     * \brief Matrix addition
      */
     Matrix3D& operator+=(const Matrix3D &A);
     
     /*!
-     * \brief 
+     * \brief Matrix substraction
      */
     Matrix3D& operator-=(const Matrix3D &A);
     
     /*!
-     * \brief 
+     * \brief Scalar division
      */
     Matrix3D& operator/=(const Mdouble a);
     
@@ -132,7 +127,7 @@ public:
     static Matrix3D square(const Matrix3D &A);
     
     /*!
-     * \brief Calculates the ointwise square root
+     * \brief Calculates the pointwise square root
      */
     static Matrix3D sqrt(const Matrix3D &A);
     
@@ -142,7 +137,8 @@ public:
     static Matrix3D dyadic(const Vec3D& a, const Vec3D& b);
 
     /*!
-     * \brief Cross product
+     * \brief 'Special' cross product; CP of vector with each column of a matrix
+     * \TWH
      */
     static Matrix3D cross(const Vec3D& a, const Matrix3D& b);
     

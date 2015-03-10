@@ -30,76 +30,117 @@
 #include "Math/Vector.h"
 
 /*!
- * \class Coil
  * \brief This class defines a coil in the z-direction from a (constant) starting point, a (constant) length L, a (constant) radius r, a (constant) number or revelations N and a (constant) rotation speed (rev/s)
  * \details q is a new coordinate going from 0 to 1 and t is the time, x=xs+r*cos(2*pi(offset+N*q)), y=ys+r*sin(2*pi*(offset+N*q)) and z=zs+q*L
+ * \todo IFCD: Can someone look at the details of the documentation of class Coil? I can't make sense of them.
  */
 
 class Coil : public BaseWall
 {
 public:
-   /*!
-    * \brief
-    */    
+    /*!
+     * \brief Default constructor, sets a coil with default parameters.
+     */    
     Coil();
     
-   /*!
-    * \brief
-    */    
-    Coil(Vec3D Start, double L, double r, double N, double omega, double thickness);
+    /*!
+     * \brief Copy constructor, makes a coil with the same properties as the input Coil.
+     */
+    Coil(const Coil& other);
     
     /*!
-     * \brief
-     */
-    void set(Vec3D Start, double L, double r, double N, double omega, double thickness);
-
-   /*!
-    * \brief
-    */    
-    virtual Coil* copy() const;
+     * \brief Constructor in which all parameters are set.
+     */    
+    Coil(Vec3D Start, Mdouble L, Mdouble r, Mdouble N, Mdouble omega, Mdouble thickness);
     
-   /*!
-    * \brief
-    */    
-    bool getDistanceAndNormal(const BaseParticle& P, Mdouble& distance, Vec3D& normal_return) const;
+    /*!
+     * \brief Default destructor.
+     */
+    ~Coil();
+    
+    /*!
+     * \brief Set all parameters of this Coil.
+     */
+    void set(Vec3D Start, Mdouble L, Mdouble r, Mdouble N, Mdouble omega, Mdouble thickness);
 
-   /*!
-    * \brief
-    */    
-    BaseInteraction* getInteractionWith(BaseParticle *P, Mdouble timeStamp, InteractionHandler* interactionHandler);
+    /*!
+     * \brief Copy this Coil and return a pointer to the copy, useful for polymorphism.
+     */    
+    Coil* copy() const override;
+    
+    /*!
+     * \brief Compute the distance from the Coil for a given BaseParticle and return if there is a collision. If there is a collision, also return the normal vector of the interaction point.
+     */   
+    bool getDistanceAndNormal(const BaseParticle& P, Mdouble& distance, Vec3D& normal_return) const override;
 
-   /*!
-    * \brief Allows the wall to be moved to a new position (also orthogonal to the normal), and setting the velocity
-    */
+    /*!
+     * \brief Get the interaction between this Coil and given BaseParticle at a given time.
+     */    
+    BaseInteraction* getInteractionWith(BaseParticle* P, Mdouble timeStamp, InteractionHandler* interactionHandler);
+
+    /*!
+     * \brief Rotate the Coil for a period dt, so that the offset_ changes with omega_*dt.
+     */
     void move_time(Mdouble dt);
     
-   /*!
-    * \brief reads wall
-    */
-    void read(std::istream& is);
+    /*!
+     * \brief Reads a Coil from an input stream, for example a restart file.
+     */
+    void read(std::istream& is) override;
     
-   /*!
-    * \brief
-    */    
+    /*!
+     * \brief Reads an old-style Coil from an input stream, for example an old restart file.
+     * \deprecated If you have old restart files, please convert them to the current
+     * version of the restart files and use read(std::istream&) instead of oldRead(std::istream&).
+     */    
+    MERCURY_DEPRECATED
     void oldRead(std::istream& is);
     
    /*!
-    * \brief outputs wall
+    * \brief Writes a Coil to an output stream, for example a restart file.
     */
-    void write(std::ostream& os) const;
+    void write(std::ostream& os) const override;
     
    /*!
-    * \brief Returns the name of the object
+    * \brief Returns the name of the object, in this case the string "Coil".
     */
-    virtual std::string getName() const;
+    std::string getName() const override;
 
 private:
+    /*!
+     * \brief The centre of the lower end of the Coil.
+     */
     Vec3D start_;///
 
    /*!
-    * \brief
+    * \brief The length of the Coil.
     */    
-    double l_, r_, n_, omega_, offset_, thickness_;
+    Mdouble l_;
+    
+    /*!
+     * The radius of the Coil.
+     */
+    Mdouble r_;
+    
+    /*!
+     * The number of revelations of the Coil.
+     */
+    Mdouble n_;
+    
+    /*!
+     * The rotation speed of the Coil, in rev/s.
+     */
+    Mdouble omega_;
+    
+    /*!
+     * The amount the Coil has rotated, this is a number between 0 and 1.
+     */
+    Mdouble offset_;
+    
+    /*!
+     * The thickness of the "spiral" of the Coil.
+     */
+    Mdouble thickness_;
 };
 
 #endif

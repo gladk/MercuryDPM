@@ -33,88 +33,97 @@ class RNG;
 
   /*!
    * \class InsertionBoundary
-   * \brief
+   * \brief Boundary structure for boundaries used for insertion of particles
    */
 class InsertionBoundary : public BaseBoundary
 {
 public:
   /*!
-   * \brief default constructor
+   * \brief Default constructor: set everything to 0/nullptr.
    */
     InsertionBoundary();
+    
+   /*!
+    * \brief Copy constructor (with deep copy)
+    */ 
+    InsertionBoundary(const InsertionBoundary& other);
+    
   /*!
-   * \brief destructor
+   * \brief Destructor: default.
    */    
     virtual ~InsertionBoundary();
     
   /*!
-   * \brief
-   * \param[in]
+   * \brief Sets the particle that will be inserted and the maximum number of times for which insertion may fail.
    */
-    void set(BaseParticle* particleToCopy, unsigned int maxFailed);
+    void set(BaseParticle* particleToCopy, std::size_t maxFailed);
     
   /*!
-   * \brief
+   * \brief Purely virtual function that generates one particle.
+   * \param[in] random  Random number generator that can be used for initial positions and velocities
+   * \todo (AT) think about implementation of this method here instead of in the 
+   * children, since the checkBoundaryBeforeTimeStep (i.e., the actual insertion 
+   * of particles) is also defined here. Current problem with this: boundary dimensions,
+   * which are needed for the particle placement, are now defined in the children, 
+   * and depend heavily on its shape.
    */
     virtual BaseParticle* generateParticle(RNG &random)=0;
 
   /*!
-   * \brief
+   * \brief Fills the boundary with particles.
    */
     virtual void checkBoundaryBeforeTimeStep(DPMBase* md);
 
   /*!
-   * \brief
-   * \return
+   * \brief Gets the number of particles inserted by the boundary.
    */    
-    unsigned int getNumberOfParticlesInserted() const;
+    std::size_t getNumberOfParticlesInserted() const;
     
   /*!
-   * \brief
-   * \return
+   * \brief Sets the number of times that the wall may fail to insert a particle.
    */
-    void setMaxFailed(unsigned int maxFailed);
+    void setMaxFailed(std::size_t maxFailed);
     
   /*!
-   * \brief
-   * \return
+   * \brief Gets the number of times that the boundary may fail to insert a particle.
    */
-    unsigned int getMaxFailed() const;
+    std::size_t getMaxFailed() const;
     
   /*!
-   * \brief
-   * \param[in]
+   * \brief Sets the particle that will be inserted through the insertion boundary.
    */
     void setParticleToCopy(BaseParticle* particleToCopy);
     
   /*!
-   * \brief
+   * \brief Gets the particle that will be inserted through the insertion boundary.
    */
     BaseParticle* getParticleToCopy() const;
     
   /*!
-   * \brief reads wall
+   * \brief Reads the boundary's id_ and maxFailed_.
    */
     void read(std::istream& is);
     
   /*!
-   * \brief outputs wall
+   * \brief Writes the boundary's id_ and maxFailed_.
    */
     void write(std::ostream& os) const;
 
 private:
   /*!
-   * \brief
+   * \brief Particle that will be inserted through the insertion boundary.
    */
     BaseParticle* particleToCopy_;
+    
   /*!
-   * \brief
+   * \brief Number of times that the wall may fail to insert a particle.
    */
-    unsigned int maxFailed_;
+    std::size_t maxFailed_;
+    
   /*!
-   * \brief
+   * \brief Number of particles that are already inserted.
    */
-    unsigned int numberOfParticlesInserted_;
+    std::size_t numberOfParticlesInserted_;
 };
 
 #endif

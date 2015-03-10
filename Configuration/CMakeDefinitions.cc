@@ -1,7 +1,6 @@
 /// This file is used for generating defitions that give access to CMakeVaribles from within a cpp file (defintions have only been added as required
 
-#ifndef CMAKEDEFINTIONS_H
-#define CMAKEDEFINTIONS_H
+#include <CMakeDefinitions.h>
 
 const std::string xballsSupportOn()
 {
@@ -18,12 +17,12 @@ const std::string getMercuryBuildDir()
 	return "@Mercury_BINARY_DIR@";
 }
 
-const int getMajorVersionNumber()
+constexpr int getMajorVersionNumber()
 {
 	return @Mercury_VERSION_MAJOR@;
 }
 
-const int getMinorVersionNumber()
+constexpr int getMinorVersionNumber()
 {
 	return @Mercury_VERSION_MINOR@;
 }
@@ -33,5 +32,3 @@ const std::string getVersion()
 	return "@Mercury_VERSION_MAJOR@.@Mercury_VERSION_MINOR@";
 }
 
-
-#endif

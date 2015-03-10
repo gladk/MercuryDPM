@@ -28,43 +28,61 @@
 #include "Species/BaseSpecies.h"
 #include "Math/ExtendedMath.h"
 #include "Interactions/AdhesiveForceInteractions/ReversibleAdhesiveInteraction.h"
-class BaseInteractable;
-class BaseInteraction;
 
-//Note the getVelocity can for some Species be dependent on which point on the Species is meant.
+/*!
+ * \brief ReversibleAdhesiveSpecies contains the parameters used to describe a linear reversible short-range force.
+ * \details See ReversibleAdhesiveInteraction::computeForce for a description of the force law.
+ */
 class ReversibleAdhesiveSpecies : public virtual BaseSpecies
 {
 public:
+    ///\brief The correct Interaction type for this AdhesiveForceSpecies
     typedef ReversibleAdhesiveInteraction InteractionType;
+
+    ///\brief The default constructor.
     ReversibleAdhesiveSpecies();
+
+    ///\brief The default constructor.
     ReversibleAdhesiveSpecies(const ReversibleAdhesiveSpecies &s);
+
+    ///\brief The default constructor.
     virtual ~ReversibleAdhesiveSpecies();
+
+    /// \brief Reads the species properties from an input stream.
     void read(std::istream& is);
+
+    /// \brief Writes the species properties to an output stream.
     void write(std::ostream& os) const;
+
+    /// \brief Used in Species::getName to obtain a unique name for each Species.
     std::string getBaseName() const;
+
+    ///\brief creates default values for mixed species
     void mix(ReversibleAdhesiveSpecies* const S, ReversibleAdhesiveSpecies* const T);
 
 //adhesion-specific functions
 
-    ///Returns the particle distance below which adhesive forces can occur (needed for contact detection)
+    ///\brief returns the largest separation distance at which adhesive short-range forces can occur.
     Mdouble getInteractionDistance() const;
 
 //setters and getters
-    ///Allows the spring constant to be changed
+    ///\brief Allows the spring constant to be changed
     void setAdhesionStiffness(Mdouble new_k0);
 
-    ///Allows the spring constant to be accessed
+    ///\brief Allows the spring constant to be accessed
     Mdouble getAdhesionStiffness() const;
 
-    ///Allows the spring constant to be changed
+    ///\brief Allows the spring constant to be changed
     void setAdhesionForceMax(Mdouble new_f0);
 
-    ///Allows the spring constant to be accessed
+    ///\brief Allows the spring constant to be accessed
     Mdouble getAdhesionForceMax() const;
 
 private:
-    Mdouble adhesionStiffness_; ///<stiffness of linear adhesion force
-    Mdouble adhesionForceMax_; ///<adhesion force at zero overlap
-    
+    ///\brief stiffness of linear adhesion force
+    Mdouble adhesionStiffness_; 
+
+    ///\brief adhesion force at zero overlap
+    Mdouble adhesionForceMax_;     
 };
 #endif

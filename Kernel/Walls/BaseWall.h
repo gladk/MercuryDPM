@@ -31,65 +31,88 @@
 class WallHandler;
 class BaseParticle;
 
-//Note the getVelocity can for some walls be dependent on which point on the wall is meant.
+/*!
+ * \brief Basic class for walls.
+ * \details Class from which all walls inherit. Please note the getVelocity can 
+ * for some walls be dependent on which point on the wall is meant.
+ */
 class BaseWall : public BaseInteractable
 {
 public:
     /*!
-     * \brief
+     * \brief Default constructor. It makes an empty BaseWall.
      */
     BaseWall();
+    
     /*!
-     * \brief
+     * \brief Copy constructor.
      */
-    BaseWall(const BaseWall &p);
+    BaseWall(const BaseWall& w);
+    
     /*!
-     * \brief
-     */
+     * \brief Default destructor. 
+     */   
     virtual ~BaseWall();
+    
     /*!
-     * \brief
+     * \brief Pure virtual function that copies a BaseWall.
+     * \return A pointer to the new BaseWall.
      */
     virtual BaseWall* copy() const = 0;
+    
     /*!
-     * \brief
+     * \brief Function that reads a BaseWall from an input stream, usually a restart file.
      */
-    void read(std::istream& is) = 0;
+    void read(std::istream& is);
+    
     /*!
-     * \brief
+     * \brief Function that writes a BaseWall to an output stream, usually a restart file.
      */
-    void write(std::ostream& os) const = 0;
+    void write(std::ostream& os) const;
+    
     /*!
-     * \brief
+     * \brief A function that outputs that it should not be called.
+     * \todo IFCD Can this function be safely removed/be made pure virtual?
      */
     virtual void clear();
+    
     /*!
-     * \brief
+     * \brief Pure virtual function that computes the distance of a BaseParticle to this wall and returns the normal of this wall if there is a collision.
+     * \details Beware, the distance and normal are output parameters, not return values!
+     * \param[in] P Reference to the BaseParticle we want to compute the distance to the BaseWall of.
+     * \param[out] distance Distance of the BaseParticle to the BaseWall.
+     * \param[out] normal_return The normal of the wall. Is only given if there is a collision.
+     * \return A boolean which indicates if there is a collision between the BaseParticle and the wall.
      */
     virtual bool getDistanceAndNormal(const BaseParticle& P, Mdouble& distance, Vec3D& normal_return) const = 0;
 
     /*!
-     * \brief
+     * \brief A function which sets the WallHandler for this BaseWall.
      */
     void setHandler(WallHandler* handler);
 
     /*!
-     * \brief
+     * \brief A function which returns the WallHandler that handles this BaseWall.
      */
     WallHandler* getHandler() const;
 
-    ///\todo TW: this function should be taken out and replaced by setSpecies
+    /*!
+     * \deprecated TW: this function should be taken out and replaced by setSpecies
+     * \brief Define the species of this wall using the index of the species in the SpeciesHandler in this DPMBase.
+     */
     void setIndSpecies(unsigned int indSpecies);
 
     /*!
-     * In addition to the functionality of BaseInteractable::setSpecies, this function sets the pointer to the
-     * wallHandler, which is needed to retrieve species information.
+     * \brief Define the species of this wall.
+     * \todo TW: this function should also check if the particle is the correct particle for the species type.
      */
-    ///\todo TW: this function should also check if the particle is the correct particle for the species type
     void setSpecies(const ParticleSpecies* species);
 
 private:
 
+    /*!
+     * A pointer to the WallHandler that handles this BaseWall.
+     */
     WallHandler* handler_; ///
 };
 #endif

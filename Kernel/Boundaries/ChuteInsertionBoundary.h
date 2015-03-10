@@ -34,38 +34,48 @@ class RNG;
 
     /*!
      * \class ChuteInsertionBoundary
-     * \brief
+     * \brief Used for modeling chute inflow. Inherits from InsertionBoundary.
      */
 class ChuteInsertionBoundary : public InsertionBoundary
 {
 public:
+    
     /*!
-     * \brief
+     * \brief Default constructor. 
+     */
+    ChuteInsertionBoundary();
+    
+    ///\brief Copy constructor.
+    ChuteInsertionBoundary(const ChuteInsertionBoundary& other);
+    
+    /*!
+     * \brief Copy method; creates a copy on the heap.
      */
     virtual ChuteInsertionBoundary* copy() const;
     
     /*!
-     * \brief
+     * \brief Sets all boundary properties at once.
      */
     void set(BaseParticle* particleToCopy, unsigned int maxFailed, Vec3D posMin, Vec3D posMax, double radMin, double radMax, double fixedParticleRadius, double inflowVelocity, double inflowVelocityVariance);
     
     /*!
-     * \brief
+     * \brief Generates a random particle
      */
     virtual BaseParticle* generateParticle(RNG &random);
     
     /*!
-     * \brief reads wall
+     * \brief reads boundary properties from istream
      */
     void read(std::istream& is);
 
     /*!
-     * \brief
-     */    
+     * \brief deprecated version of CubeInsertionBoundary::read().
+     */
+    MERCURY_DEPRECATED
     void oldRead(std::istream& is);
 
     /*!
-     * \brief outputs wall
+     * \brief writes boundary properties to ostream
      */
     void write(std::ostream& os) const;
     
@@ -75,18 +85,22 @@ public:
     virtual std::string getName() const;
     
 private:
+    
     /*!
-     * \brief
+     * \brief The two extremal corners of the cuboidal insertion boundary
      */
     Vec3D posMin_, posMax_;
 
     /*!
-     * \brief
+     * \brief Minimum and maximum radii of the generated particles
      */
     double radMin_, radMax_;
 
     /*!
-     * \brief
+     * \brief radius of the fixed bottom particles, mean particle velocity in 
+     * X-direction, and allowed maximum randomly added/substracted velocities in all three
+     * directions while generating particles (expressed as \% of inflowVelocity_).
+     * NB: see also documentation of ChuteInsertionBoundary::generateParticle().
      */
     double fixedParticleRadius_, inflowVelocity_, inflowVelocityVariance_;
     

@@ -42,10 +42,11 @@ public:
         speciesHandler.addObject(species0);
         species0->setDensity(6. / constants::pi);
 
-        double tc = 1e-2, r = 0.4, m = 0.5;
+        double tc = 1e-2, r = 0.4, m = 1;
         //sets k and dissipation_ based on the collision time and restitution coefficient for a collision with effective mass m
-        species0->setStiffnessAndDissipation(helpers::computeKAndDispFromCollisionTimeAndRestitutionCoefficientAndEffectiveMass(tc, r, m));
+        //species0->setStiffnessAndDissipation(helpers::computeKAndDispFromCollisionTimeAndRestitutionCoefficientAndEffectiveMass(tc, r, m));
         //setCollisionTimeAndRestitutionCoefficient(tc,r, 1.0,1.0);
+        species0->setCollisionTimeAndRestitutionCoefficient(tc, r, m);
         
         setSaveCount(50);
         ///Note: the restitution coefficient converges if the time steps per collision, tc/dt, is increased. Maybe this should be checked here.

@@ -27,26 +27,41 @@
 #define EMPTYADHESIVESPECIES_H
 #include "Species/BaseSpecies.h"
 #include "Math/ExtendedMath.h"
-#include "Interactions/AdhesiveForceInteractions/EmptyAdhesiveInteraction.h"
-class BaseInteractable;
-class BaseInteraction;
+class EmptyAdhesiveInteraction;
 
-//Note the getVelocity can for some Species be dependent on which point on the Species is meant.
+/*!
+ * \brief EmptyAdhesiveSpecies is used to create a force law without a short-range adhesive force.
+ */
 class EmptyAdhesiveSpecies : public virtual BaseSpecies
 {
 public:
+    ///\brief The correct Interaction type for this AdhesiveForceSpecies
     typedef EmptyAdhesiveInteraction InteractionType;
+
+    ///\brief The default constructor.
     EmptyAdhesiveSpecies();
+
+    ///\brief The default copy constructor.
     EmptyAdhesiveSpecies(const EmptyAdhesiveSpecies &s);
+
+    ///\brief The default destructor.
     virtual ~EmptyAdhesiveSpecies();
+
+    /// \brief Reads the species properties from an input stream.
     void read(std::istream& is);
+
+    /// \brief Writes the species properties to an output stream.
     void write(std::ostream& os) const;
+
+    /// \brief Used in Species::getName to obtain a unique name for each Species.
     std::string getBaseName() const;
+
+    ///\brief creates default values for mixed species
     void mix(EmptyAdhesiveSpecies* const S, EmptyAdhesiveSpecies* const T);
 
-//adhesion-specific functions
+    //adhesion-specific functions
 
-    ///Returns the particle distance below which adhesive forces can occur (needed for contact detection)
+    ///\brief returns the largest separation distance at which adhesive short-range forces can occur (0.0 for the default EmptyAdhesiveSpecies).
     Mdouble getInteractionDistance() const;
 };
 #endif

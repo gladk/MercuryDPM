@@ -32,8 +32,10 @@
 class ParticleHandler;
 
   /*!
-   * \brief Defines a pair of periodic walls.
-   * \details The particles are in {x: position_left<=normal*x <position_right}, with normal being the outward unit normal vector of the right wall. If a particle moves outside these boundaries, it will be shifted.
+   * \brief Defines a pair of periodic walls. Inherits from BaseBoundary.
+   * \details The particles are in {x: position_left<=normal*x <position_right}, 
+   * with normal being the outward unit normal vector of the right wall. If a 
+   * particle moves outside these boundaries, it will be shifted.
    */
 
 class PeriodicBoundary : public BaseBoundary
@@ -50,49 +52,42 @@ public:
     ~PeriodicBoundary();
     
   /*!
-   * \brief
+   * \brief copy method
    */
     PeriodicBoundary* copy() const;
     
   /*!
-   * \brief Defines a periodic wall, given a normal vector s.t. all particles are within {x: position_left<=normal*x<position_right}. The shift vector is set assuming that the domain is rectangular (shift parallel to normal).
-   * \param[in]
+   * \brief Defines a periodic wall
    */
     void set(Vec3D normal, Mdouble distanceLeft, Mdouble distanceRight);
     
   /*!
    * \brief For general parallelogramic domains, the direction of the shift vector can to be set manually.
-   * \param[in]
    */
     void set(Vec3D normal, Mdouble distanceLeft, Mdouble distanceRight, Vec3D shiftDirection);
     
   /*!
-   * \brief Allows the left periodic wall to be moved to a new position and automatically changes its shift value
-   * \param[in]
+   * \brief Sets the distance from the origin of the 'left' periodic wall
    */
     void moveLeft(Mdouble distanceLeft);
     
   /*!
-   * \brief Allows the right periodic wall to be moved to a new position and automatically changes its shift value
-   * \param[in]
+   * \brief Sets the distance from the origin of the 'right' periodic wall
    */
     void moveRight(Mdouble distanceRight);
     
   /*!
-   * \brief Returns the distance of the wall to the particle, and sets left_wall = true.
-   * \details if the left wall is the wall closest to the particle. Since this function should be called before calculating any Particle-Wall interactions, it can also be used to set the shift vector in case of curved walls.
-   * \param[in]
+   * \brief Returns the distance of the wall to the particle
    */
     Mdouble getDistance(BaseParticle &p);
+    
   /*!
-   * \brief
-   * \param[in]
-   */    
+   * \brief Returns the distance of the wall to the position
+   */
     Mdouble getDistance(const Vec3D &position);
     
   /*!
-   * \brief shifts the particle (after distance set the left_wall value)
-   * \param[in]
+   * \brief shifts the particle 
    */
     void shiftPosition(BaseParticle* p);
     
@@ -102,12 +97,13 @@ public:
     */
     
   /*!
-   * \brief shifts two particles
+   * \brief shifts two positions
    */
     void shiftPositions(Vec3D &postition1, Vec3D &postion2);
 
   /*!
-   * \brief
+   * \brief Returns TRUE if last particle/position checked is closest to the 'left' 
+   * wall, and FALSE if it is closest to the 'right' wall
    */
     bool isClosestToLeftBoundary() const;
 
@@ -115,25 +111,26 @@ public:
     ///shift P such that it is closest to Q
     void getCloseTogether(Vec3D &P, Vec3D &Q);
     */
-    
-  /*!
-   * \brief reads wall
-   */
+
+    /*!
+     * \brief reads boundary properties from istream
+     */
     void read(std::istream& is);
-    
-  /*!
-   * \brief
-   */
+   
+    /*!
+     * \brief deprecated version of CubeInsertionBoundary::read().
+     */
+    MERCURY_DEPRECATED
     void oldRead(std::istream& is);
     
-  /*!
-   * \brief outputs wall
-   */
+    /*!
+     * \brief writes boundary properties to ostream
+     */
     void write(std::ostream& os) const;
     
-  /*!
-   * \brief Returns the name of the object
-   */
+    /*!
+     * \brief Returns the name of the object
+     */
     virtual std::string getName() const;
     
     /*
@@ -141,12 +138,14 @@ public:
      */
     
   /*!
-   * \brief
+   * \brief Checks distance of particle to closest wall and creates periodic 
+   * copy if necessary
    */
     void createPeriodicParticles(BaseParticle *p, ParticleHandler &pH);
     
   /*!
-   * \brief
+   * \brief Checks if particle has crossed either boundary wall, and applies a shift
+   * if that is the case. NB: ALWAYS returns FALSE.
    */
     bool checkBoundaryAfterParticleMoved(BaseParticle *p, ParticleHandler &pH UNUSED);
     

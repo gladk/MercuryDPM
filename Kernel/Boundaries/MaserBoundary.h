@@ -34,27 +34,33 @@
 
 class ParticleSpecies;
 
+/*!
+ * \brief Variation on the PeriodicBoundary with maser-like properties 
+ * \details Creates a boundary which is similar to a PeriodicBoundary, except that
+ * particles which leave 
+ * 
+ * 
+ */
 class MaserBoundary : public BaseBoundary
 {
 public:
     /*!
-     * \brief
+     * \brief Creates a copy on the heap.
      */
     MaserBoundary* copy() const;
 
     /*!
-     * \brief Defines a periodic wall, given a normal vector s.t. all particles are within {x: position_left<=normal*x<position_right}. The shift vector is set assuming that the domain is rectangular (shift parallel to normal).
-     * \param[in]
+     * \brief Sets all boundary properties at once.
      */
     void set(Vec3D normal, Mdouble distanceLeft, Mdouble distanceRight);
 
     /*!
-     * \brief reads wall
+     * \brief reads boundary properties from istream
      */
     void read(std::istream& is);
 
     /*!
-     * \brief outputs wall
+     * \brief writes boundary properties to ostream
      */
     void write(std::ostream& os) const;
 
@@ -64,60 +70,71 @@ public:
     virtual std::string getName() const;
 
     /*!
-     * \brief Returns the distance of the wall to the particle, and sets left_wall = true.
-     * \details if the left wall is the wall closest to the particle. Since this function should be called before calculating any Particle-Wall interactions, it can also be used to set the shift vector in case of curved walls.
-     * \param[in]
+     * \brief Returns the distance of the wall to the particle
      */
     Mdouble getDistance(BaseParticle &p);
+
     /*!
-     * \brief
-     * \param[in]
+     * \brief Returns the distance of the wall to the position
      */
     Mdouble getDistance(const Vec3D &position);
 
     /*!
-     * \brief
+     * \brief shifts the particle to its 'periodic' position
      */
     void shiftPosition(BaseParticle* p);
 
     /*!
-     * \brief
+     * \brief Creates periodic particle when the particle is a maser particle 
+     * and is sufficiently close to one of the boundary walls.
      */
     void createPeriodicParticles(BaseParticle *p, ParticleHandler &pH);
 
     /*!
-     * \brief
+     * \brief Shifts the particle to its 'periodic' position if it is a maser particle
+     * and has crossed either of the walls. Creates a 'normal' particle at its current
+     * position if it is a maser particle which crossed the RIGHT boundary wall.
      */
     bool checkBoundaryAfterParticleMoved(BaseParticle *p, ParticleHandler &pH UNUSED);
 
     /*!
-     * \brief
+     * \brief Converts a 'normal' particle into a maser particle. 
      */
     void addParticleToMaser(BaseParticle *P);
 
 private:
     /*!
-     * \brief Normal pointing in the flowing direction
+     * \brief Normal unit vector of both maser walls. Points in the flowing direction.
      */
     Vec3D normal_;
     /*!
-     * \brief position of left wall, s.t. normal*x=position_left
+     * \brief position of left boundary wall, s.t. normal*x=position_left
      */
     Mdouble distanceLeft_;
     /*!
-     * \brief position of right wall, s.t. normal*x=position_right
+     * \brief position of right boundary wall, s.t. normal*x=position_right
      */
     Mdouble distanceRight_;
     /*!
-     * \brief true if closest wall is the left wall
+     * \brief Dummy variable used when checking the proximity of particles to the 
+     * boundary walls. TRUE if closest wall is the left boundary wall.
      */
     bool closestToLeftBoundary_;
     /*!
-     * \brief shift from left to right boundary
+     * \brief Direction in which particles are to be shifted when they cross the boundary.
+     * \details I.e., the vector pointing from a point the left boundary wall to the equivalent point
+     * on the right one.
      */
     Vec3D shift_;
-
+    
+    /*!
+     * \brief List of 'normal' particles' species, and their maser counterparts
+     */
     std::map<const ParticleSpecies*,const ParticleSpecies*> speciesConversionNormalToMaser_;
+    
+    /*!
+     * \brief List of 'maser' particles' species, and their normal counterparts
+     */
     std::map<const ParticleSpecies*,const ParticleSpecies*> speciesConversionMaserToNormal_;
 };
 #endif

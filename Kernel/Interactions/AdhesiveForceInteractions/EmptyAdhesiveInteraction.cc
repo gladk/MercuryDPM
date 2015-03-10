@@ -31,6 +31,11 @@
 #include <iomanip>
 #include <fstream>
 
+/*!
+ * \param[in] P
+ * \param[in] I
+ * \param[in] timeStamp
+ */
 EmptyAdhesiveInteraction::EmptyAdhesiveInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
     : BaseInteraction(P, I, timeStamp)
 {
@@ -38,42 +43,58 @@ EmptyAdhesiveInteraction::EmptyAdhesiveInteraction(BaseInteractable* P, BaseInte
     std::cout<<"EmptyAdhesiveInteraction::EmptyAdhesiveInteraction() finished"<<std::endl;
 #endif
 }
-
-EmptyAdhesiveInteraction::EmptyAdhesiveInteraction(const EmptyAdhesiveInteraction &p)
+/*!
+ * \param[in] P
+ */
+EmptyAdhesiveInteraction::EmptyAdhesiveInteraction(const EmptyAdhesiveInteraction& p)
     : BaseInteraction(p)
 {
 #ifdef DEBUG_CONSTRUCTOR
     std::cout<<"EmptyAdhesiveInteraction::EmptyAdhesiveInteraction(const EmptyAdhesiveInteraction &p finished"<<std::endl;
 #endif
 }
-
+/*!
+ *
+ */
 EmptyAdhesiveInteraction::~EmptyAdhesiveInteraction()
 {
 #ifdef DEBUG_DESTRUCTOR
     std::cout<<"EmptyAdhesiveInteraction::~EmptyAdhesiveInteraction() finished"<<std::endl;
 #endif
 }
-
+/*!
+ * \param[in,out] os
+ */
 void EmptyAdhesiveInteraction::write(std::ostream& os UNUSED) const
 {}
-
+/*!
+ * \param[in,out] is
+ */
 void EmptyAdhesiveInteraction::read(std::istream& is UNUSED)
 {}
-
-void EmptyAdhesiveInteraction::computeForce()
+/*!
+ *
+ */
+void EmptyAdhesiveInteraction::computeAdhesionForce()
 {}
-
+/*!
+ * \return Mdouble
+ */
 Mdouble EmptyAdhesiveInteraction::getElasticEnergy() const
 {
     return 0.0;
 }
-
-const EmptyAdhesiveSpecies *EmptyAdhesiveInteraction::getSpecies() const
+/*!
+ * \return const EmptyAdhesiveSpecies*
+ */
+const EmptyAdhesiveSpecies* EmptyAdhesiveInteraction::getSpecies() const
 {
     return dynamic_cast<const EmptyAdhesiveSpecies *>(getBaseSpecies());
 }
-
-std::string EmptyAdhesiveInteraction::getName() const
+/*!
+ * \return std::string
+ */
+std::string EmptyAdhesiveInteraction::getBaseName() const
 {
     return "";
 }

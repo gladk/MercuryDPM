@@ -38,7 +38,7 @@ class BaseInteraction;
 class InteractionHandler;
 /*!
  * \class BaseInteractable
- * \brief
+ * \brief Inherits from class BaseObject (public)
  * \details
  */
 class BaseInteractable : public BaseObject
@@ -62,136 +62,135 @@ public:
     virtual ~BaseInteractable();
 
     /*!
-     * \brief 
-     * \param[in]
+     * \brief Reads a BaseInteractable from an input stream.
+     * \param[in] is The input stream from which the BaseInteractable is read.
      */
     virtual void read(std::istream& is) = 0;
 
     /*!
-     * \brief
-     * \param[in]
+     * \brief Write a BaseInteractable to an output stream.
+     * \param[in] os The output stream to which the BaseInteractable is written.
      */
     virtual void write(std::ostream& os) const = 0;
 
     /*!
-     * \brief
-     * \return
+     * \brief Returns the index of the Species of this BaseInteractable.
+     * \return The index of the Species of this BaseInteractable.
      */
     unsigned int getIndSpecies() const;
 
     /*!
-     * \brief
-     * \return
+     * \brief Sets the index of the Species of this BaseInteractable.
+     * \param[in] indSpecies The index of the species.
      */
     virtual void setIndSpecies(unsigned int indSpecies);
 
     /*!
-     * \brief
-     * \param[in]
+     * \brief Returns a pointer to the species of this BaseInteractable.
+     * \return A pointer to the species of this BaseInteractable.
      */
     const ParticleSpecies* getSpecies() const;
 
     /*!
-     * \brief
-     * \param[in]
+     * \brief Sets the species of this BaseInteractable.
+     * \param[in] species A pointer to the species.
      */
     void setSpecies(const ParticleSpecies* species);
 
     /*!
-     * \brief
-     * \return
+     * \brief Returns the force on this BaseInteractable.
+     * \return A constant reference to the force on this BaseInteractable.
      */
     const Vec3D& getForce() const;
 
     /*!
-     * \brief
-     * \return
+     * \brief Returns the torque on this BaseInteractable.
+     * \return A constant reference to the torque on this BaseInteractable.
      */
     const Vec3D& getTorque() const;
 
     /*!
-     * \brief
-     * \param[in]
+     * \brief Sets the force on this BaseInteractable.
+     * \param[in] force The force on this BaseInteractable.
      */
-    void setForce(Vec3D _new);
+    void setForce(Vec3D force);
 
     /*!
-     * \brief
-     * \param[in]
+     * \brief Sets the torque on this BaseInteractable.
+     * \param[in] torque The torque on this BaseInteractable.
      */
-    void setTorque(Vec3D _new);
+    void setTorque(Vec3D torque);
 
     /*!
-     * \brief
-     * \param[in]
+     * \brief Adds an amount to the force on this BaseInteractable.
+     * \param[in] addForce The amount of force added to this BaseInteractable.
      */
-    void addForce(Vec3D _new);
+    void addForce(Vec3D addForce);
 
     /*!
-     * \brief
-     * \param[in]
+     * \brief Adds an amount to the torque on this BaseInteractable.
+     * \param[in] addTorque The amount of torque added to this BaseInteractable.
      */
-    void addTorque(Vec3D _new);
+    void addTorque(Vec3D addTorque);
 
     /*!
-     * \brief
-     * \return
+     * \brief Returns the position of this BaseInteractable.
+     * \return A constant reference to the position of this BaseInteractable.
      */
     const Vec3D& getPosition() const;
 
     /*!
-     * \brief
-     * \return
+     * \brief Returns the orientation of this BaseInteractable.
+     * \return A constant reference to the orientation of this BaseInteractable.
      */
     const Vec3D& getOrientation() const;
 
     /*!
-     * \brief
-     * \param[in]
+     * \brief Sets the position of this BaseInteractable.
+     * \param[in] position The position of this BaseInteractable.
      */
     void setPosition(const Vec3D& position);
 
     /*!
-     * \brief
-     * \param[in]
+     * \brief Sets the orientation of this BaseInteractable.
+     * \param[in] orientation The orientation of this BaseInteractable.
      */
     void setOrientation(const Vec3D& orientation);
 
     /*!
-     * \brief
-     * \param[in]
+     * \brief Moves this BaseInteractable by adding an amount to the position.
+     * \param[in] move The distance over which this BaseInteractable is moved.
      */
     virtual void move(const Vec3D& move);
 
     /*!
-     * \brief
-     * \param[in]
+     * \brief Rotates this BaseInteractable.
+     * \param[in] rotate
      */
     void rotate(const Vec3D& rotate);
 
     /*!
-     * \brief
-     * \param[in]
-     * \return
+     * \brief Returns a reference to the list of interactions in this BaseInteractable.
+     * \return A reference to the list of interactions in this BaseInteractable.
      */
     const std::list<BaseInteraction*>& getInteractions() const;
 
     /*!
-     * \brief
-     * \param[in]
+     * \brief Adds an interaction to this BaseInteractable.
+     * \param[in] I A pointer to the BaseInteraction which will be added.
      */
     void addInteraction(BaseInteraction* I);
 
     /*!
-     * \brief
-     * \param[in]
-     * \return
+     * \brief Removes an interaction from this BaseInteractable.
+     * \param[in] I A pointer to the BaseInteraction which will be removed.
+     * \return True if successful
      */
     bool removeInteraction(BaseInteraction* I);
 
     /*!
-     * \brief
-     * \param[in]
+     * \brief Copies interactions to this BaseInteractable whenever a periodic copy made.
+     * \param[in] p A reference to the BaseInteractable from which the BaseInteraction are copied.
      */
     void copyInteractionsForPeriodicParticles(const BaseInteractable &p);
 

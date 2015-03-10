@@ -28,8 +28,7 @@
 #include <iostream>
 #include <vector>
 #include <Species/LinearPlasticViscoelasticSpecies.h>
-#include "Logger.h"
-extern Logger<LOG_MAIN_LEVEL> logger;
+#include <Logger.h>
 
 
 ///This code tests our plastic force model, as published in Luding 2008.
@@ -89,7 +88,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     PlasticForceUnitTestProblem.setParticleDimensions(3);
     PlasticForceUnitTestProblem.setSystemDimensions(3);
 
-    logger.log(Log::INFO,"Testing particle particles collision for elastic plastic forces. \n"
+    logger(INFO,"Testing particle particles collision for elastic plastic forces. \n"
         "This will be done for serveral values of scaled relative velocity chi");
     
     //PlasticForceUnitTestProblem.getRestartFile().getFstream().precision(20);
@@ -110,7 +109,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     //Loop over all test cases
 	for (int i=0; i<4; i++)
     {
-        logger.log(Log::INFO, "Running for chi=%",chi[i]);
+        logger(INFO, "Running for chi=%",chi[i]);
 		PlasticForceUnitTestProblem.set_chi(chi[i]);
 		std::stringstream ss("");
 		ss << "PlasticForceUnitTest" << PlasticForceUnitTestProblem.get_chi();
@@ -120,10 +119,10 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 
         //Now check the particles are in the right place for each of the 4 cases
         auto pIt = PlasticForceUnitTestProblem.particleHandler.begin();
-        if (!(*pIt)->getPosition().compareTo(leftFinalPosition[i], 1e-10))
-                logger.log(Log::FATAL,"Left particle is in the wrong position. It is at % and should be %",(*pIt)->getPosition(),leftFinalPosition[i]);
-        if (!(*pIt)->getVelocity().compareTo(leftFinalVecloity[i]  , 1e-10))
-                logger.log(Log::FATAL,"Left particle has the wrong velocity. It is at % and should be %",(*pIt)->getVelocity(),leftFinalVecloity[i]);
+        if (!(*pIt)->getPosition().isEqualTo(leftFinalPosition[i], 1e-10))
+                logger(FATAL,"Left particle is in the wrong position. It is at % and should be %",(*pIt)->getPosition(),leftFinalPosition[i]);
+        if (!(*pIt)->getVelocity().isEqualTo(leftFinalVecloity[i]  , 1e-10))
+                logger(FATAL,"Left particle has the wrong velocity. It is at % and should be %",(*pIt)->getVelocity(),leftFinalVecloity[i]);
     }
 
 	//to display use

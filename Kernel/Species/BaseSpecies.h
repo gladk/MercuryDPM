@@ -29,49 +29,108 @@
 #include "Math/ExtendedMath.h"
 #include "Math/Helpers.h"
 
-class SpeciesHandler;
-//class BaseParticle;
-class BaseParticle;
+class SpeciesHandler;// derived from BaseHandler<ParticleSpecies>
+//class BaseParticle; //
 class BaseInteractable;
 class BaseInteraction;
 
+/*!
+ * \brief BaseSpecies is the class from which all other species are derived.
+ * \details A base species is almost empty, with the exception of a pointer to 
+ * the particleHandler. All other properties get added in the inherited classes.
+ * See Species for more details.
+ */
 //Note the getVelocity can for some Species be dependent on which point on the Species is meant.
 class BaseSpecies : public BaseObject
 {
 public:
+
+    ///\brief The default constructor.
     BaseSpecies();
+
+    ///\brief The copy constructor.
     BaseSpecies(const BaseSpecies &p);
+
+    ///\brief The default destructor.
     virtual ~BaseSpecies();
-    virtual BaseSpecies* copy() const=0;
-    virtual void read(std::istream& is);
-    virtual void write(std::ostream& os) const;
-    virtual void clear();
+
+    /*!
+     * \brief Creates a deep copy of the object from which it is called.
+     * \details Creates a deep copy of the Species, or MixedSpecies from which 
+     * it is called. As this depends on the template parameters of Species, the 
+     * definition of this function is in the Species class.  
+     * It is defined as a virtual function here to allow the function 
+     * to be called from a BaseSpecies pointer (which is the kind of pointer 
+     * used for MixedSpecies).
+     * 
+     * To create a copy of a MixedSpecies, use
+     * > BaseSpecies* mixedSpecies->copy();
+     * To create a copy of a Species, use
+     * > ParticleSpecies* species->copy();
+     */
+    virtual BaseSpecies* copy() const = 0;
+
+    ///\brief Sets the pointer to the handler to which this species belongs.
     void setHandler(SpeciesHandler* handler);
+
+    ///\brief Returns the pointer to the handler to which this species belongs.
     SpeciesHandler* getHandler() const;
-    virtual std::string getBaseName() const;
-    virtual std::string getName() const;
-    
-    
-  
 
-// Species-specific functions
-
+    ///\brief defines the average of two variables by the harmonic mean.
     Mdouble average(Mdouble a, Mdouble b);
 
-    ///create values for mixed species
-    void mix(BaseSpecies* const S, BaseSpecies* const T);
+    ///\brief creates default values for mixed species
+    /*!
+     * \details returns the largest separation distance (negative overlap) at which 
+     * (adhesive) short-range forces can occur (needed for contact detection).
+     * Defined in each of the AdhesiveForceSpecies
+     * It is defined as a virtual function here to allow the function 
+     * to be called from a BaseSpecies pointer (which is the kind of pointer 
+     * used for MixedSpecies).
+     */
+    virtual void mixAll(BaseSpecies * const S, BaseSpecies * const T) = 0;
 
-    ///Returns the particle distance below which adhesive forces can occur (needed for contact detection)
-    virtual Mdouble getInteractionDistance() const;
+    ///\brief returns the largest separation distance at which adhesive short-range forces can occur.
+    /*!
+     * \details returns the largest separation distance (negative overlap) at which 
+     * (adhesive) short-range forces can occur (needed for contact detection).
+     * Defined in each of the AdhesiveForceSpecies
+     * It is defined as a virtual function here to allow the function 
+     * to be called from a BaseSpecies pointer (which is the kind of pointer 
+     * used for MixedSpecies).
+     */
+    virtual Mdouble getInteractionDistance() const = 0;
 
 //setters and getters
 
-    ///Allows the dimension of the particle (f.e. for mass) to be accessed
+    ///\brief Returns true if torques (i.e. angular degrees of freedom) have to be calculated.
+    /*!
+     * \details returns true if torques have to be calculated. This is currently 
+     * only true if a tangential force is applied, but can be true for 
+     * non-spherical objects even if no tangential force is applied .
+     * Defined in FrictionForceSpecies.
+     * It is defined as a virtual function here to allow the function 
+     * to be called from a BaseSpecies pointer (which is the kind of pointer 
+     * used for MixedSpecies).
+     */
     virtual bool getUseAngularDOFs() const = 0;
 
-    virtual BaseInteraction* getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)=0;
+    ///\brief returns new Interaction object.
+    /*!
+     * \details As each Species has its own Interaction type, getNewInteraction 
+     * can be used to access the right type of Interaction
+     * It is defined as a virtual function here to allow the function 
+     * to be called from a BaseSpecies pointer (which is the kind of pointer 
+     * used for MixedSpecies).
+     */
+    virtual BaseInteraction* getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp) = 0;
 
 private:
+    /*!
+     * \brief A pointer to the handler to which this species belongs. It is 
+     * initialized to nullptr and gets set when SpeciesHandler::addObject() 
+     * is called. 
+     */
     SpeciesHandler* handler_;
 };
 #endif

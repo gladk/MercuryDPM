@@ -33,7 +33,6 @@ class BaseParticle;
 class BaseInteractable;
 
 SlidingFrictionSpecies::SlidingFrictionSpecies()
-        : BaseSpecies()
 {
     slidingStiffness_ = 0;
     slidingDissipation_ = 0;
@@ -44,8 +43,10 @@ SlidingFrictionSpecies::SlidingFrictionSpecies()
 #endif
 }
 
+/*!
+ * \param[in] s the species that is copied
+ */
 SlidingFrictionSpecies::SlidingFrictionSpecies(const SlidingFrictionSpecies &s)
-        : BaseSpecies(s)
 {
     slidingStiffness_ = s.slidingStiffness_;
     slidingDissipation_ = s.slidingDissipation_;
@@ -63,18 +64,9 @@ SlidingFrictionSpecies::~SlidingFrictionSpecies()
 #endif   
 }
 
-void SlidingFrictionSpecies::clear()
-{
-    std::cout << "SlidingFrictionSpecies::clear(), this function shouldn't be called" << std::endl;
-}
-
-///SlidingFrictionSpecies copy method. It calls to copy constructor of this SlidingFrictionSpecies, useful for polymorphism
-SlidingFrictionSpecies* SlidingFrictionSpecies::copy() const
-{
-    return new SlidingFrictionSpecies(*this);
-}
-
-///SlidingFrictionSpecies print function, which accepts an os std::stringstream as input. It prints human readable SlidingFrictionSpecies information to the std::stringstream
+/*!
+ * \param[out] os output stream (typically the restart file)
+ */
 void SlidingFrictionSpecies::write(std::ostream& os) const
         {
     //BaseSpecies::write(os);
@@ -84,6 +76,9 @@ void SlidingFrictionSpecies::write(std::ostream& os) const
     os << " slidingFrictionCoefficientStatic " << slidingFrictionCoefficientStatic_;
 }
 
+/*!
+ * \param[in] is input stream (typically the restart file)
+ */
 void SlidingFrictionSpecies::read(std::istream& is)
 {
     //BaseSpecies::read(is);
@@ -94,6 +89,9 @@ void SlidingFrictionSpecies::read(std::istream& is)
     is >> dummy >> slidingFrictionCoefficientStatic_;
 }
 
+/*!
+ * \return a string containing the name of the species (minus the word "Species")
+ */
 std::string SlidingFrictionSpecies::getBaseName() const
 {
     return "SlidingFriction";
@@ -178,17 +176,31 @@ Mdouble SlidingFrictionSpecies::getSlidingFrictionCoefficientStatic() const
     return slidingFrictionCoefficientStatic_;
 }
 
+/*!
+ * \return a pointer to the new SlidingFrictionInteraction.
+ */
 BaseInteraction* SlidingFrictionSpecies::getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
 {
     return new SlidingFrictionInteraction(P, I, timeStamp);
 }
 
+/*!
+ * \details Returns true for any FrictionForceSpecies except EmptyFrictionSpecies, 
+ * because for spherical particles, torques are only caused by tangential forces. 
+ * See SpeciesHandler::useAngularDOFs for more details
+ * \return true 
+ */
 bool SlidingFrictionSpecies::getUseAngularDOFs() const
 {
     return true;
 }
 
-///create values for mixed species
+/*!
+ * \details For all parameters we assume that the harmonic mean of the parameters of the 
+ * original two species is a sensible default.
+ * \param[in] SFrictional the first species whose properties are mixed to create the new species
+ * \param[in] TFrictional the second species whose properties are mixed to create the new species
+ */
 void SlidingFrictionSpecies::mix(SlidingFrictionSpecies* const SFrictional, SlidingFrictionSpecies* const TFrictional)
 {
     slidingStiffness_ = average(SFrictional->getSlidingStiffness(), TFrictional->getSlidingStiffness());

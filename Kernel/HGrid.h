@@ -32,136 +32,187 @@
 class BaseParticle;
 
 /*!
- * \class HGrid
- * \brief This is the HGRID class  - This is the actually HGRID code
+ * \brief In the HGrid class, here all information about the HGrid is stored.
+ * \details In particular, the hashing the grid is done in this class, the cell 
+ *          sizes of the different levels are stored, it is stored whether or not
+ *          there are BaseParticle on each level and there is a flag to see if the
+ *          HGrid needs to be rebuilt.
  */
 class HGrid
 {
 public:
     /*!
-     * \brief default constructor
+     * \brief Default constructor, it sets the parameters to some sensible defaults.
      */    
     HGrid();
 
-    //-------------------------------------------------
     /*!
-     * \brief constructor: initialises parameters and allocates space for internal variables
+     * \brief Constructor: initialises parameters and allocates space for internal variables
      */
     HGrid(unsigned int num_buckets, double cellOverSizeRatio, std::vector<double>& cellSizes);
 
     /*!
-     * \brief destructor
+     * \brief Destructor.
      */
     ~HGrid();
 
     /*!
-     * \brief 
+     * \todo TW: Where is this function defined??
      */
     void Initialize_inv_size();
 
     /*!
-     * \brief This insert a particle given by CParticle in to the HGrid (i.e. it sets up the particle grid properts updates the level information on the grid)
+     * \brief Inserts the given BaseParticle in to the HGrid.
      */
     void insertParticleToHgrid(BaseParticle *obj);
 
     /*!
-     * \brief Computes hash bucket index in range [0, NUM_BUCKETS-1]
+     * \brief Computes hash bucket index in range [0, NUM_BUCKETS-1] for a 3D domain.
      */
     unsigned int computeHashBucketIndex(int x, int y, int z, unsigned int l) const;
 
     /*!
-     * \brief Computes hash bucket index in range [0, NUM_BUCKETS-1]
+     * \brief Computes hash bucket index in range [0, NUM_BUCKETS-1] for a 2D domain.
      */
     unsigned int computeHashBucketIndex(int x, int y, unsigned int l) const;
 
     /*!
-     * \brief 
+     * \brief Sets all buckets to not-checked.
      */
     void clearBucketIsChecked();
     
     /*!
-     * \brief 
+     * \brief For all buckets, it removes the pointer to the first BaseParticle in it, practically emptying the buckets.
      */
     void clearFirstBaseParticleInBucket();
 
     /*!
-     * \brief 
+     * \brief Sets the first particle in bucket i to be the given BaseParticle.
      */
     void setFirstBaseParticleInBucket(unsigned int i, BaseParticle* p);
 
     /*!
-     * \brief 
+     * \brief Sets that the bucket with the given index is checked to true.
      */
     void setBucketIsChecked(unsigned int i);
 
     /*!
-     * \brief 
+     * \brief Gets whether or not the bucket with index i is checked.
      */
     bool getBucketIsChecked(unsigned int i) const;
 
     /*!
-     * \brief 
+     * \brief Gets the maximum ratio of the cell to a particle it contains.
      */
     Mdouble getCellOverSizeRatio() const;
 
     /*!
-     * \brief 
+     * \brief Gets the size of the cells at the given level.
      */
     double getCellSize(unsigned int i) const;
 
     /*!
-     * \brief 
+     * \brief Gets the sizes of the cells at all levels as a vector.
      */
     const std::vector<double>& getCellSizes() const;
 
     /*!
-     * \brief 
+     * \brief Gets the first BaseParticle in the given bucket, const version.
      */
     const BaseParticle* getFirstBaseParticleInBucket(unsigned int i) const;
 
     /*!
-     * \brief 
+     * \brief Gets the first BaseParticle in the given bucket.
      */
     BaseParticle* getFirstBaseParticleInBucket(unsigned int i);
 
     /*!
-     * \brief 
+     * \brief Gets 1/cellSize for the cells on level i.
      */
     double getInvCellSize(unsigned int i) const;
 
     /*!
-     * \brief 
+     * \brief Gets all the inverse cell sizes (1/cellSize) for all levels as a vector.
      */
     const std::vector<double>& getInvCellSizes() const;
 
     /*!
-     * \brief 
+     * \brief Gets whether or not the grid needs to be rebuilt before something else is done with it.
      */
     bool getNeedsRebuilding() const;
 
     /*!
-     * \brief 
+     * \brief Gets the number of buckets of this HGrid.
      */
     unsigned int getNumberOfBuckets() const;
 
     /*!
-     * \brief 
+     * \brief Gets the number of levels of this HGrid.
      */
     unsigned int getNumberOfLevels() const;
 
     /*!
-     * \brief 
+     * \brief Gets the integer that represents which levels are occupied.
      */
     int getOccupiedLevelsMask() const;
 
+    /*!
+     * \brief Displays the member variables of the hGrid object.
+     * This function is intended for debugging the hGrid, therefore the 
+     * variables are displayed next to the variable names instead of putting it 
+     * in a user-friendly format. 
+     */
+    void info() const;
+
 private:
-    bool needsRebuilding_; ///flag sets if the HGrid needs to be rebuild
-    unsigned int numberOfBuckets_; ///The number of buckets in the current HGrid
-    Mdouble cellOverSizeRatio_;///
-    int occupiedLevelsMask_; /// Marks if there are particle at certain levels, l-th bit of occupiedLevelsMask is 1 if level l is contains particles (Implies max 32 hgrid levels)
-    std::vector<double> cellSizes_; ///The sizes of the cells in the different grids
-    std::vector<double> invCellSizes_; ///The inverse sizes of the cells in the different grids
-    std::vector<BaseParticle*> firstBaseParticleInBucket_; ///Stores a pointer to first element in hash bucket b; initially all nullptr
-    std::vector<bool> bucketIsChecked_; ///bucketIsChecked stores if hash bucket b is checked already; initially all false
+    /*!
+     * \brief Flag sets if the HGrid needs to be rebuilt.
+     */
+    bool needsRebuilding_; 
+
+    /*!
+     * \brief The number of buckets in the current HGrid.
+     * \details The number of buckets is the number of possible "results" of the
+     *          hash function for the grid.
+     */
+    unsigned int numberOfBuckets_; 
+
+    /*!
+     * \brief The maximum ratio between the size of the cell and the size of a particle it contains.
+     */
+    Mdouble cellOverSizeRatio_;
+
+    /*!
+     * \brief Marks if there are particles at certain levels.
+     * \details The l-th bit of occupiedLevelsMask_ is 1 if level l is contains 
+     *          particles (Implies max 32 hgrid levels) and 0 if it contains none.
+     */
+    int occupiedLevelsMask_; 
+
+    /*!
+     * \brief The sizes of the cells in the different grids.
+     * \details The sizes of the cells in the different grids are saved in a 
+     *          vector of double. The smaller the index in the vector, the smaller
+     *          the cells.
+     */
+    std::vector<double> cellSizes_; 
+
+    /*!
+     * \brief The inverse sizes of the cells in the different grids, where the inverse is defined as 1/cellSizes_.
+     */
+    std::vector<double> invCellSizes_; 
+
+    /*!
+     * \brief Stores a pointer to first element in hash bucket b.
+     * \details The pointer to the first element in a certain bucket, initially
+     *          a nullptr, is the pointer to the first BaseParticle in the first
+     *          cell in the bucket.
+     */
+    std::vector<BaseParticle*> firstBaseParticleInBucket_; 
+
+    /*!
+     * \brief BucketIsChecked stores if hash bucket b is checked already; initially all false.
+     */
+    std::vector<bool> bucketIsChecked_; 
 };
 #endif

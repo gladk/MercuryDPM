@@ -24,23 +24,32 @@
 //SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "HGrid.h"
+#include "Logger.h"
 #include "Particles/BaseParticle.h"
 
 HGrid::HGrid()
 {
-    needsRebuilding_=true;
-    numberOfBuckets_=10;
-    cellOverSizeRatio_=1.0;
-    occupiedLevelsMask_=0;
+    needsRebuilding_ = true;
+    numberOfBuckets_ = 10;
+    cellOverSizeRatio_ = 1.0;
+    occupiedLevelsMask_ = 0;
+    logger(DEBUG, "HGrid::HGrid() finished");
 }
 
-///constructor: initialises parameters and allocates space for internal variables
+/*!
+ * \param[in] num_buckets       The number of buckets that are used by this HGrid.
+ * \param[in] cellOverSizeRatio The maximum ratio between the size of the 
+ *                              cell over the size of the particle.
+ * \param[in] cellSizes         The sizes of the cells we want to set.
+ * \details                     Constructor: initialises parameters and allocates 
+ *                              space for internal variables. 
+ */
 HGrid::HGrid(unsigned int num_buckets, double cellOverSizeRatio, std::vector<double>& cellSizes)
 {
     needsRebuilding_ = false;
     numberOfBuckets_ = num_buckets;
     cellOverSizeRatio_ = cellOverSizeRatio;
-    occupiedLevelsMask_=0;
+    occupiedLevelsMask_ = 0;
     
     firstBaseParticleInBucket_.resize(numberOfBuckets_, nullptr);
     bucketIsChecked_.resize(numberOfBuckets_, false);
@@ -52,16 +61,30 @@ HGrid::HGrid(unsigned int num_buckets, double cellOverSizeRatio, std::vector<dou
     	cellSizes_.push_back(cellSizes[i]);
         invCellSizes_.push_back(1.0 / cellSizes[i]);
     }
+    logger(DEBUG, "HGrid::HGrid(unsigned int, double, vector<double>&) constructor finished.");
+    /*  std::cout << "HGrid::HGrid(" << num_buckets << ", " << cellOverSizeRatio << ", [";
+        for (auto p: cellSizes) std::cout << p << " "; 
+        std::cout << "]) finished" << std::endl;*/
 }
 
-///constructor: initialises parameters and allocates space for internal variables
 HGrid::~HGrid()
 {
+    logger(DEBUG, "HGrid::~HGrid() destructor finished");
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-///This insert a particle given by CParticle in to the HGrid (i.e. it sets up the particle grid properts updates the level information on the grid)
-/////////////////////////////////////////////////////////////////////////////////
+/*!
+ * \param[in] obj A pointer to the BaseParticle we want to add to the HGrid.
+ * \details Inserts the given BaseParticle into the HGrid, i.e. it sets up the 
+ *          particle grid properties and updates the level information on the grid.
+ *          First find which level is big enough to fit the BaseParticle in, then 
+ *          add the BaseParticle to that level and set that level as occupied in 
+ *          the occupiedLevelsMask_.
+ * \bug What happens if the particle is too big for the biggest cell? It just says
+ *      that it needs to rebuild the HGrid, but the particle is not inserted and
+ *      there seems to be no indication to the rest of the code that it has not 
+ *      been inserted. For now giving a warning, since code of users may rely on
+ *      it that nothing happens.
+ */
 void HGrid::insertParticleToHgrid(BaseParticle *obj)
 {
     if(!needsRebuilding_)
@@ -76,7 +99,7 @@ void HGrid::insertParticleToHgrid(BaseParticle *obj)
 
         if (level >= cellSizes_.size())
         {
-            std::cerr << "ATTENTION !!! Object ( id=" << obj->getId() << " index=" << obj->getIndex() << ") is larger (d=" << diameter << ", cellOverSizeRatio=" << cellOverSizeRatio_ << ") than largest grid cell allows (" << cellSizes_.back() << ")!" << std::endl;
+            logger(WARN, "WARNING: object (id = %, index = %) is larger (d = %, cellOverSizeRatio = %) than largest grid cell (%) allows.", obj->getId(), obj->getIndex(), diameter, cellOverSizeRatio_, cellSizes_.back());
             needsRebuilding_ = true;
         }
 
@@ -84,21 +107,28 @@ void HGrid::insertParticleToHgrid(BaseParticle *obj)
         // indicate level is in use - not levels with no particles no collision detection is performed
         this->occupiedLevelsMask_ |= (1 << level);
     }
+    else
+    {
+        logger(WARN, "WARNING: the HGrid needs to be rebuild before insertParticleToHgrid may be called!");
+    }
 }
 
-//-------------------------------------------------
-
-/// Computes hash bucket index in range [0, NUM_BUCKETS-1]
-/**
- * Computes a hash from parameters
- * @param x coordinate
- * @param y coordinate
- * @param z coordinate
- * @param l ??
- * @return a hashed value
+/*!
+ * \details Computes a hash from parameters, the result is in range [0, numberOfBuckets_-1].
+ * \todo Note, here we convert from a int to a long int and back; I assume this is 
+ * done to ensure that there is no overflow, but it is ugly code, IMHO.
+ * If so, why don't we take the modulo first, i.e. h1 %= numberOfBuckets_; 
+ * it will have the same result, and since numberOfBuckets_ should be nowhere 
+ * near the overflow value, we can savely use unsigned int everywhere (including the int x,y,z,l values!!).
+ * Can someone confirm this? \author weinhartt
+ * \param[in] x The coordinate of the cell in x direction for which the hash must be computed.
+ * \param[in] y The coordinate of the cell in y direction for which the hash must be computed.
+ * \param[in] z The coordinate of the cell in z direction for which the hash must be computed.
+ * \param[in] l The level in the HGrid of the cell for which the hash must be computed.
+ * \return The hash value for the given cell (x,y,z,l), which is in the range [0,numberOfBuckets_-1].
  */
 unsigned int HGrid::computeHashBucketIndex(int x, int y, int z, unsigned int l) const
-        {
+{
     const unsigned int h1 = 0x8da6b343u; // Large multiplicative constants;
     const unsigned int h2 = 0xd8163841u; // here arbitrarily chosen primes
     const unsigned int h3 = 0xcb1ab31fu;
@@ -107,11 +137,18 @@ unsigned int HGrid::computeHashBucketIndex(int x, int y, int z, unsigned int l) 
     unsigned long int n = h1 * x + h2 * y + h3 * z + h4 * l;
     n = n % numberOfBuckets_;
     
-    return n;
+    return static_cast<unsigned int>(n);
 }
 
+/*!
+ * \details Computes a hash from parameters, the result is in range [0, numberOfBuckets_-1].
+ * \param[in] x The coordinate of the cell in x direction for which the hash must be computed.
+ * \param[in] y The coordinate of the cell in y direction for which the hash must be computed.
+ * \param[in] l The level in the HGrid of the cell for which the hash must be computed.
+ * \return The hash value for the given cell (x,y,l), which is in the range [0,numberOfBuckets_-1].
+ */
 unsigned int HGrid::computeHashBucketIndex(int x, int y, unsigned int l) const
-        {
+{
     const unsigned int h1 = 0x8da6b343u; // Large multiplicative constants;
     const unsigned int h2 = 0xd8163841u; // here arbitrarily chosen primes
     const unsigned int h4 = 0x165667b1u;
@@ -119,9 +156,12 @@ unsigned int HGrid::computeHashBucketIndex(int x, int y, unsigned int l) const
     unsigned long int n = h1 * x + h2 * y + h4 * l;
     n = n % numberOfBuckets_;
     
-    return n;
+    return static_cast<unsigned int>(n);
 }
 
+/*!
+ * \return The number of buckets in this HGrid.
+ */
 unsigned int HGrid::getNumberOfBuckets() const
 {
     return numberOfBuckets_;
@@ -135,11 +175,17 @@ void HGrid::clearBucketIsChecked()
     }
 }
 
+/*!
+ * \return A vector with the sizes of the cells of different levels.
+ */
 const std::vector<double>& HGrid::getCellSizes() const
 {
     return cellSizes_;
 }
 
+/*!
+ * \return A vector with the inverse sizes (1/size) of the cells of different levels.
+ */
 const std::vector<double>& HGrid::getInvCellSizes() const
 {
     return invCellSizes_;
@@ -153,57 +199,117 @@ void HGrid::clearFirstBaseParticleInBucket()
     }
 }
 
+/*!
+ * \param[in] i The ordinal number of the bucket we want to know for whether or not it has been checked.
+ * \return A boolean which is true if the bucket is checked and false otherwise.
+ */
 bool HGrid::getBucketIsChecked(unsigned int i) const
-        {
+{
     return bucketIsChecked_[i];
 }
 
+/*!
+ * \param[in] i The ordinal number of the bucket for which we want to get the first particle of.
+ * \return A pointer to the (constant) BaseParticle which is the first Baseparticle in the given bucket.
+ */
 const BaseParticle* HGrid::getFirstBaseParticleInBucket(unsigned int i) const
-        {
+{
     return firstBaseParticleInBucket_[i];
 }
 
+/*!
+ * \param[in] i The ordinal number of the bucket for which we want to get the first particle of.
+ * \return A pointer to the BaseParticle which is the first Baseparticle in the given bucket.
+ */
 BaseParticle* HGrid::getFirstBaseParticleInBucket(unsigned int i)
 {
     return firstBaseParticleInBucket_[i];
 }
 
+/*!
+ * \param[in] i The ordinal number of the bucket we want to mark as checked.
+ */
 void HGrid::setBucketIsChecked(unsigned int i)
 {
     bucketIsChecked_[i] = true;
 }
 
+/*!
+ * \return The number of levels in this HGrid.
+ */
 unsigned int HGrid::getNumberOfLevels() const
 {
     return cellSizes_.size();
 }
 
+/*!
+ * \param[in] i The ordinal number of the bucket we want to set the first BaseParticle for.
+ * \param[in] p A pointer to the BaseParticle we want to place in the given bucket.
+ */
 void HGrid::setFirstBaseParticleInBucket(unsigned int i, BaseParticle* p)
 {
     firstBaseParticleInBucket_[i] = p;
 }
 
+/*!
+ * \param[in] i The level we want to know the cell size of.
+ * \return The size of the cells at the given level.
+ */
 double HGrid::getCellSize(unsigned int i) const
-        {
+{
     return cellSizes_[i];
 }
 
+/*!
+ * \param[in] i The level we want to know the inverse cell size of.
+ * \return The inverse size, i.e. 1/size, of the cells at the given level.
+ */
 double HGrid::getInvCellSize(unsigned int i) const
-        {
+{
     return invCellSizes_[i];
 }
 
+/*!
+ * \return A boolean which indicates whether or not the HGrid needs rebuilding.
+ */
 bool HGrid::getNeedsRebuilding() const
 {
     return needsRebuilding_;
 }
 
+/*!
+ * \return The ratio between the size of the smallest cell and the smallest BaseParticle.
+ */
 Mdouble HGrid::getCellOverSizeRatio() const
 {
     return cellOverSizeRatio_;
 }
 
+/*!
+ * \return The integer that represents the bit-vector that indicates which levels have at least one particle.
+ */
 int HGrid::getOccupiedLevelsMask() const
 {
     return occupiedLevelsMask_;
+}
+
+void HGrid::info() const
+{
+    std::cout << "Current status of hGrid parameters:" << std::endl;
+    std::cout << "bool needsRebuilding_=" << needsRebuilding_ << std::endl; 
+    std::cout << "unsigned int numberOfBuckets_=" << numberOfBuckets_ << std::endl; 
+    std::cout << "Mdouble cellOverSizeRatio_=" << cellOverSizeRatio_ << std::endl;
+    std::cout << "int occupiedLevelsMask_=" << occupiedLevelsMask_ << std::endl; 
+    std::cout << "std::vector<double> cellSizes_[" << cellSizes_.size() << "]="; 
+    for (auto p: cellSizes_) std::cout << p << " "; 
+    std::cout << std::endl; 
+    std::cout << "std::vector<double> invCellSizes_[" << invCellSizes_.size() << "]="; 
+    for (auto p: invCellSizes_) std::cout << p << " "; 
+    std::cout << std::endl; 
+    std::cout << "std::vector<BaseParticle> firstBaseParticleInBucket_[" << firstBaseParticleInBucket_.size() << "]=... (not shown)"; 
+    //for (auto p: firstBaseParticleInBucket_) std::cout << p << " "; 
+    std::cout << std::endl; 
+    std::cout << "std::vector<bool> bucketIsChecked_[" << bucketIsChecked_.size() << "]=... (not shown)"; 
+    //for (auto p: bucketIsChecked_) std::cout << p << " "; 
+    std::cout << std::endl; 
 }

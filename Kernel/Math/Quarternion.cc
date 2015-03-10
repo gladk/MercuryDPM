@@ -136,6 +136,7 @@ void Quarternion::integrate(const Vec3D& omega, double timeStep)
     deltaQ.x_ = theta.X * s;
     deltaQ.y_ = theta.Y * s;
     deltaQ.z_ = theta.Z * s;
+    ///\todo Are we sure this works? *this = deltaQ * *this \author weinhartt
     *this = deltaQ * *this;
 }
 

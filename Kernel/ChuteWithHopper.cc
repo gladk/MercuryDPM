@@ -151,13 +151,13 @@ void ChuteWithHopper::addHopper()
     IntersectionOfWalls w_Left;
     temp = B - A;
     normal = Vec3D(temp.Z, 0.0, -temp.X) / sqrt(temp.getLengthSquared());
-    w_Left.addObject(normal, Vec3D::dot(normal, A));
+    w_Left.addObject(normal, A);
     temp = C - B;
     normal = Vec3D(temp.Z, 0.0, -temp.X) / sqrt(temp.getLengthSquared());
-    w_Left.addObject(normal, Vec3D::dot(normal, B));
+    w_Left.addObject(normal, B);
     temp = A - C;
     normal = Vec3D(temp.Z, 0.0, -temp.X) / sqrt(temp.getLengthSquared());
-    w_Left.addObject(normal, Vec3D::dot(normal, C));
+    w_Left.addObject(normal, C);
     wallHandler.copyAndAddObject(w_Left);
 
     //next, do the same for the right wall
@@ -179,13 +179,13 @@ void ChuteWithHopper::addHopper()
     IntersectionOfWalls w_Right;
     temp = A - B;
     normal = Vec3D(temp.Z, 0.0, -temp.X) / sqrt(temp.getLengthSquared());
-    w_Right.addObject(normal, Vec3D::dot(normal, A));
+    w_Right.addObject(normal, A);
     temp = B - C;
     normal = Vec3D(temp.Z, 0.0, -temp.X) / sqrt(temp.getLengthSquared());
-    w_Right.addObject(normal, Vec3D::dot(normal, B));
+    w_Right.addObject(normal, B);
     temp = C - A;
     normal = Vec3D(temp.Z, 0.0, -temp.X) / sqrt(temp.getLengthSquared());
-    w_Right.addObject(normal, Vec3D::dot(normal, C));
+    w_Right.addObject(normal, C);
     wallHandler.copyAndAddObject(w_Right);
 
     setZMax(A.Z);
@@ -216,15 +216,15 @@ void ChuteWithHopper::addHopper()
         temp = B - A;
         normal = Vec3D::cross(Vec3D(-c, 0, -s), temp) / sqrt(temp.getLengthSquared());
         //normal  = Vec3D(0.0,temp.Z,-temp.Y) / sqrt(temp.GetLength2());
-        w_Back.addObject(normal, Vec3D::dot(normal, A));
+        w_Back.addObject(normal, A);
         temp = C - B;
         //normal  = Vec3D(0.0,temp.Z,-temp.Y) / sqrt(temp.GetLength2());
         normal = Vec3D::cross(Vec3D(-c, 0, -s), temp) / sqrt(temp.getLengthSquared());
-        w_Back.addObject(normal, Vec3D::dot(normal, B));
+        w_Back.addObject(normal, B);
         temp = A - C;
         //normal = Vec3D(0.0,temp.Z,-temp.Y)/sqrt(temp.GetLength2());
         normal = Vec3D::cross(Vec3D(-c, 0, -s), temp) / sqrt(temp.getLengthSquared());
-        w_Back.addObject(normal, Vec3D::dot(normal, C));
+        w_Back.addObject(normal, C);
         wallHandler.copyAndAddObject(w_Back);
 
         //Now for the right y-wall
@@ -251,15 +251,15 @@ void ChuteWithHopper::addHopper()
         temp = A - B;
         normal = Vec3D::cross(Vec3D(-c, 0, -s), temp) / sqrt(temp.getLengthSquared());
         //normal  = Vec3D(0.0,-temp.Z,temp.Y) / sqrt(temp.GetLength2());
-        w_Front.addObject(normal, Vec3D::dot(normal, A));
+        w_Front.addObject(normal, A);
         temp = B - C;
         //normal  = Vec3D(0.0,-temp.Z,temp.Y) / sqrt(temp.GetLength2());
         normal = Vec3D::cross(Vec3D(-c, 0, -s), temp) / sqrt(temp.getLengthSquared());
-        w_Front.addObject(normal, Vec3D::dot(normal, B));
+        w_Front.addObject(normal, B);
         temp = C - A;
         //normal = Vec3D(0.0,-temp.Z,temp.Y)/sqrt(temp.GetLength2());
         normal = Vec3D::cross(Vec3D(-c, 0, -s), temp) / sqrt(temp.getLengthSquared());
-        w_Front.addObject(normal, Vec3D::dot(normal, C));
+        w_Front.addObject(normal, C);
         wallHandler.copyAndAddObject(w_Front);
     }
 
@@ -459,7 +459,7 @@ void ChuteWithHopper::setIsHopperAlignedWithBottom(bool isHopperAlignedWithBotto
     isHopperAlignedWithBottom_ = isHopperAlignedWithBottom;
 }
 
-int ChuteWithHopper::readNextArgument(int& i, int argc, char *argv[])
+bool ChuteWithHopper::readNextArgument(int& i, int argc, char *argv[])
 {
     if (!strcmp(argv[i], "-hopperLength"))
     {

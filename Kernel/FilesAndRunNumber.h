@@ -37,16 +37,24 @@ typedef double Mdouble;
 
 /*!
  * \class FilesAndRunNumber
- * \brief Here are the routines to use a counter file to store run numbers.
- * All my codes do this so I expect this routines will be used often.
- * So this saves my coping the same routine over and over again
+ * \brief It is publicly inherited from class Files. It defines an awesome feature that is ideal when doing a parameter study.
+ * Below are the routines that manipulate a counter file, called COUNTER_DONOTDEL, to store run numbers.
+ * \details For a paramater study, a particular DPM simulation is run several times. Each time the code is executed,
+ * the run number or counter, in the COUNTER_DONOTDEL, gets incremented. Based on the counter your file name is named as 
+ * problemName.1.data, problemName.2.data...
+ * If the File::fileType_ is chosen as Multiple files, then the your data files will have the name as problemName.runNumber.0,
+ *  problemName.runNumber.1 ...
  */
+
+ // All my codes do this so I expect this routines will be used often.
+ //So this saves my coping the same routine over and over again
+
 class FilesAndRunNumber : public Files
 {
 public:
 
     /*!
-     * \brief Default constructor: sets the counter to 0 (i.e. no number will be included).
+     * \brief Constructor
      */
     FilesAndRunNumber();
 
@@ -56,51 +64,69 @@ public:
     FilesAndRunNumber(const FilesAndRunNumber& other);
 
     /*!
-     * \brief
+     * \brief Constructor
+     */
+    virtual ~FilesAndRunNumber();
+
+    /*!
+     * \brief a function called by the FilesAndRunNumber() (constructor)
      */
     void constructor();
 
     /*!
-     * \brief Increament the counter value stored in the file_counter by 1 and store the new value
+     * \brief Increment the run Number (counter value) stored in the file_counter (COUNTER_DONOTDEL) by 1 and store the new value
+     * in the counter file
      */
     void incrementRunNumberInFile();
 
     /*!
-     * \brief Read from the counter file the counter
+     * \brief Read the run number or the counter from the counter file (COUNTER_DONOTDEL)
      */
     int readRunNumberFromFile();
 
     /*!
-     * \brief
+     * \brief The autoNumber() function is the trigger. It calls three functions. setRunNumber(), readRunNumberFromFile() and 
+     * incrementRunNumberInFile().
      */
     void autoNumber();
 
     /*!
-     * \brief This turns a counter into two indices for doing parameter studies. The indices run from 1:size_x and 1:size_y, while the study number starts at 0.
+     * \brief This turns a counter into two indices which is an amazing feature for doing two dimensional parameter studies. 
+     * The indices run from 1:size_x and 1:size_y, while the study number starts at 0 ( initially the counter=1 in COUNTER_DONOTDEL)
      */
     std::vector<int> get2DParametersFromRunNumber(int size_x, int size_y);
 
     /*!
-     * \brief This launch a code from within this code. Please pass the name of the code to run
+     * \brief This launches a code from within this code. Please pass the name of the code to run.
      */
     int launchNewRun(const char* name, bool quick = false);
 
-//setters and getters
+    //setters and getters
     
     /*!
-     * \brief This sets the counter, overriding the defaults
+     * \brief This sets the counter/Run number, overriding the defaults
      */
     void setRunNumber(int runNumber);
 
     /*!
-     * \brief This returns the current value of the counter
+     * \brief This returns the current value of the counter (runNumber_)
      */
     int getRunNumber() const;
+
+    /*!
+     * \brief Accepts an input stream <a href="http://en.cppreference.com/w/cpp/io/basic_istreams.html">std::istream</a>.
+     */
+    void read(std::istream& is);
+
+    /*!
+     * \brief Accepts an output stream read function, which accepts an input stream <a href="http://en.cppreference.com/w/cpp/io/basic_ostreams.html">std::ostream</a>.
+     */
+    void write(std::ostream& os) const;
 
 private:
 
     /*!
-     * \brief The stores the run number for saving
+     * \brief This stores the run number for saving
      */
     int runNumber_;
 };

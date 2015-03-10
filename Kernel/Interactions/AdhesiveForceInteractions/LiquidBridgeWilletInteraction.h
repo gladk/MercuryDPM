@@ -28,33 +28,64 @@
 
 #include "Interactions/BaseInteraction.h"
 #include "Math/Vector.h"
+
 class BaseParticle;
 class LiquidBridgeWilletSpecies;
 class BaseInteractable;
-
+/*!
+ * \class LiquidBridgeWilletInteraction
+ * \brief Defines the liquid bridge willet interaction between two particles or walls.
+ */
 class LiquidBridgeWilletInteraction : public virtual BaseInteraction
 {
 public:
+    /*!
+     * \brief An alias name for LiquidBridgeWilletSpecies data type.
+     */
     typedef LiquidBridgeWilletSpecies SpeciesType;
+    /*!
+     * \brief Constructor.
+     */
     LiquidBridgeWilletInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
+    /*!
+     * \brief Copy constructor.
+     */
     LiquidBridgeWilletInteraction(const LiquidBridgeWilletInteraction &p);
+    /*!
+     * \brief Destructor.
+     */
     virtual ~LiquidBridgeWilletInteraction();
-
-    void computeForce();
-
-    ///Interaction read function, which accepts an std::stringstream as input.
+    /*!
+     * \brief Computes the adhesive forces for liquid bridge Willet type of interaction.
+     */
+    void computeAdhesionForce();
+    /*!
+     * \brief Interaction read function, which accepts an std::istream as input.
+     */
     void read(std::istream& is);
-
-    ///Interaction print function, which accepts an std::stringstream as input.
+    /*!
+     * \brief Interaction print function, which accepts an std::ostream as input.
+     */
     void write(std::ostream& os) const;
-
+    /*!
+     * \brief Returns the amount of Elastic energy involved in an interaction. Basically
+     *        used in case you want to write the elastic energy into an output file. 
+     */ 
     Mdouble getElasticEnergy() const;
-
+    /*!
+     * \brief A dynamic_cast of BaseSpecies type pointer to a pointer of type LiquidBridgeWilletSpecies.
+     */
     const LiquidBridgeWilletSpecies* getSpecies() const;
-
-    std::string getName() const;
+    /*!
+     * \brief Returns the name of the interaction, see Interaction.h.
+     */  
+    std::string getBaseName() const;
     
 private:
+    /*!
+     * \brief A history parameter to store if the particles were in contact or not. Useful
+     *        to compute adhesive forces.
+     */    
     bool wasInContact_;
 };
 #endif

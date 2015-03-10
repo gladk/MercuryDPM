@@ -24,17 +24,21 @@
 //SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "IrreversibleAdhesiveSpecies.h"
+#include <Logger.h>
 
 IrreversibleAdhesiveSpecies::IrreversibleAdhesiveSpecies()
-    : BaseSpecies(), ReversibleAdhesiveSpecies()
+    : ReversibleAdhesiveSpecies()
 {
 #ifdef DEBUG_CONSTRUCTOR
     std::cout<<"IrreversibleAdhesiveSpecies::IrreversibleAdhesiveSpecies() finished"<<std::endl;
 #endif
 }
 
+/*!
+ * \param[in] the species that is copied
+ */
 IrreversibleAdhesiveSpecies::IrreversibleAdhesiveSpecies(const IrreversibleAdhesiveSpecies &s)
-    : BaseSpecies(s), ReversibleAdhesiveSpecies(s)
+    : ReversibleAdhesiveSpecies(s)
 {
 #ifdef DEBUG_CONSTRUCTOR
     std::cout<<"IrreversibleAdhesiveSpecies::IrreversibleAdhesiveSpecies(const IrreversibleAdhesiveSpecies &p) finished"<<std::endl;
@@ -48,7 +52,9 @@ IrreversibleAdhesiveSpecies::~IrreversibleAdhesiveSpecies()
 #endif   
 }
 
-//the name is set such that the full name does not extend
+/*!
+ * \return a string containing the name of the species (minus the word "Species")
+ */
 std::string IrreversibleAdhesiveSpecies::getBaseName() const
 {
     return "IrreversibleAdhesive";

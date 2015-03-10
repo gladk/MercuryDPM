@@ -27,27 +27,55 @@
 #include "DPMBase.h"
 #include "Particles/BaseParticle.h"
 
+/*!
+ * \details Default constructor, sets all data members to 0 or nullptr.
+ */
 InsertionBoundary::InsertionBoundary()
 {   
-    numberOfParticlesInserted_=0;
-    particleToCopy_=nullptr;
-    maxFailed_=0;
+    numberOfParticlesInserted_ = 0;
+    particleToCopy_ = nullptr;
+    maxFailed_ = 0;
 }
 
+/*!
+ * \details Copy constructor
+ */
+InsertionBoundary::InsertionBoundary(const InsertionBoundary& other) 
+{
+    numberOfParticlesInserted_ = other.numberOfParticlesInserted_;
+    maxFailed_ = other.maxFailed_;
+    particleToCopy_ = other.particleToCopy_->copy();
+}
+
+/*!
+ * \details Destructor
+ */
 InsertionBoundary::~InsertionBoundary()
 {
+    delete particleToCopy_;
 }
 
-
-void InsertionBoundary::set(BaseParticle* particleToCopy, unsigned int maxFailed)
+/*!
+ * \details Sets the particle that will be inserted and the maximum number of 
+ * times for which insertion may fail.
+ * \param[in] particleToCopy  Particle that will be copied and inserted in the domain
+ * \param[in] maxFailed       Number of times that the wall may fail to insert a particle
+ */
+void InsertionBoundary::set(BaseParticle* particleToCopy, std::size_t maxFailed)
 {
-    particleToCopy_ = particleToCopy;
+    particleToCopy_ = particleToCopy->copy();
     maxFailed_ = maxFailed;
 }
 
+/*!
+ * \details Is used to fill the insides of the boundary with particles until 
+ * it is filled up. 
+ * \param[in,out] md    the problem's DPMBase object
+ * \todo rename to something like "insertUntilMaxFailed"?
+ */
 void InsertionBoundary::checkBoundaryBeforeTimeStep(DPMBase* md)
 {
-    unsigned int failed = 0;
+    std::size_t failed = 0;
     BaseParticle* p0;
     //try max_failed times to find new insertable particle
     while (failed <= maxFailed_)
@@ -67,36 +95,61 @@ void InsertionBoundary::checkBoundaryBeforeTimeStep(DPMBase* md)
             failed++;
             //std::cout<<"failure"<<std::endl;
         }
-        delete p0;
+        //Irana: got rid of the delete, since it is not made with new (particle on stack instead of heap)
+        //delete p0;
     }
 }
 
-unsigned int InsertionBoundary::getNumberOfParticlesInserted() const
+/*!
+ * \details Returns the number of particles inserted in the boundary
+ * \return  the number of particles inserted
+ */
+std::size_t InsertionBoundary::getNumberOfParticlesInserted() const
 {
     return numberOfParticlesInserted_;
 }
 
-void InsertionBoundary::setMaxFailed(unsigned int maxFailed)
+/*!
+ * \details Sets the maximum number of times InsertionBoundary::checkBoundaryBeforeTimeStep()
+ * may try to insert a particle and fail, before the insertion of particles stops.
+ * \param[in] maxFailed     the maximum number of particle insertion trials
+ * \todo Are we using std::size_t now? Then we should use it all appropriate places (such as getNumberOfObjects())
+ */
+void InsertionBoundary::setMaxFailed(std::size_t maxFailed)
 {
     maxFailed_=maxFailed;
 }
 
-unsigned int InsertionBoundary::getMaxFailed() const
+/*!
+ * \details Return maxFailed_ (see InsertionBoundary::setMaxFailed).
+ * \return the maximum number of particle insertion trials
+ */
+std::size_t InsertionBoundary::getMaxFailed() const
 {
     return maxFailed_;
 }
 
+/*!
+ * \details Sets the pointer to the particle, copies of which are inserted 
+ * \param[in] particleToCopy    pointer to the particle to be inserted
+ */
 void InsertionBoundary::setParticleToCopy(BaseParticle* particleToCopy)
 {
-    particleToCopy_=particleToCopy;
+    particleToCopy_ = particleToCopy->copy();
 }
 
+/*!
+ * \details returns pointer to the particle copies of which are to be inserted
+ */
 BaseParticle* InsertionBoundary::getParticleToCopy() const
 {
     return particleToCopy_;
 }
 
-///reads wall
+/*!
+ * \details reads the boundary's id_ and maxFailed_ from the given istream
+ * \param[in,out] is    stream the data members are read from
+ */
 void InsertionBoundary::read(std::istream& is)
 {
     BaseBoundary::read(is);
@@ -104,9 +157,12 @@ void InsertionBoundary::read(std::istream& is)
     is >> dummy >> maxFailed_;
 }
 
-///outputs wall
+/*!
+ * \details adds the boundary's id_ and maxFailed_ to the given ostream
+ * \param[in,out] is    stream the data members are to be added to
+ */
 void InsertionBoundary::write(std::ostream& os) const
-        {
+{
     BaseBoundary::write(os);
     os << " maxFailed " << maxFailed_;
 }

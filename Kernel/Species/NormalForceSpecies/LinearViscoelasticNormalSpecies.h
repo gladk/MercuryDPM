@@ -28,25 +28,34 @@
 #include "Species/BaseSpecies.h"
 #include "Math/ExtendedMath.h"
 #include "Interactions/NormalForceInteractions/LinearViscoelasticInteraction.h"
-//class SpeciesHandler;
-class BaseInteractable;
-class BaseInteraction;
 
-//Note the getVelocity can for some Species be dependent on which point on the Species is meant.
+/*!
+ * \brief LinearViscoelasticNormalSpecies contains the parameters used to describe a linear elastic-dissipative normal force.
+ * \details See LinearViscoelasticNormalInteraction::computeForce for a description of the force law.
+ */
 class LinearViscoelasticNormalSpecies : public virtual BaseSpecies
 {
 public:
+    ///\brief The correct Interaction type for this FrictionForceSpecies
     typedef LinearViscoelasticInteraction InteractionType;
 
+    ///\brief The default constructor.
     LinearViscoelasticNormalSpecies();
+
+    ///\brief The default copy constructor.
     LinearViscoelasticNormalSpecies(const LinearViscoelasticNormalSpecies &p);
+
+    ///\brief The default destructor.
     virtual ~LinearViscoelasticNormalSpecies();
-    LinearViscoelasticNormalSpecies* copy() const;
+
+    /// \brief Reads the species properties from an input stream.
     void read(std::istream& is);
+
+    /// \brief Writes the species properties to an output stream.
     void write(std::ostream& os) const;
-    void clear();
+
+    /// \brief Used in Species::getName to obtain a unique name for each Species.
     std::string getBaseName() const;
-    BaseInteraction* getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
 
 // Species-specific functions
 
@@ -74,7 +83,7 @@ public:
      */
     Mdouble getRestitutionCoefficient(Mdouble mass);
 
-    ///create values for mixed species
+    ///\brief creates default values for mixed species
     void mix(LinearViscoelasticNormalSpecies* const SBase, LinearViscoelasticNormalSpecies* const TBase);
 
 //setters and getters
@@ -91,10 +100,8 @@ public:
     Mdouble getDissipation() const;
 
     ///Allows the spring and dissipation constants to be changed simultaneously
+    MERCURY_DEPRECATED 
     void setStiffnessAndDissipation(helpers::KAndDisp new_);
-
-    ///Allows the dimension of the particle (f.e. for mass) to be accessed
-    bool getUseAngularDOFs() const;
 
 private:
     Mdouble stiffness_; ///<(normal) spring constant

@@ -24,9 +24,9 @@
 //SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "LiquidBridgeWilletSpecies.h"
+#include <Logger.h>
 
 LiquidBridgeWilletSpecies::LiquidBridgeWilletSpecies()
-        : BaseSpecies()
 {
     liquidBridgeVolume_ = std::numeric_limits<double>::quiet_NaN();
     cbrtLiquidBridgeVolume_ = std::numeric_limits<double>::quiet_NaN();
@@ -37,8 +37,10 @@ LiquidBridgeWilletSpecies::LiquidBridgeWilletSpecies()
 #endif
 }
 
+/*!
+ * \param[in] the species that is copied
+ */
 LiquidBridgeWilletSpecies::LiquidBridgeWilletSpecies(const LiquidBridgeWilletSpecies &s)
-        : BaseSpecies(s)
 {
     setLiquidBridgeVolume(s.liquidBridgeVolume_);
     surfaceTension_ = s.surfaceTension_;
@@ -55,7 +57,9 @@ LiquidBridgeWilletSpecies::~LiquidBridgeWilletSpecies()
 #endif   
 }
 
-///LiquidBridgeWilletSpecies print function, which accepts an os std::stringstream as input. It prints human readable LiquidBridgeWilletSpecies information to the std::stringstream
+/*!
+ * \param[out] output stream (typically the restart file)
+ */
 void LiquidBridgeWilletSpecies::write(std::ostream& os) const
         {
     os << " liquidBridgeVolume " << liquidBridgeVolume_;
@@ -63,6 +67,9 @@ void LiquidBridgeWilletSpecies::write(std::ostream& os) const
     os << " contactAngle " << contactAngle_;
 }
 
+/*!
+ * \param[in] input stream (typically the restart file)
+ */
 void LiquidBridgeWilletSpecies::read(std::istream& is)
 {
     std::string dummy;
@@ -71,13 +78,19 @@ void LiquidBridgeWilletSpecies::read(std::istream& is)
     is >> dummy >> contactAngle_;
 }
 
-//the name is set such that the full name does not extend
+/*!
+ * \return a string containing the name of the species (minus the word "Species")
+ */
 std::string LiquidBridgeWilletSpecies::getBaseName() const
 {
     return "LiquidBridgeWillet";
 }
 
-///create values for mixed species
+/*!
+ * \details For all parameters we assume that the harmonic mean of the parameters of the 
+ * original two species is a sensible default.
+ * \param[in] S,T the two species whose properties are mixed to create the new species
+ */
 void LiquidBridgeWilletSpecies::mix(LiquidBridgeWilletSpecies* const S, LiquidBridgeWilletSpecies* const T)
 {
     setLiquidBridgeVolume(average(S->getLiquidBridgeVolume(), T->getLiquidBridgeVolume()));
@@ -85,12 +98,17 @@ void LiquidBridgeWilletSpecies::mix(LiquidBridgeWilletSpecies* const S, LiquidBr
     contactAngle_ = average(S->getContactAngle(), T->getContactAngle());
 }
 
-///\todo check cbrt
+/*!
+ * \return the maximum separation distance between particles below which the adhesive force is active.
+ */
 Mdouble LiquidBridgeWilletSpecies::getInteractionDistance() const
 {
 	return (1.0+0.5*contactAngle_)*cbrtLiquidBridgeVolume_;	
 }
 
+/*!
+ * \param[in] liquidBridgeVolume the volume of the liquid bridge.
+ */
 void LiquidBridgeWilletSpecies::setLiquidBridgeVolume(Mdouble liquidBridgeVolume)
 {
     if (liquidBridgeVolume >= 0) 
@@ -105,11 +123,17 @@ void LiquidBridgeWilletSpecies::setLiquidBridgeVolume(Mdouble liquidBridgeVolume
     }
 }
 
+/*!
+ * \return the volume of the liquid bridge.
+ */
 Mdouble LiquidBridgeWilletSpecies::getLiquidBridgeVolume() const
 {
     return liquidBridgeVolume_;
 }
 
+/*!
+ * \param[in] surfaceTension the surface tension of the liquid.
+ */
 void LiquidBridgeWilletSpecies::setSurfaceTension(Mdouble surfaceTension)
 {
     if (surfaceTension >= 0)
@@ -121,11 +145,17 @@ void LiquidBridgeWilletSpecies::setSurfaceTension(Mdouble surfaceTension)
     }
 }
 
+/*!
+ * \return the surface tension of the liquid.
+ */
 Mdouble LiquidBridgeWilletSpecies::getSurfaceTension() const
 {
     return surfaceTension_;
 }
 
+/*!
+ * \param[in] contactAngle the contact angle between particle and liquid bridge surface.
+ */
 void LiquidBridgeWilletSpecies::setContactAngle(Mdouble contactAngle)
 {
     if (contactAngle >= 0)
@@ -137,6 +167,9 @@ void LiquidBridgeWilletSpecies::setContactAngle(Mdouble contactAngle)
     }
 }
 
+/*!
+ * \return the contact angle between particle and liquid bridge surface.
+ */
 Mdouble LiquidBridgeWilletSpecies::getContactAngle() const
 {
     return contactAngle_;

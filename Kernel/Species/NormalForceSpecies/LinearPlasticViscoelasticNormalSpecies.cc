@@ -31,7 +31,6 @@ class BaseParticle;
 class BaseInteractable;
 
 LinearPlasticViscoelasticNormalSpecies::LinearPlasticViscoelasticNormalSpecies()
-    : BaseSpecies()
 {
     loadingStiffness_ = 0.0;
     unloadingStiffnessMax_ = 0.0;
@@ -43,8 +42,10 @@ LinearPlasticViscoelasticNormalSpecies::LinearPlasticViscoelasticNormalSpecies()
 #endif
 }
 
+/*!
+ * \param[in] the species that is copied
+ */
 LinearPlasticViscoelasticNormalSpecies::LinearPlasticViscoelasticNormalSpecies(const LinearPlasticViscoelasticNormalSpecies &p)
-    : BaseSpecies(p)
 {
     loadingStiffness_ = p.loadingStiffness_;
     unloadingStiffnessMax_ = p.unloadingStiffnessMax_;
@@ -63,18 +64,9 @@ LinearPlasticViscoelasticNormalSpecies::~LinearPlasticViscoelasticNormalSpecies(
 #endif   
 }
 
-void LinearPlasticViscoelasticNormalSpecies::clear()
-{
-    std::cout << "LinearPlasticViscoelasticNormalSpecies::clear(), this function shouldn't be called" << std::endl;
-}
-
-///LinearPlasticViscoelasticNormalSpecies copy method. It calls to copy constructor of this LinearPlasticViscoelasticNormalSpecies, useful for polymorphism
-LinearPlasticViscoelasticNormalSpecies* LinearPlasticViscoelasticNormalSpecies::copy() const
-{
-    return new LinearPlasticViscoelasticNormalSpecies(*this);
-}
-
-///LinearPlasticViscoelasticNormalSpecies print function, which accepts an os std::stringstream as input. It prints human readable LinearPlasticViscoelasticNormalSpecies information to the std::stringstream
+/*!
+ * \param[out] output stream (typically the restart file)
+ */
 void LinearPlasticViscoelasticNormalSpecies::write(std::ostream& os) const
 {
     os  << " loadingStiffness " << loadingStiffness_;
@@ -84,6 +76,9 @@ void LinearPlasticViscoelasticNormalSpecies::write(std::ostream& os) const
     os  << " dissipation " << dissipation_;
 }
 
+/*!
+ * \param[in] input stream (typically the restart file)
+ */
 void LinearPlasticViscoelasticNormalSpecies::read(std::istream& is)
 {
     std::string dummy;
@@ -94,20 +89,21 @@ void LinearPlasticViscoelasticNormalSpecies::read(std::istream& is)
     is >> dummy >> dissipation_;
 }
 
+/*!
+ * \return a string containing the name of the species (minus the word "Species")
+ */
 std::string LinearPlasticViscoelasticNormalSpecies::getBaseName() const
 {
     return "LinearPlasticViscoelastic";
 }
 
-bool LinearPlasticViscoelasticNormalSpecies::getUseAngularDOFs() const
-{
-    return false;
-}
-
-///create values for mixed species
+/*!
+ * \details For all parameters we assume that the harmonic mean of the parameters of the 
+ * original two species is a sensible default.
+ * \param[in] S,T the two species whose properties are mixed to create the new species
+ */
 void LinearPlasticViscoelasticNormalSpecies::mix(LinearPlasticViscoelasticNormalSpecies* const S, LinearPlasticViscoelasticNormalSpecies* const T)
 {
-    BaseSpecies::mix(S, T);
     loadingStiffness_ = average(S->getLoadingStiffness(), T->getLoadingStiffness());
     unloadingStiffnessMax_ = average(S->getUnloadingStiffnessMax(), T->getUnloadingStiffnessMax());
     cohesionStiffness_ = average(S->getCohesionStiffness(), T->getCohesionStiffness());
@@ -115,14 +111,13 @@ void LinearPlasticViscoelasticNormalSpecies::mix(LinearPlasticViscoelasticNormal
     dissipation_ = average(S->getDissipation(), T->getDissipation());
 }
 
-BaseInteraction* LinearPlasticViscoelasticNormalSpecies::getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
-{
-    return new LinearPlasticViscoelasticInteraction(P, I, timeStamp);
-}
-
-
-///Acccess functions for the plastic model
-void LinearPlasticViscoelasticNormalSpecies::setPlasticParameters(Mdouble loadingStiffness, Mdouble unloadingStiffnessMax, Mdouble cohesionStiffness, Mdouble penetrationDepthMax)
+/*!
+ * \param[in] loadingStiffness      the loading stiffness of the linear plastic-viscoelastic normal force.
+ * \param[in] unloadingStiffnessMax the maximum unloading stiffness of the linear plastic-viscoelastic normal force.
+ * \param[in] cohesionStiffness     the cohesive stiffness of the linear plastic-viscoelastic normal force.
+ * \param[in] penetrationDepthMax   the maximum penetration depth of the linear plastic-viscoelastic normal force.
+ */
+void LinearPlasticViscoelasticNormalSpecies::setPlasticParameters (Mdouble loadingStiffness, Mdouble unloadingStiffnessMax, Mdouble cohesionStiffness, Mdouble penetrationDepthMax)
 {
     if (loadingStiffness <= 0 || unloadingStiffnessMax < loadingStiffness || cohesionStiffness < 0 || penetrationDepthMax < 0 || penetrationDepthMax > 1)
     {
@@ -135,45 +130,83 @@ void LinearPlasticViscoelasticNormalSpecies::setPlasticParameters(Mdouble loadin
     setPenetrationDepthMax(penetrationDepthMax);
 }
 
+/*!
+ * \return the loading stiffness of the linear plastic-viscoelastic normal force.
+ */
 Mdouble LinearPlasticViscoelasticNormalSpecies::getLoadingStiffness() const
 {
     return loadingStiffness_;
 }
+
+/*!
+ * \return the maximum unloading stiffness of the linear plastic-viscoelastic normal force.
+ */
 Mdouble LinearPlasticViscoelasticNormalSpecies::getUnloadingStiffnessMax() const
 {
     return unloadingStiffnessMax_;
 }
+
+/*!
+ * \return the cohesive stiffness of the linear plastic-viscoelastic normal force.
+ */
 Mdouble LinearPlasticViscoelasticNormalSpecies::getCohesionStiffness() const
 {
     return cohesionStiffness_;
 }
+
+/*!
+ * \return the maximum penetration depth of the linear plastic-viscoelastic normal force.
+ */
 Mdouble LinearPlasticViscoelasticNormalSpecies::getPenetrationDepthMax() const
 {
     return penetrationDepthMax_;
 }
+
+/*!
+ * \param[in] loadingStiffness      the loading stiffness of the linear plastic-viscoelastic normal force.
+ */
 void LinearPlasticViscoelasticNormalSpecies::setLoadingStiffness(Mdouble loadingStiffness)
 {
     loadingStiffness_ = loadingStiffness;
 }
+
+/*!
+ * \param[in] unloadingStiffnessMax the maximum unloading stiffness of the linear plastic-viscoelastic normal force.
+ */
 void LinearPlasticViscoelasticNormalSpecies::setUnloadingStiffnessMax(Mdouble unloadingStiffnessMax)
 {
     unloadingStiffnessMax_ = unloadingStiffnessMax;
 }
+
+/*!
+ * \param[in] cohesionStiffness     the cohesive stiffness of the linear plastic-viscoelastic normal force.
+ */
 void LinearPlasticViscoelasticNormalSpecies::setCohesionStiffness(Mdouble cohesionStiffness)
 {
     cohesionStiffness_ = cohesionStiffness;
 }
+
+/*!
+ * \param[in] penetrationDepthMax   the maximum penetration depth of the linear plastic-viscoelastic normal force.
+ */
 void LinearPlasticViscoelasticNormalSpecies::setPenetrationDepthMax(Mdouble penetrationDepthMax)
 {
     penetrationDepthMax_ = penetrationDepthMax;
 }
-///Calculates collision time for stiffest spring constant, divides by 50
+
+/*!
+ * \details Calculates collision time for stiffest spring constant, divides by 50
+ * \param[in] the optimal time step is computed to resolve a collision of two particles of this mass.
+ */
 Mdouble LinearPlasticViscoelasticNormalSpecies::computeTimeStep(Mdouble mass)
 {
     return 0.02 * constants::pi / std::sqrt(unloadingStiffnessMax_ / (.5 * mass) - mathsFunc::square(dissipation_ /mass));
 }
 
-///Allows the normal dissipation to be changed
+/*!
+ * \details should be non-negative
+ * \param[in] the linear dissipation coefficient of the linear plastic-viscoelastic normal force.
+ */
 void LinearPlasticViscoelasticNormalSpecies::setDissipation(Mdouble dissipation)
 {
     if (dissipation >= 0)
@@ -187,15 +220,32 @@ void LinearPlasticViscoelasticNormalSpecies::setDissipation(Mdouble dissipation)
     }
 }
 
-///Allows the spring and dissipation constants to be changed simultaneously
+/*!
+ * \param[in] a helper struct containing both the loading stiffness and the disssipation coefficient.
+ */
 void LinearPlasticViscoelasticNormalSpecies::setLoadingStiffnessAndDissipation(helpers::KAndDisp new_)
 {
     setLoadingStiffness(new_.k);
     setDissipation(new_.disp);
 }
 
-///Allows the normal dissipation to be accessed
+/*!
+ * \return the linear dissipation coefficient
+ */
 Mdouble LinearPlasticViscoelasticNormalSpecies::getDissipation() const
 {
     return dissipation_;
+}
+
+/*!
+ * \details Sets k, disp such that it matches a given tc and eps for a collision of two copies of equal mass m
+ * \param[in] tc collision time
+ * \param[in] eps restitution coefficient
+ * \param[in] mass effective particle mass, \f$\frac{2}{1/m1+1/m2}\f$
+ */
+void LinearPlasticViscoelasticNormalSpecies::setCollisionTimeAndRestitutionCoefficient(Mdouble tc, Mdouble eps, Mdouble mass)
+{
+    dissipation_ = -mass / tc * std::log(eps);
+    loadingStiffness_ = .5 * mass * (mathsFunc::square(constants::pi / tc) + mathsFunc::square(dissipation_ / mass));
+    unloadingStiffnessMax_ = loadingStiffness_;
 }

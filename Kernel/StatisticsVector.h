@@ -639,7 +639,7 @@ public:
     /*!
      * \brief Calculates statistics for one collision (can be any kind of collision)
      */
-    void gatherContactStatistics(int index1, int index2, Vec3D Contact, Mdouble delta, Mdouble ctheta, Mdouble fdotn, Mdouble fdott, Vec3D P1_P2_normal_, Vec3D P1_P2_tangential);
+    void gatherContactStatistics(unsigned int index1, int index2, Vec3D Contact, Mdouble delta, Mdouble ctheta, Mdouble fdotn, Mdouble fdott, Vec3D P1_P2_normal_, Vec3D P1_P2_tangential);
 
     /*!
      * \brief Processes all gathered statistics and resets them afterwards. (Processing means either calculating time averages or writing out statistics)

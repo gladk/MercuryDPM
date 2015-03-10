@@ -28,27 +28,47 @@
 #include "SlidingFrictionSpecies.h"
 #include "Math/ExtendedMath.h"
 #include "Interactions/FrictionForceInteractions/FrictionInteraction.h"
-//class SpeciesHandler;
-class BaseInteractable;
-class BaseInteraction;
 
-//Note the getVelocity can for some Species be dependent on which point on the Species is meant.
+/*!
+ * \brief FrictionSpecies contains the parameters used to describe sliding, rolling and torsional friction.
+ * \details See FrictionInteraction::computeForce for a description of the force law.
+ */
 ///\todo TW: should this class be renamed SlidingRollingTorsionFrictionSpecies?
 class FrictionSpecies : public SlidingFrictionSpecies
 {
 public:
+    ///\brief The correct Interaction type for this FrictionForceSpecies
     typedef FrictionInteraction InteractionType;
-    FrictionSpecies();
-    FrictionSpecies(const FrictionSpecies &s);
-    virtual ~FrictionSpecies();
-    virtual FrictionSpecies* copy() const;
-    virtual void read(std::istream& is);
-    virtual void write(std::ostream& os) const;
-    virtual void clear();
-    virtual std::string getBaseName() const;
 
-    virtual BaseInteraction* getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
+    ///\brief The default constructor.
+    FrictionSpecies();
+
+    ///\brief The default copy constructor.
+    FrictionSpecies(const FrictionSpecies &s);
+
+    ///\brief The default destructor.
+    virtual ~FrictionSpecies();
+
+    /// \brief Reads the species properties from an input stream.
+    void read(std::istream& is);
+
+    /// \brief Writes the species properties to an output stream.
+    void write(std::ostream& os) const;
+
+    /// \brief Used in Species::getName to obtain a unique name for each Species.
+    std::string getBaseName() const;
+
+    /*!
+     * \brief allocates a new SlidingFrictionInteraction object and returns a pointer to it.
+     */
+    BaseInteraction* getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
+
+    /*!
+     * \brief Returns true if torques have to be calculated.
+     */
     bool getUseAngularDOFs() const;
+
+    ///\brief creates default values for mixed species
     void mix(FrictionSpecies* const S, FrictionSpecies* const T);
 
 //setters and getters
@@ -72,40 +92,91 @@ public:
     ///Allows the (dynamic) Coulomb friction coefficient to be accessed
     Mdouble getRollingFrictionCoefficient() const;
 
+    ///Allows the static Coulomb rolling friction coefficient to be changed
     void setRollingFrictionCoefficientStatic(Mdouble new_mu);
 
+    ///Allows the static Coulomb rolling friction coefficient to be accessed
     Mdouble getRollingFrictionCoefficientStatic() const;
 
+    ///Allows the torsion stiffness to be changed
     void setTorsionStiffness(Mdouble new_kt);
 
-    ///Allows the spring constant to be accessed
+    ///Allows the torsion stiffness to be accessed
     Mdouble getTorsionStiffness() const;
 
-    ///Allows the tangential viscosity to be changed
+    ///Allows the torsion viscosity to be changed
     void setTorsionDissipation(Mdouble new_dispt);
 
-    ///Allows the tangential viscosity to be accessed
+    ///Allows the torsion viscosity to be accessed
     Mdouble getTorsionDissipation() const;
 
-    ///Allows the (dynamic) Coulomb friction coefficient to be changed; also sets mu_s by default
+    ///Allows the (dynamic) Coulomb torsion friction coefficient to be changed; also sets mu_s by default
     //mu has to be set to allow tangential forces (sets dispt=disp as default)
     void setTorsionFrictionCoefficient(Mdouble new_mu);
 
-    ///Allows the (dynamic) Coulomb friction coefficient to be accessed
+    ///Allows the (dynamic) Coulomb torsion friction coefficient to be accessed
     Mdouble getTorsionFrictionCoefficient() const;
 
+    ///Allows the static Coulomb torsion friction coefficient to be accessed
     void setTorsionFrictionCoefficientStatic(Mdouble new_mu);
 
+    ///Allows the static Coulomb torsion friction coefficient to be accessed
     Mdouble getTorsionFrictionCoefficientStatic() const;
 
 private:
+   /*! 
+     * \brief rolling stiffness. 
+     * \details Typically set to 2/5 of the stiffness of the normal force, as  
+     * both the rolling and the normal spring have the same oscillation  
+     * frequency (and thus require the same timeStep)in this case. 
+     */
     Mdouble rollingStiffness_;
-    Mdouble rollingDissipation_; ///<tangential viscosity: should satisfy \f$4*dispt*dt<mass, dispt \approx disp\f$
-    Mdouble rollingFrictionCoefficient_; ///< (dynamic) Coulomb friction coefficient
-    Mdouble rollingFrictionCoefficientStatic_; ///<static Coulomb friction coefficient (by default set equal to mu)
+    
+    /*! 
+     * \brief rolling dissipation coefficient. 
+     * \details Typically set to 2/5 of the normal force dissipation, as both
+     * the tangential and the normal spring have the same restitution coefficients 
+     * (if the rolling and normal stiffnesses also have a ratio of 2/5). 
+     */
+    Mdouble rollingDissipation_; 
+   
+    
+    /*! 
+     * \brief (dynamic) Coulomb rolling friction coefficient. 
+     */
+    Mdouble rollingFrictionCoefficient_; 
+    
+    /*! 
+     * \brief static Coulomb rolling friction coefficient  
+     * (by default set equal to the dynamic one).
+     */
+    Mdouble rollingFrictionCoefficientStatic_; 
+    
+    /*! 
+     * \brief rolling stiffness. 
+     * \details Typically set to 2/5 of the stiffness of the normal force, as  
+     * both the rolling and the normal spring have the same oscillation  
+     * frequency (and thus require the same timeStep)in this case. 
+     */
     Mdouble torsionStiffness_;
-    Mdouble torsionDissipation_; ///<tangential viscosity: should satisfy \f$4*dispt*dt<mass, dispt \approx disp\f$
-    Mdouble torsionFrictionCoefficient_; ///< (dynamic) Coulomb friction coefficient
-    Mdouble torsionFrictionCoefficientStatic_; ///<static Coulomb friction coefficient (by default set equal to mu)
+    
+    /*! 
+     * \brief rolling dissipation coefficient. 
+     * \details Typically set to 2/5 of the normal force dissipation, as both
+     * the tangential and the normal spring have the same restitution coefficients 
+     * (if the rolling and normal stiffnesses also have a ratio of 2/5). 
+     */
+    Mdouble torsionDissipation_; 
+
+    /*! 
+     * \brief (dynamic) Coulomb torsion friction coefficient. 
+     */
+    Mdouble torsionFrictionCoefficient_; 
+    
+    /*! 
+     * \brief static Coulomb torsion friction coefficient  
+     * (by default set equal to the dynamic one).
+     */
+    Mdouble torsionFrictionCoefficientStatic_; 
 };
 #endif

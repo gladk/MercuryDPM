@@ -29,55 +29,71 @@
 #include "IntersectionOfWalls.h"
 #include "InteractionHandler.h"
 #include "Math/Vector.h"
+
 /*!
- * \class AxisymmetricIntersectionOfWalls
- * \brief
+ * \brief A AxisymmetricIntersectionOfWalls is a axisymmetric wall, defined by 
+ * rotating a twodimensional IntersectionOfWalls around a symmetry axis.
+ * \details A AxisymmetricIntersectionOfWalls can be defined by first defining a
+ * twodimensional IntersectionOfWalls in the XZ plane. Then, the object is rotated 
+ * around the x-axis, creating an three-dimensional axisymmetric wall. Finally, 
+ * the object is translated  by the vector position_ and rotated such that the 
+ * axis of rotation is the orientation_.
  */
 class AxisymmetricIntersectionOfWalls : public IntersectionOfWalls
 {
 public:
-   /*!
-    * \brief
-    */    
+    /*!
+     * \brief Default constructor.
+     */
     AxisymmetricIntersectionOfWalls();
 
-   /*!
-    * \brief
-    */    
-    AxisymmetricIntersectionOfWalls(const AxisymmetricIntersectionOfWalls &p);
-
-    ///Wall copy method. It calls the copy contrustor of this Wall, usefull for polymorfism
-    AxisymmetricIntersectionOfWalls* copy() const;
-
-   /*!
-    * \brief
-    */    
-    bool getDistanceAndNormal(const BaseParticle& P, Mdouble& distance, Vec3D& normal_return) const;
-
-   /*!
-    * \brief reads wall
-    */
-    void read(std::istream& is);
-
-   /*!
-    * \brief
-    */
-    void oldRead(std::istream& is);
-    
-   /*!
-    * \brief outputs wall
-    */
-    void write(std::ostream& os) const;
-    
-   /*!
-    * \brief Returns the name of the object
-    */
-    virtual std::string getName() const;
+    /*!
+     * \brief Copy constructor.
+     */
+    AxisymmetricIntersectionOfWalls(const AxisymmetricIntersectionOfWalls& p);
 
     /*!
-     * \brief
+     * \brief Destructor.
      */
-    BaseInteraction* getInteractionWith(BaseParticle *P, Mdouble timeStamp, InteractionHandler* interactionHandler);
+    ~AxisymmetricIntersectionOfWalls();
+
+    /*!
+     * \brief Copy assignment operator.
+     */
+    AxisymmetricIntersectionOfWalls& operator=(const AxisymmetricIntersectionOfWalls& other);
+
+    /*!
+     * \brief Wall copy method. It calls the copy constructor of this Wall, useful for polymorphism
+     */
+    AxisymmetricIntersectionOfWalls* copy() const final;
+
+    /*!
+     * \brief Computes the distance from the wall for a given BaseParticle and 
+     * returns true if there is a collision. If there is a collision, also 
+     * return the normal vector.
+     */
+    bool getDistanceAndNormal(const BaseParticle& P, Mdouble& distance, Vec3D& normal_return) const final;
+
+    /*!
+     * \brief reads wall
+     */
+    void read(std::istream& is) final;
+
+    /*!
+     * \brief outputs wall
+     */
+    void write(std::ostream& os) const final;
+
+    /*!
+     * \brief Returns the name of the object
+     */
+    std::string getName() const final;
+
+    /*!
+     * \brief Get the interaction between this AxisymmetricIntersectionOfWalls
+     * and a given BaseParticle at a given time.
+     */
+    BaseInteraction* getInteractionWith(BaseParticle* P, Mdouble timeStamp, InteractionHandler* interactionHandler) final;
 };
 
 

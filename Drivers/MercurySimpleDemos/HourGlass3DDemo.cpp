@@ -54,7 +54,7 @@ public:
         wallHandler.copyAndAddObject(w2);
 
         InfiniteWall w0;
-        w0.set(Vec3D(0,0,-1), -0.5*(getZMin()+getZMax()));
+        w0.set(Vec3D(0,0,-1), Vec3D(0,0,0.5*(getZMin()+getZMax())));
         wallHandler.copyAndAddObject(w0);
 
         BaseParticle p0;
@@ -79,7 +79,7 @@ public:
 		if (getTime()<0.9 && getTime()+ getTimeStep()>0.9)
 		{
 			std::cout<<"Shifting bottom wall downward"<<std::endl;
-			dynamic_cast<InfiniteWall*>(wallHandler.getLastObject())->set(Vec3D(0,0,-1), -getZMin());
+			dynamic_cast<InfiniteWall*>(wallHandler.getLastObject())->set(Vec3D( 0, 0,-1), Vec3D(0, 0, getZMin()));
 		}
 	}
 	
@@ -156,11 +156,11 @@ int main(int argc, char *argv[])
    	//Calculates collision time for two copies of a particle of given dissipation_, k, effective mass
 	std::cout << "MinParticleMass =" << MinParticleMass << std::endl;
    	//Calculates collision time for two copies of a particle of given dissipation_, k, effective mass
-	Mdouble tc = helpers::computeCollisionTimeFromKAndDispAndEffectiveMass(species->getStiffness(), species->getDissipation(), MinParticleMass/2.0);
-	std::cout << "tc  =" << tc << std::endl;
+	Mdouble tc = species->getCollisionTime(MinParticleMass);
+    std::cout << "tc  =" << tc << std::endl;
 	//Calculates restitution coefficient for two copies of given dissipation_, k, effective mass
-	Mdouble r = helpers::computeRestitutionCoefficientFromKAndDispAndEffectiveMass(species->getStiffness(), species->getDissipation(), MinParticleMass/2.0);
-	std::cout << "r   =" << r << std::endl;
+	Mdouble r = species->getRestitutionCoefficient(MinParticleMass);
+    std::cout << "r   =" << r << std::endl;
 	//Calculates the maximum relative velocity allowed for a normal collision of two particles of radius r and particle mass m (for higher velocities particles could pass through each other)
 	//std::cout << "vmax=" << helpers::getMaximumVelocity(species->getStiffness(), HGgetSpecies(0)->getDissipation(), HG.MinParticleRadius, MinParticleMass) << std::endl;
 

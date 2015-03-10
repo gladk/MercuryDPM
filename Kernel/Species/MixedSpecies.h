@@ -29,28 +29,61 @@
 #include "Species/AdhesiveForceSpecies/EmptyAdhesiveSpecies.h"
 #include "Interactions/Interaction.h"
 class BaseInteraction;
-//class EmptyFrictionSpecies;
-//class EmptyAdhesiveSpecies;
-//template<class NormalForceInteraction, class FrictionForceInteraction> class Interaction;
 
-template<class NormalForceSpecies, class FrictionForceSpecies=EmptyFrictionSpecies, class AdhesiveForceSpecies=EmptyAdhesiveSpecies>
+/*!
+ * \class MixedSpecies
+ * \brief Contains contact force properties for contacts between 
+ * particles with two different species.
+ * \details See Species for details. 
+*/
+template<class NormalForceSpecies, class FrictionForceSpecies = EmptyFrictionSpecies, class AdhesiveForceSpecies = EmptyAdhesiveSpecies>
 class MixedSpecies : public NormalForceSpecies, public FrictionForceSpecies, public AdhesiveForceSpecies
 {
 public:
+
+    ///\brief The default constructor.
     MixedSpecies();
+
+    ///\brief The default copy constructor.
     MixedSpecies(const MixedSpecies &s);
+
+    ///\brief Creates a mixed species with the same force properties as a Species.
     MixedSpecies(const Species<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies> &s);
+
+    ///\brief The default destructor.
     virtual ~MixedSpecies();
+
+    /*!
+     * \brief Creates a deep copy of the MixedSpecies from which it is called.
+     */
     MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>* copy() const;
-    /// Called by SpeciesHandler::readObject
+
+    /// \brief Reads the species properties from an input stream.
     void read(std::istream& is);
+
+    /// \brief Writes the MixedSpecies properties to an output stream.
     void write(std::ostream& os) const;
-    void clear();
-    std::string getBaseName() const;
+
+    ///\brief Returns the name of the MixedSpecies as it is used in the restart file. 
     std::string getName() const;
+
+    /*!
+     * \brief When a contact between two particles is determined, an Interaction 
+     * object is created, as the type of Interaction depends on the MixedSpecies type.
+     */
     BaseInteraction* getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
+
+    /*!
+     * \brief Returns true if torques have to be calculated.
+     */
     bool getUseAngularDOFs() const;
-    void mix(BaseSpecies* const S, BaseSpecies* const T);
+
+    /*!
+     * \brief sets the MixedSpecies properties by mixing the properties of  
+     * two particle species
+     */
+    void mixAll(BaseSpecies * const S, BaseSpecies * const T);
+
     ///Returns the particle distance below which adhesive forces can occur (needed for contact detection)
     Mdouble getInteractionDistance() const;
 };
@@ -60,7 +93,7 @@ MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::Mi
 : BaseSpecies(), NormalForceSpecies(), FrictionForceSpecies(), AdhesiveForceSpecies()
 {
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout<<"MixedSpecies::MixedSpecies() finished"<<std::endl;
+    std::cout << "MixedSpecies::MixedSpecies() finished" << std::endl;
 #endif
 }
 
@@ -69,7 +102,7 @@ MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::Mi
 : BaseSpecies(s), NormalForceSpecies(s), FrictionForceSpecies(s), AdhesiveForceSpecies(s)
 {
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout<<"MixedSpecies::MixedSpecies(const MixedSpecies &p) finished"<<std::endl;
+    std::cout << "MixedSpecies::MixedSpecies(const MixedSpecies &p) finished" << std::endl;
 #endif
 }
 
@@ -78,7 +111,7 @@ MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::Mi
 : BaseSpecies(s), NormalForceSpecies(s), FrictionForceSpecies(s), AdhesiveForceSpecies(s)
 {
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout<<"MixedSpecies::MixedSpecies(const MixedSpecies &p) finished"<<std::endl;
+    std::cout << "MixedSpecies::MixedSpecies(const MixedSpecies &p) finished" << std::endl;
 #endif
 }
 
@@ -86,26 +119,28 @@ template<class NormalForceSpecies, class FrictionForceSpecies, class AdhesiveFor
 MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::~MixedSpecies()
 {
 #ifdef DEBUG_DESTRUCTOR
-    std::cout<<"MixedSpecies::~MixedSpecies() finished"<<std::endl;
+    std::cout << "MixedSpecies::~MixedSpecies() finished" << std::endl;
 #endif
-}
-
-template<class NormalForceSpecies, class FrictionForceSpecies, class AdhesiveForceSpecies>
-void MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::clear()
-{
-    std::cout << "MixedSpecies::clear(), this function shouldn't be called" << std::endl;
 }
 
 ///MixedSpecies copy method. It calls to copy constructor of this MixedSpecies, useful for polymorphism
 template<class NormalForceSpecies, class FrictionForceSpecies, class AdhesiveForceSpecies>
-MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>* MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::copy() const
+MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>* MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>
+::copy() const
 {
     return new MixedSpecies(*this);
 }
 
-///MixedSpecies print function, which accepts an os std::stringstream as input. It prints human readable MixedSpecies information to the std::stringstream
+/*!
+ * \details It prints human readable MixedSpecies information to the output stream, 
+ * typically to Files::restartFile::fstream_.
+ * The basic species information is written in ParticleSpecies::write; 
+ * then the three force types write additional information to the stream.
+ * \param[out] os output stream (typically the restart file)
+ */
 template<class NormalForceSpecies, class FrictionForceSpecies, class AdhesiveForceSpecies>
-void MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::write(std::ostream& os) const
+void MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>
+::write(std::ostream& os) const
 {
     os << getName();
     os << " idA " << BaseObject::getId();
@@ -115,8 +150,13 @@ void MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies
     AdhesiveForceSpecies::write(os);
 }
 
+/*!
+ * Called by SpeciesHandler::readObject
+ * \param[in] is input stream (typically the restart file)
+ */
 template<class NormalForceSpecies, class FrictionForceSpecies, class AdhesiveForceSpecies>
-void MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::read(std::istream& is)
+void MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>
+::read(std::istream& is)
 {
     //note: name is already read by SpeciesHandler::readObject
     std::string dummy;
@@ -130,42 +170,70 @@ void MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies
     AdhesiveForceSpecies::read(is);
 }
 
-template<class NormalForceSpecies, class FrictionForceSpecies, class AdhesiveForceSpecies>
-std::string MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::getBaseName() const
-{
-    return NormalForceSpecies::getBaseName()
-        + FrictionForceSpecies::getBaseName()
-        + AdhesiveForceSpecies::getBaseName();
-}
-
+/*!
+ * \details Returns the name of the MixedSpecies as it is used in the restart file. 
+ * The name of the species is a concatenation of the names of the three force  
+ * components, e.g.
+ * > MixedSpecies<LinearViscoelasticNormalSpecies,SlidingFrictionSpecies,ReversibleAdhesiveSpecies> species;
+ * > std::cout << species.getName();
+ * will output "LinearViscoelasticSlidingFrictionReversibleAdhesiveMixedSpecies".
+ * The EmptyFrictionSpecies and the EmptyAdhesiveSpecies return empty strings, such that 
+ * > MixedSpecies<LinearViscoelasticNormalSpecies> species;
+ * > std::cout << species.getName();
+ * will output "LinearViscoelasticMixedSpecies".
+ * 
+ * \return The name of the MixedSpecies.
+ */
 template<class NormalForceSpecies, class FrictionForceSpecies, class AdhesiveForceSpecies>
 std::string MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::getName() const
 {
-    return getBaseName() + "MixedSpecies";
+    return NormalForceSpecies::getBaseName()
+        + FrictionForceSpecies::getBaseName()
+        + AdhesiveForceSpecies::getBaseName() + "MixedSpecies";
 }
 
+/*!
+ * \details The input parameters of this function are directly passed into the constructor for the new interaction.
+ * See Interaction for details.
+ * \param[in] P first of the two objects that interact
+ * \param[in] I second of the two objects that interact
+ * \param[in] timestamp current value of DPMBase::time_
+ * \return pointer to the newly created Interaction.
+ */
 template<class NormalForceSpecies, class FrictionForceSpecies, class AdhesiveForceSpecies>
 BaseInteraction* MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
 {
-    return new Interaction<typename NormalForceSpecies::InteractionType, typename FrictionForceSpecies::InteractionType, typename AdhesiveForceSpecies::InteractionType>(P, I, timeStamp);
+    return new Interaction<typename NormalForceSpecies::InteractionType, typename FrictionForceSpecies::InteractionType, typename AdhesiveForceSpecies::InteractionType > (P, I, timeStamp);
 }
 
+/*!
+ * \details Returns true for any FrictionForceSpecies except EmptyFrictionSpecies, 
+ * because for spherical particles, torques are only caused by tangential forces. 
+ * See SpeciesHandler::useAngularDOFs for more details
+ * \return true iff torques have to be calculated
+ */
 template<class NormalForceSpecies, class FrictionForceSpecies, class AdhesiveForceSpecies>
 bool MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::getUseAngularDOFs() const
 {
     return FrictionForceSpecies::getUseAngularDOFs();
 }
 
-///create values for mixed MixedSpecies
+/*!
+ * \details Uses the harmonic mean for most properties. Calls the mix function 
+ * for each of the force species from which MixedSpecies is derived.
+ * \param[in] S the first  of two species whose properties are mixed to create the new species
+ * \param[in] T the second of two species whose properties are mixed to create the new species
+ */
 template<class NormalForceSpecies, class FrictionForceSpecies, class AdhesiveForceSpecies>
-void MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::mix(BaseSpecies* const S, BaseSpecies* const T)
+void MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::mixAll(BaseSpecies * const S, BaseSpecies * const T)
 {
-    NormalForceSpecies::mix(S, T);
-    FrictionForceSpecies::mix(S, T);
-    AdhesiveForceSpecies::mix(S, T);
+    NormalForceSpecies::mix(dynamic_cast<NormalForceSpecies*> (S), dynamic_cast<NormalForceSpecies*> (T));
+    FrictionForceSpecies::mix(dynamic_cast<FrictionForceSpecies*> (S), dynamic_cast<FrictionForceSpecies*> (T));
+    AdhesiveForceSpecies::mix(dynamic_cast<AdhesiveForceSpecies*> (S), dynamic_cast<AdhesiveForceSpecies*> (T));
 }
 
 ///Returns the particle distance below which adhesive forces can occur (needed for contact detection)
+
 template<class NormalForceSpecies, class FrictionForceSpecies, class AdhesiveForceSpecies>
 Mdouble MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::getInteractionDistance() const
 {

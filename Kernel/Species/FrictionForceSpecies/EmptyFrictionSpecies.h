@@ -31,18 +31,39 @@ class BaseInteractable;
 class BaseInteraction;
 class EmptyFrictionInteraction;
 
-//Note the getVelocity can for some Species be dependent on which point on the Species is meant.
+/*!
+ * \brief EmptyFrictionSpecies is used to create a force law without frictional forces.
+ */
 class EmptyFrictionSpecies : public virtual BaseSpecies
 {
 public:
+    ///\brief The correct Interaction type for this FrictionForceSpecies
     typedef EmptyFrictionInteraction InteractionType;
+
+    ///\brief The default constructor.
     EmptyFrictionSpecies();
+
+    ///\brief The default copy constructor.
     EmptyFrictionSpecies(const EmptyFrictionSpecies &s);
+
+    ///\brief The default destructor.
     virtual ~EmptyFrictionSpecies();
+
+    /// \brief Reads the species properties from an input stream.
     void read(std::istream& is);
+
+    /// \brief Writes the species properties to an output stream.
     void write(std::ostream& os) const;
+
+    /// \brief Used in Species::getName to obtain a unique name for each Species.
     std::string getBaseName() const;
+
+    /*!
+     * \brief Returns true if torques have to be calculated.
+     */
     bool getUseAngularDOFs() const;
+
+    ///\brief creates default values for mixed species
     void mix(EmptyFrictionSpecies* const S, EmptyFrictionSpecies* const T);
 };
 #endif

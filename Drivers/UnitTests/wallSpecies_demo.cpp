@@ -77,10 +77,10 @@ public:
         
 		//set walls
 		InfiniteWall w0;
-		w0.set(Vec3D(0, 0, -1), getZMin());
+		w0.set(Vec3D(0, 0, -1), Vec3D(0, 0, getZMin()));
 		wallHandler.copyAndAddObject(w0);
         
-        w0.set(Vec3D(-1,0,0),getXMin());
+        w0.set(Vec3D(-1,0,0), Vec3D(getZMin(), 0, 0));
         w0.setIndSpecies(1);
         wallHandler.copyAndAddObject(w0);
         

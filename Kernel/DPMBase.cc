@@ -23,8 +23,6 @@
 //(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-//#define DEBUG_OUTPUT
-//#define DEBUG_OUTPUT_FULL
 
 #include "DPMBase.h"
 #include <iostream>
@@ -35,6 +33,7 @@
 #include <cstdlib>
 #include <limits>
 #include <string>
+#include <cstdio>
 ///todo strcmp relies on this, should be changed to more modern version
 #include <string.h>
 //This is only used to change the file permission of the xball script create, at some point this code may be moved from this file to a different file.
@@ -48,7 +47,7 @@
 #include "Species/FrictionForceSpecies/SlidingFrictionSpecies.h"
 
 //This is part of this class and just separates out the stuff to do with xballs.
-#include "CMakeDefinitions.hpp"
+#include "CMakeDefinitions.h"
 #include "DPMBaseXBalls.icc"
 #include "Logger.h"
 #include "Particles/BaseParticle.h"
@@ -56,10 +55,10 @@
 #include "Walls/InfiniteWall.h"
 #include "Boundaries/PeriodicBoundary.h"
 
-
-//Create a main logger for most of our output messages.
-Logger<LOG_MAIN_LEVEL> logger("Main");
-
+/*!
+ * \param[in] module
+ * \param[in] message
+ */
 void logWriteAndDie(std::string module, std::string message)
 {
     std::cerr << "A fatal   error has occured"
@@ -68,19 +67,27 @@ void logWriteAndDie(std::string module, std::string message)
     
     std::exit(-1);
 }
-
+/*!
+ * \param[in] os
+ * \param[in] md
+ */
 std::ostream& operator<<(std::ostream& os, DPMBase &md)
 {
     md.write(os);
     return os;
 }
-
+/*!
+ * \param[in] other
+ */
 DPMBase::DPMBase(const FilesAndRunNumber& other)
         : FilesAndRunNumber(other)
 {
     constructor();
 }
 
+/*!
+ * \param[in] other
+ */
 DPMBase::DPMBase(const DPMBase& other)
 {
     systemDimensions_ = other.systemDimensions_;
@@ -96,14 +103,14 @@ DPMBase::DPMBase(const DPMBase& other)
     timeStep_ = other.timeStep_;
     ntimeSteps_ = other.ntimeSteps_;
     timeMax_ = other.timeMax_;
-    restartVersion_ = other.restartVersion_; ///<to read new and old restart data
-    restarted_ = other.restarted_; ///<to read new and old restart data
+    restartVersion_ = other.restartVersion_; //to read new and old restart data
+    restarted_ = other.restarted_; //to see if it was restarted or not
     append_ = other.append_;
     rotation_ = other.rotation_;
-    xBallsColourMode_ = other.xBallsColourMode_; ///< sets the xballs argument cmode (see xballs.txt)
-    xBallsVectorScale_ = other.xBallsVectorScale_; ///< sets the xballs argument vscale (see xballs.txt)
-    xBallsScale_ = other.xBallsScale_; ///< sets the xballs argument scale (see xballs.txt)
-    xBallsAdditionalArguments_ = other.xBallsAdditionalArguments_; ///< std::string where additional xballs argument can be specified (see xballs.txt)
+    xBallsColourMode_ = other.xBallsColourMode_; // sets the xballs argument cmode (see xballs.txt)
+    xBallsVectorScale_ = other.xBallsVectorScale_; // sets the xballs argument vscale (see xballs.txt)
+    xBallsScale_ = other.xBallsScale_; // sets the xballs argument scale (see xballs.txt)
+    xBallsAdditionalArguments_ = other.xBallsAdditionalArguments_; // std::string where additional xballs argument can be specified (see xballs.txt)
 #ifdef CONTACT_LIST_HGRID
             possibleContactList=other.possibleContactList;
 #endif
@@ -121,177 +128,227 @@ DPMBase::DPMBase(const DPMBase& other)
     boundaryHandler = other.boundaryHandler;
     interactionHandler = other.interactionHandler;
 }
-
+/*!
+ * 
+ */
 DPMBase::DPMBase()
 {
     constructor();
 }
-
+/*!
+ * 
+ */
 DPMBase::~DPMBase()
 {
 
 }
-
+/*!
+ * \param[in] argc
+ * \param[in] argv
+ */
 void DPMBase::solve(int argc, char* argv[])
 {
     readArguments(argc, argv);
     solve();
 }
-
+/*!
+ * \return time_
+ */
 Mdouble DPMBase::getTime() const
 {
     return time_;
 }
-
+/*!
+ * \return ntimeSteps_
+ */
 unsigned int DPMBase::getNtimeSteps() const
 {
     return ntimeSteps_;
 }
-
+/*!
+ * \param[in] time
+ */
 void DPMBase::setTime(Mdouble time)
 {
     time_ = time;
 }
-
-void DPMBase::setTimeMax(Mdouble new_tmax)
+/*!
+ * \param[in] newTMmax
+ */
+void DPMBase::setTimeMax(Mdouble newTMax)
 {
-    if (new_tmax >= 0)
+    if (newTMax >= 0)
     {
-        timeMax_ = new_tmax;
+        timeMax_ = newTMax;
     }
     else
     {
-        std::cerr << "Error in setTimeMax, new_tmax=" << new_tmax << std::endl;
+        std::cerr << "Error in setTimeMax, newTMax=" << newTMax << std::endl;
         exit(-1);
     }
 }
-
+/*!
+ * \return timeMax_ 
+ */
 Mdouble DPMBase::getTimeMax() const
 {
     return timeMax_;
 }
-
+/*!
+ *
+ */
 #ifdef CONTACT_LIST_HGRID
 PossibleContactList& DPMBase::getPossibleContactList()
 {   
     return possibleContactList;
 }
 #endif
-
-void DPMBase::setRotation(bool new_)
+/*!
+ * \param[in] newRotFlag
+ */
+void DPMBase::setRotation(bool newRotFlag)
 {
-    rotation_ = new_;
+    rotation_ = newRotFlag;
 }
+/*!
+ * \returns bool (True or False)
+ */
 bool DPMBase::getRotation() const
 {
     return rotation_;
 }
-
+/*!
+ * \returns xMin_
+ */
 Mdouble DPMBase::getXMin() const
 {
     return xMin_;
 }
-
+/*!
+ * \returns xMax_
+ */
 Mdouble DPMBase::getXMax() const
 {
     return xMax_;
 }
-
+/*!
+ * \returns yMin_
+ */
 Mdouble DPMBase::getYMin() const
 {
     return yMin_;
 }
-
+/*!
+ * \returns yMax_
+ */
 Mdouble DPMBase::getYMax() const
 {
     return yMax_;
 }
-
+/*!
+ * \returns zMin_
+ */
 Mdouble DPMBase::getZMin() const
 {
     return zMin_;
 }
-
+/*!
+ * \returns zMax_
+ */
 Mdouble DPMBase::getZMax() const
 {
     return zMax_;
 }
-
-void DPMBase::setXMin(Mdouble xMin)
+/*!
+ * \param[in] newXMin
+ */
+void DPMBase::setXMin(Mdouble newXMin)
 {
-    if (xMin <= getXMax())
+    if (newXMin <= getXMax())
     {
-        xMin_ = xMin;
+        xMin_ = newXMin;
     }
     else
     {
-        std::cerr << "Warning in setXMin(" << xMin << "): xMax=" << getXMax() << std::endl;
+        std::cerr << "Warning in setXMin(" << newXMin << "): xMax=" << getXMax() << std::endl;
     }
 }
-
-void DPMBase::setYMin(Mdouble yMin)
+/*!
+ * \param[in] newYMin
+ */
+void DPMBase::setYMin(Mdouble newYMin)
 {
-    if (yMin <= getYMax())
+    if (newYMin <= getYMax())
     {
-        yMin_ = yMin;
+        yMin_ = newYMin;
     }
     else
     {
-        std::cerr << "Error in setYMin(" << yMin << "): yMax=" << getYMax() << std::endl;
+        std::cerr << "Error in setYMin(" << newYMin << "): yMax=" << getYMax() << std::endl;
         exit(-1);
     }
 }
-
-void DPMBase::setZMin(Mdouble zMin)
+/*!
+ * \param[in] newZMin
+ */
+void DPMBase::setZMin(Mdouble newZMin)
 {
-    if (zMin <= getZMax())
+    if (newZMin <= getZMax())
     {
-        zMin_ = zMin;
+        zMin_ = newZMin;
     }
     else
     {
-        std::cerr << "Warning in setZMin(" << zMin << "): zMax=" << getZMax() << std::endl;
+        std::cerr << "Warning in setZMin(" << newZMin << "): zMax=" << getZMax() << std::endl;
     }
 }
-
-void DPMBase::setXMax(Mdouble xMax)
+/*!
+ * \param[in] newXMax
+ */
+void DPMBase::setXMax(Mdouble newXMax)
 {
-    if (xMax >= getXMin())
+    if (newXMax >= getXMin())
     {
-        xMax_ = xMax;
+        xMax_ = newXMax;
     }
     else
     {
-        std::cerr << "Error in setXMax(" << xMax << "): xMin=" << getXMin() << std::endl;
+        std::cerr << "Error in setXMax(" << newXMax << "): xMin=" << getXMin() << std::endl;
         exit(-1);
     }
 }
-
-void DPMBase::setYMax(Mdouble yMax)
+/*!
+ * \param[in] newYMax
+ */
+void DPMBase::setYMax(Mdouble newYMax)
 {
-    if (yMax >= getYMin())
+    if (newYMax >= getYMin())
     {
-        yMax_ = yMax;
+        yMax_ = newYMax;
     }
     else
     {
-        std::cerr << "Warning in setYMax(" << yMax << "): yMin=" << getYMin() << std::endl;
+        std::cerr << "Warning in setYMax(" << newYMax << "): yMin=" << getYMin() << std::endl;
     }
 }
-
-void DPMBase::setZMax(Mdouble zMax)
+/*!
+ * \param[in] newZMax
+ */
+void DPMBase::setZMax(Mdouble newZMax)
 {
-    if (zMax >= getZMin())
+    if (newZMax >= getZMin())
     {
-        zMax_ = zMax;
+        zMax_ = newZMax;
     }
     else
     {
-        std::cerr << "Error in setZMax(" << zMax << "): zMin=" << getZMin() << std::endl;
+        std::cerr << "Error in setZMax(" << newZMax << "): zMin=" << getZMin() << std::endl;
         exit(-1);
     }
 }
-
+/*!
+ * \param[in] timeStep
+ */
 void DPMBase::setTimeStep(Mdouble timeStep)
 {
     if (timeStep >= 0.0)
@@ -304,89 +361,120 @@ void DPMBase::setTimeStep(Mdouble timeStep)
         exit(-1);
     }
 }
-
+/*!
+ * \return timeStep_
+ */
 Mdouble DPMBase::getTimeStep() const
 {
     return timeStep_;
 }
-
-void DPMBase::setXBallsColourMode(int new_cmode)
+/*!
+ * \param[in] newCMode
+ */
+void DPMBase::setXBallsColourMode(int newCMode)
 {
-    xBallsColourMode_ = new_cmode;
+    xBallsColourMode_ = newCMode;
 }
-
+/*!
+ * \return int xBallsColourMode_ 
+ */
 int DPMBase::getXBallsColourMode() const
 {
     return xBallsColourMode_;
 }
-
-void DPMBase::setXBallsVectorScale(double new_vscale)
+/*!
+ * \param[in] newVScale
+ */
+void DPMBase::setXBallsVectorScale(double newVScale)
 {
-    xBallsVectorScale_ = new_vscale;
+    xBallsVectorScale_ = newVScale;
 }
-
+/*!
+ * \return double xBallsVectorScale_
+ */
 double DPMBase::getXBallsVectorScale() const
 {
     return xBallsVectorScale_;
 }
-
-void DPMBase::setXBallsAdditionalArguments(std::string new_)
+/*!
+ * \param[in] newXBArgs
+ */
+void DPMBase::setXBallsAdditionalArguments(std::string newXBArgs)
 {
-    xBallsAdditionalArguments_ = new_.c_str();
+    xBallsAdditionalArguments_ = newXBArgs.c_str();
 }
-
+/*!
+ * \return xBallsAdditionalArguments_
+ */
 std::string DPMBase::getXBallsAdditionalArguments() const
 {
     return xBallsAdditionalArguments_;
 }
-
-void DPMBase::setXBallsScale(Mdouble new_scale)
+/*!
+ * \param[in] newScale
+ */
+void DPMBase::setXBallsScale(Mdouble newScale)
 {
-    xBallsScale_ = new_scale;
+    xBallsScale_ = newScale;
 }
-
+/*!
+ * \return double xBallsScale_
+ */
 double DPMBase::getXBallsScale() const
 {
     return xBallsScale_;
 }
-
-void DPMBase::setGravity(Vec3D new_gravity)
+/*!
+ * \param[in] newGravity
+ */
+void DPMBase::setGravity(Vec3D newGravity)
 {
-    gravity_ = new_gravity;
+    gravity_ = newGravity;
 }
-
+/*!
+ * \return Vec3D gravity_
+ */
 Vec3D DPMBase::getGravity() const
 {
     return gravity_;
 }
-
-void DPMBase::setDimension(int new_dim)
+/*!
+ * \param[in] newDim
+ */
+void DPMBase::setDimension(unsigned int newDim)
 {
-    setSystemDimensions(new_dim);
-    setParticleDimensions(new_dim);
+    setSystemDimensions(newDim);
+    setParticleDimensions(newDim);
 }
-
-void DPMBase::setSystemDimensions(int new_dim)
+/*!
+ * \param[in] newDim
+ */
+void DPMBase::setSystemDimensions(unsigned int newDim)
 {
-    if (new_dim >= 1 && new_dim <= 3)
-        systemDimensions_ = new_dim;
+    if (newDim >= 1 && newDim <= 3)
+        systemDimensions_ = newDim;
     else
     {
         std::cerr << "Error in setSystemDimensions" << std::endl;
         exit(-1);
     }
 }
-
-int DPMBase::getSystemDimensions() const
+/*!
+ * \return systemDimensions_
+ */
+unsigned int DPMBase::getSystemDimensions() const
 {
     return systemDimensions_;
 }
 
-void DPMBase::setParticleDimensions(int new_dim)
+/*!
+ * \param[in] particleDimensions
+ */
+void DPMBase::setParticleDimensions(unsigned int particleDimensions)
 {
-    if (new_dim >= 1 && new_dim <= 3)
+    if (particleDimensions >= 1 && particleDimensions <= 3)
     {
-        particleDimensions_ = new_dim;
+        particleDimensions_ = particleDimensions;
         particleHandler.computeAllMasses();
     }
     else
@@ -396,42 +484,70 @@ void DPMBase::setParticleDimensions(int new_dim)
     }
 }
 
-int DPMBase::getParticleDimensions() const
+/*!
+ * \return particleDimensions_
+ */
+
+unsigned int DPMBase::getParticleDimensions() const
 {
     return particleDimensions_;
 }
+
+/*!
+ * \return restartVersion_
+ */
 
 std::string DPMBase::getRestartVersion() const
 {
     return restartVersion_;
 }
 
-void DPMBase::setRestartVersion(std::string new_)
+/*!
+ * \param[in] newRV
+ */
+
+void DPMBase::setRestartVersion(std::string newRV)
 {
-    restartVersion_ = new_;
+    restartVersion_ = newRV;
 }
+
+/*!
+ * \return restarted_
+ */
 
 bool DPMBase::getRestarted() const
 {
     return restarted_;
 }
 
-void DPMBase::setRestarted(bool new_)
+/*!
+ * \param[in] newRestartedFlag
+ */
+void DPMBase::setRestarted(bool newRestartedFlag)
 {
-    restarted_ = new_;
-    setAppend(new_);
+    restarted_ = newRestartedFlag;
+    //setAppend(new_);
 }
 
+/*!
+ * \return bool (True or False)
+ */
 bool DPMBase::getAppend() const
 {
     return append_;
 }
 
-void DPMBase::setAppend(bool new_)
+/*!
+ * \param[in] newAppendFlag
+ */
+void DPMBase::setAppend(bool newAppendFlag)
 {
-    append_ = new_;
+    append_ = newAppendFlag;
 }
 
+/*!
+ * \return Mdouble elasticEnergy
+ */
 Mdouble DPMBase::getElasticEnergy() const
 {
     Mdouble elasticEnergy = 0.0;
@@ -440,6 +556,9 @@ Mdouble DPMBase::getElasticEnergy() const
     return elasticEnergy;
 }
 
+/*!
+ * \return Mdouble kineticEnergy
+ */
 Mdouble DPMBase::getKineticEnergy() const
 {
     Mdouble kineticEnergy = 0;
@@ -454,67 +573,112 @@ Mdouble DPMBase::getKineticEnergy() const
 
 }
 
+/*!
+ * \return double 
+ */
 double DPMBase::getInfo(const BaseParticle& P) const
-        {
-    return P.getSpecies()->getIndex();
+{
+    return P.getSpecies()->getId(); // was getIndex()
 }
 
+/*!
+ * \param[in] pI
+ * \param[in] pJ
+ * \return bool (True or False)
+ */
 bool DPMBase::areInContact(const BaseParticle* pI, const BaseParticle* pJ) const
-        {
+{
     return pI != pJ && Vec3D::getDistanceSquared(pI->getPosition(), pJ->getPosition()) < mathsFunc::square(pI->getInteractionRadius() + pJ->getInteractionRadius());
 }
 
+/*!
+ * \brief no implementation but can be overriden in its derived classes.
+ */
 void DPMBase::actionsBeforeTimeLoop()
 {
 }
 
+/*!
+ * \brief no implementation but can be overidden in its derived classes.
+ */
 void DPMBase::hGridActionsBeforeTimeLoop()
 {
 }
 
+/*!
+ * \brief no implementation but can be overidden in its derived classes.
+ */
 void DPMBase::actionsOnRestart()
 {
 }
 
-///This is action before the time step is started
+/*!
+ * \brief no implementation but can be overidden in its derived classes.
+ */
 void DPMBase::hGridActionsBeforeTimeStep()
 {
 }
 
-///This is action before the time step is started
+/*!
+ * \brief no implementation but can be overidden in its derived classes.
+ */
 void DPMBase::hGridInsertParticle(BaseParticle *obj UNUSED)
 {
 }
 
+/*!
+ * \brief no implementation but can be overidden in its derived classes.
+ */
 void DPMBase::hGridUpdateParticle(BaseParticle *obj UNUSED)
 {
 }
 
+/*!
+ * \brief no implementation but can be overidden in its derived classes.
+ */
 void DPMBase::hGridRemoveParticle(BaseParticle *obj UNUSED)
 {
 }
 
+/*!
+ * \return bool (True or False)
+ */
 bool DPMBase::getHGridUpdateEachTimeStep() const
 {
     return true;
 }
 
+/*!
+ * \brief no implementation but can be overidden in its derived classes.
+ */
 void DPMBase::actionsBeforeTimeStep()
 {
 }
 
+/*!
+ * \brief no implementation but can be overidden in its derived classes.
+ */
 void DPMBase::actionsAfterSolve()
 {
 }
 
+/*!
+ * \brief no implementation but can be overidden in its derived classes.
+ */
 void DPMBase::actionsAfterTimeStep()
 {
 }
 
+/*!
+ * \brief no implementation but can be overidden in its derived classes.
+ */
 void DPMBase::initialiseStatistics()
 {
 }
 
+/*!
+ * \brief no implementation but can be overidden in its derived classes.
+ */
 void DPMBase::outputStatistics()
 {
 }
@@ -525,31 +689,51 @@ void DPMBase::gatherContactStatistics()
         (*it)->gatherContactStatistics();
 }
 
-
-void DPMBase::gatherContactStatistics(int index1 UNUSED, int index2 UNUSED, Vec3D Contact UNUSED, Mdouble delta UNUSED, Mdouble ctheta UNUSED, Mdouble fdotn UNUSED, Mdouble fdott UNUSED, Vec3D P1_P2_normal_ UNUSED, Vec3D P1_P2_tangential UNUSED)
+/*!
+ * \brief no implementation but can be overidden in its derived classes.
+ */
+void DPMBase::gatherContactStatistics(unsigned int index1 UNUSED, int index2 UNUSED, Vec3D Contact UNUSED, Mdouble delta UNUSED, Mdouble ctheta UNUSED, Mdouble fdotn UNUSED, Mdouble fdott UNUSED, Vec3D P1_P2_normal_ UNUSED, Vec3D P1_P2_tangential UNUSED)
 {
 }
 
+/*!
+ * \brief no implementation but can be overidden in its derived classes.
+ */
 void DPMBase::processStatistics(bool usethese UNUSED)
 {
 }
 
+/*!
+ * \brief no implementation but can be overidden in its derived classes.
+ */
 void DPMBase::finishStatistics()
 {
 }
 
+/*!
+ * \brief no implementation but can be overidden in its derived classes.
+ */
 void DPMBase::hGridUpdateMove(BaseParticle*, Mdouble)
 {
 }
 
+/*!
+ * \brief no implementation but can be overidden in its derived classes.
+ */
 void DPMBase::hGridActionsBeforeIntegration()
 {
 }
 
+/*!
+ * \brief no implementation but can be overidden in its derived classes.
+ */
 void DPMBase::hGridActionsAfterIntegration()
 {
 }
 
+/*!
+ * \param[in] i
+ */
 void DPMBase::broadPhase(BaseParticle* i)
 {
     for (std::vector<BaseParticle*>::iterator it = particleHandler.begin(); (*it) != i; ++it)
@@ -558,12 +742,18 @@ void DPMBase::broadPhase(BaseParticle* i)
     }
 }
 
+/*!
+ * \param[in] n
+ */
 void DPMBase::setFixedParticles(unsigned int n)
 {
     for (unsigned int i = 0; i < std::min(particleHandler.getNumberOfObjects(), n); i++)
         particleHandler.getObject(i)->fixParticle();
 }
 
+/*!
+ * 
+ */
 void DPMBase::printTime() const
 {
     std::cout << "t=" << std::setprecision(3) << std::left << std::setw(6) << getTime()
@@ -572,11 +762,17 @@ void DPMBase::printTime() const
     std::cout.flush();
 }
 
+/*!
+ * \return bool (True or False)
+ */
 bool DPMBase::continueSolve() const
 {
     return true;
 }
 
+/*!
+ *
+ */
 void DPMBase::constructor()
 {
     //These are the particle parameters like dissipation etc..
@@ -630,18 +826,24 @@ void DPMBase::constructor()
 #endif
 }
 
+/*!
+ * \brief A virtual function with no implementation but can be overriden
+ */
 void DPMBase::setupInitialConditions()
 {
 }
 
+/*!
+* \param[in] os 
+*/
 void DPMBase::writeEneHeader(std::ostream& os) const
-        {
+{
     //only write if we don't restart
     if (getAppend())
         return;
     
-    ///todo{Why is there a +6 here?}
-    static int width = os.precision() + 6;
+    ///todo{Why is there a +6 here? TW: to get the numbers and title aligned}
+    long width = os.precision() + 6;
     os << std::setw(width) << "t" << " " << std::setw(width)
             << "ene_gra" << " " << std::setw(width)
             << "ene_kin" << " " << std::setw(width)
@@ -652,6 +854,9 @@ void DPMBase::writeEneHeader(std::ostream& os) const
             << "Z_COM" << std::endl;
 }
 
+/*!
+ * \param[in] os
+ */
 void DPMBase::writeFstatHeader(std::ostream& os) const
         {
     // line #1: time, volume fraction
@@ -700,6 +905,9 @@ void DPMBase::writeFstatHeader(std::ostream& os) const
     }
 }
 
+/*!
+ * \param[in] os
+ */
 void DPMBase::writeEneTimestep(std::ostream& os) const
 {
     Mdouble ene_kin = 0, ene_elastic = 0, ene_rot = 0, ene_gra = 0, mass_sum = 0, x_masslength = 0, y_masslength = 0, z_masslength = 0;
@@ -718,8 +926,8 @@ void DPMBase::writeEneTimestep(std::ostream& os) const
 
     ene_elastic = getElasticEnergy();
 
-    ///todo{Why is there a +6 here?}
-    static int width = os.precision() + 6;
+    ///todo{Why is there a +6 here?  TW: to ensure the numbers fit into a constant width column}
+    long width = os.precision() + 6;
     os << std::setw(width) << getTime()
             << " " << std::setw(width) << ene_gra
             << " " << std::setw(width) << ene_kin
@@ -732,10 +940,13 @@ void DPMBase::writeEneTimestep(std::ostream& os) const
     //sliding = sticking = 0;
 }
 
+/*!
+ * \param[in] os
+ */
 void DPMBase::outputXBallsData(std::ostream& os) const
         {
     //Set the correct formation based of dimension if the formation is not specified by the user
-    int format;
+    unsigned int format;
     switch (getSystemDimensions())
     {
         case 2:
@@ -769,22 +980,20 @@ void DPMBase::outputXBallsData(std::ostream& os) const
 #endif
 }
 
-///This function loads data from the .data file
-/// i.e. you get position, mass and velocity information only
-/// See also MD::readRestartFile
-/// Can read in format_ 14 - 8 or format_ 7 data
-///This code saves in format_ 8 for 2D and format_ 14 for 3D so if no extra parameters are specified it will assume this
-///note: many parameters, like density cannot be set using the data file
-///\todo change from deprecated const char* to std::string
-bool DPMBase::readDataFile(const char* filename, unsigned int format)
+/*!
+ * \param[in] fileName
+ * \param[in] format (format for specifying if its for 2D or 3D data)
+ * \return bool (True or False)
+ */
+bool DPMBase::readDataFile(const char* fileName, unsigned int format)
 {
     std::string oldFileName = getDataFile().getName();
     //This opens the file the data will be recalled from
-    getDataFile().setName(filename);
+    getDataFile().setName(fileName);
     getDataFile().open(std::fstream::in);
     if (!getDataFile().getFstream().is_open() || getDataFile().getFstream().bad())
     {
-        std::cout << "Loading data file " << filename << " failed" << std::endl;
+        std::cout << "Loading data file " << fileName << " failed" << std::endl;
         return false;
     }
 
@@ -801,11 +1010,15 @@ bool DPMBase::readDataFile(const char* filename, unsigned int format)
     return true;
 }
 
-bool DPMBase::readParAndIniFiles(const char* filename)
+/*!
+ * \param[in] fileName
+ * \return bool (True or False)
+ */
+bool DPMBase::readParAndIniFiles(const char* fileName)
 {
     //Opens the par.ini file
     std::fstream file;
-    file.open(filename, std::fstream::in);
+    file.open(fileName, std::fstream::in);
     if (!file.is_open() || file.bad())
     {
         //std::cout << "Loading par.ini file " << filename << " failed" << std::endl;
@@ -827,17 +1040,17 @@ bool DPMBase::readParAndIniFiles(const char* filename)
     if (integerValue == 0)
     {
         InfiniteWall w0;
-        w0.set(Vec3D(-1, 0, 0), -getXMin());
+        w0.set(Vec3D(-1, 0, 0), Vec3D(getXMin(), 0, 0));
         wallHandler.copyAndAddObject(w0);
-        w0.set(Vec3D(1, 0, 0), getXMax());
+        w0.set(Vec3D( 1, 0, 0), Vec3D(getXMax(), 0, 0));
         wallHandler.copyAndAddObject(w0);
-        w0.set(Vec3D(0, -1, 0), -getYMin());
+        w0.set(Vec3D(0, -1, 0), Vec3D(0, getYMin(), 0));
         wallHandler.copyAndAddObject(w0);
-        w0.set(Vec3D(0, 1, 0), getYMax());
+        w0.set(Vec3D(0,  1, 0), Vec3D(0, getYMax(), 0));
         wallHandler.copyAndAddObject(w0);
-        w0.set(Vec3D(0, 0, -1), -getZMin());
+        w0.set(Vec3D(0, 0, -1), Vec3D(0, 0, getZMin()));
         wallHandler.copyAndAddObject(w0);
-        w0.set(Vec3D(0, 0, 1), getZMax());
+        w0.set(Vec3D(0, 0,  1), Vec3D(0, 0, getZMax()));
         wallHandler.copyAndAddObject(w0);
     }
     else if (integerValue == 1)
@@ -853,13 +1066,13 @@ bool DPMBase::readParAndIniFiles(const char* filename)
     else if (integerValue == 5)
     {
         InfiniteWall w0;
-        w0.set(Vec3D(-1, 0, 0), -getXMin());
+        w0.set(Vec3D(-1, 0, 0), Vec3D(-getXMin(), 0, 0));
         wallHandler.copyAndAddObject(w0);
-        w0.set(Vec3D(1, 0, 0), getXMax());
+        w0.set(Vec3D(1, 0, 0), Vec3D(getXMax(), 0, 0));
         wallHandler.copyAndAddObject(w0);
-        w0.set(Vec3D(0, -1, 0), -getYMin());
+        w0.set(Vec3D(0, -1, 0), Vec3D(0, -getYMin(), 0));
         wallHandler.copyAndAddObject(w0);
-        w0.set(Vec3D(0, 1, 0), getYMax());
+        w0.set(Vec3D(0, 1, 0), Vec3D(0, getYMax(), 0));
         wallHandler.copyAndAddObject(w0);
         
     }
@@ -969,11 +1182,16 @@ bool DPMBase::readParAndIniFiles(const char* filename)
     return true;
 }
 
-bool DPMBase::findNextExistingDataFile(Mdouble tmin, bool verbose)
+/*!
+ * \param[in] tMin
+ * \param[in] verbose
+ * \return bool (True or False)
+ */
+bool DPMBase::findNextExistingDataFile(Mdouble tMin, bool verbose)
 {
     if (getDataFile().getFileType() == FileType::MULTIPLE_FILES || getDataFile().getFileType() == FileType::MULTIPLE_FILES_PADDED)
     {
-        while (true)
+        while (true)// This true corresponds to the if s
         {
             getDataFile().openNextFile();
             //check if file exists and contains data
@@ -987,7 +1205,7 @@ bool DPMBase::findNextExistingDataFile(Mdouble tmin, bool verbose)
             //check if tmin condition is satisfied
             Mdouble t;
             getDataFile().getFstream() >> t;
-            if (t > tmin)
+            if (t > tMin)
             {
                 //set_file_counter(get_file_counter()-1);
                 return true;
@@ -999,9 +1217,9 @@ bool DPMBase::findNextExistingDataFile(Mdouble tmin, bool verbose)
     return true;
 }
 
-///by default format_ do not pass an argument; only specify format_ if you have to read a special format_
-// (f.e. dim=2, but format_=14 (3d format_))
-// Note: this function assumes that all particles are species 0 and sets the particle class accordingly!
+/*!
+ * \param[in] format
+ */
 bool DPMBase::readNextDataFile(unsigned int format)
 {
     getDataFile().openNextFile(std::fstream::in);
@@ -1140,18 +1358,19 @@ bool DPMBase::readNextDataFile(unsigned int format)
     return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-///This function stores all MD data - See also MD::readRestartFile
-///////////////////////////////////////////////////////////////////////////////////////////////////
+/*!
+ * /// See also MD::readRestartFile
+ */
 void DPMBase::writeRestartFile()
 {
     write(getRestartFile().getFstream());
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-///This function loads all MD data - See also MD::writeRestartFile, MD::readDataFile
-/// This function return 1 if sucessful else it returns -1
-///////////////////////////////////////////////////////////////////////////////////////////////////
+/*!
+ * \details Calls the read() and sets the restarted_ flag to true 
+ *          (if the file is found)
+ * \return int
+ */
 int DPMBase::readRestartFile()
 {
     if (getRestartFile().open(std::fstream::in))
@@ -1168,13 +1387,20 @@ int DPMBase::readRestartFile()
     }
 }
 
-int DPMBase::readRestartFile(std::string filename)
+/*!
+ * \param[in] fileName
+ * \return int
+ */
+int DPMBase::readRestartFile(std::string fileName)
 {
-    getRestartFile().setName(filename);
+    getRestartFile().setName(fileName);
     return readRestartFile();
 }
 
-///This computes the internal forces (internal in the sence that they sum to zero) i.e. the fully modelled forces.
+/*!
+ * \param[in] P1
+ * \param[in] P2
+ */
 void DPMBase::computeInternalForces(BaseParticle* P1, BaseParticle* P2)
 {
     //this is because the rough bottom allows overlapping fixed particles
@@ -1217,24 +1443,25 @@ void DPMBase::computeInternalForces(BaseParticle* P1, BaseParticle* P2)
     }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-///This computes the external forces e.g. here it is gravity_ and walls
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+/*!
+ * \todo take out computeWalls() from compute External Forces method.
+ * \param[in] CI
+ */
 void DPMBase::computeExternalForces(BaseParticle* CI)
 {
     if (!CI->isFixed())
     {
-        /// Now add on gravity_
+        // Gravitational force
         CI->addForce(getGravity() * CI->getMass());
-        ///Finally walls
-        computeWalls(CI);
+        // Still calls this in compute External Forces.
+        computeForcesDueToWalls(CI);
     }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-///This is were the walls are implemented - normals are outward normals
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-void DPMBase::computeWalls(BaseParticle* pI)
+/*!
+ * \param[in] pI
+ */
+void DPMBase::computeForcesDueToWalls(BaseParticle* pI)
 {
     //No need to compute interactions between periodic particle images and walls
     if (pI->getPeriodicFromParticle() != nullptr)
@@ -1244,14 +1471,14 @@ void DPMBase::computeWalls(BaseParticle* pI)
     {
         BaseInteraction* C = (*it)->getInteractionWith(pI, getTime(), &interactionHandler);
 
-        if (C != 0)
+        if (C != nullptr)
         {
             C->computeForce();
 
             pI->addForce(C->getForce());
             (*it)->addForce(-C->getForce());
 
-            if (getRotation())
+            if (getRotation()) // getRotation() returns a boolean.
             {
                 pI->addTorque(C->getTorque() - Vec3D::cross(pI->getPosition() - C->getContactPoint(), C->getForce()));
                 ///\todo TW: I think this torque has the wrong sign
@@ -1261,9 +1488,9 @@ void DPMBase::computeWalls(BaseParticle* pI)
     }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-///This is were the integration is done, at the moment it is Velocity Verlet integration
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+/*!
+ * 
+ */
 void DPMBase::integrateBeforeForceComputation()
 {
     for_each(particleHandler.begin(), particleHandler.end(), [this] (BaseParticle* p)
@@ -1275,7 +1502,9 @@ void DPMBase::integrateBeforeForceComputation()
         w->integrateBeforeForceComputation(getTime(),getTimeStep());
     });
 }
-
+/*!
+ * \\\ calls checkBoundaryAfterParticleMoved()
+ */
 void DPMBase::checkInteractionWithBoundaries()
 {
     for (std::vector<BaseBoundary*>::iterator B = boundaryHandler.begin(); B != boundaryHandler.end(); ++B)
@@ -1288,9 +1517,9 @@ void DPMBase::checkInteractionWithBoundaries()
     }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-///This is were the integration is done, at the moment it is Velocity Verlet integration
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+/*!
+ *
+ */
 void DPMBase::integrateAfterForceComputation()
 {
     for_each(particleHandler.begin(), particleHandler.end(), [this] (BaseParticle* p)
@@ -1350,9 +1579,9 @@ void DPMBase::integrateAfterForceComputation()
 //    getStatFile().close();
 //}
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-///This does the force computation
-////////////////////////////////////////////////////////////////////////////////////////////////////
+/*!
+ * 
+ */
 void DPMBase::computeAllForces()
 {
     ///Reset all forces to zero
@@ -1397,16 +1626,22 @@ void DPMBase::computeAllForces()
     
 }
 
+/*!
+ * \param[in] i
+ */
 void DPMBase::computeInternalForces(BaseParticle* i)
 {
     broadPhase(i);
 }
 
-///Writes all MD data
+/*!
+ * \param[in] os
+ * \param[in] writeAllParticles
+ */
 void DPMBase::write(std::ostream& os, bool writeAllParticles) const
 {
     os << "restart_version " << "1.0";
-    Files::write(os);
+    FilesAndRunNumber::write(os);
     os << "xMin " << getXMin()
         << " xMax " << getXMax()
         << " yMin " << getYMin()
@@ -1450,9 +1685,13 @@ void DPMBase::write(std::ostream& os, bool writeAllParticles) const
             os << *interactionHandler.getObject(i) << std::endl;
         os << "..." << std::endl;
     }
+    ///\todo TW: random number seed is not stored
+    ///\todo TW: xBalls arguments are not stored
 }
 
-///Reads all MD data
+/*!
+ * \param[in] is
+ */
 void DPMBase::read(std::istream& is)
 {
     std::string dummy;
@@ -1467,7 +1706,7 @@ void DPMBase::read(std::istream& is)
         is >> restartVersion_;
         if (!restartVersion_.compare("1.0"))
         {
-            Files::read(is);
+            FilesAndRunNumber::read(is);
             is >> dummy >> xMin_
                 >> dummy >> xMax_
                 >> dummy >> yMin_
@@ -1527,7 +1766,9 @@ void DPMBase::read(std::istream& is)
         }
     }
 }
-
+/*!
+ * \param[in] is
+ */
 void DPMBase::readOld(std::istream &is)
 {
     std::string dummy;
@@ -1577,6 +1818,9 @@ void DPMBase::readOld(std::istream &is)
     particleHandler.read(is);
 }
 
+/*!
+ *
+ */
 void DPMBase::checkSettings()
 {
     if (speciesHandler.getNumberOfObjects() == 0)
@@ -1636,9 +1880,18 @@ void DPMBase::writeOutputFiles()
     }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-///This is the main solve loop where all the action takes place///
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+/*!
+ * \details  - Initialises the time, sets up the initial conditions for the simulation by 
+ *             calling the setupInitialConditions() and resets the counter using
+ *             setNExtSavedTimeStep().
+ *          -  HGrid operations which is the contact detection algorithm.
+ *          -  Checks if the basic essentials are set for carrying out the
+ *             simulations using checkSettings()
+ *          -  And many more vital operations. See below ;)
+ * \todo Is it neccesarry to reset initial conditions here and in setTimeStepByParticle
+ *       (i.e. should it be in constructor) Thomas: I agree, setTimeStepByParticle should be 
+ *       rewritten to work without calling setupInitialConditions
+ */
 void DPMBase::solve()
 {
 #ifdef DEBUG_OUTPUT
@@ -1652,7 +1905,7 @@ void DPMBase::solve()
     /// sets up the initial conditions for the simulation
     ///\todo Is it neccesarry to reset initial conditions here and in setTimeStepByParticle (i.e. should it be in constructor)?
     ///Thomas: I agree, setTimeStepByParticle should be rewritten to work without calling setupInitialConditions
-    if (!getRestarted())
+    if (getRestarted()==false)
     {
         ntimeSteps_ = 0;
         resetFileCounter();
@@ -1688,15 +1941,15 @@ void DPMBase::solve()
 
     initialiseStatistics();
 
-    /// Setup the mass of each particle.
+    // Setup the mass of each particle.
     particleHandler.computeAllMasses();
 
-    /// Other initializations
+    // Other initialisations
     //max_radius = getLargestParticle()->getRadius();
     actionsBeforeTimeLoop();
     hGridActionsBeforeTimeLoop();
 
-    /// do a first force computation
+    // do a first force computation
     checkAndDuplicatePeriodicParticles();
     hGridActionsBeforeTimeStep();
     computeAllForces();
@@ -1707,20 +1960,20 @@ void DPMBase::solve()
     std::cerr << "Have computed the initial values for the forces " << std::endl;
 #endif
 
-    /// This is the main loop over advancing time
+    // This is the main loop over advancing time
     while (getTime() < getTimeMax() && continueSolve())
     {
         writeOutputFiles(); //everything is written at the beginning of the timestep!
         
-        /// Loop over all particles doing the time integration step
+        // Loop over all particles doing the time integration step
         hGridActionsBeforeIntegration();
         integrateBeforeForceComputation();
         checkInteractionWithBoundaries();
         hGridActionsAfterIntegration();
 
-        /// Compute forces
+        // Compute forces
         
-        ///bug{In chute particles are added in actions_before_time_set(), however they are not written to the xballs data yet, but can have a collison and be written to the fstat data}
+        ///\bug{In chute particles are added in actions_before_time_set(), however they are not written to the xballs data yet, but can have a collison and be written to the fstat data}
         
         for (std::vector<BaseBoundary*>::iterator it = boundaryHandler.begin(); it != boundaryHandler.end(); ++it)
         {
@@ -1739,7 +1992,7 @@ void DPMBase::solve()
 
         actionsAfterTimeStep();
 
-        /// Loop over all particles doing the time integration step
+        // Loop over all particles doing the time integration step
         hGridActionsBeforeIntegration();
         integrateAfterForceComputation();
 
@@ -1766,10 +2019,11 @@ void DPMBase::solve()
     closeFiles();
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-///Can interpret main function input arguments that are passed by the driver codes
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-int DPMBase::readArguments(int argc, char *argv[])
+/*!
+ * \param[in] argc
+ * \param[in] *argv[]  
+ */
+bool DPMBase::readArguments(int argc, char *argv[])
 {
     bool isRead = true;
     for (int i = 1; i < argc; i += 2)
@@ -1791,7 +2045,13 @@ int DPMBase::readArguments(int argc, char *argv[])
     return isRead;
 }
 
-int DPMBase::readNextArgument(int& i, int argc, char *argv[])
+/*!
+ * \param[in] i
+ * \param[in] argc
+ * \param[in] *argv[]
+ * \return bool (True or False)
+ */
+bool DPMBase::readNextArgument(int& i, int argc, char *argv[])
 {
     ///argv[i+1] interpreted as argument of type char*, Mdouble, integer or boolean unless noted
     if (!strcmp(argv[i], "-name"))
@@ -1868,7 +2128,7 @@ int DPMBase::readNextArgument(int& i, int argc, char *argv[])
     }
     else if (!strcmp(argv[i], "-dim"))
     {
-        setSystemDimensions(atoi(argv[i + 1]));
+        setSystemDimensions(static_cast<unsigned int>(atoi(argv[i + 1])));
     }
     else if (!strcmp(argv[i], "-gravity"))
     {
@@ -1933,6 +2193,39 @@ int DPMBase::readNextArgument(int& i, int argc, char *argv[])
         
         std::cout << "restart from " << filename << std::endl;
         readRestartFile(filename);
+    }    
+    else if (!strcmp(argv[i], "-clean") || !strcmp(argv[i], "-c"))
+    {
+        std::cout<< "Remove old " << getName() << ".* files" << std::endl;
+        ///-clean of -c removes all files <name>.*. 
+        std::string filename;
+        std::vector<std::string> ext {".restart",".stat",".fstat",".data",".ene",".xballs"};
+        for (unsigned int j=0; j<ext.size(); j++)
+        {
+            // remove files with given extension for FileType::ONE_FILE
+            filename = getName()+ext[j];
+            if( !remove( filename.c_str() ) )
+            {
+                std::cout<< "  File " << filename << " successfully deleted" << std::endl;
+            }
+            // remove files with given extension for FileType::MULTIPLE_FILES
+            unsigned int k=0;
+            filename = getName()+ext[j]+"."+std::to_string(k);
+            while( !remove( filename.c_str() ) )
+            {
+                std::cout<< "  File " << filename << " successfully deleted" << std::endl;
+                filename = getName()+ext[j]+"."+std::to_string(++k);
+            }
+            // remove files with given extension for FileType::MULTIPLE_FILES_PADDED
+            k=0;           
+            filename = getName()+ext[j]+"."+to_string_padded(k);
+            while( !remove( filename.c_str() ) )
+            {
+                std::cout<< "  File " << filename << " successfully deleted" << std::endl;
+                filename = getName()+ext[j]+"."+to_string_padded(++k);
+            }
+        }
+        i--;
     }
     else if (!strcmp(argv[i], "-data"))
     {
@@ -2040,7 +2333,15 @@ int DPMBase::readNextArgument(int& i, int argc, char *argv[])
     return true; //returns true if argv is found
 }
 
-///bool DPMBase::checkParticleForInteraction(const BaseParticle& p) is not a const function, because when using the HGrid it may have to be rebuild.
+/*!
+ * \details A very useful feature. For e.g. when one wants to have an initial condition 
+ *          with particles free of interactions with other particles or walls, one could use this
+ *          method and check for particles if they are interacting. If yes, then it would not 
+ *          consider this particle for insertion and continue onto next particle.
+ *          However can prove expensive if the number of particles is large.
+ * \param[in] p
+ * \return bool (True or False) 
+ */
 bool DPMBase::checkParticleForInteraction(const BaseParticle& p)
 {
     Mdouble distance;
@@ -2077,7 +2378,10 @@ bool DPMBase::checkParticleForInteraction(const BaseParticle& p)
     ///\todo tw check against periodic copies (see ShearCell3DInitialConditions.cpp)
 }
 
-///Remove periodic duplicate Particles (i.e. removes particles created by Check_and_Duplicate_Periodic_Particle(int i, int nWallPeriodic)). Note that between these two functions it is not allowed to create additional functions. It returns the number of Particles removed
+/*!
+ * \details Removes particles created by CheckAndDuplicatePeriodicParticle(int i, int nWallPeriodic)).
+ *          Note that between these two functions it is not allowed to create additional functions
+ */
 void DPMBase::removeDuplicatePeriodicParticles()
 {
     for (unsigned int i = particleHandler.getNumberOfObjects(); i >= 1 && particleHandler.getObject(i - 1)->getPeriodicFromParticle() != nullptr; i--)
@@ -2090,10 +2394,12 @@ void DPMBase::removeDuplicatePeriodicParticles()
     }
 }
 
-///Calls Check_and_Duplicate_Periodic_Particle for all Particles currently in Particles[] and returns the number of particles created
+/*!
+ * 
+ */  
 void DPMBase::checkAndDuplicatePeriodicParticles()
 {
-    for (BaseBoundary* it : boundaryHandler)
+    for (BaseBoundary* it : boundaryHandler) // For all pointers of type BaseBoundary in Boundary handler
     {
         unsigned int N = particleHandler.getNumberOfObjects(); //Required because the number of particles increases
         for (unsigned int i = 0; i < N; i++)
@@ -2102,7 +2408,10 @@ void DPMBase::checkAndDuplicatePeriodicParticles()
         }
     }
 }
-
+/*!
+ * \details Skims through all the object pointers of type BaseInteraction in the interaction handler. Outputs the type of
+ *          interaction between two particles P and I.
+ */
 void DPMBase::outputInteractionDetails() const
 {
     std::cout << "Interactions currently in the handler:" << std::endl;
@@ -2122,7 +2431,9 @@ void DPMBase::outputInteractionDetails() const
      }
      }*/
 }
-
+/*!
+ * \return bool (True or False)
+ */
 bool DPMBase::isTimeEqualTo(Mdouble time) const
 {
     return getTime()<=time && getTime()+getTimeStep()>time;

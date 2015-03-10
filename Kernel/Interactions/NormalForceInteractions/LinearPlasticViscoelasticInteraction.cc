@@ -73,7 +73,7 @@ void LinearPlasticViscoelasticInteraction::read(std::istream& is)
     BaseInteraction::read(is);
 }
 
-std::string LinearPlasticViscoelasticInteraction::getName() const
+std::string LinearPlasticViscoelasticInteraction::getBaseName() const
 {
     return "LinearPlasticViscoelastic";
 }
@@ -149,15 +149,18 @@ void LinearPlasticViscoelasticInteraction::computeLinearPlasticViscoelasticForce
     }
 }
 
-void LinearPlasticViscoelasticInteraction::computeForce()
+void LinearPlasticViscoelasticInteraction::computeNormalForce()
 {
     computeLinearPlasticViscoelasticForce();
 }
 
 Mdouble LinearPlasticViscoelasticInteraction::getElasticEnergy() const
 {
-  ///\todo TW this is not correct
-    return 0.5 * (getSpecies()->getLoadingStiffness() * mathsFunc::square(getOverlap()));
+   if (getOverlap() > 0)
+        return 0.5 * (getSpecies()->getLoadingStiffness() * mathsFunc::square(getOverlap()));
+    else
+        return 0.0;
+  ///\todo TW this is not correct; we should count the return energy
 }
 
 const LinearPlasticViscoelasticNormalSpecies* LinearPlasticViscoelasticInteraction::getSpecies() const

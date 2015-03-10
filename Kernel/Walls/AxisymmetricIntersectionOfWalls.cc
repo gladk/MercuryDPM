@@ -27,44 +27,75 @@
 #include "Particles/BaseParticle.h"
 
 AxisymmetricIntersectionOfWalls::AxisymmetricIntersectionOfWalls()
-        : IntersectionOfWalls()
 {
-#ifdef DEBUG_CONSTRUCTOR
-    std::cout<<"AxisymmetricIntersectionOfWalls() finished"<<std::endl;
-#endif
+    logger(DEBUG, "AxisymmetricIntersectionOfWalls() finished");
 }
 
+/*!
+ * \param[in] other The AxisymmetricIntersectionOfWalls that must be copied.
+ */
 AxisymmetricIntersectionOfWalls::AxisymmetricIntersectionOfWalls(const AxisymmetricIntersectionOfWalls &p)
         : IntersectionOfWalls(p)
 {
-#ifdef DEBUG_CONSTRUCTOR
-    std::cout<<"AxisymmetricIntersectionOfWalls(const AxisymmetricIntersectionOfWalls &p) finished"<<std::endl;
-#endif
+    logger(DEBUG, "AxisymmetricIntersectionOfWalls(const AxisymmetricIntersectionOfWalls &p) finished");
 }
 
-///Wall copy method. It calls the copy contrustor of this Wall, usefull for polymorfism
+AxisymmetricIntersectionOfWalls::~AxisymmetricIntersectionOfWalls()
+{
+    logger(DEBUG, "~AxisymmetricIntersectionOfWalls() finished.");
+}
+
+/*!
+ * \param[in] other The AxisymmetricIntersectionOfWalls that must be copied.
+ */
+AxisymmetricIntersectionOfWalls& AxisymmetricIntersectionOfWalls::operator=(const AxisymmetricIntersectionOfWalls& other)
+{
+    if (this == &other)
+    {
+        return *this;
+    }
+    else
+    {
+        return *(other.copy());
+    }
+}
+
+/*!
+ * \return pointer to a IntersectionOfWalls object allocated using new.
+ */
 AxisymmetricIntersectionOfWalls* AxisymmetricIntersectionOfWalls::copy() const
 {
     return new AxisymmetricIntersectionOfWalls(*this);
 }
 
-bool AxisymmetricIntersectionOfWalls::getDistanceAndNormal(const BaseParticle &P, Mdouble &distance, Vec3D &normalReturn) const
+/*!
+ * \details First, the particle is translated by the vector position_, then the 
+ * distance normal and tangential to the orientation is computed. This normal 
+ * and tangential direction is interpreted as the x and z coordinate. With the 
+ * particle shifted into the XZ plane, the distance and normal is computed, as 
+ * if the AxisymmetricIntersectionOfWalls would be a simple IntersectionOfWalls.
+ * Finally, the object and the normal is rotated back to the original position.
+ * 
+ * See also AxisymmetricIntersectionOfWalls for details.
+ */
+bool AxisymmetricIntersectionOfWalls::getDistanceAndNormal(const BaseParticle& p, Mdouble& distance, Vec3D& normalReturn) const
 {
-    ///\todo test
     //transform to axisymmetric coordinates
-    Vec3D PO = P.getPosition() -getPosition(); //move the coordinate system to the axis origin, so P0=(xhat,yhat,zhat)
-    Mdouble normal = Vec3D::dot(PO, getOrientation());
-    Vec3D tangentialUnitVector = PO - normal * getOrientation(); //tangential is the projection into the (xhat,yhat) plane
+    //move the coordinate system to the axis origin, so pOrigin=(xhat,yhat,zhat)
+    Vec3D pOrigin = p.getPosition() -getPosition(); 
+    Mdouble normal = Vec3D::dot(pOrigin, getOrientation());
+    //tangential is the projection into the (xhat,yhat) plane
+    Vec3D tangentialUnitVector = pOrigin - normal * getOrientation();
     Mdouble tangential = tangentialUnitVector.getLength();
     if (tangential!=0.0)
         tangentialUnitVector /= tangential;
     else //in this case the tangential vector is irrelevant
-        std::cout << "Warning: Particle " << P.getIndex() << " is exactly on the symmetry axis of wall " << this->getIndex() << std::endl;
+        logger(WARN, "Warning: Particle % is exactly on the symmetry axis of wall %", p.getIndex(), getIndex());
     Vec3D transformedPosition = Vec3D(tangential, 0.0, normal); //now P=(r,phi,zhat) is cylindrical
     Vec3D transformedNormal;
     //determine wall distance, normal and contact in axissymmetric coordinates
     //and transform from axisymmetric coordinates
-    if (!IntersectionOfWalls::getDistanceAndNormal(transformedPosition, P.getWallInteractionRadius(), distance, transformedNormal))
+    if (!IntersectionOfWalls::getDistanceAndNormal(transformedPosition, p.getWallInteractionRadius(), distance, transformedNormal))
     {
         //if not in contact
         return false;
@@ -77,43 +108,55 @@ bool AxisymmetricIntersectionOfWalls::getDistanceAndNormal(const BaseParticle &P
     }
 }
 
-///reads wall
+/*!
+ * \param[in] is The input stream from which the AxisymmetricIntersectionOfWalls
+ * is read, usually a restart file.
+ */
 void AxisymmetricIntersectionOfWalls::read(std::istream& is)
 {
     IntersectionOfWalls::read(is);
 }
 
-///reads wall
-void AxisymmetricIntersectionOfWalls::oldRead(std::istream& is)
-{
-    IntersectionOfWalls::read(is);
-}
-
-///outputs wall
+/*!
+ * \param[in] os The output stream where the AxisymmetricIntersectionOfWalls must be written
+ *  to, usually a restart file.
+ */
 void AxisymmetricIntersectionOfWalls::write(std::ostream& os) const
 {
     IntersectionOfWalls::write(os);
 }
 
+/*!
+ * \return The string "AxisymmetricIntersectionOfWalls".
+ */
 std::string AxisymmetricIntersectionOfWalls::getName() const
 {
     return "AxisymmetricIntersectionOfWalls";
 }
 
-BaseInteraction* AxisymmetricIntersectionOfWalls::getInteractionWith(BaseParticle *P, Mdouble timeStamp, InteractionHandler* interactionHandler)
+
+/*!
+ * \param[in] p Pointer to the BaseParticle which we want to check the interaction for.
+ * \param[in] timeStamp The time at which we want to look at the interaction.
+ * \param[in] interactionHandler A pointer to the InteractionHandler in which 
+ *            the interaction can be found.
+ * \return A pointer to the Interaction between this AxisymmetricIntersectionOfWalls
+ * and the BaseParticle at the timeStamp.
+ */
+BaseInteraction* AxisymmetricIntersectionOfWalls::getInteractionWith(BaseParticle* p, Mdouble timeStamp, InteractionHandler* interactionHandler)
 {
     Mdouble distance;
     Vec3D normal;
 
-    if (getDistanceAndNormal(*P,distance,normal))
+    if (getDistanceAndNormal(*p,distance,normal))
     {
-        BaseInteraction* C = interactionHandler->getInteraction(P, this, timeStamp);
-        C->setNormal(-normal);
-        C->setDistance(distance);
-        C->setOverlap(P->getRadius() - distance);
-        ///todo{DK: What is the contact point for interactions with walls}
-        C->setContactPoint(P->getPosition()-(P->getRadius()- 0.5 * C->getOverlap())*C->getNormal());
-        return C;
+        BaseInteraction* c = interactionHandler->getInteraction(p, this, timeStamp);
+        c->setNormal(-normal);
+        c->setDistance(distance);
+        c->setOverlap(p->getRadius() - distance);
+        ///\todo{DK: What is the contact point for interactions with walls}
+        c->setContactPoint(p->getPosition()-(p->getRadius()- 0.5 * c->getOverlap())*c->getNormal());
+        return c;
     }
     else
     {

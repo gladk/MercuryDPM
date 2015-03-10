@@ -99,7 +99,7 @@ problem.setXBallsAdditionalArguments("-solidf -v0 -s .85");
 //
 
 //
- problem.setTimeStep(0.005/50.0);// (collision time)/50.0
+problem.setTimeStep(0.005/50.0);// (collision time)/50.0
 problem.solve(argc, argv);
 //
 }

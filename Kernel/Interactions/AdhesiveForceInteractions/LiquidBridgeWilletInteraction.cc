@@ -31,6 +31,11 @@
 #include <iomanip>
 #include <fstream>
 
+/*!
+ * \param[in] P
+ * \param[in] I
+ * \param[in] timeStamp
+ */
 LiquidBridgeWilletInteraction::LiquidBridgeWilletInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
     : BaseInteraction(P, I, timeStamp)
 {
@@ -39,7 +44,9 @@ LiquidBridgeWilletInteraction::LiquidBridgeWilletInteraction(BaseInteractable* P
     std::cout<<"LiquidBridgeWilletInteraction::LiquidBridgeWilletInteraction() finished"<<std::endl;
 #endif
 }
-
+/*!
+ * \param[in] p
+ */
 LiquidBridgeWilletInteraction::LiquidBridgeWilletInteraction(const LiquidBridgeWilletInteraction &p)
     : BaseInteraction(p)
 {
@@ -48,20 +55,26 @@ LiquidBridgeWilletInteraction::LiquidBridgeWilletInteraction(const LiquidBridgeW
     std::cout<<"LiquidBridgeWilletInteraction::LiquidBridgeWilletInteraction(const LiquidBridgeWilletInteraction &p finished"<<std::endl;
 #endif
 }
-
+/*!
+ * 
+ */
 LiquidBridgeWilletInteraction::~LiquidBridgeWilletInteraction()
 {
 #ifdef DEBUG_DESTRUCTOR
     std::cout<<"LiquidBridgeWilletInteraction::~LiquidBridgeWilletInteraction() finished"<<std::endl;
 #endif
 }
-
-void LiquidBridgeWilletInteraction::write(std::ostream& os  UNUSED) const
+/*!
+ * \param[in,out] os
+ */
+void LiquidBridgeWilletInteraction::write(std::ostream& os) const
 {
 	os << " wasInContact " << wasInContact_;
 }
-
-void LiquidBridgeWilletInteraction::read(std::istream& is  UNUSED)
+/*!
+ * \param[in,out] is
+ */
+void LiquidBridgeWilletInteraction::read(std::istream& is)
 {
     // we read in wasInContact_ like this because an early version did not initialize it.
     std::string dummy;
@@ -72,8 +85,10 @@ void LiquidBridgeWilletInteraction::read(std::istream& is  UNUSED)
     else
         wasInContact_ = false;
 }
-
-void LiquidBridgeWilletInteraction::computeForce()
+/*!
+ * 
+ */
+void LiquidBridgeWilletInteraction::computeAdhesionForce()
 {
     const LiquidBridgeWilletSpecies* species = getSpecies();
     if (getOverlap()>=0)
@@ -92,19 +107,25 @@ void LiquidBridgeWilletInteraction::computeForce()
         addForce(getNormal() * fdotn);
     }
 }
-
+/*!
+ * \return Mdouble
+ */
 Mdouble LiquidBridgeWilletInteraction::getElasticEnergy() const
 {
     ///\todo TW
     return 0.0;
 }
-
-const LiquidBridgeWilletSpecies *LiquidBridgeWilletInteraction::getSpecies() const
+/*!
+ * \return const LiquidBridgeWilletSpecies*
+ */
+const LiquidBridgeWilletSpecies* LiquidBridgeWilletInteraction::getSpecies() const
 {
     return dynamic_cast<const LiquidBridgeWilletSpecies *>(getBaseSpecies());
 }
-
-std::string LiquidBridgeWilletInteraction::getName() const
+/*!
+ * \return std::string
+ */
+std::string LiquidBridgeWilletInteraction::getBaseName() const
 {
     return "LiquidBridgeWillet";
 }

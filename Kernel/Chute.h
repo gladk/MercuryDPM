@@ -29,8 +29,19 @@
 
 class InsertionBoundary;
 
+
 /*!
- * \brief 0 grid-like fixed-particle bottom, 1 random fixed-particle bottom, 2 bottom slice
+ * \brief enum for determining the type of rough bottom (if any) of the chute. Either of
+ * the enum options can be assigned to the roughBottomType_ data member using Chute::setRoughBottomType().
+ * The options are as follows:
+ *    * MONOLAYER_ORDERED:      Bottom will be a rectangularly ordered monolayer of particles
+ *    * MONOLAYER_DISORDERED:   Bottom will be a disordered monolayer of particles
+ *    * MULTILAYER:             Bottom will be a multilayer of particles
+ * See also the documentation of Chute::createBottom().
+ * 
+ * \todo consider converting to an enum class. 
+ * \todo consider changing to just 'bottomType' and add 'FLAT' (or something similar)
+ * as an option so that from ALL bottom types can be chosen with just ONE enumerator
  */
 enum RoughBottomType
 {
@@ -38,9 +49,11 @@ enum RoughBottomType
 };
 /*!
  * \class Chute
- * \brief Creates chutes with different bottoms
- * \details Chute adds three new effects to the HGrid: the gravity direction can be set using the ChuteAngle variable, a (smooth or rough) bottom wall 
- is created by default, and some basic inflow and outflow routines are added
+ * \brief Creates chutes with different bottoms. Inherits from Mercury3D (-> MercuryBase -> DPMBase).
+ * \details Chute adds three new effects as compared to a 'normal' Mercury3D object: 
+ * the gravity direction can be set using the ChuteAngle variable, a (smooth or 
+ * rough) bottom wall is created by default, and some basic inflow and outflow 
+ * routines are added.
 */
 class Chute : public Mercury3D
 {
@@ -51,91 +64,99 @@ public:
     Chute();
     
     /*!
-     * \brief Copy-constructor for creates an HGRID problem from an existing MD problem
+     * \brief Copy-constructor, converts an existing DPMBase problem into a Chute problem
      */
     Chute(const DPMBase& other);
 
     /*!
-     * \brief 
-     */    
+     * \brief Copy-constructor, converts an existing MercuryBase problem into a Chute problem
+     */  
     Chute(const MercuryBase& other);
 
     /*!
-     * \brief 
-     */    
+     * \brief Copy-constructor, converts an existing Mercury3D problem into a Chute problem
+     */   
     Chute(const Mercury3D& other);
+    
+    /*!
+     * \brief Default copy-constructor
+     */ 
+    Chute(const Chute& other);
 
     /*!
-     * \brief This is the actual constructor; it is called do both constructors above.
+     * \brief This is the actual constructor METHOD; it is called by all constructors above 
+     * (except the default copy-constructor).
      */
     void constructor();
 
     /*!
-     * \brief 
-     * \param[in]
-     * \param[out]
+     * \brief This method can be used for reading object properties from a string.
      */
-    int readNextArgument(int& i, int argc, char *argv[]);
+    bool readNextArgument(int& i, int argc, char *argv[]);
 
     /*!
-     * \brief 
+     * \brief Creates chute side walls (either solid or periodic)
      */
     void setupSideWalls();
     
     /*!
-     * \brief This makes the chute periodic, in y
+     * \brief This makes the chute periodic in Y
      */
     void makeChutePeriodic();
     
     /*!
-     * \brief Get whether the chute is periodic
+     * \brief Returns whether the chute is periodic in Y
      */
     bool getIsPeriodic() const;
     
     /*!
-     * \brief Initialize particle position, velocity, radius
+     * \brief Creates bottom, side walls and a particle insertion boundary
      */
     void setupInitialConditions();
 
     /*!
-     * \brief This function reads all chute data
+     * \brief Reads all chute properties from an istream
      */
     void read(std::istream& is);
 
     /*!
-     * \brief This function writes all chute data
+     * \brief Writes all chute properties to an ostream
      */
     virtual void write(std::ostream& os) const;
 
     /*!
-     * \brief This function std::couts all chute data
+     * \brief This function writes the Chute properties to an ostream, and adds 
+     * the properties of ALL chute particles as well
      */
     void write(std::ostream& os, bool writeAllParticles = true) const;
 
 //setters and getters
 
     /*!
-     * \brief Allows radius of fixed particles to be changed
+     * \brief Sets the particle radius of the fixed particles which constitute the 
+     * (rough) chute bottom
      */
     void setFixedParticleRadius(Mdouble fixedParticleRadius);
     
     /*!
-     * \brief Allows radius of fixed particles to be accessed
+     * \brief Returns the particle radius of the fixed particles which constitute the 
+     * (rough) chute bottom
      */
     Mdouble getFixedParticleRadius() const;
     
     /*!
-     * \brief Changes RandomisedBottom
+     * \brief Sets the type of rough bottom of the chute
      */
     void setRoughBottomType(RoughBottomType roughBottomType);
 
     /*!
-     * \brief Changes RandomisedBottom
+     * \brief Sets the type of rough bottom of the chute, using a string with the
+     * EXACT enum type as input
      */
     void setRoughBottomType(std::string roughBottomTypeString);
 
     /*!
-     * \brief Accesses RandomisedBottom
+     * \brief Returns the type of (rough) bottom of the chute
      */
     RoughBottomType getRoughBottomType() const;
     
@@ -150,136 +171,115 @@ public:
     void setChuteAngleAndMagnitudeOfGravity(Mdouble chuteAngle, Mdouble gravity);
 
     //void setChuteAngle(Mdouble new_, Mdouble gravity){if (new_>=0.0&&new_<=90.0) {ChuteAngle = new_; setGravity(Vec3D(sin(ChuteAngle*pi/180.0), 0.0, -cos(ChuteAngle*pi/180.0))*gravity);} else std::cerr << "WARNING : Chute angle must be within [0,90]" << std::endl;}
+    
     /*!
-     * \brief Gets chute angle (in radians)
-     * \return
-     * \todo Thomas: This should return the angle in degrees
+     * \brief Returns the chute angle (in radians)
      */
     Mdouble getChuteAngle() const;
 
     /*!
-     * \brief 
-     * \return
+     * \brief Returns the chute angle (in degrees)
      */    
     Mdouble getChuteAngleDegrees() const;
     
     /*!
-     * \brief Allows radius of fixed particles to be changed
-     * \param[in]
+     * \brief Sets the number of times a particle will be tried to be added to the insertion boundary
      */
     void setMaxFailed(unsigned int maxFailed);
     
     /*!
-     * \brief Allows radius of fixed particles to be accessed
-     * \return
+     * \brief Returns the number of times a particle will be tried to be added to the insertion boundary
      */
     unsigned int getMaxFailed() const;
 
     /*!
-     * \brief Allows radius of inflow particles to be changed
-     * \param[in]
+     * \brief Sets the radius of the inflow particles to a single one (i.e. ensures
+     * a monodisperse inflow).
      */
-    void setInflowParticleRadius(Mdouble InflowParticleRadius);
+    void setInflowParticleRadius(Mdouble inflowParticleRadius);
     
     /*!
-     * \brief Allows radius of inflow particles to be set to a range of values
-     * \param[in]
+     * \brief Sets the minimum and maximum radius of the inflow particles
      */
     void setInflowParticleRadius(Mdouble minInflowParticleRadius, Mdouble maxInflowParticleRadius);
 
     /*!
-     * \brief 
-     * \param[in]
+     * \brief sets the minimum radius of inflow particles
      */    
     void setMinInflowParticleRadius(Mdouble minInflowParticleRadius);
 
     /*!
-     * \brief 
-     * \param[in]
+     * \brief Sets the maximum radius of inflow particles
      */    
     void setMaxInflowParticleRadius(Mdouble maxInflowParticleRadius);
 
     /*!
-     * \brief Allows radius of inflow particles to be accessed
-     * \return
+     * \brief Returns the average radius of inflow particles
      */
     Mdouble getInflowParticleRadius() const;
     
     /*!
-     * \brief Allows radius of inflow particles to be accessed
-     * \return
+     * \brief returns the minimum radius of inflow particles
      */
-    const Mdouble getMinInflowParticleRadius() const;
+    Mdouble getMinInflowParticleRadius() const;
     
     /*!
-     * \brief Allows radius of inflow particles to be accessed
-     * \return
+     * \brief Returns the maximum radius of inflow particles
      */
-    const Mdouble getMaxInflowParticleRadius() const;
+    Mdouble getMaxInflowParticleRadius() const;
     
     /*!
-     * \brief Changes inflow height
-     * \param[in]
+     * \brief Sets maximum inflow height (Z-direction)
      */
     void setInflowHeight(Mdouble inflowHeight);
     
     /*!
-     * \brief Accesses inflow height
-     * \return
+     * \brief Returns the maximum inflow height (Z-direction)
      */
     Mdouble getInflowHeight() const;
     
     /*!
-     * \brief Changes inflow velocity
-     * \param[in]
+     * \brief Sets the average inflow velocity
      */
     void setInflowVelocity(Mdouble inflowVelocity);
     
     /*!
-     * \brief Accesses inflow velocity
-     * \return
+     * \brief Returns the average inflow velocity
      */
     Mdouble getInflowVelocity() const;
     
     /*!
-     * \brief Changes inflow velocity variance
-     * \param[in]
+     * \brief Sets the inflow velocity variance
      */
     void setInflowVelocityVariance(Mdouble inflowVelocityVariance);
     
     /*!
-     * \brief Accesses inflow velocity variance
-     * \return
+     * \brief Returns the inflow velocity variance
      */
     Mdouble getInflowVelocityVariance() const;
 
     /*!
-     * \brief Access function that set the width of the chute
-     * \param[in]
+     * \brief Sets the chute width (Y-direction)
      */
     void setChuteWidth(Mdouble chuteWidth);
     
     /*!
-     * \brief 
-     * \return
+     * \brief Returns the chute width (Y-direction)
      */
     Mdouble getChuteWidth() const;
     
     /*!
-     * \brief 
-     * \param[in]
+     * \brief Sets the chute length (X-direction)
      */
     virtual void setChuteLength(Mdouble chuteLength);
 
     /*!
-     * \brief 
-     * \return
+     * \brief Returns the chute length (X-direction)
      */    
     Mdouble getChuteLength() const;
 
     /*!
      * \brief 
-     * \return
      */
     int getNCreated() const;
 
@@ -289,29 +289,28 @@ public:
     void increaseNCreated();
 
     /*!
-     * \brief 
-     * \param[in]
+     * \brief Sets the chute insertion boundary 
      */
     void setInsertionBoundary(InsertionBoundary* insertionBoundary);
 
 protected:
     /*!
-     * \brief 
+     * \brief Calls Chute::cleanChute().
      */
     void actionsBeforeTimeStep();
 
     /*!
-     * \brief Here we define the outflow
+     * \brief Deletes all outflow particles once every 100 time steps
      */
     void cleanChute();
 
     /*!
-     * \brief Create the bottom of chute out of particles
+     * \brief Creates the chute bottom, which can be either flat or one of three flavours of rough
      */
     virtual void createBottom();
 
     /*!
-     * \brief 
+     * \brief prints time, max time and number of particles
      */
     void printTime() const;
 
@@ -338,7 +337,7 @@ private:
      */
     Mdouble inflowVelocity_;
     /*!
-     * \brief Inflow velocity variance in x-direction
+     * \brief Inflow velocity variance in x-direction (in ratio of inflowVelocity_)
      */
     Mdouble inflowVelocityVariance_;
     /*!
@@ -346,19 +345,22 @@ private:
      */
     Mdouble inflowHeight_;
     /*!
-     * \brief distinguishes between grid-like (0), one-layer randomised (1), and thick random dense (2) bottom
+     * \brief Determines the type of rough bottom created (if any). See also the enum
+     * RoughBottomType at the beginning of this header file.
      */
     RoughBottomType roughBottomType_;
     /*!
-     * \brief indicates how many attempts are undertake to insert a new particle before each timestep
+     * \brief indicates how many attempts are made to insert a new particle
+     * into the insertion boundary before the boundary is considered filled.
      */
     unsigned int maxFailed_;
     /*!
-     * \brief 
+     * \brief (Pointer to) the Chute's insertion boundary
      */
     InsertionBoundary* insertionBoundary_;
     /*!
-     * \brief 
+     * \brief Determines whether the chute has periodic (TRUE) or solid (FALSE) walls
+     * in the Y-direction
      */
     bool isChutePeriodic_;
     

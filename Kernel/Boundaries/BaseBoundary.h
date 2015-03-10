@@ -36,8 +36,8 @@ class DPMBase;
 
 /*!
  * \class BaseBoundary
- * \brief
- * \details
+ * \brief 
+ * \details Inherits from BaseObject
  */
 class BaseBoundary : public BaseObject
 {
@@ -58,55 +58,52 @@ public:
     virtual ~BaseBoundary();
 
     /*!
-     * \brief 
-     * \return
+     * \brief Used to create a copy of the object
+     * NB: purely virtual function
      */
     virtual BaseBoundary* copy() const = 0;
     
     /*!
-     * \brief
+     * \brief Reads the object's id_ from given istream
+     * NB: purely virtual function
      */
     void read(std::istream& is) = 0;
     
     /*!
-     * \brief
+     * \brief Adds object's id_ to given ostream
+     * NB: purely virtual function
      */
     void write(std::ostream& os) const = 0;
 
     /*!
-     * \brief
-     * \param[in]
+     * \brief Creates periodic copies of given particle in case of periodic boundaries
      */    
     virtual void createPeriodicParticles(BaseParticle *P UNUSED, ParticleHandler &pH UNUSED);
 
     /*!
-     * \brief
-     * \param[in]
+     * \brief Checks if given particle passed the boundary 
      */
     virtual bool checkBoundaryAfterParticleMoved(BaseParticle *P UNUSED, ParticleHandler &pH UNUSED);
 
     /*!
-     * \brief
-     * \param[in]
+     * \brief Fills a (3D) boundary with particles 
      */
     virtual void checkBoundaryBeforeTimeStep(DPMBase* md UNUSED);
 
     /*!
-     * \brief
-     * \param[in]
+     * \brief Sets the boundary's BoundaryHandler
      */
     void setHandler(BoundaryHandler* handler);
 
     /*!
-     * \brief
-     * \return
+     * \brief Returns the boundary's BoundaryHandler
      */
     BoundaryHandler* getHandler() const;
 
 private:
 
     /*!
-     * \brief
+     * \brief pointer to the boundary's BoundaryHandler
      */
     BoundaryHandler* handler_;
 };

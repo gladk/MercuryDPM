@@ -32,14 +32,14 @@
 
 /*!
  * \class BoundaryHandler
- * \brief Container to store all BaseBoundary
+ * \brief Container to store pointers to all BaseBoundary objects
  * \details The BoundaryHandler is a container to store all BaseBoundary. It is implemented by a vector of pointers to BaseBoundary.
  */
 class BoundaryHandler : public BaseHandler<BaseBoundary>
 {
 public:
     /*!
-     * \brief Default constructor, it simply creates an empty BoundaryHandler.
+     * \brief Default constructor, it creates an empty BoundaryHandler.
      */
     BoundaryHandler();
 
@@ -50,26 +50,33 @@ public:
 
     /*!
      * \brief Assignment operator.
+     * 
      */
-    BoundaryHandler operator =(const BoundaryHandler& rhs);
+    BoundaryHandler operator=(const BoundaryHandler& rhs);
     
     /*!
-     * \brief Destructor, it simply destructs the BoundaryHandler and all BaseBoundary it contains.
+     * \brief Destructor, it destructs the BoundaryHandler and all BaseBoundary it contains.
      */
     ~BoundaryHandler();
 
     /*!
-     * \brief Adds a BaseBoundary to the BoundaryHandler.
+     * \brief Adds a BaseBoundary to the BoundaryHandler. 
      */
     void addObject(BaseBoundary* P);
 
     /*!
-     * \brief Reads BaseBoundary into the BoundaryHandler from restart data.
+     * \brief Reads BaseBoundary into the BoundaryHandler from restart data. 
      */
     void readObject(std::istream& is);
 
+    /*!
+     *  \brief Reads a periodic boundary from old-style restart data.    
+     */ 
     void readOldObject(std::istream& is);
 
+    /*!
+     *  \brief Returns the name of the handler, namely the string "BoundaryHandler".
+     */
     std::string getName() const;
 };
 

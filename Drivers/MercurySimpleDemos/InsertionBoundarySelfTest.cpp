@@ -24,20 +24,20 @@
 //SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iostream>
-
 #include "Mercury3D.h"
 #include "Boundaries/CubeInsertionBoundary.h"
 #include "Particles/BaseParticle.h"
 #include "Species/LinearViscoelasticSpecies.h"
 #include "Walls/InfiniteWall.h"
 
+
 class InsertionBoundarySelfTest : public Mercury3D
 {
 public:
     
+    
     void setupInitialConditions()
     {
-
         setName("InsertionBoundarySelfTest");
         setSystemDimensions(3);
         setGravity(Vec3D(0.0,0.0,0.0));
@@ -53,17 +53,23 @@ public:
         setYMax(1.0);
         setZMax(1.0);
 
-        species = speciesHandler.copyAndAddObject(LinearViscoelasticSpecies());
+        
+        species = new LinearViscoelasticSpecies; //delete is done in speciesHandler
+        speciesHandler.addObject(species);
         species->setDensity(2000);
         species->setStiffness(10000);
-        
-        insertionBoundary = boundaryHandler.copyAndAddObject(CubeInsertionBoundary());
-        BaseParticle* insertionBoundaryParticle =new BaseParticle;
+                
+        insertionBoundary = new CubeInsertionBoundary; //delete is done in boundaryHandler
+        boundaryHandler.addObject(insertionBoundary);
+        BaseParticle* insertionBoundaryParticle = new BaseParticle;
         insertionBoundaryParticle->setSpecies(species);
-        insertionBoundary->set(insertionBoundaryParticle,10,Vec3D(0.25,0.25,0.25),Vec3D(0.75,0.75,0.75),Vec3D(-5,-5,-5),Vec3D(5,5,5),0.1,0.2);
-        
-        bottomWall= wallHandler.copyAndAddObject(InfiniteWall());
-        bottomWall->set(Vec3D(std::pow(1.0/3.0,0.5), std::pow(1.0/3.0,0.5), std::pow(1.0/3.0,0.5)), 1);
+        insertionBoundary->set(insertionBoundaryParticle,10,Vec3D(0.25,0.25,0.25),Vec3D(0.75,0.75,0.75),Vec3D(-5,-5,-5),Vec3D(5,5,5),0.1,0.2);        
+        delete insertionBoundaryParticle;
+                
+        bottomWall = new InfiniteWall(); //delete is done in wallHandler
+        wallHandler.addObject(bottomWall);
+        Vec3D normal = Vec3D(std::pow(1.0/3.0,0.5), std::pow(1.0/3.0,0.5), std::pow(1.0/3.0,0.5));
+        bottomWall->set(normal, normal);
     }
     
     LinearViscoelasticSpecies* species;

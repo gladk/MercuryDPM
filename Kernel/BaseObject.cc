@@ -25,7 +25,29 @@
 
 
 #include "BaseObject.h"
-
+/*!
+ * \param[in,out] os
+ * \param[in] o
+ * \return std::ostream &
+ */
+std::ostream& operator<<(std::ostream& os, const BaseObject& o)
+{
+    o.write(os);
+    return os;
+}
+/*!
+ * \param[in] o
+ * \param[in,out] is
+ * \return std::istream&
+ */
+std::istream& operator>>(std::istream& is, BaseObject &o)
+{
+    o.read(is);
+    return (is);
+}
+/*!
+ * \details Initialises the member variables to zero.
+ */
 BaseObject::BaseObject()
 {
     index_ = 0;
@@ -35,6 +57,9 @@ BaseObject::BaseObject()
 #endif
 }
 
+/*!
+ * \param[in] p
+ */
 BaseObject::BaseObject(const BaseObject &p)
 {
     index_ = p.index_;
@@ -43,59 +68,63 @@ BaseObject::BaseObject(const BaseObject &p)
     std::cout<<"BaseObject::BaseObject(const BaseObject &p) finished"<<std::endl;
 #endif
 }
-
+/*!
+ *
+ */
 BaseObject::~BaseObject()
 {
 #ifdef DEBUG_DESTRUCTOR
     std::cout << "BaseObject::~BaseBoundary() finished"<<std::endl;
 #endif
 }
-
-std::ostream& operator <<(std::ostream& os, const BaseObject& o)
-{
-    o.write(os);
-    return os;
-}
-
-std::istream& operator >>(std::istream& is, BaseObject &o)
-{
-    o.read(is);
-    return (is);
-}
-
+/*!
+ * \param[in] index
+ */
 void BaseObject::moveInHandler(const unsigned int index)
 {
     index_ = index;
 }
 
+/*!
+ * \param[in] index
+ */
 void BaseObject::setIndex(const unsigned int index)
 {
     index_ = index;
 }
-
+/*!
+ * \param[in] id
+ */
 void BaseObject::setId(const unsigned int id)
 {
     id_ = id;
     ///\todo TW: here we should update BaseHandler::nextId_
 }
-
-
+/*!
+ * \return index_
+ */
 unsigned int BaseObject::getIndex() const
 {
     return index_;
 }
-
+/*!
+ * \return id_
+ */
 unsigned int BaseObject::getId() const
 {
     return id_;
 }
-
+/*!
+ * \param[in] is
+ */
 void BaseObject::read(std::istream& is)
 {
     std::string dummy;
     is >> dummy >> id_;
 }
-
+/*!
+ * \param[in] os
+ */
 void BaseObject::write(std::ostream& os) const
 {
     os << getName();

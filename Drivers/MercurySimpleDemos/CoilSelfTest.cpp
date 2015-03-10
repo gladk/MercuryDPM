@@ -54,15 +54,15 @@ class CoilSelfTest : public Mercury3D{
 		species->setCollisionTimeAndRestitutionCoefficient(0.05,0.8, pow(particleRadius,3)*constants::pi*4.0/3.0*1000);
 
 		frontWall = wallHandler.copyAndAddObject(InfiniteWall());
-		frontWall->set(Vec3D(-1, 0, 0), -getXMin());
+		frontWall->set(Vec3D(-1, 0, 0), Vec3D(getXMin(), 0, 0));
 		backWall = wallHandler.copyAndAddObject(InfiniteWall());
-		backWall->set(Vec3D( 1, 0, 0),  getXMax());
+		backWall->set(Vec3D( 1, 0, 0),  Vec3D(getXMax(), 0, 0));
 		bottomWall = wallHandler.copyAndAddObject(InfiniteWall());
-		bottomWall->set(Vec3D( 0,-1, 0), -getYMin());
+		bottomWall->set(Vec3D( 0,-1, 0), Vec3D(0, getYMin(), 0));
 		topWall = wallHandler.copyAndAddObject(InfiniteWall());
-		topWall->set(Vec3D( 0, 1, 0),  getYMax());
+		topWall->set(Vec3D( 0, 1, 0),  Vec3D(0, getYMax(), 0));
 		leftWall = wallHandler.copyAndAddObject(InfiniteWall());
-		leftWall->set(Vec3D( 0, 0,-1), -getZMin());
+		leftWall->set(Vec3D( 0, 0,-1), Vec3D(0, 0, getZMin()));
 		
 		rightWall = wallHandler.copyAndAddObject(InfiniteWallWithHole());
 		rightWall->set(Vec3D(0,0,1),getZMax(),1.0);

@@ -82,6 +82,7 @@ problem.getDataFile().setFileType(FileType::ONE_FILE);
 problem.getRestartFile().setFileType(FileType::ONE_FILE);
 problem.getFStatFile().setFileType(FileType::NO_FILE);
 problem.getEneFile().setFileType(FileType::NO_FILE);
+std::cout << problem.getDataFile().getCounter() << std::endl;
 //! [T1:output]
 
 //! [T1:visualOutput] 	

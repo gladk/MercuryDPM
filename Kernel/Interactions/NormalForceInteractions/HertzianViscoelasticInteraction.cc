@@ -70,12 +70,12 @@ void HertzianViscoelasticInteraction::read(std::istream& is)
     BaseInteraction::read(is);
 }
 
-std::string HertzianViscoelasticInteraction::getName() const
+std::string HertzianViscoelasticInteraction::getBaseName() const
 {
     return "HertzianViscoelastic";
 }
 
-void HertzianViscoelasticInteraction::computeForce()
+void HertzianViscoelasticInteraction::computeNormalForce()
 {
     ///\todo TWnow
     // Compute the relative velocity vector of particle P w.r.t. I
@@ -109,8 +109,11 @@ void HertzianViscoelasticInteraction::computeForce()
 
 Mdouble HertzianViscoelasticInteraction::getElasticEnergy() const
 {
-    ///\todo TWnow
-    return 0.5 * (getSpecies()->getElasticModulus() * mathsFunc::square(getOverlap()));
+   if (getOverlap() > 0)
+        return 0.5 * (getSpecies()->getElasticModulus() * mathsFunc::square(getOverlap()));
+    else
+        return 0.0;
+    ///\todo TW This is not correct
 }
 
 const HertzianViscoelasticNormalSpecies* HertzianViscoelasticInteraction::getSpecies() const

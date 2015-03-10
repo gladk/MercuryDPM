@@ -34,72 +34,66 @@
 #include <iostream>
 #include <vector>
 #include "Math/Helpers.h"
+#include "Logger.h"
 
-///\todo TW: someone help: how do I add a logger here?
+///\todo TW: someone help: how do I add a logger here? Guess its implemented. Did you mean something else TW?
 
 class DPMBase;
 
 /*!
  * \class BaseHandler
- * \brief Container to store all Object
- * \details The BaseHandler is a container to store all Object. It is implemented by a vector of pointers to the Object.
+ * \brief Container to store all objects that one creates in a simulation. This is where a container to store an umpteen number of pointers is created
+ * . Its just pointers everywhere ;)
+ * \details The BaseHandler allows one to create a container to store all pointer objects of a templated type T 
+ * It is implemented by a (protected) vector of pointers to objects of type T. Once the container is created, the BaseHandler
+ * also provides the provision to manipulate the pointers i.e. by accessing, adding, deleting and few more operations by using its
+ * member methods. 
  */
 template<class T>
 class BaseHandler
 {
 public:
     /*!
-     * \brief Default BaseHandler constructor, it simply creates an empty BaseHandler.
+     * \brief Default BaseHandler constructor, it creates an empty BaseHandler and assigns DPMBase_ to a
+     * null pointer.
      */
     BaseHandler();
 
     /*!
-     * \brief Copy constructor, it copies the BaseHandler and all Object it contains.
-     * \param[in] BH The BaseHandler that has to be copied.
+     * \brief Copy constructor, it copies the content of BaseHandler it contains.
      */
     BaseHandler(const BaseHandler<T>& BH);
 
     /*!
-     * \brief Destructor, it simply destructs the BaseHandler and all Object it contains.
+     * \brief Destructor, it destructs the BaseHandler and all Object it contains.
      */
     virtual ~BaseHandler();
 
     /*!
-     * \brief 
-     * \param[in]
+     * \brief Function that copies the contents (vector of pointers, maxObject_, nextId_, DPMBase_) from one 
+     * handler (container) to the other.
      */
     void copyContentsFromOtherHandler(const BaseHandler<T>& BH);
 
     /*!
      * \brief Creates a copy of a Object and adds it to the BaseHandler.
-     * \param[in] O A reference to the Object that has to be copied.
      */
     template<typename U>
     U* copyAndAddObject(const U& O);
 
     /*!
      * \brief Creates a copy of a Object and adds it to the BaseHandler.
-     * \param[in] O A pointer to the Object that has to be copied.
      */
     template<typename U>
     U* copyAndAddObject(U* O);
 
     /*!
      * \brief Adds a new Object to the BaseHandler.
-     * \param[in]
      */
     virtual void addObject(T* O);
 
-//    /*!
-//     * \brief Creates a copy of a Object and adds it to the BaseHandler.
-//     * \param[in] O A pointer to the Object that has to be copied.
-//     */
-//    template<typename U>
-//    U* addNewObject();
-
     /*!
-     * \brief Removes a Object from the BaseHandler.
-     * \param[in]
+     * \brief Removes an Object from the BaseHandler.
      */
     virtual void removeObject(unsigned const int id);
 
@@ -109,7 +103,7 @@ public:
     void removeLastObject();
 
     /*!
-     * \brief Empties the whole BaseHandler by removing all Objects.
+     * \brief Empties the whole BaseHandler by removing all Objects and setting all other variables to 0.
      */
     void clear();
 
@@ -117,104 +111,100 @@ public:
      * \brief Reads Object into the BaseHandler from restart data.
      * \param[in] is The input stream from which the information is read.
      */
-    virtual void readObject(std::istream& is)=0;
+    virtual void readObject(std::istream& is) = 0;
 
+    /*!
+     *  \brief Reads all objects from restart data.
+     */
     void read(std::istream& is);
 
     /*!
-     * \brief Gets a pointer to the Object at the specified index in the BaseHandler.
-     * \param[in] id the id of the requested Object.
-     * \return A pointer to the requested Object.    
+     * \brief Gets a pointer to the Object at the specified index in the BaseHandler. 
      */
     T* getObjectById(const unsigned int id);
 
     /*!
-     * \brief Gets a pointer to the Object at the specified index in the BaseHandler.
-     * \param[in] id the index of the requested Object.
-     * \return A pointer to the requested Object.    
+     * \brief Gets a pointer to the Object at the specified index in the BaseHandler.   
      */
     T* getObject(const unsigned int id);
 
     /*!
      * \brief Gets a constant pointer to the Object at the specified index in the BaseHandler.
-     * \param[in] id the index of the requested Object.
-     * \return A constant pointer to the requested Object.
      */
     const T* getObject(const unsigned int id) const;
 
     /*!
      * \brief Gets a pointer to the last Object in this BaseHandler.
-     * \return A pointer to the last Object in the BaseHandler.
      */
     T* getLastObject();
 
     /*!
-     * \brief
-     * \return
+     * \brief Gets a constant pointer to the last Object in this BaseHandler.
      */
     const T* getLastObject() const;
 
     /*!
-     * \brief Gets the number of Object in this BaseHandler.
-     * \return The number of Objects in this BaseHandler.
+     * \brief Gets the number of Object in this BaseHandler. 
      */
     unsigned int getNumberOfObjects() const;
 
     /*!
      * \brief Gets the storage capacity of this BaseHandler.
-     * \return The storage capacity of this BaseHandler.
      */
     unsigned int getStorageCapacity() const;
 
     /*!
      * \brief Sets the storage capacity of this BaseHandler.
-     * \param[in] N The storage capacity the BaseHandler will have   
      */
     void setStorageCapacity(const unsigned int N);
 
     /*!
      * \brief Gets the begin of the const_iterator over all Object in this BaseHandler.
-     * \return A const_iterator pointing to the first Object.
      */
     const typename std::vector<T*>::const_iterator begin() const;
 
     /*!
      * \brief Gets the begin of the iterator over all BaseBoundary in this BaseHandler.
-     * \return A iterator pointing to the first Object.
      */
     const typename std::vector<T*>::iterator begin();
 
     /*!
      * \brief Gets the end of the const_iterator over all BaseBoundary in this BaseHandler.
-     * \return A const_iterator pointing to the last BaseBoundary.
      */
     const typename std::vector<T*>::const_iterator end() const;
 
     /*!
      * \brief Gets the end of the iterator over all BaseBoundary in this BaseHandler.
-     * \return An iterator pointing to the last BaseBoundary.
      */
     const typename std::vector<T*>::iterator end();
 
     /*!
-     * \brief
-     * \param[in]
+     * \brief Sets the problem that is solved using this handler.
      */
     void setDPMBase(DPMBase* DPMBase);
 
     /*! 
-     * \brief
+     * \brief Gets the problem that is solved using this handler.
      */
     DPMBase* getDPMBase();
 
+    /*! 
+     * \brief Gets the problem that is solved using this handler and does not change the class.
+     */
     DPMBase* getDPMBase() const;
-
+    
+    /*!\brief Gets the name of this handler.
+     * \return A string that contains the name of the handler.
+     */
     virtual std::string getName() const = 0;
 
 protected:
     //This should not be private. That's just annoying. @dducks
     /*!
      * \brief The actual list of Object pointers
+     * 
+     * The list of Object pointers. This handler is responsible for the memory-deallocation
+     * of these objects.
      */
     std::vector<T*> objects_;
     
@@ -230,27 +220,35 @@ private:
     unsigned int nextId_;
 
     /*!
-     * \brief A pointer back to the DPMBase class
+     * \brief A pointer back to the DPMBase class.
+     * 
+     * Please note that this pointer back to the DPMBase class is a "shared" pointer
+     * and should not be deallocated by this class.
      */
     DPMBase* DPMBase_;
 };
 
+/*!
+ * 
+ */
 template<class T> BaseHandler<T>::BaseHandler()
 {
     DPMBase_ = nullptr;
     clear();
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout << "BaseHandler<T>::BaseHandler() finished" << std::endl;
+    logger(DEBUG, "Basehandler<T>::BaseHandler() finished");
+    //std::cout << "BaseHandler<T>::BaseHandler() finished" << std::endl;
 #endif
 }
 
+///\param[in] BH A reference to the BaseHandler that has to be copied.
 template<class T> BaseHandler<T>::BaseHandler(const BaseHandler<T>& BH)
 {
     DPMBase_ = nullptr;
     clear();
     copyContentsFromOtherHandler(BH);
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout << "BaseHandler<T>::BaseHandler(const BaseHandler &BH) finished" << std::endl;
+    logger(DEBUG,"BaseHandler<T>::BaseHandler(const BaseHandler &BH) finished");
 #endif
 }
 
@@ -258,18 +256,20 @@ template<class T> BaseHandler<T>::~BaseHandler()
 {
     clear();
 #ifdef DEBUG_DESTRUCTOR
-    std::cout << "BaseHandler<T>::~BaseHandler() finished" << std::endl;
+    logger(DEBUG, "BaseHandler<T>::~BaseHandler() finished");
 #endif
 }
 
+///\param[in] BH A reference to the BaseHandler of which the objects have to be copied.
 template<class T> void BaseHandler<T>::copyContentsFromOtherHandler(const BaseHandler<T>& BH)
 {
-    for (typename std::vector<T*>::const_iterator it = BH.begin(); it != BH.end(); it++)
+    for (auto obj : BH.objects_) 
     {
-        addObject((*it)->copy());
+        addObject(obj->copy());
     }
 }
 
+///\param[in] BH A reference to the BaseHandler of which the objects have to be copied.
 template<class T> template<class U> U* BaseHandler<T>::copyAndAddObject(const U& O)
 {
     U* oCopy = O.copy();
@@ -277,6 +277,7 @@ template<class T> template<class U> U* BaseHandler<T>::copyAndAddObject(const U&
     return oCopy;
 }
 
+///\param[in] O A reference to the Object that has to be copied.
 template<class T> template<class U> U* BaseHandler<T>::copyAndAddObject(U* O)
 {
     U* oCopy = O->copy();
@@ -284,6 +285,7 @@ template<class T> template<class U> U* BaseHandler<T>::copyAndAddObject(U* O)
     return oCopy;
 }
 
+///\param[in] O A pointer to the object that must be added.
 template<class T> void BaseHandler<T>::addObject(T* O)
 {
     objects_.push_back(O);
@@ -298,33 +300,50 @@ template<class T> void BaseHandler<T>::addObject(T* O)
         maxObjects_ = getNumberOfObjects();
 }
 
-//template<class T> template<class U> U* BaseHandler<T>::addNewObject()
-//{
-//    U* object = new U;
-//    addObject(object);
-//    return object;
-//}
-
+/*!
+ * This methods removes a particle. This methods invalidates ANY iterators to
+ * particles in this container. This method may shuffle the order of objects in this container.
+ * \param[in] id An unsigned integer that gives the id of the Object that has to be removed.
+ */
 template<class T> void BaseHandler<T>::removeObject(unsigned const int id)
 {
     if (id >= getNumberOfObjects())
     {
-        std::cerr << "In: void " << getName() << "::removeObject(const unsigned int id) const" << std::endl;
-        std::cerr << "No Object exist with index " << id << " number of objects is " << getNumberOfObjects() << std::endl;
-        throw;
+        logger(ERROR, "In: void %::removeOject(const unsigned int id) const, no object exists with index %, number of objects is %", getName(), id, getNumberOfObjects());
+        return;
     }
+    
+    //Okay, this function deletes the particle. Now, the problem is that
+    //particles store their position in the handler (@dducks: do they?)
+    //which means that we would absolutely destroy performance if we took
+    //something out in the middle. Now, what we'll do is swap our particle
+    //with the last one (in case it already is, it is invariant); then
+    //remove the last one.
+    //So, we want the last index.
+    std::size_t lastIdx = objects_.size() - 1;
+  
+    //So, step one, retrieve the pointer
+    T* objectToDelete = objects_[id];
 
-    //Physically remove Object
-    delete objects_[id];
-
-    //If the Object was the last Object nothing has to be done, otherwise some additional work is neccesary
-    if (getObject(id) != getLastObject())
+    if (id != lastIdx) //Are we not the last object?
     {
-        //Copy the pointer to the last Object to position id
-        objects_[id] = getLastObject();
-        objects_[id]->moveInHandler(id);
+      //well.. let's swap.
+      T* objectToMove = objects_[lastIdx];
+
+      objects_[id] = objectToMove; //place it back
+      objects_[lastIdx] = objectToDelete; //Just to make sure.
+
+      //and notify it of the change.
+      objects_[id]->moveInHandler(id);
+      //Even though we are going to delete this particle,
+      //we still need to keep it consistent.
+      objects_[lastIdx]->moveInHandler(lastIdx);
     }
-    //Remove the (now double) reference to that last Object
+    
+    //And _NOW_ we delete it.
+    delete objectToDelete;
+      
+    //And clear it from the backing container.
     objects_.pop_back();
 }
 
@@ -332,9 +351,8 @@ template<class T> void BaseHandler<T>::removeLastObject()
 {
     if (getNumberOfObjects() == 0)
     {
-        std::cerr << "In: void " << getName() << "::removeLastObject" << std::endl;
-        std::cerr << "No Object exist in this BaseHandler" << std::endl;
-        throw;
+        logger(WARN, "In: void %::removeLastObject, no Object exists in this BaseHandler.", getName());
+        return;
     }
     //Physically removes Object
     delete objects_.back();
@@ -342,16 +360,22 @@ template<class T> void BaseHandler<T>::removeLastObject()
     objects_.pop_back();
 }
 
+///Delete all objects stored in objects_ and set the maximum number of objects that
+///have been in this container to 0, and set the Id of the next object that will be added to 0.
 template<class T> void BaseHandler<T>::clear()
 {
-    while (!objects_.empty())
+    
+    for (auto obj : objects_) 
     {
-        removeLastObject();
+        delete obj;
     }
+    objects_.clear();
+    
     nextId_ = 0;
     maxObjects_ = 0;
 }
 
+/// \param[in] is The input stream from which the information is read.
 template<class T> void BaseHandler<T>::read(std::istream& is)
 {
     clear();
@@ -361,22 +385,38 @@ template<class T> void BaseHandler<T>::read(std::istream& is)
     std::stringstream line(std::stringstream::in | std::stringstream::out);
 	helpers::getLineFromStringStream(is, line);
     line >> N;
-    //std::cout << "In " << getName() << "::read(is): reading in " << N << " objects..." << std::endl; //verbose level
+    logger(VERBOSE, "In %::read(is): reading in % objects.", getName(), N);
     for (unsigned int i = 0; i < N; i++)
+    {
         readObject(is);
+    }
 }
 
+/// \param[in] id The id of the requested Object.
+/// \return A pointer to the Object with the correct Id.   
+///Gets an object with the identity id. Please note that the object with this identity
+///does not have to be at place id in the vector of Object objects_.
 template<class T> T* BaseHandler<T>::getObjectById(const unsigned int id)
 {
-    if (id<getNumberOfObjects() && objects_[id]->getId()==id) 
-        return objects_[id]; //should be quicker because typically the id and index matches
-    for (typename std::vector<T*>::const_iterator it = begin(); it != end(); it++) 
-        if ((*it)->getId()==id) 
-            return *it;  
-    std::cerr << "Object not found" << std::endl;
-    exit(-1);
+    // Usually, the id and the index into the backing storage matches
+    // So check this postion first!
+    // dducks: Can't we guarantee more? That should speed up searches. 
+    if (id < objects_.size() && objects_[id]->getId() == id)
+    {
+        return objects_[id]; //There is a hit, return early
+    }
+    
+    for (T* obj : objects_ ) //Search for the correct id, since it wasn't where
+    {                        // we expected it. Just use a linear search..
+        if (obj->getId() == id) //Found it, so return!
+            return obj;
+    }
+    logger(ERROR, "Object with id % could not be found.", id);
+    return nullptr;
 }
 
+///\param[in] id the index of the requested Object.
+///\return A pointer to the requested Object.  
 template<class T> T* BaseHandler<T>::getObject(const unsigned int id)
 {
 #ifdef NDEBUG
@@ -384,9 +424,8 @@ template<class T> T* BaseHandler<T>::getObject(const unsigned int id)
 #else
     if (id >= getNumberOfObjects())
     {
-        std::cerr << "In: Object* " << getName() << "::getObject(const unsigned int id) const" << std::endl;
-        std::cerr << "No Object exist with index " << id << " number of objects is " << getNumberOfObjects() << std::endl;
-        throw;
+        logger(ERROR, "Object couldn't be found because ID (%) is higher than number of objects. (Handler = %)", id, getName());
+        return nullptr;
     }
     else
     {
@@ -395,16 +434,17 @@ template<class T> T* BaseHandler<T>::getObject(const unsigned int id)
 #endif
 }
 
+/// \param[in] id the index of the requested Object.
+/// \return A constant pointer to the requested Object.
 template<class T> const T* BaseHandler<T>::getObject(const unsigned int id) const
-        {
+{
 #ifdef NDEBUG
     return objects_[id];
 #else
     if (id >= getNumberOfObjects())
     {
-        std::cerr << "In: Object* " << getName() << "::getObject(const unsigned int id) const" << std::endl;
-        std::cerr << "No Object exist with index " << id << " number of objects is " << getNumberOfObjects() << std::endl;
-        throw;
+        logger(ERROR, "In: Object* % :getObject(const unsigned int id) const. No Object exist with index % number of objects is %", getName(), id, getNumberOfObjects());
+        return nullptr;
     }
     else
     {
@@ -413,56 +453,68 @@ template<class T> const T* BaseHandler<T>::getObject(const unsigned int id) cons
 #endif
 }
 
+///\return A pointer to the last Object in the BaseHandler.
 template<class T> T* BaseHandler<T>::getLastObject()
 {
     return objects_.back();
 }
 
+///\return A constant pointer to the last Object in the BaseHandler.
 template<class T> const T* BaseHandler<T>::getLastObject() const
 {
     return objects_.back();
 }
 
+///\return The number of Objects in this BaseHandler.
+///\todo TW: should we change this to size_type?
 template<class T> unsigned int BaseHandler<T>::getNumberOfObjects() const
 {
     return objects_.size();
 }
 
+///\return The storage capacity of this BaseHandler.
 template<class T> unsigned int BaseHandler<T>::getStorageCapacity() const
 {
     return objects_.capacity();
 }
 
+///\param[in] N The storage capacity the BaseHandler will have 
 template<class T> void BaseHandler<T>::setStorageCapacity(const unsigned int N)
 {
     objects_.reserve(N);
 }
 
+///\return A const_iterator pointing to the first Object.
 template<class T> const typename std::vector<T*>::const_iterator BaseHandler<T>::begin() const
 {
     return objects_.begin();
 }
 
+///\return A iterator pointing to the first Object.
 template<class T> const typename std::vector<T*>::iterator BaseHandler<T>::begin()
 {
     return objects_.begin();
 }
 
+///\return A const_iterator pointing to the last BaseBoundary.
 template<class T> const typename std::vector<T*>::const_iterator BaseHandler<T>::end() const
 {
     return objects_.end();
 }
 
+///\return An iterator pointing to the last BaseBoundary.
 template<class T> const typename std::vector<T*>::iterator BaseHandler<T>::end()
 {
     return objects_.end();
 }
 
+///\param[in] DPMBase A pointer to a DPMBase, which is the superclass for all problem descriptions.
 template<class T> void BaseHandler<T>::setDPMBase(DPMBase* DPMBase)
 {
     DPMBase_ = DPMBase;
 }
 
+///\return A pointer to the DPMBase (problem descriptor) that is using this handler.
 template<class T> DPMBase* BaseHandler<T>::getDPMBase()
 {
 #ifdef NDEBUG
@@ -470,13 +522,13 @@ template<class T> DPMBase* BaseHandler<T>::getDPMBase()
 #else
     if (DPMBase_ == nullptr)
     {
-        std::cerr << getName() << "::getDPMBase(): pointer to DPMBase class is not set." << std::endl;
-        exit(-1);
+        logger(ERROR, "%::getDPMBase(): pointer to DPMBase class is not set.", getName());
     }
     return DPMBase_;
 #endif
 }
 
+///\return A pointer to the DPMBase (problem descriptor) that is using this handler.
 template<class T> DPMBase* BaseHandler<T>::getDPMBase() const
 {
 #ifdef NDEBUG
@@ -484,8 +536,7 @@ template<class T> DPMBase* BaseHandler<T>::getDPMBase() const
 #else
     if (DPMBase_ == nullptr)
     {
-        std::cerr << getName() << "::getDPMBase(): pointer to DPMBase class is not set." << std::endl;
-        exit(-1);
+        logger(ERROR, "%::getDPMBase(): pointer to DPMBase class is not set.", getName());
     }
     return DPMBase_;
 #endif

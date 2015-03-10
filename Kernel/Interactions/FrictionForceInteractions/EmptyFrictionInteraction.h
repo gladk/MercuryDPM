@@ -31,37 +31,69 @@
 class BaseParticle;
 class EmptyFrictionSpecies;
 class BaseInteractable;
-
+/*!
+ * \brief In case one wants to have a frictionless interaction between the interactables
+ *        (particles or walls), the following class can be used. See Interaction.h, where
+ *        one can set the FrictionalForceInteraction to EmptyFrictionInteraction.
+ * \details All the member functions are just dummy methods which basically do nothing but
+ *          define a interface.
+ */
 class EmptyFrictionInteraction : public virtual BaseInteraction
 {
 public:
+    /*!
+     * \brief An alias name for EmptyFrictionSpecies.
+     */
     typedef EmptyFrictionSpecies SpeciesType;
+    /*!
+     * \brief Constructor.
+     */    
     EmptyFrictionInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
+    /*!
+     * \brief Copy constructor.
+     */    
     EmptyFrictionInteraction(const EmptyFrictionInteraction &p);
+    /*!
+     * \brief Destructor.
+     */    
     virtual ~EmptyFrictionInteraction();
-
-    void computeForce();
-
-    ///Interaction read function, which accepts an std::stringstream as input.
+    /*!
+     * \brief Computes nothing, it is an empty function.
+     */
+    void computeFrictionForce();
+    /*!
+     * \brief Interaction read function, which accepts an std::istream as input.
+     */
     void read(std::istream& is);
-
-    ///Interaction print function, which accepts an std::stringstream as input.
+    /*!
+     * \brief Interaction write function, which accepts an std::ostream as input.
+     */
     void write(std::ostream& os) const;
-
+    /*!
+     * \brief Returns zero as it is an frictionless interaction.
+     */
     Mdouble getElasticEnergy() const;
-
+    /*!
+     * \brief Returns a const pointer of type EmptyFrictionSpecies*. 
+     */
     const EmptyFrictionSpecies* getSpecies() const;
-
-    std::string getName() const;
+    /*!
+     * \brief Returns interaction name/type.
+     */
+    std::string getBaseName() const;
 
 // specific for tangential forces
-
-    //currently, only tangential forces have an integratable part (the spring)
+    /*!
+     * \brief Does nothing as there is no force.
+     */    
     void integrate(Mdouble timeStep);
-
-    //needed by BaseInteraction::writeToFstat()
+    /*!
+     * \brief Returns zero overlap.
+     */
     Mdouble getTangentialOverlap() const;
-
+    /*!
+     * \brief Returns zero tangential force. 
+     */
     const Vec3D getTangentialForce() const;
 };
 #endif

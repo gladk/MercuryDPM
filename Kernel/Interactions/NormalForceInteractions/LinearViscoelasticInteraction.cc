@@ -30,7 +30,11 @@
 #include "InteractionHandler.h"
 #include <iomanip>
 #include <fstream>
-
+/*!
+ * \param[in] P
+ * \param[in] I
+ * \param[in] timeStamp
+ */
 LinearViscoelasticInteraction::LinearViscoelasticInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
         : BaseInteraction(P, I, timeStamp)
 {
@@ -38,12 +42,14 @@ LinearViscoelasticInteraction::LinearViscoelasticInteraction(BaseInteractable* P
     std::cout<<"LinearViscoelasticInteraction::LinearViscoelasticInteraction() finished"<<std::endl;
 #endif
 }
-
-LinearViscoelasticInteraction::LinearViscoelasticInteraction(const LinearViscoelasticInteraction &p)
+/*!
+ * \param[in] p
+ */
+LinearViscoelasticInteraction::LinearViscoelasticInteraction(const LinearViscoelasticInteraction& p)
         : BaseInteraction(p)
 {
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout<<"LinearViscoelasticInteraction::LinearViscoelasticInteraction(const LinearViscoelasticInteraction &p finished"<<std::endl;
+    std::cout<<"LinearViscoelasticInteraction::LinearViscoelasticInteraction(const LinearViscoelasticInteraction& p) finished"<<std::endl;
 #endif
 }
 
@@ -53,29 +59,41 @@ LinearViscoelasticInteraction::~LinearViscoelasticInteraction()
     std::cout<<"LinearViscoelasticInteraction::~LinearViscoelasticInteraction() finished"<<std::endl;
 #endif
 }
-
+/*!
+ * \return A pointer to the copy of an object that is cloned (Deep copy).
+ */
 LinearViscoelasticInteraction* LinearViscoelasticInteraction::copy() const
 {
     return new LinearViscoelasticInteraction(*this);
 }
 
-///BaseParticle print function, which accepts an os std::stringstream as input. It prints human readable BaseParticle information to the std::stringstream
+/*!
+ * \detail Calls the BaseInteraction() write function.
+ * \param[in,out] os
+ */
 void LinearViscoelasticInteraction::write(std::ostream& os) const
         {
     BaseInteraction::write(os);
 }
-
+/*!
+ * \detail Calls the BaseInteraction() read function.
+ * \param[in,out] is
+ */
 void LinearViscoelasticInteraction::read(std::istream& is)
 {
     BaseInteraction::read(is);
 }
-
-std::string LinearViscoelasticInteraction::getName() const
+/*!
+ * \return std::string
+ */
+std::string LinearViscoelasticInteraction::getBaseName() const
 {
     return "LinearViscoelastic";
 }
-
-void LinearViscoelasticInteraction::computeForce()
+/*!
+ *
+ */
+void LinearViscoelasticInteraction::computeNormalForce()
 {
     // Compute the relative velocity vector of particle P w.r.t. I
     setRelativeVelocity(getP()->getVelocityAtContact(getContactPoint()) - getI()->getVelocityAtContact(getContactPoint()));
@@ -98,12 +116,19 @@ void LinearViscoelasticInteraction::computeForce()
         setTorque(Vec3D(0.0, 0.0, 0.0));
     }
 }
-
+/*!
+ * \return Mdouble
+ */
 Mdouble LinearViscoelasticInteraction::getElasticEnergy() const
 {
-    return 0.5 * (getSpecies()->getStiffness() * mathsFunc::square(getOverlap()));
+   if (getOverlap() > 0)
+        return 0.5 * (getSpecies()->getStiffness() * mathsFunc::square(getOverlap()));
+    else
+        return 0.0;
 }
-
+/*!
+ * \return const LinearViscoelasticNormalSpecies*
+ */
 const LinearViscoelasticNormalSpecies* LinearViscoelasticInteraction::getSpecies() const
 {
     return dynamic_cast<const LinearViscoelasticNormalSpecies*>(getBaseSpecies());

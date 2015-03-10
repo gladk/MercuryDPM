@@ -28,31 +28,68 @@
 
 #include "ReversibleAdhesiveInteraction.h"
 #include "Math/Vector.h"
+
 class BaseParticle;
 class IrreversibleAdhesiveSpecies;
 class BaseInteractable;
 
+/*!
+ * \class IrreversibleAdhesiveInteraction
+ */
 class IrreversibleAdhesiveInteraction : public ReversibleAdhesiveInteraction
 {
 public:
+    /*!
+     * \brief An alias name for IrreversibleAdhesiveSpecies data type.
+     */
     typedef IrreversibleAdhesiveSpecies SpeciesType;
+    /*!
+     * \brief Constructor.
+     */
     IrreversibleAdhesiveInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
+    /*!
+     * \brief Copy constructor.
+     */
     IrreversibleAdhesiveInteraction(const IrreversibleAdhesiveInteraction &p);
+    /*!
+     * \brief Destructor.
+     */
     virtual ~IrreversibleAdhesiveInteraction();
+    
+    /*!
+     * \brief Computes the Adhesive force.
+     */
+    void computeAdhesionForce();
 
-    void computeForce();
-
-    ///Interaction read function, which accepts an std::stringstream as input.
+    /*!
+     * \brief Interaction read function, which accepts an std::istream as input.
+     */
     void read(std::istream& is);
 
-    ///Interaction print function, which accepts an std::stringstream as input.
+    /*!
+     * \brief Interaction print function, which accepts an std::ostream as input.
+     */
     void write(std::ostream& os) const;
 
+    /*!
+     * \brief A dynamic_cast of BaseSpecies type pointer to a pointer of type IrreversibleAdhesiveSpecies.
+     */
     const IrreversibleAdhesiveSpecies* getSpecies() const;
+    /*!
+     * \brief Returns the name of the interaction, see Interaction.h.
+     */  
+    std::string getBaseName() const;
 
-    std::string getName() const;
+    /*!
+     * \brief Returns the elastic energy stored in the adhesive spring. 
+     */
+    Mdouble getElasticEnergy() const;
 
 private:
+    /*!
+     * \brief A history parameter to store if the particles were in contact or not. Useful
+     *        to compute adhesive forces.
+     */
     bool wasInContact_;
 };
 #endif

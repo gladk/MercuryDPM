@@ -110,7 +110,7 @@ species0->setSlidingFrictionCoefficient(0.0);
 species0->setRollingFrictionCoefficient(0.0);
 
 //
-species1->setDensity(2500.0); // sets the species type-0 density
+species1->setDensity(2500.0); // sets the species type-1 density
 species1->setStiffness(259.018);// sets the spring stiffness
 species1->setDissipation(0.0334);// sets the dissipation
 species1->setSlidingStiffness(2.0/7.0*species1->getStiffness());
@@ -125,7 +125,7 @@ species01->setRollingStiffness(2.0/5.0*species01->getStiffness());
 species01->setSlidingFrictionCoefficient(0.5);
 species01->setRollingFrictionCoefficient(0.0);
 
-species2->setDensity(2500.0); // sets the species type-0 density
+species2->setDensity(2500.0); // sets the species type-2 density
 species2->setStiffness(258.5);// sets the spring stiffness
 species2->setDissipation(0.0);// sets the dissipation
 species2->setSlidingStiffness(2.0/7.0*species2->getStiffness());

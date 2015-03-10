@@ -40,7 +40,7 @@ public:
     virtual ~HertzianViscoelasticInteraction();
     HertzianViscoelasticInteraction* copy() const;
 
-    void computeForce();
+    void computeNormalForce();
 
     ///Interaction read function, which accepts an std::stringstream as input.
     void read(std::istream& is);
@@ -48,7 +48,7 @@ public:
     ///Interaction print function, which accepts an std::stringstream as input.
     void write(std::ostream& os) const;
 
-    std::string getName() const;
+    std::string getBaseName() const;
 
     Mdouble getElasticEnergy() const;
 

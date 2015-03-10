@@ -39,7 +39,7 @@ public:
 
     void setupInitialConditions()
     {
-        auto species = speciesHandler.copyAndAddObject(LinearViscoelasticSpecies());
+        speciesHandler.copyAndAddObject(LinearViscoelasticSpecies());
 
         BaseParticle p0;
         particleHandler.copyAndAddObject(p0);

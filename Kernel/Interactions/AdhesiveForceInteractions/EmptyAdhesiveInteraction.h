@@ -31,27 +31,56 @@
 class BaseParticle;
 class EmptyAdhesiveSpecies;
 class BaseInteractable;
-
+/*!
+ * \class EmptyAdhesiveInteraction
+ * \brief In case one doesn't want to have an adhesive (short range non contact) interaction between the interactables
+ *        (particles or walls), the following class can be used. See Interaction.h, where one can set the Adhesive 
+ *        interaction to EmptyAdhesiveInteraction.
+ */
 class EmptyAdhesiveInteraction : public virtual BaseInteraction
 {
 public:
+    /*!
+     * \brief An alias name for EmptyAdhesiveSpecies data type.
+     */
     typedef EmptyAdhesiveSpecies SpeciesType;
+    /*!
+     * \brief Constructor.
+     */
     EmptyAdhesiveInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
+    /*!
+     * \brief copy constructor.
+     */
     EmptyAdhesiveInteraction(const EmptyAdhesiveInteraction &p);
+    /*!
+     * \brief Destructor.
+     */
     virtual ~EmptyAdhesiveInteraction();
-
-    void computeForce();
-
-    ///Interaction read function, which accepts an std::stringstream as input.
+    /*!
+     * \brief Computes nothing as it is an Empty Adhesive interaction.
+     */
+    void computeAdhesionForce();
+    /*!
+     * \brief Interaction read function, which accepts an std::istream as input.
+     */    
     void read(std::istream& is);
-
-    ///Interaction print function, which accepts an std::stringstream as input.
+    /*!
+     * \brief Interaction print function, which accepts an std::ostream as input.
+     */
     void write(std::ostream& os) const;
-
+    /*!
+     * \brief Returns the amount of Elastic energy involved in an interaction. Basically
+     *        used in case you want to write the elastic energy into an output file. 
+     */
     Mdouble getElasticEnergy() const;
-
+    /*!
+     * \brief A dynamic_cast of BaseSpecies pointer type to a pointer to an object of 
+     *        type EmptyAdhesiveSpecies.
+     */
     const EmptyAdhesiveSpecies* getSpecies() const;
-
-    std::string getName() const;
+    /*!
+     * \brief Returns the name of the interaction, see Interaction.h.
+     */
+    std::string getBaseName() const;
 };
 #endif

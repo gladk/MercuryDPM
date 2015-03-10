@@ -30,6 +30,8 @@
 /*!
  * \class CylindricalWall
  * \brief
+ * \deprecated Don't use this anymore.
+ * \todo Throw this class away.
  */
 class CylindricalWall : public BaseWall
 {

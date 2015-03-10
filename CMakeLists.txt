@@ -14,6 +14,54 @@ if (UNIX)
     add_definitions( -DUNIX )
 endif(UNIX)
 
+#Configure the default loglevel using CMake..
+set( Mercury_LOGLEVEL "DEFAULT" CACHE STRING "Verbosity of Mercury. DEFAULT is recommended.")
+set_property( CACHE Mercury_LOGLEVEL PROPERTY STRINGS FATAL ERROR WARN INFO DEFAULT VERBOSE DEBUG )
+mark_as_advanced( FORCE Mercury_LOGLEVEL )
+add_definitions( -DMERCURY_LOGLEVEL=Log::${Mercury_LOGLEVEL} )
+
+#Enable or disable stacktraces based on the system
+include(CheckIncludeFiles)
+include(CheckIncludeFileCXX)
+include(CheckLibraryExists)
+#We need execinfo.h for backtrace()
+CHECK_INCLUDE_FILES(execinfo.h  HAS_EXECINFO_H)
+#We would like cxxabi.h and dlfcn.h for the name demangling..
+CHECK_INCLUDE_FILES(dlfcn.h     HAS_DLFCN_H)
+CHECK_INCLUDE_FILE_CXX(cxxabi.h HAS_CXXABI_H)
+CHECK_LIBRARY_EXISTS(dl dladdr  "" HAS_DLADDR_LIB)
+
+#Without it, we simply can't do backtraces.
+if (${HAS_EXECINFO_H})
+  #enable it only in debug..
+  if (CMAKE_BUILD_TYPE)
+    if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+      set( Mercury_BACKTRACE_ENABLE ON CACHE BOOL "Enable stacktraces for terminating log messages")
+    else()
+      set( Mercury_BACKTRACE_ENABLE OFF CACHE BOOL "Enable stacktraces for terminating log messages")
+    endif()
+  endif()
+  #allow us to do demangling!
+  set( USE_DEMANGLE ON )
+  if (NOT HAS_DLFCN_H)
+    set( USE_DEMANGLE OFF )
+  endif()
+  if (NOT HAS_DLADDR_LIB)
+    set( USE_DEMANGLE OFF )
+  endif()
+  if (NOT HAS_CXXABI_H)
+    set( USE_DEMANGLE OFF )
+  endif()
+  if ( USE_DEMANGLE )
+    set( Mercury_BACKTRACE_DEMANGLE ON CACHE BOOL "Enable demangling for stacktraces")
+  else()
+    set( Mercury_BACKTRACE_DEMANGLE OFF INTERNAL BOOL "Demangling not possible")
+  endif()
+else()
+  set( Mercury_BACKTRACE_ENABLE OFF INTERNAL BOOL "execinfo.h not found - stacktrace not possible" )
+  set( Mercury_BACKTRACE_DEMANGLE OFF INTERNAL BOOL "no backtraces anyway" )
+endif()
+mark_as_advanced( FORCE Mercury_BACKTRACE_ENABLE Mercury_BACKTRACE_DEMANGLE )
 
 #if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   #if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7.0)
@@ -35,7 +83,7 @@ else()
 	message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. We require a compiler that has support for CXX0X, for example GCC 4.3 or later")
 endif()
 
-#If uses has not given build type set it to Release
+#If user has not given build type set it to Release
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release" CACHE 
 	STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
@@ -45,6 +93,7 @@ endif(NOT CMAKE_BUILD_TYPE)
 add_subdirectory(Drivers)
 add_subdirectory(Kernel)
 add_subdirectory(XBalls)
+add_subdirectory(Tools)
 
 add_custom_target(fullTest
         COMMAND make rebuild_cache	
@@ -56,9 +105,10 @@ add_custom_target(fullTest
 #This section generates a configuration file that contains the CMake variables#
 #############################################
 
-configure_file(Configuration/CMakeDefinitions.conf
-		${PROJECT_BINARY_DIR}/Kernel/CMakeDefinitions.hpp)
-
+configure_file(Configuration/CMakeDefinitions.cc
+		${PROJECT_BINARY_DIR}/Kernel/CMakeDefinitions.cc)
+configure_file(Configuration/CMakeDefinitions.h
+		${PROJECT_BINARY_DIR}/Kernel/CMakeDefinitions.h)
 
 #This section is about the build of documentation#
 ##################################################
@@ -98,8 +148,8 @@ if(Mercury_BUILD_DOCUMENTATION)
             SOURCES ${PROJECT_BINARY_DIR}/Configuration/doxygen.conf)
 
 	add_custom_target	(docClean
-            COMMAND mkdir -p ${PROJECT_BINARY_DIR}/docs
-            COMMAND rm -r ${PROJECT_BINARY_DIR}/docs/*
+            COMMAND mkdir -p ${PROJECT_BINARY_DIR}/Documentation
+            COMMAND rm -r ${PROJECT_BINARY_DIR}/Documentation/*
 			COMMENT "Cleaning (deleting) the documentation"	) 
 
 	add_custom_target	(docWeb

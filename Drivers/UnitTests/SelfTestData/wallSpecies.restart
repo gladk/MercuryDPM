@@ -1,9 +1,9 @@
 restart_version 1.0 name wallSpecies
-dataFile name wallSpecies.data fileType ONE_FILE saveCount 2587 counter 30 nextSavedTimeStep 77588
-fStatFile name wallSpecies.fstat fileType ONE_FILE saveCount 2587 counter 30 nextSavedTimeStep 77588
-eneFile name wallSpecies.ene fileType ONE_FILE saveCount 2587 counter 30 nextSavedTimeStep 77588
-restartFile name wallSpecies.restart fileType ONE_FILE saveCount 2587 counter 30 nextSavedTimeStep 77588
-statFile name wallSpecies.stat fileType ONE_FILE saveCount 2587 counter 0 nextSavedTimeStep 75001
+dataFile    fileType ONE_FILE saveCount 2587 counter 30 nextSavedTimeStep 77588
+fStatFile   fileType ONE_FILE saveCount 2587 counter 30 nextSavedTimeStep 77588
+eneFile     fileType ONE_FILE saveCount 2587 counter 30 nextSavedTimeStep 77588
+restartFile fileType ONE_FILE saveCount 2587 counter 30 nextSavedTimeStep 77588
+statFile    fileType ONE_FILE saveCount 2587 counter 0 nextSavedTimeStep 75001
 xMin 0 xMax 20 yMin 0 yMax 20 zMin 0 zMax 20
 timeStep 0.0002 time 15.0001999999917 ntimeSteps 75001 timeMax 15
 systemDimensions 3 particleDimensions 3 gravity 0 0 0

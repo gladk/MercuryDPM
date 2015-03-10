@@ -28,6 +28,7 @@
 
 /*!
  * \class InfiniteWallWithHole
+ * \deprecated Use AxisymmetricIntersectionOfWalls instead.
  * \brief
  */
 #include "BaseWall.h"
@@ -70,12 +71,14 @@ public:
     /*!
      * \brief Allows the wall to be moved to a new position
      */
-    void move(Mdouble position);
+    void moveTo(Mdouble position);
     
-    /*!
-     * \brief Allows the wall to be moved to a new position (also orthogonal to the normal), and setting the velocity
-     */
-    void move(Vec3D velocity, Mdouble dt);
+//    /*!
+//     * \brief Allows the wall to be moved to a new position (also orthogonal to the normal), and setting the velocity
+//     * note: I commented this function out as it does not add new functionality (instead, BaseInteractable::move(velocity*dt) can be used), 
+//     * and it hides the virtual function BaseInteractable::move. If this is really needed, please add it again. \author weinhartt
+//     */
+//    void move(Vec3D velocity, Mdouble dt);
     
     /*!
      * \brief Allows the wall to be moved with time
@@ -133,8 +136,14 @@ public:
     Mdouble getPosition();
 
 private:
-    Vec3D normal_; ///<outward unit normal vector
-    Mdouble factor_; ///<This is the normal to rescale to unit vectors.
+    /*!
+     * \brief Outward normal vector, does not have to be a unit vector.
+     */
+    Vec3D normal_;
+    /*!
+     * The factor that needs to be multiplied with normal_ to make it a unit vector.
+     */
+    Mdouble factor_; 
     Mdouble position_; ///<position n*x=p
     Mdouble holeRadius_;
 

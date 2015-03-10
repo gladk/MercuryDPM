@@ -46,6 +46,9 @@ FrictionSpecies::FrictionSpecies()
 #endif
 }
 
+/*!
+ * \param[in] the species that is copied
+ */
 FrictionSpecies::FrictionSpecies(const FrictionSpecies &s)
     : SlidingFrictionSpecies(s)
 {
@@ -69,18 +72,9 @@ FrictionSpecies::~FrictionSpecies()
 #endif   
 }
 
-void FrictionSpecies::clear()
-{
-    std::cout << "FrictionSpecies::clear(), this function shouldn't be called" << std::endl;
-}
-
-///FrictionSpecies copy method. It calls to copy constructor of this FrictionSpecies, useful for polymorphism
-FrictionSpecies* FrictionSpecies::copy() const
-{
-    return new FrictionSpecies(*this);
-}
-
-///FrictionSpecies print function, which accepts an os std::stringstream as input. It prints human readable FrictionSpecies information to the std::stringstream
+/*!
+ * \param[out] output stream (typically the restart file)
+ */
 void FrictionSpecies::write(std::ostream& os) const
 {
     SlidingFrictionSpecies::write(os);
@@ -94,6 +88,9 @@ void FrictionSpecies::write(std::ostream& os) const
     os  << " torsionFrictionCoefficientStatic " << torsionFrictionCoefficientStatic_;
 }
 
+/*!
+ * \param[in] input stream (typically the restart file)
+ */
 void FrictionSpecies::read(std::istream& is)
 {
     SlidingFrictionSpecies::read(is);
@@ -108,6 +105,9 @@ void FrictionSpecies::read(std::istream& is)
     is >> dummy >> torsionFrictionCoefficientStatic_;
 }
 
+/*!
+ * \return a string containing the name of the species (minus the word "Species")
+ */
 std::string FrictionSpecies::getBaseName() const
 {
     return "Friction";
@@ -118,12 +118,22 @@ BaseInteraction* FrictionSpecies::getNewInteraction(BaseInteractable* P, BaseInt
     return new FrictionInteraction(P, I, timeStamp);
 }
 
+/*!
+ * \details Returns true for any FrictionForceSpecies except EmptyFrictionSpecies, 
+ * because for spherical particles, torques are only caused by tangential forces. 
+ * See SpeciesHandler::useAngularDOFs for more details
+ * \return true 
+ */
 bool FrictionSpecies::getUseAngularDOFs() const
 {
     return true;
 }
 
-///create values for mixed species
+/*!
+ * \details For all parameters we assume that the harmonic mean of the parameters of the 
+ * original two species is a sensible default.
+ * \param[in] S,T the two species whose properties are mixed to create the new species
+ */
 void FrictionSpecies::mix(FrictionSpecies* const S, FrictionSpecies* const T)
 {
     rollingStiffness_= average(S->getRollingStiffness(), T->getRollingStiffness());

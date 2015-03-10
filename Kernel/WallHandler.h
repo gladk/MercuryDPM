@@ -35,13 +35,15 @@ class BaseWall;
 /*!
  * \class WallHandler
  * \brief Container to store all BaseWall
- * \details The WallHandler is a container to store all BaseWall. It is implemented by a vector of pointers to BaseWall.
+ * 
+ * \details The WallHandler is a container to store all BaseWall. 
+ * It is implemented by a vector of pointers to BaseWall.
  */
 class WallHandler : public BaseHandler<BaseWall>
 {
 public:
   /*!
-   * \brief default constructor, it simply creates an empty WallHandler.
+   * \brief Default constructor, it creates an empty WallHandler.
    */
     WallHandler();
 
@@ -51,17 +53,17 @@ public:
     WallHandler(const WallHandler& BH);
 
   /*!
-   * \brief Assignment operator.
+   * \brief Copy assignment operator.
    */
     WallHandler operator =(const WallHandler& rhs);
     
   /*!
-   * \brief Destructor, it simply destructs the WallHandler and all BaseWall it contains.
+   * \brief Destructor, it destructs the WallHandler and all BaseWall it contains.
    */
     ~WallHandler();
 
   /*!
-   * \brief Adds a new BaseWall to the WallHandler.
+   * \brief Adds a BaseWall to the WallHandler.
    */
     void addObject(BaseWall* W);
 
@@ -70,8 +72,14 @@ public:
    */
     void readObject(std::istream& is);
 
+    /*!
+     * \brief Reads a Basewall into the WallHandler from old-style restart data.     
+     */
     void readOldObject(std::istream& is);
 
+    /*!
+     * \brief Returns the name of the handler, namely the string "WallHandler".
+     */
     std::string getName() const;
 
 };

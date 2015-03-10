@@ -66,7 +66,7 @@ public:
 		
 		//set walls
 		InfiniteWall w;
-		w.set(Vec3D(0.0,0.0,-1.0),-getZMin());
+		w.set(Vec3D(0.0,0.0,-1.0),Vec3D(0, 0, getZMin()));
         wallHandler.copyAndAddObject(w);
 	}
 	

@@ -35,7 +35,7 @@ public:
 	void setupInitialConditions()
 	{
 		InfiniteWall w0;
-		w0.set(Vec3D(0,-1,0),-getYMin());
+		w0.set(Vec3D(0,-1,0),Vec3D(0, getYMin(), 0));
 		wallHandler.copyAndAddObject(w0);
 		
 		BaseParticle p0; //important

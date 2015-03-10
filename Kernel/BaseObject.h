@@ -27,11 +27,25 @@
 #define BASEOBJECT_H
 
 #include <iostream>
-    /*!
-     * \class BaseObject
-     * \brief 
-     * \details
-     */
+
+class BaseObject;
+
+/*! 
+ * \brief Operator overloading for passing the data from the BaseObject "o" into the output stream.
+ */
+std::ostream& operator<<(std::ostream& os, const BaseObject& o);
+
+/*!
+ * \brief Operator overloading for reading the data from an input stream into the BAseObject "o"  
+ */
+std::istream& operator>>(std::istream& is, BaseObject& o);
+
+/*!
+ * \class BaseObject 
+ * \brief It is an abstract base class due to the purely virtual functions declared below. Even if the function is
+ * purely virtual, it does not imply that it cannot have a definition. Abstract classes are useful to define a 
+ * interface.
+ */
 class BaseObject
 {
 public:
@@ -46,67 +60,51 @@ public:
     BaseObject(const BaseObject &p);
 
     /*!
-     * \brief Destructor
+     * \brief virtual destructor
      */
     virtual ~BaseObject();
 
     /*!
-     * \brief 
-     * \details
-     */
-    friend std::ostream& operator <<(std::ostream& os, const BaseObject& o);
-
-    /*!
-     * \brief 
-     * \details
-     */
-    friend std::istream& operator >>(std::istream& is, BaseObject& o);
-
-    /*!
-     * \brief 
-     * \param[in]
+     * \brief A purely virtual method with an implementation which reads the index from the stream and assigns
+     * it to id_
+     * \param[in] is
      */
     virtual void read(std::istream& is) = 0;
 
     /*!
-     * \brief 
-     * \param[in]
+     * \brief A purely virtual function which has an implementation which writes the name and the object id_ 
+     * to the output stream.
      */
     virtual void write(std::ostream& os) const = 0;
 
     /*!
-     * \brief 
-     * \return
+     * \brief A purely virtual function
      */
     virtual std::string getName() const = 0;
 
     /*!
-     * \brief 
-     * \param[in]
+     * \brief Except that it is virtual, it does the same thing as setIndex() does.
      */
     virtual void moveInHandler(const unsigned int index);
 
     /*!
-     * \brief 
-     * \param[in]
+     * \brief Allows one to assign an index to an object in the handler/container.
      */
     void setIndex(const unsigned int index);
 
     /*!
-     * \brief 
-     * \param[in]
+     * \brief Assigns a unique identifier to each object in the handler (container) which remains
+     * constant even after the object is deleted from the container/handler.
      */
     void setId(const unsigned int id);
 
     /*!
-     * \brief 
-     * \return
+     * \brief Returns the index of the object in the handler.
      */
     unsigned int getIndex() const;
 
     /*!
-     * \brief 
-     * \return
+     * \brief Returns the unique identifier of any particular object.
      */
     unsigned int getId() const;
 

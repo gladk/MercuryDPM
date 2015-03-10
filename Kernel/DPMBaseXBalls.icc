@@ -101,15 +101,15 @@ void DPMBase::writeXBallsScript() const
     script_file << "cd $dirname" << std::endl;
     
     Mdouble scale;
-    Mdouble offset = 0;
+    //Mdouble offset = 0;
     int verticalOffset = 0;
-    int horizontalOffset = 500.0*(0.0 - getXMin())/(getXMax() - getXMin());
+    int horizontalOffset = static_cast<int>(500.0*(0.0 - getXMin())/(getXMax() - getXMin()));
     int format;
     
     if (getSystemDimensions() < 3)
     { // dim = 1 or 2
         format = 8;
-        verticalOffset = 500.*(0.0 - getYMin())/(getYMax() - getYMin());
+        verticalOffset = static_cast<int>(500.*(0.0 - getYMin())/(getYMax() - getYMin()));
         if (getXBallsScale() < 0)
         {
             scale = 1.0 / std::max(getYMax() - getYMin(), getXMax() - getXMin());
@@ -122,7 +122,7 @@ void DPMBase::writeXBallsScript() const
     else
     { //dim==3
         format = 14;
-        verticalOffset = 500.*(0.0 - getZMin())/(getZMax() - getZMin());
+        verticalOffset = static_cast<int>(500.*(0.0 - getZMin())/(getZMax() - getZMin()));
         if (getXBallsScale() < 0)
         {
             scale = 1.2 / std::max(getZMax() - getZMin(), getXMax() - getXMin());

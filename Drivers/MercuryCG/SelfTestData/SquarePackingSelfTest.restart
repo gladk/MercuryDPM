@@ -1,9 +1,9 @@
 restart_version 1.0 name SquarePackingSelfTest
-dataFile name SquarePackingSelfTest.data fileType ONE_FILE saveCount 1000 counter 7 nextSavedTimeStep 6001
-fStatFile name SquarePackingSelfTest.fstat fileType ONE_FILE saveCount 1000 counter 7 nextSavedTimeStep 6001
-eneFile name SquarePackingSelfTest.ene fileType ONE_FILE saveCount 1000 counter 7 nextSavedTimeStep 6001
-restartFile name SquarePackingSelfTest.restart fileType ONE_FILE saveCount 1000 counter 7 nextSavedTimeStep 6001
-statFile name SquarePackingSelfTest.stat fileType ONE_FILE saveCount 1000 counter 7 nextSavedTimeStep 6001
+dataFile    fileType ONE_FILE saveCount 1000 counter 7 nextSavedTimeStep 6001
+fStatFile   fileType ONE_FILE saveCount 1000 counter 7 nextSavedTimeStep 6001
+eneFile     fileType ONE_FILE saveCount 1000 counter 7 nextSavedTimeStep 6001
+restartFile fileType ONE_FILE saveCount 1000 counter 7 nextSavedTimeStep 6001
+statFile    fileType ONE_FILE saveCount 1000 counter 7 nextSavedTimeStep 6001
 xMin 0 xMax 5 yMin 0 yMax 5 zMin 0 zMax 0.1
 timeStep 0.0002 time 1.00019999999992 ntimeSteps 5001 timeMax 1
 systemDimensions 2 particleDimensions 2 gravity 0 -1 0

@@ -1,4 +1,4 @@
-//Copyright (c) 2013-2014, The MercuryDPM Developers Team. All rights reserved.
+//Copyright (c) 2013-2015, The MercuryDPM Developers Team. All rights reserved.
 //For the list of developers, see <http://www.MercuryDPM.org/Team>.
 //
 //Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,12 @@
 #include "Interactions/BaseInteraction.h"
 #include "Species/ParticleSpecies.h"
 
-///\todo TW: why do some constructors (e.g. BaseInteractable, BaseParticle)not explicitly call the constructor from the inherited class?
+/*!
+ * \todo TW: why do some constructors (e.g. BaseInteractable, BaseParticle)not 
+ *       explicitly call the constructor from the inherited class?
+ * \detilas Sets all vectors to zero and all point to nullptr.
+ */
+
 BaseInteractable::BaseInteractable()
 {
     position_.setZero();
@@ -47,10 +52,16 @@ BaseInteractable::BaseInteractable()
 #endif
 }
 
+/*!
+ * \detials Note, this does not copy interactions of a interactable. As these 
+ *          often require extra work. 
+ *          All the other properties are copied normally. Please use this copy
+ *          with care.
+ */
 BaseInteractable::BaseInteractable(const BaseInteractable &p)
         : BaseObject(p)
 {
-    //interactions_=p.interactions_;//Interactions are not copied by default
+    interactions_.clear();
     position_ = p.position_;
     orientation_ = p.orientation_;
     velocity_ = p.velocity_;
@@ -66,6 +77,9 @@ BaseInteractable::BaseInteractable(const BaseInteractable &p)
 #endif
 }
 
+/*!
+ * \detials Removes all the interactions from the interactable.
+ */
 BaseInteractable::~BaseInteractable()
 {
     //std::cout<<"Deleting BaseInteractable with index="<<getIndex()<<" and id="<<getId()<<" size="<<interactions_.size()<<std::endl;
@@ -78,6 +92,11 @@ BaseInteractable::~BaseInteractable()
 #endif
 }
 
+/*!
+ * \details Returns the unsigned int to the index of the species associated with
+ *          the interactable object.
+ * \return  Unsigned int which is the unique index of the species 
+ */
 unsigned int BaseInteractable::getIndSpecies() const
 {
     return indSpecies_;
@@ -109,24 +128,24 @@ const Vec3D& BaseInteractable::getTorque() const
     return torque_;
 }
 
-void BaseInteractable::setForce(Vec3D _new)
+void BaseInteractable::setForce(Vec3D force)
 {
-    force_ = _new;
+    force_ = force;
 }
 
-void BaseInteractable::setTorque(Vec3D _new)
+void BaseInteractable::setTorque(Vec3D torque)
 {
-    torque_ = _new;
+    torque_ = torque;
 }
 
-void BaseInteractable::addForce(Vec3D _new)
+void BaseInteractable::addForce(Vec3D addForce)
 {
-    force_ += _new;
+    force_ += addForce;
 }
 
-void BaseInteractable::addTorque(Vec3D _new)
+void BaseInteractable::addTorque(Vec3D addTorque)
 {
-    torque_ += _new;
+    torque_ += addTorque;
 }
 
 const Vec3D& BaseInteractable::getPosition() const
@@ -242,11 +261,15 @@ const Vec3D BaseInteractable::getVelocityAtContact(const Vec3D& contact) const
     return getVelocity() - Vec3D::cross(contact - getPosition(), getAngularVelocity());
 }
 
-void BaseInteractable::copyInteractionsForPeriodicParticles(const BaseInteractable &p)
+/*!
+ * \details This loops over all interactions of periodic (particle) and calls copySwitchPointer, which copies the interactions.
+ */
+void BaseInteractable::copyInteractionsForPeriodicParticles(const BaseInteractable &pOriginal)
 {
-    for (std::list<BaseInteraction*>::const_iterator it = p.interactions_.begin(); it != p.interactions_.end(); ++it)
+    for (std::list<BaseInteraction*>::const_iterator it = pOriginal.interactions_.begin(); it != pOriginal.interactions_.end(); ++it)
     {
-        (*it)->copySwitchPointer(&p, this);
+        //So here this is the ghost and it is the interaction of the ghost/
+        (*it)->copySwitchPointer(&pOriginal, this);
     }
 }
 

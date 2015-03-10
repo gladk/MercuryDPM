@@ -33,80 +33,60 @@ class BaseParticle;
 class BaseInteractable;
 
 BaseSpecies::BaseSpecies()
-		: BaseObject()
+: BaseObject()
 {
     handler_ = 0;
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout<<"BaseSpecies::BaseSpecies() finished"<<std::endl;
+    std::cout << "BaseSpecies::BaseSpecies() finished" << std::endl;
 #endif
 }
 
+/*!
+ * \param[in] the species that is copied
+ */
 BaseSpecies::BaseSpecies(const BaseSpecies &p)
-        : BaseObject(p)
+: BaseObject(p)
 {
     handler_ = p.handler_;
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout<<"BaseSpecies::BaseSpecies(const BaseSpecies &p) finished"<<std::endl;
+    std::cout << "BaseSpecies::BaseSpecies(const BaseSpecies &p) finished" << std::endl;
 #endif
 }
 
 BaseSpecies::~BaseSpecies()
 {
 #ifdef DEBUG_DESTRUCTOR
-    std::cout<<"BaseSpecies::~BaseSpecies() finished"<<std::endl;
+    std::cout << "BaseSpecies::~BaseSpecies() finished" << std::endl;
 #endif   
 }
 
-void BaseSpecies::clear()
-{
-    std::cout << "BaseSpecies::clear(), this function shouldn't be called" << std::endl;
-}
-
+/*!
+ * \param[in] the pointer to the handler to which this species belongs.
+ */
 void BaseSpecies::setHandler(SpeciesHandler* handler)
 {
     handler_ = handler;
 }
 
+/*!
+ * \return the pointer to the handler to which this species belongs.
+ */
 SpeciesHandler* BaseSpecies::getHandler() const
 {
     return handler_;
 }
 
-///BaseSpecies print function, which accepts an os std::stringstream as input. It prints human readable BaseSpecies information to the std::stringstream
-void BaseSpecies::write(std::ostream& os) const
-{
-    BaseObject::write(os);
-}
-
-void BaseSpecies::read(std::istream& is)
-{
-    BaseObject::read(is);
-}
-
-std::string BaseSpecies::getBaseName() const
-{
-    return "Base";
-}
-
-std::string BaseSpecies::getName() const
-{
-    return getBaseName() + "Species";
-}
-
-Mdouble BaseSpecies::getInteractionDistance() const
-{
-    return 0.0;
-}
-
+/*!
+ * Defines the average of two variables by the harmonic mean.
+ * This function is used to define default mixed species.
+ * \param[in] a,b The two variables you want to average
+ * \return The harmonic mean of a and b, \f$\frac{2}{1/a+1/b}\f$
+ */
 Mdouble BaseSpecies::average(Mdouble a, Mdouble b)
 {
-    return (a + b) != 0.0 ? (2. * (a * b) / (a + b)) : 0;
-}
-
-
-///create values for mixed species
-void BaseSpecies::mix(BaseSpecies* const S UNUSED, BaseSpecies* const T UNUSED)
-{
+    //the second algorithm seems to have a better accuracy, at least for the case average(2e5,2e5)
+    //return (a + b) != 0.0 ? (2. * (a * b) / (a + b)) : 0;
+    return (a + b) != 0.0 ? (2./(1.0/a+1.0/b)) : 0.0;
 }
 
 

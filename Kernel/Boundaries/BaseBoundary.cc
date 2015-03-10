@@ -24,15 +24,23 @@
 //SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseBoundary.h"
+#include "BoundaryHandler.h"
 
+/*!
+ * \details Default constructor
+ */
 BaseBoundary::BaseBoundary()
 {
-    handler_ = 0;
+    handler_ = nullptr;
 #ifdef DEBUG_CONSTRUCTOR
     std::cout<<"BaseBoundary::BaseBoundary() finished"<<std::endl;
 #endif
 }
 
+/*!
+ * \details Copy constructor
+ */
+///Note: shallow copy! Otherwise the HGrid causes a stack overflow.
 BaseBoundary::BaseBoundary(const BaseBoundary &b)
         : BaseObject(b)
 {
@@ -42,6 +50,9 @@ BaseBoundary::BaseBoundary(const BaseBoundary &b)
 #endif
 }
 
+/*!
+ * \details Destructor
+ */
 BaseBoundary::~BaseBoundary()
 {
 #ifdef DEBUG_DESTRUCTOR
@@ -49,34 +60,70 @@ BaseBoundary::~BaseBoundary()
 #endif 
 }
 
+/*!
+ * \details Reads the object's id_ from the given istream
+ * \param[in,out] is    istream the id_ is read from
+ */
 void BaseBoundary::read(std::istream& is)
 {
     BaseObject::read(is);
 }
 
+/*!
+ * \details Adds the object's id_ to the given ostream
+ * \param[in] os    ostream the id_ is added to
+ */
 void BaseBoundary::write(std::ostream& os) const
 {
     BaseObject::write(os);
 }
 
+/*!
+ * \details Used to create periodic copies of particles in classes which 
+ * implement periodic boundary conditions
+ * NB: virtual function
+ * \param[in] P     particle of which periodic copies are to be created
+ * \param[out] pH   the particle handler
+ */
 void BaseBoundary::createPeriodicParticles(BaseParticle *P UNUSED, ParticleHandler &pH UNUSED)
 {
 }
 
+/*!
+ * \details checks whether given particle passed the boundary, and if so, does something
+ * special with it.
+ * NB: virtual function
+ * \param[in] P     Particle checked
+ * \param[out] pH   the particle handler.
+ * \return returns TRUE if given particle actually did pass the boundary
+ */
 bool BaseBoundary::checkBoundaryAfterParticleMoved(BaseParticle *P UNUSED, ParticleHandler &pH UNUSED)
 {
     return false;
 }
 
+/*!
+ * \details Is used to fill the insides of a 3D boundary with particles untill 
+ * it is filled up. 
+ * \param[in] md    the problem's DPMBase object
+ */
 void BaseBoundary::checkBoundaryBeforeTimeStep(DPMBase* md UNUSED)
 {
 }
 
+/*!
+ * \details Sets the pointer to the BounadaryHandler the boundary belongs to
+ * \param[in] handler   pointer to the boundary handler
+ */
 void BaseBoundary::setHandler(BoundaryHandler* handler)
 {
     handler_ = handler;
 }
 
+/*!
+ * \details Returns the pointer to the BoundaryHandler the boundary belongs to
+ * \return pointer to the handler
+ */
 BoundaryHandler* BaseBoundary::getHandler() const
 {
     return handler_;

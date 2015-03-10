@@ -31,7 +31,11 @@
 #include <iomanip>
 #include <fstream>
 #include <DPMBase.h>
-
+/*!
+ * \param[in] P
+ * \param[in] I
+ * \param[in] timeStamp
+ */
 SlidingFrictionInteraction::SlidingFrictionInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
     : BaseInteraction(P, I, timeStamp)
 {
@@ -40,42 +44,53 @@ SlidingFrictionInteraction::SlidingFrictionInteraction(BaseInteractable* P, Base
     std::cout<<"SlidingFrictionInteraction::SlidingFrictionInteraction() finished"<<std::endl;
 #endif
 }
-
-SlidingFrictionInteraction::SlidingFrictionInteraction(const SlidingFrictionInteraction &p)
+/*!
+ * \param[in] p
+ */
+SlidingFrictionInteraction::SlidingFrictionInteraction(const SlidingFrictionInteraction& p)
     : BaseInteraction(p)
 {
     slidingSpring_=p.slidingSpring_;
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout<<"SlidingFrictionInteraction::SlidingFrictionInteraction(const SlidingFrictionInteraction &p finished"<<std::endl;
+    std::cout<<"SlidingFrictionInteraction::SlidingFrictionInteraction(const SlidingFrictionInteraction& p) finished"<<std::endl;
 #endif
 }
-
+/*!
+ *
+ */
 SlidingFrictionInteraction::~SlidingFrictionInteraction()
 {
 #ifdef DEBUG_DESTRUCTOR
     std::cout<<"SlidingFrictionInteraction::~SlidingFrictionInteraction() finished"<<std::endl;
 #endif
 }
-
+/*!
+ * \param[in,out] os
+ */
 void SlidingFrictionInteraction::write(std::ostream& os) const
 {
     //BaseInteraction::write(os);
     os << " slidingSpring " << slidingSpring_;
 }
-
+/*!
+ * \param[in,out] is
+ */
 void SlidingFrictionInteraction::read(std::istream& is)
 {
     //BaseInteraction::read(is);
     std::string dummy;
     is >> dummy >> slidingSpring_;
 }
-
-void SlidingFrictionInteraction::computeForce()
+/*!
+ *
+ */
+void SlidingFrictionInteraction::computeFrictionForce()
 {
     //If tangential forces are absent
     if (getAbsoluteNormalForce() == 0.0) return;
 
-    const SlidingFrictionSpecies* species = getSpecies();
+    const SlidingFrictionSpecies* species = getSpecies();//dynamic_cast
+    
     if (species->getSlidingFrictionCoefficient() != 0.0)
     {
         //Compute the tangential component of relativeVelocity_
@@ -132,38 +147,52 @@ void SlidingFrictionInteraction::computeForce()
 //        std::cerr << "SlidingFrictionInteraction::getForce(): warning: sliding friction is zero" << std::endl;
 //    }
 }
-
+/*!
+ * \param[in] timeStep
+ */
 void SlidingFrictionInteraction::integrate(Mdouble timeStep)
 {
     slidingSpring_ += slidingSpringVelocity_ * timeStep;
 }
-
+/*!
+ * \return Mdouble
+ */
 Mdouble SlidingFrictionInteraction::getElasticEnergy() const
 {
     return 0.5 * getSpecies()->getSlidingStiffness() * slidingSpring_.getLengthSquared();
 }
-
+/*!
+ * \return Mdouble
+ */
 Mdouble SlidingFrictionInteraction::getTangentialOverlap() const
 {
     ///\todo TWnow this should be positive
     return -slidingSpring_.getLength();
 }
-
+/*!
+ * \return const Vec3D
+ */
 const Vec3D SlidingFrictionInteraction::getTangentialForce() const
 {
     return tangentialForce_;
 }
-
+/*!
+ * \return const SlidingFrictionSpecies*
+ */
 const SlidingFrictionSpecies* SlidingFrictionInteraction::getSpecies() const
 {
     return dynamic_cast<const SlidingFrictionSpecies*>(getBaseSpecies());
 }
-
-std::string SlidingFrictionInteraction::getName() const
+/*!
+ * \return std::string
+ */
+std::string SlidingFrictionInteraction::getBaseName() const
 {
     return "SlidingFriction";
 }
-
+/*!
+ *
+ */
 void SlidingFrictionInteraction::reverseHistory()
 {
     slidingSpring_=-slidingSpring_;

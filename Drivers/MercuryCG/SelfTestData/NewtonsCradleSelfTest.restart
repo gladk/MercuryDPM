@@ -1,9 +1,9 @@
 restart_version 1.0 name NewtonsCradleSelfTest
-dataFile name NewtonsCradleSelfTest.data fileType ONE_FILE saveCount 1000 counter 82 nextSavedTimeStep 81001
-fStatFile name NewtonsCradleSelfTest.fstat fileType ONE_FILE saveCount 1000 counter 82 nextSavedTimeStep 81001
-eneFile name NewtonsCradleSelfTest.ene fileType ONE_FILE saveCount 1000 counter 82 nextSavedTimeStep 81001
-restartFile name NewtonsCradleSelfTest.restart fileType ONE_FILE saveCount 1000 counter 82 nextSavedTimeStep 81001
-statFile name NewtonsCradleSelfTest.stat fileType ONE_FILE saveCount 1000 counter 0 nextSavedTimeStep 80001
+dataFile    fileType ONE_FILE saveCount 1000 counter 82 nextSavedTimeStep 81001
+fStatFile   fileType ONE_FILE saveCount 1000 counter 82 nextSavedTimeStep 81001
+eneFile     fileType ONE_FILE saveCount 1000 counter 82 nextSavedTimeStep 81001
+restartFile fileType ONE_FILE saveCount 1000 counter 82 nextSavedTimeStep 81001
+statFile    fileType ONE_FILE saveCount 1000 counter 0 nextSavedTimeStep 80001
 xMin 0 xMax 2 yMin 0 yMax 2 zMin 0 zMax 10.5
 timeStep 0.0001 time 8.00009999999469 ntimeSteps 80001 timeMax 8
 systemDimensions 3 particleDimensions 3 gravity 0 0 -1

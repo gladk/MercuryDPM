@@ -29,61 +29,86 @@
 #include "PossibleContact.h"
 
 /*!
- * \class PossibleContactList
- * \brief
+ * \brief Manages the linked list of PossibleContact.
+ * \details Please note that the PossibleContact at the front of the list is the
+ * one that is added last, so firstPossibleContact_ is the PossibleContact that
+ * has been added last.
+ * \todo Look at the memory management of PossibleContactList. Maybe a destructor
+ * that takes out all remaining PossibleContact? Or is there a Handler that calls
+ * remove_ParticlePosibleContacts for all particles?
+ * \todo Restart-tests are not working with CONTACT_LIST_HGRID turned on, so either
+ * finish the ContactList-related code, or get rid of it. If we keep it, clean up
+ * the code, in particular the naming-convention.
  */
 class PossibleContactList
 {
 public:
     
     /*!
-     * \brief constructor
+     * \brief Constructor, sets the firstPossibleContact_ to a nullptr since there are no possible interactions yet.
      */
     PossibleContactList()
     {
-//        std::cout<<"Standard constructor"<<std::endl;
-        FirstPossibleContact = 0;
+        firstPossibleContact_ = nullptr;
+        logger(DEBUG, "PossibleContactList() constructor finished.");
     }
     
     /*!
-     * \brief 
+     * \brief Add the possible contact between two given BaseParticle to the linked list.
+     * \param[in] P1 A pointer to the first BaseParticle we want to make a PossibleContact with.
+     * \param[in] P2 A pointer to the second BaseParticle we want to make a PossibleContact with.
+     * \details If there is a PossibleContact between two BaseParticle, make a new
+     *          PossibleContact and put it in front of the linked list. Then assign
+     *          the newly made PossibleContact to the former front of the linked list.
      */
-    void add_PossibleContact(BaseParticle *P1, BaseParticle *P2)
+    void add_PossibleContact(BaseParticle* P1, BaseParticle* P2)
     {
-		//std::cout<<"Added new possible contact between particle "<<P1->getIndex()<<" and "<<P2->getIndex()<<std::endl;
-        FirstPossibleContact = new PossibleContact(P1, P2, FirstPossibleContact, P1->getFirstPossibleContact(), P2->getFirstPossibleContact());
-        P1->setFirstPossibleContact(FirstPossibleContact);
-        P2->setFirstPossibleContact(FirstPossibleContact);
-        if (FirstPossibleContact->getNext())
-            FirstPossibleContact->getNext()->setPreviousPosition(FirstPossibleContact);
-        if (FirstPossibleContact->getNext1())
-            FirstPossibleContact->getNext1()->setPreviousPosition(P1, FirstPossibleContact);
-        if (FirstPossibleContact->getNext2())
-            FirstPossibleContact->getNext2()->setPreviousPosition(P2, FirstPossibleContact);
+		firstPossibleContact_ = new PossibleContact(P1, P2, firstPossibleContact_, P1->getFirstPossibleContact(), P2->getFirstPossibleContact());
+        P1->setFirstPossibleContact(firstPossibleContact_);
+        P2->setFirstPossibleContact(firstPossibleContact_);
+        if (firstPossibleContact_->getNext())
+            firstPossibleContact_->getNext()->setPreviousPosition(firstPossibleContact_);
+        if (firstPossibleContact_->getNext1())
+            firstPossibleContact_->getNext1()->setPreviousPosition(P1, firstPossibleContact_);
+        if (firstPossibleContact_->getNext2())
+            firstPossibleContact_->getNext2()->setPreviousPosition(P2, firstPossibleContact_);
+        logger(VERBOSE, "Added new possible contact between particles % and % ", P1->getIndex(), P2->getIndex());
     }
 
     /*!
-     * \brief 
+     * \brief Remove all PossibleContact with given BaseParticle from the linked list.
+     * \param[in] P A pointer to the BaseParticle we want to remove all PossibleContact for.
+     * \details To remove all PossibleContact with given BaseParticle from the 
+     *          linked list of all PossibleContact, go through all PossibleContact
+     *          that are given as a list for the given BaseParticle, and then remove
+     *          it from the global list by correcting all pointers and then delete
+     *          the PossibleContact.
      */
-    void remove_ParticlePosibleContacts(BaseParticle *P)
+    void remove_ParticlePosibleContacts(BaseParticle* P)
     {
-        //std::cout<<"Removing all contacts of particle "<<P->getIndex()<<std::endl;
+        logger(VERBOSE, "Removing all contacts of particle %.", P->getIndex());
+        //The BaseParticle that shares a PossibleContact with P.
         BaseParticle* O;
+        //The next possible contact for P.
         PossibleContact* Next;
+        //The current possible contact for P.
         PossibleContact* Curr = P->getFirstPossibleContact();
-        while (Curr)
+        while (Curr != nullptr)
         {
-            //std::cout<<"Removing possible contacts index="<<Curr->getIndex()<<" between particle "<<Curr->getP1()->getIndex()<<" and "<<Curr->getP2()->getIndex()<<std::endl;
+            logger(VERBOSE, "Removing possible contacts index = % between particles % and %.", Curr->getIndex(), Curr->getP1()->getIndex(), Curr->getP2()->getIndex());
             Next = Curr->getNext(P);
             O = Curr->getOtherParticle(P);
+            //Set the pointers of the next global possible contact.
             if (Curr->getNext())
                 Curr->getNext()->setPreviousPosition(Curr->getPrevious());
             
+            //Set the pointers of the previous possible contact.
             if (Curr->getPrevious())
                 Curr->getPrevious()->setNextPosition(Curr->getNext());
             else
-                FirstPossibleContact = Curr->getNext();
+                firstPossibleContact_ = Curr->getNext();
             
+            //Set the pointers of the other object of the possible contact.
             if (Curr->getNext(O))
                 Curr->getNext(O)->setPreviousPosition(O, Curr->getPrevious(O));
             
@@ -91,36 +116,46 @@ public:
                 Curr->getPrevious(O)->setNextPosition(O, Curr->getNext(O));
             else
                 O->setFirstPossibleContact(Curr->getNext(O));
+            
+            //Delete the possible contact and update the the pointer Curr to the
+            //next possible contact with P.
             delete Curr;
             Curr = Next;
         }
-        P->setFirstPossibleContact(0);
+        P->setFirstPossibleContact(nullptr);
     }
     
     /*!
-     * \brief
+     * \brief Write all PossibleContact to the given ostream.
+     * \param[in,out] os The output stream the PossibleContactList must be written to.
      */
     void write(std::ostream& os) const
     {
-        os<<"Possible contacts are:"<<std::endl;
-        PossibleContact* it=FirstPossibleContact;
-        while(it!=nullptr)
+        os << "Possible contacts are: " << std::endl;
+        PossibleContact* it = firstPossibleContact_;
+        while(it != nullptr)
         {
-            os<<*it<<std::endl;
-            it=it->getNext();
+            os << *it << std::endl;
+            it = it->getNext();
         }
     }
 
     /*!
-     * \brief 
+     * \brief Get the front of the linked list of PossibleContact.
+     * \return A pointer to the first PossibleContact on the linked list.
      */
     PossibleContact* getFirstPossibleContact()
     {
-        return FirstPossibleContact;
+        return firstPossibleContact_;
     }
     
 private:
-    PossibleContact* FirstPossibleContact;///
+    /*!
+     * \brief The pointer to the first PossibleContact on the linked list. 
+     * \details Please note that this is the PossibleContact that has been added
+     *          last.
+     */
+    PossibleContact* firstPossibleContact_;///
     
 };
 

@@ -29,17 +29,27 @@
 #include "Math/ExtendedMath.h"
 #include "Interactions/AdhesiveForceInteractions/IrreversibleAdhesiveInteraction.h"
 #include "ReversibleAdhesiveSpecies.h"
-class BaseInteractable;
-class BaseInteraction;
 
-//Note the getVelocity can for some Species be dependent on which point on the Species is meant.
+/*!
+ * \brief IrreversibleAdhesiveSpecies contains the parameters used to describe a linear irreversible short-range force.
+ * \details See IrreversibleAdhesiveInteraction::computeForce for a description of the force law.
+ */
 class IrreversibleAdhesiveSpecies : public ReversibleAdhesiveSpecies
 {
 public:
+    ///\brief The correct Interaction type for this AdhesiveForceSpecies
     typedef IrreversibleAdhesiveInteraction InteractionType;
+
+    ///\brief The default constructor.
     IrreversibleAdhesiveSpecies();
+
+    ///\brief The default copy constructor.
     IrreversibleAdhesiveSpecies(const IrreversibleAdhesiveSpecies &s);
+
+    ///\brief The default destructor.
     virtual ~IrreversibleAdhesiveSpecies();
+
+    /// \brief Used in Species::getName to obtain a unique name for each Species.
     std::string getBaseName() const;
 };
 #endif

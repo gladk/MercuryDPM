@@ -29,28 +29,31 @@
 Mercury3D::Mercury3D()
 {
     constructor();
-#ifdef DEBUG_CONSTRUCTOR
-    std::cout << "Mercury3D::Mercury3D() finished"<<std::endl;
-#endif
+    logger(DEBUG, "Mercury3D::Mercury3D() finished");
 }
 
-//The copy-constructor of DPMBase has to be called because the link from DPMBase to MercuryBase is virtual
+/*!
+ * \param[in] other Mercury3D that must be copied.
+ * \details Copy constructor, note that the copy-constructor of DPMBase has to 
+ * be called because the link from DPMBase to MercuryBase is virtual.
+ */
 Mercury3D::Mercury3D(const Mercury3D& other)
         : DPMBase(other), MercuryBase(other)
 {
-#ifdef DEBUG_CONSTRUCTOR
-    std::cout << "Mercury3D::Mercury3D(Mercury3D& other) finished"<<std::endl;
-#endif
+    logger(DEBUG, "Mercury3D::Mercury3D(Mercury3D& other) copy constructor finished.");
 }
 
-//The copy-constructor of DPMBase has to be called because the link from DPMBase to MercuryBase is virtual
+/*!
+ * \param[in] other DPMBase which has to be copied and converted to a Mercury3D.
+ * \details Constructor that makes a Mercury3D out of a DPMBase.
+ * The "copy"-constructor of DPMBase has to be called because the link 
+ * from DPMBase to MercuryBase is virtual.
+ */
 Mercury3D::Mercury3D(const DPMBase& other)
         : DPMBase(other), MercuryBase()
 {
     constructor();
-#ifdef DEBUG_CONSTRUCTOR
-    std::cout << "Mercury3D::Mercury3D(DPMBase& other) finished"<<std::endl;
-#endif
+    logger(DEBUG, "Mercury3D::Mercury3D(DPMBase& other) constructor finished");
 }
 
 void Mercury3D::constructor()
@@ -59,10 +62,17 @@ void Mercury3D::constructor()
     setSystemDimensions(3);
 }
 
-///Computes all collision between particles in the same bucket as cell (x,y,z,l), however the particles are in even in the same cell.
+/*!
+ * \param[in] x Coordinate of the target cell in x direction.
+ * \param[in] y Coordinate of the target cell in y direction.
+ * \param[in] z Coordinate of the target cell in z direction.
+ * \param[in] l Level in the HGrid of the target cell.
+ * \details Computes all collision between particles in the same bucket as cell 
+ * (x,y,z,l), please note that all the particles are in the same cell.
+ */
 void Mercury3D::hGridFindContactsWithinTargetCell(int x, int y, int z, unsigned int l)
 {
-    HGrid* hgrid=getHGrid();
+    HGrid* hgrid = getHGrid();
     unsigned int bucket = hgrid->computeHashBucketIndex(x, y, z, l);
     
     //Check if this function is already applied to this bucket
@@ -91,7 +101,17 @@ void Mercury3D::hGridFindContactsWithinTargetCell(int x, int y, int z, unsigned 
     hgrid->setBucketIsChecked(bucket);
 }
 
-///Computes all collisions between BaseParticle *obj and particles in cell (x,y,z,l)
+/*!
+ * \param[in] x     The coordinate of the target cell in x direction.
+ * \param[in] y     The coordinate of the target cell in y direction.
+ * \param[in] z     The coordinate of the target cell in z direction.
+ * \param[in] l     The level in the HGrid of the target cell.
+ * \param[in] obj   A pointer to the BaseParticle for which we want to have interactions.
+ * \details Computes all collisions between given BaseParticle and particles in 
+ * cell (x,y,z,l). This is done by first checking if the BaseParticle is indeed from
+ * another cell, then for all BaseParticle in the target cell it is checked what
+ * the forces between that BaseParticle and given BaseParticle are.
+ */
 void Mercury3D::hGridFindContactsWithTargetCell(int x, int y, int z, unsigned int l, BaseParticle *obj)
 {
     
@@ -107,7 +127,7 @@ void Mercury3D::hGridFindContactsWithTargetCell(int x, int y, int z, unsigned in
     unsigned int bucket = hgrid->computeHashBucketIndex(x, y, z, l);
 
     // Loop through all objects in the bucket to find nearby objects
-    BaseParticle *p = hgrid->getFirstBaseParticleInBucket(bucket);
+    BaseParticle* p = hgrid->getFirstBaseParticleInBucket(bucket);
     while (p != nullptr)
     {
         ///\bug{TW: This check is not necessary, I believe. This is the most-expensive function in most codes (the two checks in this function slows down granular jet by 15%) and the selftests are not affected. DK: I do think this is neccesary, for example: If two cells hash to the same bucket and a particle in one of these cells check for collisions with the other cell. Then due to the hashingcollision it also gets all particles in it's own cell and thus generating false collisions.}
@@ -120,8 +140,13 @@ void Mercury3D::hGridFindContactsWithTargetCell(int x, int y, int z, unsigned in
     }
 }
 
-///Computes all collision between BaseParticle *obj and all other particles in the grid
-void Mercury3D::hGridFindOneSidedContacts(BaseParticle *obj)
+/*!
+ * \param[in] obj   A pointer to the BaseParticle for which we want to check for contacts.
+ * \details         Computes all collision between given BaseParticle and all other 
+ *                  particles in the grid. Please note that we're looking only one way, so that 
+ *                  interactions are not detected twice.
+ */
+void Mercury3D::hGridFindOneSidedContacts(BaseParticle* obj)
 {
     HGrid* hgrid=getHGrid();
     unsigned int startLevel = obj->getHGridLevel();
@@ -255,8 +280,11 @@ void Mercury3D::hGridFindOneSidedContacts(BaseParticle *obj)
     }
 }
 
-///Updates the HGrid positions (x, y and z) of BaseParticle *obj
-void Mercury3D::hGridUpdateParticle(BaseParticle *obj)
+/*!
+ * \param[in] obj   A pointer to the BaseParticle that must be updated.
+ * \details         Updates the HGrid positions (x, y and z) of the given BaseParticle.
+ */
+void Mercury3D::hGridUpdateParticle(BaseParticle* obj)
 {
     HGrid* hGrid=getHGrid();
     if (hGrid)
@@ -269,7 +297,7 @@ void Mercury3D::hGridUpdateParticle(BaseParticle *obj)
         int z = static_cast<int>(std::floor(obj->getPosition().Z * inv_size));
 
 #ifdef CONTACT_LIST_HGRID
-        if(obj->getHGridX()!=x||obj->getHGridY()!=y||obj->getHGridZ()!=z)
+        if(obj->getHGridX() != x || obj->getHGridY() != y || obj->getHGridZ() != z)
         {
             int bucket = hGrid->computeHashBucketIndex(x, y, z, l);
 
@@ -312,7 +340,10 @@ void Mercury3D::hGridUpdateParticle(BaseParticle *obj)
     }
 }
 
-///Removes BaseParticle *obj from the HGrid
+/*!
+ * \param[in] obj   A pointer to the BaseParticle that needs to be removed.
+ * \details         Removes the given BaseParticle from the HGrid.
+ */
 void Mercury3D::hGridRemoveParticle(BaseParticle *obj)
 {
     HGrid* hGrid=getHGrid();
@@ -338,7 +369,15 @@ void Mercury3D::hGridRemoveParticle(BaseParticle *obj)
 	}
 }
 
-///Tests if there are any collisions between BaseParticle *obj and particles in cell (x, y, z, l)
+/*!
+ * \param[in] x     The coordinate of the target cell in x direction.
+ * \param[in] y     The coordinate of the target cell in y direction.
+ * \param[in] z     The coordinate of the target cell in z direction.
+ * \param[in] l     The level of the HGrid of the target cell.
+ * \param[in] obj   A pointer to the BaseParticle which is checked for contacts.
+ * \details Tests if there are any collisions between given BaseParticle and 
+ * particles in cell (x, y, z, l).
+ */
 bool Mercury3D::hGridHasContactsInTargetCell(int x, int y, int z, unsigned int l, const BaseParticle *obj) const
 {
     // Loop through all objects in the bucket to find nearby objects
@@ -359,12 +398,19 @@ bool Mercury3D::hGridHasContactsInTargetCell(int x, int y, int z, unsigned int l
     return false;
 }
 
-///Tests if there are any collisions between BaseParticle *obj and all other particles in the HGrid
-bool Mercury3D::hGridHasParticleContacts(const BaseParticle *obj)
+/*!
+ * \param[in] obj   A pointer to the BaseParticle that is tested for contacts.
+ * \details         Tests if there are any collisions between the given 
+ *                  BaseParticle and all other particles in the HGrid. Do this by
+ *                  going through all levels, find if there is a collision in any
+ *                  of the levels in any cell of the HGrid.
+ */
+///
+bool Mercury3D::hGridHasParticleContacts(const BaseParticle* obj)
 {
     if (getHGrid() == nullptr || getHGrid()->getNeedsRebuilding())
     {
-        std::cout << "HGrid needs rebuilding for \"bool Mercury3D::hGridHasParticleContacts(BaseParticle *obj)\"" << std::endl;
+        logger(INFO, "HGrid needs rebuilding for \"bool Mercury3D::hGridHasParticleContacts(BaseParticle *obj)\"");
         hGridRebuild();
     }
     
@@ -376,14 +422,14 @@ bool Mercury3D::hGridHasParticleContacts(const BaseParticle *obj)
         // If no objects in rest of grid, stop now
         if (occupiedLevelsMask == 0)
         {
-            //std::cout<<"Level "<<level<<" and higher levels are empty"<<std::endl;
+            logger(VERBOSE, "Level % and higher levels are empty", level);
             break;
         }
         
         // If no objects at this level, go on to the next level
         if ((occupiedLevelsMask & 1) == 0)
         {
-            //std::cout<<"Level "<<level<<" is empty"<<std::endl;
+            logger(VERBOSE, "Level % is empty", level);
             continue;
         }
         
@@ -396,7 +442,7 @@ bool Mercury3D::hGridHasParticleContacts(const BaseParticle *obj)
         zs = static_cast<int>(std::floor((obj->getPosition().Z - obj->getInteractionRadius()) * inv_size - 0.5));
         ze = static_cast<int>(std::floor((obj->getPosition().Z + obj->getInteractionRadius()) * inv_size + 0.5));
         
-        //std::cout<<"Level="<<level<<" grid cells ["<<xs<<","<<xe<<"]x["<<ys<<","<<ye<<"]x["<<zs<<","<<ze<<"]"<<std::endl;
+        logger(VERBOSE, "Level = % grid cells [%,%] x [%,%] x [%,%]", level, xs, xe, ys, ye, zs, ze);
         for (int x = xs; x <= xe; ++x)
         {
             for (int y = ys; y <= ye; ++y)
@@ -416,6 +462,15 @@ bool Mercury3D::hGridHasParticleContacts(const BaseParticle *obj)
 }
 
 #ifdef CONTACT_LIST_HGRID
+/*!
+ * \param[in] x     The x coordinate of the cell for which possible contacts are requested.
+ * \param[in] y     The y coordinate of the cell for which possible contacts are requested.
+ * \param[in] z     The z coordinate of the cell for which possible contacts are requested.
+ * \param[in] l     The level in the HGrid of the cell for which possible contacts are requested.
+ * \param[in] obj   A pointer to the BaseParticle for which possible contacts are requested.
+ * \details         Adds the combination of all objects in the cell with identity (x,y,z,l)
+ *                  and given BaseParticle to the list of possible contacts.
+ */
 void Mercury3D::InsertCell(int x, int y, int z, unsigned int l, BaseParticle *obj)
 {   
     // Loop through all objects in the bucket to find nearby objects
@@ -432,6 +487,13 @@ void Mercury3D::InsertCell(int x, int y, int z, unsigned int l, BaseParticle *ob
     }
 }
 
+/*!
+ * \param[in] obj   A pointer to the BaseParticle for which all possible interactions are requested.
+ * \details         Add the object to possible interactions for all levels. 
+ *                  Do this by first finding the cell of the given BaseParticle.
+ *                  Then go through all levels and find all possible interactions,
+ *                  which are then added to the list.
+ */
 void Mercury3D::InsertObjAgainstGrid(BaseParticle *obj)
 {   
     Mdouble inv_size;
@@ -439,12 +501,12 @@ void Mercury3D::InsertObjAgainstGrid(BaseParticle *obj)
 
     inv_size=getHGrid()->getInvCellSize(obj->getHGridLevel());
 
-    double ownXMin=(obj->getHGridX()-0.5)*getHGrid()->getCellSize(obj->getHGridLevel());
-    double ownXMax=(obj->getHGridX()+1.5)*getHGrid()->getCellSize(obj->getHGridLevel());
-    double ownYMin=(obj->getHGridY()-0.5)*getHGrid()->getCellSize(obj->getHGridLevel());
-    double ownYMax=(obj->getHGridY()+1.5)*getHGrid()->getCellSize(obj->getHGridLevel());
-    double ownZMin=(obj->getHGridZ()-0.5)*getHGrid()->getCellSize(obj->getHGridLevel());
-    double ownZMax=(obj->getHGridZ()+1.5)*getHGrid()->getCellSize(obj->getHGridLevel());
+    double ownXMin = (obj->getHGridX() - 0.5) * getHGrid()->getCellSize(obj->getHGridLevel());
+    double ownXMax = (obj->getHGridX() + 1.5) * getHGrid()->getCellSize(obj->getHGridLevel());
+    double ownYMin = (obj->getHGridY() - 0.5) * getHGrid()->getCellSize(obj->getHGridLevel());
+    double ownYMax = (obj->getHGridY() + 1.5) * getHGrid()->getCellSize(obj->getHGridLevel());
+    double ownZMin = (obj->getHGridZ() - 0.5) * getHGrid()->getCellSize(obj->getHGridLevel());
+    double ownZMax = (obj->getHGridZ() + 1.5) * getHGrid()->getCellSize(obj->getHGridLevel());
 
     for (int level = 0; level < getHGrid()->getNumberOfLevels(); occupiedLevelsMask_ >>= 1, level++)
     {   
@@ -464,18 +526,18 @@ void Mercury3D::InsertObjAgainstGrid(BaseParticle *obj)
         inv_size = getHGrid()->getInvCellSize(level);
 
         int xs, xe, ys, ye, zs, ze;
-        xs=static_cast<int>(std::floor(ownXMin*inv_size-0.5));
-        xe=static_cast<int>(std::floor(ownXMax*inv_size+0.5));
-        ys=static_cast<int>(std::floor(ownYMin*inv_size-0.5));
-        ye=static_cast<int>(std::floor(ownYMax*inv_size+0.5));
-        zs=static_cast<int>(std::floor(ownZMin*inv_size-0.5));
-        ze=static_cast<int>(std::floor(ownZMax*inv_size+0.5));
+        xs=static_cast<int>(std::floor(ownXMin * inv_size - 0.5));
+        xe=static_cast<int>(std::floor(ownXMax * inv_size + 0.5));
+        ys=static_cast<int>(std::floor(ownYMin * inv_size - 0.5));
+        ye=static_cast<int>(std::floor(ownYMax * inv_size + 0.5));
+        zs=static_cast<int>(std::floor(ownZMin * inv_size - 0.5));
+        ze=static_cast<int>(std::floor(ownZMax * inv_size + 0.5));
 
-        for(int x=xs;x<=xe;++x)
+        for(int x=xs; x<=xe; ++x)
         {   
-            for(int y=ys;y<=ye;++y)
+            for(int y=ys; y<=ye; ++y)
             {   
-                for(int z=zs;z<=ze;++z)
+                for(int z=zs; z<=ze; ++z)
                 {   
                     InsertCell(x, y, z, level, obj);
                 }

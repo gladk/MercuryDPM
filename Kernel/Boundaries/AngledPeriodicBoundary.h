@@ -33,29 +33,29 @@
 class BaseParticle;
 class ParticleHandler;
 
-    /*!
-     * \class AngledPerioidicBoundary
-     * \brief Defines a pair of periodic walls that are angled around the origin. 
-     * \details The particles are in {x: normal_left*(x-origin)>0 && normal_right*(x-origin)<0, with normal* being the unit normal vector of the walls. If a particle moves outside these boundaries, it will be shifted.
-     */
+/*!
+ * \class AngledPerioidicBoundary
+ * \brief Defines a pair of periodic walls that are angled around the origin. 
+ * \details The particles are in {x: normal_left*(x-origin)>0 && normal_right*(x-origin)<0, 
+ * with normal* being the unit normal vector of the walls. If a particle moves outside 
+ * these boundaries, it will be shifted.
+ */
 class AngledPeriodicBoundary : public BaseBoundary
 {
 public:
+    
     /*!
      * \brief 
      */    
-    virtual AngledPeriodicBoundary* copy() const;
+    AngledPeriodicBoundary* copy() const final;
     
     //todo constructors instead of set functions?
     //AngledPeriodicBoundary (Vec3D normal_left_, Vec3D normal_right_, Vec3D origin_) 
     
     /*!
      * \brief Defines a periodic wall.
-     * \details given a normal vector s.t. all particles are within {x: position_left<=normal*x<position_right}. The shift vector is set assuming that the domain is rectangular (shift parallel to normal).
-     *
-     * \param[in]
     */
-    void set(Vec3D normal_left_, Vec3D normal_right_, Vec3D origin_);
+    void set(Vec3D normalLeft, Vec3D normalRight, Vec3D origin);
     
     /*!
      * \brief Returns the distance of the wall to the particle and 
@@ -127,45 +127,45 @@ private:
     /*!
      * \brief 
      */
-    Vec3D normal_left; ///< outward unit normal vector for left wall
+    Vec3D leftNormal_; ///< outward unit normal vector for left wall
 
     /*!
      * \brief outward unit normal vector for right wall
      */
-    Vec3D normal_right;
+    Vec3D rightNormal_;
 
     /*!
      * \brief common point of both walls
      */
-    Vec3D origin; 
+    Vec3D origin_; 
     //values set by the code
     /*!
      * \brief true if closest wall is the left wall
      */
-    bool left_wall;
+    bool leftWall_;
     /*!
      * \brief outward unit normal vector for left wall
      */
-    Vec3D radialAxis_left; 
+    Vec3D leftRadialAxis_; 
     /*!
      * \brief outward unit normal vector for right wall
      */
-    Vec3D radialAxis_right; 
+    Vec3D rightRadialAxis_; 
     /*!
      * \brief 
      */
-    Vec3D diff_radial;
+    Vec3D differenceRadialAxis_;
     /*!
      * \brief 
      */
-    Vec3D diff_normal;
+    Vec3D differenceNormal_;
     /*!
      * \brief 
      */
-    Vec3D common_axis;
+    Vec3D commonAxis_;
     /*!
-     * \brief 
+     * angularShift_ is currently unused; waiting for Quaternions to be implemented
      */
-    Vec3D angularShift;
+    //Vec3D angularShift_;
 };
 #endif

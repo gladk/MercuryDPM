@@ -121,26 +121,26 @@ public:
         {
             return 1;
         }
-        double teller;
-        double noemer;
+        double numerator;
+        double denominator;
         if (alpha == -1)
         {
-            noemer = log(omega);
+            denominator = log(omega);
         }
         else
         {
-            noemer = (pow(omega, 1.0 + alpha) - 1.0) / (1.0 + alpha);
+            denominator = (pow(omega, 1.0 + alpha) - 1.0) / (1.0 + alpha);
         }
         
         if (alpha == -4)
         {
-            teller = log(e) - log(s);
+            numerator = log(e) - log(s);
         }
         else
         {
-            teller = (pow(e, 4.0 + alpha) - pow(s, 4.0 + alpha)) / (4.0 + alpha);
+            numerator = (pow(e, 4.0 + alpha) - pow(s, 4.0 + alpha)) / (4.0 + alpha);
         }
-        return teller / noemer;
+        return numerator / denominator;
     }
     
     double L;
@@ -201,11 +201,11 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     std::vector<BaseParticle*>::iterator hGrid2It = HGrid_problem2.particleHandler.begin();
     for (std::vector<BaseParticle*>::iterator mdIt = MD_problem.particleHandler.begin(); mdIt != MD_problem.particleHandler.end(); ++mdIt)
     {
-        if (!(*mdIt)->getPosition().compareTo((*hGrid1It)->getPosition(),1e-10))
+        if (!(*mdIt)->getPosition().isEqualTo((*hGrid1It)->getPosition(),1e-10))
         {
             exit(-1);
         }
-        if (!(*mdIt)->getPosition().compareTo((*hGrid2It)->getPosition(), 1e-10))
+        if (!(*mdIt)->getPosition().isEqualTo((*hGrid2It)->getPosition(), 1e-10))
         {
             exit(-1);
         }

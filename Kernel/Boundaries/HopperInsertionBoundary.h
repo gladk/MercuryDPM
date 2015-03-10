@@ -33,85 +33,136 @@ class RNG;
 
 /*! 
  * \class HopperInsertionBoundary
- * \brief
- * \details
+ * \brief Inherits from InsertionBoundary
+ * Some images are useful to better understand the structure of both the hopper-chute
+ * combination, as of the hopper insertion boundary itself:
+ * 
+ * \image html hopper.jpg "Image clarifying the definitions of the data members hopperLength_, hopperExitLength, hopperHeight_ and hopperAngle_."
+ * 
+ * \image html hopper_add_particle.jpg "Image shows the AC and AB directions used to determine a particle position inside the hopper. NB: the X and Z directions are in the same plane, but pointed along the chute and normal to the chute, respectively."
+ * 
+ * \todo (BvdH) Better graphical diagrams are needed for further clarification, as 
+ * well as some property renaming.
  */
 class HopperInsertionBoundary : public InsertionBoundary
 {
 public:
+        
   /*!
-   * \brief
+   * \brief Default constructor. Sets all properties to 0.
+   */
+    HopperInsertionBoundary();
+    
+  /*!
+   * \brief Copy constructor
+   */
+    HopperInsertionBoundary(const HopperInsertionBoundary &other);
+    
+  /*!
+   * \brief copy method, returns a pointer to a copy.
    */
     virtual HopperInsertionBoundary* copy() const;
 
-  /*!
-   * \brief
-   * \param[in]
-   */
+    /*!
+     * \brief Sets all boundary properties at once.
+     */
     void set(BaseParticle* particleToCopy, int maxFailed, double yMin, double yMax, double radMin, double radMax,
             double chuteAngle, double fixedParticleRadius, bool isHopperCentred_, int hopperDim, double hopperAngle, double hopperLength, double hopperExitLength,
             double hopperHeight, double lift, double fillPercent);
 
   /*!
    * \brief This creates an inflow particle in the top 50% of the hopper i.e. between gamma=0.5 and gamma=1.0
-   * \details Gamma is random number in the z direction and delta in the y direction. In the 2D (hopper) case the particles are generated with equal probability in the y-direction, i.e. delta is from the edge of the domain. In the 3D (hopper) case a third vector AD is generated and delta is again created for the sloping walls of the hopper.
-   * \image html hopper_add_particle.jpg "Image shows the vectors in 2-dimension used to find a position inside the hopper"
-   * \param[in]
    */
     virtual BaseParticle* generateParticle(RNG &random);
 
-  /*!
-   * \brief reads wall
-   */
+    /*!
+     * \brief reads boundary properties from istream
+     */
     void read(std::istream& is);
-  /*!
-   * \brief
-   */
+ 
+    /*!
+     * \brief deprecated version of CubeInsertionBoundary::read().
+     */
+    MERCURY_DEPRECATED
     void oldRead(std::istream& is);
     
-  /*!
-   * \brief outputs wall
-   */
+    /*!
+     * \brief writes boundary properties to ostream
+     */
     void write(std::ostream& os) const;
     
-  /*!
-   * \brief 
-   *\return Returns the name of the object
-   */
+    /*!
+     * \brief Returns the name of the object
+     */
     virtual std::string getName() const;
 
-  /*!
-   * \brief
-   */
+    
+    /*!
+     * \brief  The minimum and maximum y-positions of the particle for a hopper 
+     * with vertical walls in the y-direction ('1D hopper'). For the '2D hopper', 
+     * these variables have no physical meaning, except for the fact that the insertion
+     * boundary is centered in the y-direction at (yMax_ - yMin_)/2 .
+     */
     double yMin_, yMax_;
 
   /*!
-   * \brief
+   * \brief Minimum and maximum radii of the inserted particles
    */
     double radMin_, radMax_;
   /*!
-   * \brief
+   * \brief Angle of the chute as compared to the horizontal plane
    */
-    double chuteAngle_, hopperAngle_, fixedParticleRadius_;
+    double chuteAngle_; 
+    
+    /*!
+     * \brief Angle of the hopper as compared to the vertical plane
+     */
+    double hopperAngle_;
+    
+    /*!
+     * \brief 
+     */
+    double fixedParticleRadius_;
+    
   /*!
-   * \brief
+   * \brief The horizontal (AB-direction) width at the top of the hopper
    */
-    double hopperLength_, hopperExitLength_, hopperHeight_;
+    double hopperLength_;
+    
+  /*!
+   * \brief The horizontal (AB-direction) width at the square exit of the hopper
+   */
+    double hopperExitLength_;
+    
+  /*!
+   * \brief The vertical (AC-direction) height of the hopper, measured from the top of 
+   * the hopper to the start of the chute.
+   */
+    double hopperHeight_;
+    
   /*!
    * \brief
    */
     bool isHopperCentred__;
-  /*!
-   * \brief
-   */
+
+    /*!
+     * \brief Percentage of the height of the insertion boundary up to which it should 
+     * be filled. The part to be filled reaches from the top of the hopper down to 
+     * {fillPercent * (top - 'position A')}. 
+     */
     double fillPercent_;
+    
   /*!
    * \brief
    */
     double lift_;
-  /*!
-   * \brief
-   */
+
+    /*!
+     * \brief Either 1 or 2. If 1, the insertion boundary has vertical walls in the 
+     * y extrema. This is used e.g. for a hopper with periodic walls in the y-direction.
+     * If 2, the insertion boundary has the form of  an inverted (truncated) pyramid, 
+     * with equally inclined walls in both AB and Y directions.
+     */
     int hopperDim_;
     
 };

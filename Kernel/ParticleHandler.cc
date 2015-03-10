@@ -39,25 +39,29 @@ ParticleHandler::ParticleHandler()
     largestParticle_ = nullptr;
     smallestParticle_ = nullptr;
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout << "ParticleHandler::ParticleHandler() finished" << std::endl;
+    logger(DEBUG, "ParticleHandler::ParticleHandler() finished");
 #endif
 }
 
-/// \param[in] PH The ParticleHandler that has to be copied.
+///\param[in] PH The ParticleHandler that has to be copied. 
 ParticleHandler::ParticleHandler(const ParticleHandler& PH)
-//    : BaseHandler<BaseParticle>()
 {
     clear();
     setDPMBase(PH.getDPMBase());
     largestParticle_ = nullptr;
     smallestParticle_ = nullptr;
     copyContentsFromOtherHandler(PH);
+    if (objects_.size() != 0)
+    {
+        computeLargestParticle();
+        computeSmallestParticle();
+    }
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout << "ParticleHandler::ParticleHandler(const ParticleHandler &PH) finished" << std::endl;
+    logger(DEBUG, "ParticleHandler::ParticleHandler(const ParticleHandler &PH) finished");
 #endif
 }
 
-/// \param[in] rhs The ParticleHandler on the right hand side of the assignment.
+///\param[in] rhs The ParticleHandler on the right hand side of the assignment.
 ParticleHandler ParticleHandler::operator =(const ParticleHandler& rhs)
 {
     if (this != &rhs)
@@ -66,24 +70,31 @@ ParticleHandler ParticleHandler::operator =(const ParticleHandler& rhs)
         largestParticle_ = nullptr;
         smallestParticle_ = nullptr;
         copyContentsFromOtherHandler(rhs);
+        if (objects_.size() != 0)
+        {
+            computeLargestParticle();
+            computeSmallestParticle();
+        }
     }
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout << "ParticleHandler::operator = (const ParticleHandler& rhs) finished" << std::endl;
+    logger(DEBUG, "ParticleHandler::operator = (const ParticleHandler& rhs) finished");
 #endif
     return *this;
 }
 
+///Set the pointers to largestParticle_ and smallestParticle_ to nullptr, then let
+///the BaseHandler destroy all particles.
 ParticleHandler::~ParticleHandler()
 {
-    //First reset the pointers, such that they are not checked when removing particles
+    //First reset the pointers, such that they are not checked twice when removing particles
     largestParticle_ = nullptr;
     smallestParticle_ = nullptr;
 #ifdef DEBUG_DESTRUCTOR
-    std::cout << "ParticleHandler::~ParticleHandler() finished" << std::endl;
+    logger(DEBUG, "ParticleHandler::~ParticleHandler() finished");
 #endif
 }
 
-/// \param[in] P A pointer to the BaseParticle (or derived class) that has to be added.
+///\param[in] P A pointer to the BaseParticle (or derived class) that has to be added. 
 /// \todo Also insert the particle in the HGRID
 void ParticleHandler::addObject(BaseParticle* P)
 {
@@ -104,8 +115,9 @@ void ParticleHandler::addObject(BaseParticle* P)
     checkExtrema(P);
 }
 
-/// \details The BaseParticle at position id is removed by moving the last BaseParticle in the vector to the position of id. It also removes the BaseParticle from the HGrid.
 /// \param[in] id The index of which BaseParticle has to be removed from the ParticleHandler
+/// \details The BaseParticle at position id is removed by moving the last 
+/// BaseParticle in the vector to the position of id. It also removes the BaseParticle from the HGrid.
 void ParticleHandler::removeObject(unsigned const int id)
 {
 #ifdef CONTACT_LIST_HGRID
@@ -125,104 +137,169 @@ void ParticleHandler::removeLastObject()
     BaseHandler<BaseParticle>::removeLastObject();
 }
 
-/// \return A pointer to the to the smallest BaseParticle (by interactionRadius) in this ParticleHandler.
+void ParticleHandler::computeSmallestParticle()
+{
+    if (getNumberOfObjects() == 0)
+    {
+        logger(WARN, "No particles, so cannot compute the smallest particle.");
+        return;
+    }
+    Mdouble min = std::numeric_limits<Mdouble>::max();
+    smallestParticle_ = nullptr;
+    for (BaseParticle* const particle : objects_)
+    {
+        if (particle->getInteractionRadius() < min)
+        {
+            min = particle->getInteractionRadius();
+            smallestParticle_ = particle;
+        }
+    }
+}
+
+void ParticleHandler::computeLargestParticle() 
+{
+    if (getNumberOfObjects() == 0)
+    {
+        logger(WARN, "No particles, so cannot compute the largest particle.");
+        return;
+    }
+    Mdouble max = -std::numeric_limits<Mdouble>::max();
+    largestParticle_ = nullptr;
+    for (BaseParticle* const particle : objects_)
+    {
+        if (particle->getInteractionRadius() > max)
+        {
+            max = particle->getInteractionRadius();
+            largestParticle_ = particle;
+        }
+    }
+}
+
+///\return A pointer to the to the smallest BaseParticle (by interactionRadius) in this ParticleHandler.
 BaseParticle* ParticleHandler::getSmallestParticle() const
 {
-    if (!smallestParticle_)
+    if (smallestParticle_ == nullptr)
     {
-        std::cerr << "Warning: No particles to set getSmallestParticle()" << std::endl;
+        logger(WARN, "No particles to set getSmallestParticle()");
     }
     return smallestParticle_;
 }
 
-/// \return A pointer to the to the fastest BaseParticle in this ParticleHandler.
+///\return A pointer to the largest BaseParticle (by interactionRadius) in this ParticleHandler.
+BaseParticle* ParticleHandler::getLargestParticle() const
+{
+    if (largestParticle_ == nullptr)
+    {
+        logger(WARN, "No particles to set get_LargestParticle()");
+    }
+    return largestParticle_;
+}
+
+///\return A pointer to the fastest BaseParticle in this ParticleHandler.
 BaseParticle* ParticleHandler::getFastestParticle() const
 {
-    if (!getNumberOfObjects())
+    if (getNumberOfObjects() == 0)
     {
-        std::cerr << "Warning: No particles to set getFastestParticle()" << std::endl;
+        logger(WARN, "No particles to set getFastestParticle()" );
+        return nullptr;
     }
-    BaseParticle* p = 0;
+    BaseParticle* p = nullptr;
     Mdouble maxSpeed = -std::numeric_limits<Mdouble>::max();
-    for (std::vector<BaseParticle*>::const_iterator it = begin(); it != end(); it++)
+    for (BaseParticle* const pLoop : objects_)
     {
-        if ((*it)->getVelocity().getLength() > maxSpeed)
+        if ((pLoop->getVelocity().getLength()) > maxSpeed)
         {
-            maxSpeed = (*it)->getVelocity().getLength();
-            p = (*it);
+            maxSpeed = pLoop->getVelocity().getLength();
+            p = pLoop;
         }
     }
     return p;
 }
 
+/// \param[in] i Direction for which you want the particle with lowest coordinates.
+/// \return A pointer to the particle with the lowest coordinates in direction i in this ParticleHandler.
 BaseParticle* ParticleHandler::getLowestPositionComponentParticle(const int i) const
-        {
-    if (!getNumberOfObjects())
+{
+    if (getNumberOfObjects() == 0)
     {
-        std::cerr << "Warning: No getLowestPositionComponentParticle(const int i)" << std::endl;
+        logger(WARN, "No getLowestPositionComponentParticle(const int i) since there are no particles.");
+        return nullptr;
     }
-    BaseParticle* p = 0;
+    BaseParticle* p = nullptr;
     Mdouble min = std::numeric_limits<Mdouble>::max();
-    for (std::vector<BaseParticle*>::const_iterator it = begin(); it != end(); it++)
+    for (BaseParticle* const pLoop : objects_)
     {
-        if ((*it)->getPosition().getComponent(i) < min)
+        if (pLoop->getPosition().getComponent(i) < min)
         {
-            min = (*it)->getPosition().getComponent(i);
-            p = (*it);
+            min = pLoop->getPosition().getComponent(i);
+            p = pLoop;
         }
     }
     return p;
 }
+
+/// \param[in] i Direction for which you want the particle with highest coordinates.
+/// \return A pointer to the particle with the highest coordinates in direction i in this ParticleHandler.
 BaseParticle* ParticleHandler::getHighestPositionComponentParticle(const int i) const
-        {
-    if (!getNumberOfObjects())
+{
+    if (getNumberOfObjects() == 0)
     {
-        std::cerr << "Warning: No getHighestPositionComponentParticle(const int i)" << std::endl;
+        logger(WARN, "No getHighestPositionComponentParticle(const int i) since there are no particles.");
+        return nullptr;
     }
-    BaseParticle* p = 0;
+    BaseParticle* p = nullptr;
     Mdouble max = -std::numeric_limits<Mdouble>::max();
-    for (std::vector<BaseParticle*>::const_iterator it = begin(); it != end(); it++)
+    for (BaseParticle* const pLoop : objects_)
     {
-        if ((*it)->getPosition().getComponent(i) > max)
+        if (pLoop->getPosition().getComponent(i) > max)
         {
-            max = (*it)->getPosition().getComponent(i);
-            p = (*it);
+            max = pLoop->getPosition().getComponent(i);
+            p = pLoop;
         }
     }
+    
     return p;
 }
+
+/// \param[in] i Direction for which you want the particle with lowest velocity.
+/// \return A pointer to the particle with the lowest velocity in direction i in this ParticleHandler.
 BaseParticle* ParticleHandler::getLowestVelocityComponentParticle(const int i) const
-        {
-    if (!getNumberOfObjects())
+{
+    if (getNumberOfObjects() == 0)
     {
-        std::cerr << "Warning: No getLowestVelocityComponentParticle(const int i)" << std::endl;
+        logger(WARN, "No getLowestVelocityComponentParticle(const int i) since there are no particles");
+        return nullptr;
     }
-    BaseParticle* p = 0;
+    BaseParticle* p = nullptr;
     Mdouble min = std::numeric_limits<Mdouble>::max();
-    for (std::vector<BaseParticle*>::const_iterator it = begin(); it != end(); it++)
+    for (BaseParticle* const pLoop : objects_)
     {
-        if ((*it)->getVelocity().getComponent(i) < min)
+        if (pLoop->getVelocity().getComponent(i) < min)
         {
-            min = (*it)->getVelocity().getComponent(i);
-            p = (*it);
+            min = pLoop->getVelocity().getComponent(i);
+            p = pLoop;
         }
     }
     return p;
 }
+
+/// \param[in] i Direction for which you want the particle with highest velocity.
+/// \return A pointer to the particle with the highest velocity in direction i in this ParticleHandler.
 BaseParticle* ParticleHandler::getHighestVelocityComponentParticle(const int i) const
-        {
+{
     if (!getNumberOfObjects())
     {
-        std::cerr << "Warning: No getHighestVelocityComponentParticle(const int i)" << std::endl;
+        logger(WARN, "No getHighestVelocityComponentParticle(const int i) since there are no particles");
+        return nullptr;
     }
-    BaseParticle* p = 0;
+    BaseParticle* p = nullptr;
     Mdouble max = -std::numeric_limits<Mdouble>::max();
-    for (std::vector<BaseParticle*>::const_iterator it = begin(); it != end(); it++)
+    for (BaseParticle* const pLoop : objects_)
     {
-        if ((*it)->getVelocity().getComponent(i) > max)
+        if (pLoop->getVelocity().getComponent(i) > max)
         {
-            max = (*it)->getVelocity().getComponent(i);
-            p = (*it);
+            max = pLoop->getVelocity().getComponent(i);
+            p = pLoop;
         }
     }
     return p;
@@ -231,39 +308,30 @@ BaseParticle* ParticleHandler::getHighestVelocityComponentParticle(const int i) 
 /// \return A pointer to the to the lightest BaseParticle (by mass) in this ParticleHandler.
 BaseParticle* ParticleHandler::getLightestParticle() const
 {
-    if (!getNumberOfObjects())
+    if (getNumberOfObjects() == 0)
     {
-        std::cerr << "Warning: No particles to set getLightestParticle()" << std::endl;
-        throw;
+        logger(WARN, "No particles to set getLightestParticle()");
+        return nullptr;
     }
-    BaseParticle* p = 0;
+    BaseParticle* p = nullptr;
     Mdouble minMass = std::numeric_limits<Mdouble>::max();
-    for (std::vector<BaseParticle*>::const_iterator it = begin(); it != end(); it++)
+    for (BaseParticle* const pLoop : objects_)
     {
-        if ((*it)->getMass() < minMass)
+        if (pLoop->getMass() < minMass)
         {
-            minMass = (*it)->getMass();
-            p = (*it);
+            minMass = pLoop->getMass();
+            p = pLoop;
         }
     }
     return p;
 }
 
-/// \return A pointer to the to the largest BaseParticle (by interactionRadius) in this ParticleHandler.
-BaseParticle* ParticleHandler::getLargestParticle() const
-{
-    if (!largestParticle_)
-    {
-        std::cerr << "Warning: No particles to set get_LargestParticle()" << std::endl;
-        //throw;
-    }
-    return largestParticle_;
-}
-
+///Note that the pointers to smallestParticle_ and largestParticle_ are set to nullptr
+///since these particles don't exist anymore after calling this function.
 void ParticleHandler::clear()
 {
-    smallestParticle_ = 0;
-    largestParticle_ = 0;
+    smallestParticle_ = nullptr;
+    largestParticle_ = nullptr;
     BaseHandler<BaseParticle>::clear();
 }
 
@@ -272,7 +340,7 @@ void ParticleHandler::readObject(std::istream& is)
 {
     std::string type;
     is >> type;
-    if (type.compare("BaseParticle") == 0)
+    if (type == "BaseParticle")
     {
         BaseParticle baseParticle;
         is >> baseParticle;
@@ -280,8 +348,8 @@ void ParticleHandler::readObject(std::istream& is)
         getLastObject()->setId(baseParticle.getId()); //to ensure old id
         ///\todo make sure setting the id doesn't break the id setter :)
     }
-    ///todo{Remove for final version}
-    else if (type.compare("BP") == 0)
+    ///\todo{Remove for final version}
+    else if (type == "BP")
     {
         BaseParticle baseParticle;
         baseParticle.oldRead(is);
@@ -294,32 +362,45 @@ void ParticleHandler::readObject(std::istream& is)
     }
     else
     {
-        std::cerr << "Particle type: " << type << " not understood in restart file" << std::endl;
-        exit(-1);
+        logger(ERROR, "Particle type % not understood in restart file. Particle has not been read.", type);
+        return;
     }
 }
 
+/// \param[in] type The first value of the position.
 /// \param[in] is The input stream from which the information is read.
+/// The old objects did not have their type in the beginning of the line. Instead, 
+/// the first string of the file was the position in x-direction. 
+/// Since we already read the first string of the file, we need to give it to this
+/// function and convert it to the position in x-direction. The rest of the stream
+/// is then read in the usual way.
 void ParticleHandler::readOldObject(std::string type, std::istream& is)
 {
     //read in next line
     std::stringstream line(std::stringstream::in | std::stringstream::out);
     helpers::getLineFromStringStream(is, line);
+    logger(VERBOSE, line.str());
     //std::cout << line.str() << std::endl;
 
     BaseParticle particle;
-    std::string dummy;
-    Mdouble radius, inverseMass, inverseInertia, indSpecies;
+    
+    //Declare all properties of the particle
+    unsigned int indSpecies;
+    Mdouble radius, inverseMass, inverseInertia;
     Vec3D position, velocity, orientation, angularVelocity;
+    
+    //Read all values
     position.X = atof(type.c_str());
 
     line >> position.Y >> position.Z >> velocity >> radius >> orientation >> angularVelocity >> inverseMass >> inverseInertia >> indSpecies;
+    
+    //Put the values in the particle
     particle.setPosition(position);
     particle.setVelocity(velocity);
     particle.setRadius(radius);
     particle.setOrientation(orientation);
     particle.setAngularVelocity(angularVelocity);
-    if (inverseMass==0)
+    if (inverseMass == 0.0)
         particle.fixParticle();
     else
     {
@@ -327,76 +408,69 @@ void ParticleHandler::readOldObject(std::string type, std::istream& is)
         particle.setMass(1./inverseMass);
     }
     particle.setIndSpecies(indSpecies);
+    
+    //Put the particle in the  handler
     copyAndAddObject(particle);
 }
 
 /// \param[in] P A pointer to the particle, which properties have to be checked against the ParticleHandlers extrema.
 void ParticleHandler::checkExtrema(BaseParticle* P)
 {
-    if (!largestParticle_ || P->getInteractionRadius() > largestParticle_->getInteractionRadius())
+    if (P==largestParticle_) 
+    {
+        //if the properties of the largest particle changes
+        computeLargestParticle();
+    } 
+    else if (!largestParticle_ || P->getInteractionRadius() > largestParticle_->getInteractionRadius())
     {
         largestParticle_ = P;
     }
-    if (!smallestParticle_ || P->getInteractionRadius() < smallestParticle_->getInteractionRadius())
+    
+    if (P==smallestParticle_) 
+    {
+        //if the properties of the smallest particle changes
+        computeSmallestParticle();
+    } 
+    else if (!smallestParticle_ || P->getInteractionRadius() < smallestParticle_->getInteractionRadius())
     {
         smallestParticle_ = P;
     }
 }
 
-/// \param[in] P A pointer to the particle, which is going to get deleted.
+///\param[in] P A pointer to the particle, which is going to get deleted.
 void ParticleHandler::checkExtremaOnDelete(BaseParticle* P)
 {
     if (P == largestParticle_)
     {
-        largestParticle_ = 0;
-        Mdouble maxRadius = -std::numeric_limits<Mdouble>::max();
-        for (std::vector<BaseParticle*>::const_iterator it = begin(); it != end(); it++)
-        {
-            if ((*it)->getInteractionRadius() > maxRadius && P != (*it))
-            {
-                maxRadius = (*it)->getInteractionRadius();
-                largestParticle_ = (*it);
-            }
-        }
+        computeLargestParticle();
     }
     if (P == smallestParticle_)
     {
-        smallestParticle_ = 0;
-        Mdouble minRadius = std::numeric_limits<Mdouble>::max();
-        for (std::vector<BaseParticle*>::const_iterator it = begin(); it != end(); it++)
-        {
-            if ((*it)->getInteractionRadius() < minRadius && P != (*it))
-            {
-                minRadius = (*it)->getInteractionRadius();
-                smallestParticle_ = (*it);
-            }
-        }
+        computeSmallestParticle();
     }
 }
 
+///\param[in] indSpecies Unsigned integer with the index of the species for which the masses must be computed.
 void ParticleHandler::computeAllMasses(unsigned int indSpecies)
 {
-    /** \todo: expose objects so we can iterate over them.
-     * Expose either objects_ or rip out the entire basehandler as it
-     * is NOT linear in memory and has no clear API.
-     * @dducks
-     **/
-     for (BaseParticle* particle : *this)
-        if (particle->getIndSpecies()==indSpecies)
+     for (BaseParticle* particle : objects_)
+     {
+        if (particle->getIndSpecies() == indSpecies)
+        {
             particle->getSpecies()->computeMass(particle);
+        }
+     }
 }
 
 void ParticleHandler::computeAllMasses()
 {
-    /** \todo: expose objects so we can iterate over them.
-    * Expose either objects_ or rip out the entire basehandler as it
-    * is NOT linear in memory and has no clear API.
-    * @dducks
-    **/
-    for (BaseParticle* particle : *this)
+    for (BaseParticle* particle : objects_)
+    {
         particle->getSpecies()->computeMass(particle);
+    }
 }
 
+/// \return The string "ParticleHandler"
 std::string ParticleHandler::getName() const
 {
     return "ParticleHandler";

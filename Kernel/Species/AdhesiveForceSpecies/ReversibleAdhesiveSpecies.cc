@@ -24,9 +24,9 @@
 //SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ReversibleAdhesiveSpecies.h"
+#include <Logger.h>
 
 ReversibleAdhesiveSpecies::ReversibleAdhesiveSpecies()
-        : BaseSpecies()
 {
     adhesionForceMax_ = 0;
     adhesionStiffness_ = 0;
@@ -35,8 +35,10 @@ ReversibleAdhesiveSpecies::ReversibleAdhesiveSpecies()
 #endif
 }
 
+/*!
+ * \param[in] s the species that is copied
+ */
 ReversibleAdhesiveSpecies::ReversibleAdhesiveSpecies(const ReversibleAdhesiveSpecies &s)
-        : BaseSpecies(s)
 {
     adhesionForceMax_ = s.adhesionForceMax_;
     adhesionStiffness_ = s.adhesionStiffness_;
@@ -52,13 +54,18 @@ ReversibleAdhesiveSpecies::~ReversibleAdhesiveSpecies()
 #endif   
 }
 
-///ReversibleAdhesiveSpecies print function, which accepts an os std::stringstream as input. It prints human readable ReversibleAdhesiveSpecies information to the std::stringstream
+/*!
+ * \param[out] os output stream (typically the restart file)
+ */
 void ReversibleAdhesiveSpecies::write(std::ostream& os) const
         {
     os << " adhesionForceMax " << adhesionForceMax_;
     os << " adhesionStiffness " << adhesionStiffness_;
 }
 
+/*!
+ * \param[in] is input stream (typically the restart file)
+ */
 void ReversibleAdhesiveSpecies::read(std::istream& is)
 {
     std::string dummy;
@@ -66,19 +73,26 @@ void ReversibleAdhesiveSpecies::read(std::istream& is)
     is >> dummy >> adhesionStiffness_;
 }
 
-//the name is set such that the full name does not extend
+/*!
+ * \return a string containing the name of the species (minus the word "Species")
+ */
 std::string ReversibleAdhesiveSpecies::getBaseName() const
 {
     return "ReversibleAdhesive";
 }
 
-///create values for mixed species
+/*!
+ * \details For all parameters we assume that the harmonic mean of the parameters of the 
+ * original two species is a sensible default.
+ * \param[in] S,T the two species whose properties are mixed to create the new species
+ */
 void ReversibleAdhesiveSpecies::mix(ReversibleAdhesiveSpecies* const S, ReversibleAdhesiveSpecies* const T)
 {
     adhesionForceMax_ = average(S->getAdhesionForceMax(), T->getAdhesionForceMax());
     adhesionStiffness_ = average(S->getAdhesionStiffness(), T->getAdhesionStiffness());
 }
 
+///\return the maximum separation distance below which adhesive forces can occur (needed for contact detection)
 Mdouble ReversibleAdhesiveSpecies::getInteractionDistance() const
 {
     if (adhesionStiffness_ != 0.0)

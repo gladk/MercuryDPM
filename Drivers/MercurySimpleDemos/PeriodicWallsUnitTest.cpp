@@ -30,8 +30,7 @@
 #include "Boundaries/PeriodicBoundary.h"
 #include "Particles/BaseParticle.h"
 #include "Species/LinearViscoelasticSpecies.h"
-#include "Logger.h"
-extern Logger<LOG_MAIN_LEVEL> logger;
+#include <Logger.h>
 
 class periodic_walls : public Mercury2D {
 
@@ -40,7 +39,7 @@ class periodic_walls : public Mercury2D {
   /////////////////////////////////////////////////////////////////////////////////////////////////////
   void computeExternalForces(BaseParticle *CI)
   {
-    computeWalls(CI);
+    computeForcesDueToWalls(CI);
   }
 
 	void setupInitialConditions() 
@@ -141,167 +140,167 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 
     goodPos=Vec3D(0.00950076062215577,0.002,0);
     goodVel=Vec3D(-0.005560409816604,0,0);
-    if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
+    if (!(*pIt)->getPosition().isEqualTo(goodPos, 1e-10))
     {
-        logger.log(Log::FATAL, "E0 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
+        logger(FATAL, "E0 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
     }
-    if (!(*pIt)->getVelocity().compareTo(goodVel , 1e-10))
+    if (!(*pIt)->getVelocity().isEqualTo(goodVel , 1e-10))
     {
-        logger.log(Log::FATAL, "E0 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
+        logger(FATAL, "E0 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
     }
     ++pIt;
 
     goodPos=Vec3D(0.000725163257251641,0.002,0);
     goodVel=Vec3D(-0.000808302139899,0,0);
-    if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
+    if (!(*pIt)->getPosition().isEqualTo(goodPos, 1e-10))
     {
-        logger.log(Log::FATAL, "E1 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
+        logger(FATAL, "E1 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
     }
-    if (!(*pIt)->getVelocity().compareTo(goodVel , 1e-10))
+    if (!(*pIt)->getVelocity().isEqualTo(goodVel , 1e-10))
     {
-        logger.log(Log::FATAL, "E1 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
+        logger(FATAL, "E1 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
     }
     ++pIt;
     
     goodPos=Vec3D(0.00950076062215577,0.003,0);
     goodVel=Vec3D(-0.005560409816604,0,0);
-    if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
+    if (!(*pIt)->getPosition().isEqualTo(goodPos, 1e-10))
     {
-        logger.log(Log::FATAL, "E2 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
+        logger(FATAL, "E2 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
     }
-    if (!(*pIt)->getVelocity().compareTo(goodVel , 1e-10))
+    if (!(*pIt)->getVelocity().isEqualTo(goodVel , 1e-10))
     {
-        logger.log(Log::FATAL, "E2 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
+        logger(FATAL, "E2 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
     }
     ++pIt;
 
     goodPos=Vec3D(0.000725163257251641,0.003,0);
     goodVel=Vec3D(-0.000808302139899,0,0);
-    if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
+    if (!(*pIt)->getPosition().isEqualTo(goodPos, 1e-10))
     {
-        logger.log(Log::FATAL, "E3 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
+        logger(FATAL, "E3 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
     }
-    if (!(*pIt)->getVelocity().compareTo(goodVel , 1e-10))
+    if (!(*pIt)->getVelocity().isEqualTo(goodVel , 1e-10))
     {
-        logger.log(Log::FATAL, "E3 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
+        logger(FATAL, "E3 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
     }
     ++pIt;
     
     goodPos=Vec3D(0.0004992393778432442,0.004,0);
     goodVel=Vec3D(0.00556040981661,0,0);
-    if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
+    if (!(*pIt)->getPosition().isEqualTo(goodPos, 1e-10))
     {
-        logger.log(Log::FATAL, "E4 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
+        logger(FATAL, "E4 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
     }
-    if (!(*pIt)->getVelocity().compareTo(goodVel , 1e-10))
+    if (!(*pIt)->getVelocity().isEqualTo(goodVel , 1e-10))
     {
-        logger.log(Log::FATAL, "E4 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
+        logger(FATAL, "E4 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
     }
     ++pIt;
 
     goodPos=Vec3D(0.00927483674274562,0.004,0);
     goodVel=Vec3D(0.0008083021398896,0,0);
-    if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
+    if (!(*pIt)->getPosition().isEqualTo(goodPos, 1e-10))
     {
-        logger.log(Log::FATAL, "E5 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
+        logger(FATAL, "E5 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
     }
-    if (!(*pIt)->getVelocity().compareTo(goodVel , 1e-10))
+    if (!(*pIt)->getVelocity().isEqualTo(goodVel , 1e-10))
     {
-        logger.log(Log::FATAL, "E5 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
+        logger(FATAL, "E5 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
     }
     ++pIt;
     
     goodPos=Vec3D(0.000499239377843248,0.005,0);
     goodVel=Vec3D(0.00556040981661,0,0);
-    if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
+    if (!(*pIt)->getPosition().isEqualTo(goodPos, 1e-10))
     {
-        logger.log(Log::FATAL, "E6 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
+        logger(FATAL, "E6 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
     }
-    if (!(*pIt)->getVelocity().compareTo(goodVel , 1e-10))
+    if (!(*pIt)->getVelocity().isEqualTo(goodVel , 1e-10))
     {
-        logger.log(Log::FATAL, "E6 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
+        logger(FATAL, "E6 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
     }
     ++pIt;
 
     goodPos=Vec3D(0.00927483674274562,0.005,0);
     goodVel=Vec3D(0.0008083021398892,0,0);
-    if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
+    if (!(*pIt)->getPosition().isEqualTo(goodPos, 1e-10))
     {
-        logger.log(Log::FATAL, "E7 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
+        logger(FATAL, "E7 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
     }
-    if (!(*pIt)->getVelocity().compareTo(goodVel , 1e-10))
+    if (!(*pIt)->getVelocity().isEqualTo(goodVel , 1e-10))
     {
-        logger.log(Log::FATAL, "E7 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
+        logger(FATAL, "E7 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
     }
     ++pIt;
 
     goodPos=Vec3D(0.00149923937784423,0.006,0);
     goodVel=Vec3D(0.005560409816606,0,0);
-    if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
+    if (!(*pIt)->getPosition().isEqualTo(goodPos, 1e-10))
     {
-        logger.log(Log::FATAL, "E8 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
+        logger(FATAL, "E8 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
     }
-    if (!(*pIt)->getVelocity().compareTo(goodVel , 1e-10))
+    if (!(*pIt)->getVelocity().isEqualTo(goodVel , 1e-10))
     {
-        logger.log(Log::FATAL, "E8 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
+        logger(FATAL, "E8 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
     }
     ++pIt;
     
     goodPos=Vec3D(0.000274836742748357,0.006,0);
     goodVel=Vec3D(0.0008083021398959,0,0);
-    if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
+    if (!(*pIt)->getPosition().isEqualTo(goodPos, 1e-10))
     {
-        logger.log(Log::FATAL, "E9 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
+        logger(FATAL, "E9 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
     }
-    if (!(*pIt)->getVelocity().compareTo(goodVel , 1e-10))
+    if (!(*pIt)->getVelocity().isEqualTo(goodVel , 1e-10))
     {
-        logger.log(Log::FATAL, "E9 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
+        logger(FATAL, "E9 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
     }
     ++pIt;
 
     goodPos=Vec3D(0.000368955529803987, 0.000368955529803987,0);
     goodVel=Vec3D(0.005560480643586,0.005560480643586,0);
-    if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
+    if (!(*pIt)->getPosition().isEqualTo(goodPos, 1e-10))
     {
-        logger.log(Log::FATAL, "E10 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
+        logger(FATAL, "E10 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
     }
-    if (!(*pIt)->getVelocity().compareTo(goodVel , 1e-10))
+    if (!(*pIt)->getVelocity().isEqualTo(goodVel , 1e-10))
     {
-        logger.log(Log::FATAL, "E10 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
+        logger(FATAL, "E10 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
     }
     ++pIt;
 
     goodPos=Vec3D(0.0094902039201126, 0.0094902039201126 ,0);
     goodVel=Vec3D(0.0008081850585628,0.0008081850585628,0);
-    if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
+    if (!(*pIt)->getPosition().isEqualTo(goodPos, 1e-10))
     {
-        logger.log(Log::FATAL, "E11 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
+        logger(FATAL, "E11 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
     }
-    if (!(*pIt)->getVelocity().compareTo(goodVel , 1e-10))
+    if (!(*pIt)->getVelocity().isEqualTo(goodVel , 1e-10))
     {
-        logger.log(Log::FATAL, "E11 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
+        logger(FATAL, "E11 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
     }
     ++pIt;
 
     goodPos=Vec3D(0.00963104447019111, 0.00963104447019111,0.001);
     goodVel=Vec3D(-0.005560480643562,-0.005560480643562,0);
-    if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
+    if (!(*pIt)->getPosition().isEqualTo(goodPos, 1e-10))
     {
-        logger.log(Log::FATAL, "E12 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
+        logger(FATAL, "E12 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
     }
-    if (!(*pIt)->getVelocity().compareTo(goodVel , 1e-10))
+    if (!(*pIt)->getVelocity().isEqualTo(goodVel , 1e-10))
     {
-        logger.log(Log::FATAL, "E12 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
+        logger(FATAL, "E12 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
     }
     ++pIt;
 
     goodPos=Vec3D(0.00050979607988006, 0.00050979607988006,0.001);
     goodVel=Vec3D(-0.0008081850586013,-0.0008081850586013,0);
-    if (!(*pIt)->getPosition().compareTo(goodPos, 1e-10))
+    if (!(*pIt)->getPosition().isEqualTo(goodPos, 1e-10))
     {
-        logger.log(Log::FATAL, "E13 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
+        logger(FATAL, "E13 The particle is in the wrong position. It is %, however is should be %", (*pIt)->getPosition(), goodPos);
     }
-    if (!(*pIt)->getVelocity().compareTo(goodVel , 1e-10))
+    if (!(*pIt)->getVelocity().isEqualTo(goodVel , 1e-10))
     {
         logger.log(Log::FATAL, "E13 The particle has the wrong velocity. It is %, however is should be %", (*pIt)->getVelocity(), goodVel);
     }

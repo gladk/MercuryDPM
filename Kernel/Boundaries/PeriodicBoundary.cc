@@ -26,6 +26,10 @@
 #include "PeriodicBoundary.h"
 #include "ParticleHandler.h"
 #include "Particles/BaseParticle.h"
+
+/*!
+ * \details constructor
+ */
 PeriodicBoundary::PeriodicBoundary()
         : BaseBoundary()
 {
@@ -39,6 +43,9 @@ PeriodicBoundary::PeriodicBoundary()
 #endif
 }
 
+/*!
+ * \details destructor
+ */
 PeriodicBoundary::~PeriodicBoundary()
 {
 #ifdef DEBUG_DESTRUCTOR
@@ -46,11 +53,22 @@ PeriodicBoundary::~PeriodicBoundary()
 #endif   
 }
 
+/*!
+ * \details Copy method; creates a copy on the heap and returns its pointer. 
+ */
 PeriodicBoundary* PeriodicBoundary::copy() const
 {
     return new PeriodicBoundary(*this);
 }
 
+/*!
+ * \details Defines the boundary, given a normal vector such that all particles 
+ * are within {x: position_left<=normal*x<position_right}. The shift vector is set 
+ * assuming that the domain is rectangular (shift parallel to normal).
+ * \param[in] normal        The normal vector pointing from the left wall into the domain
+ * \param[in] distanceLeft  The (signed) distance between the left wall and the origin
+ * \param[in] distanceRight The (signed) distance between the right wall and the origin
+ */
 void PeriodicBoundary::set(Vec3D normal, Mdouble distanceLeft, Mdouble distanceRight)
 {
     // factor is used to set normal to unit length
@@ -61,6 +79,15 @@ void PeriodicBoundary::set(Vec3D normal, Mdouble distanceLeft, Mdouble distanceR
     shift_ = normal_ * (distanceRight_ - distanceLeft_);
 }
 
+/*!
+ * \details like PeriodicBoundary::set(normal, distanceLeft, distanceRight), but 
+ * including the possibility of setting the shift direction vector.
+ * \param[in]   normal The normal vector pointing from the left wall into the domain
+ * \param[in]   distanceLeft The (signed) distance between the left wall and the origin
+ * \param[in]   distanceRight The (signed) distance between the right wall and the origin
+ * \param[in]   shiftDirection The vector over which particles will be shifted when 
+ *              moving through the PeriodicBoundary
+ */
 void PeriodicBoundary::set(Vec3D normal, Mdouble distanceLeft, Mdouble distanceRight, Vec3D shiftDirection)
 {
     // factor is used to set normal to unit length
@@ -72,25 +99,50 @@ void PeriodicBoundary::set(Vec3D normal, Mdouble distanceLeft, Mdouble distanceR
     scaleFactor_ = (distanceRight_ - distanceLeft_) * Vec3D::dot(shiftDirection, normal_);
     shift_ = shiftDirection * scaleFactor_;
 }
-
+/*!
+ * \details Allows the left periodic boundary to be moved to a new position and 
+ * automatically changes its shift value
+ * \param[in] distanceLeft  The distance (from the origin) to which the left 
+ *                          boundary is moved
+ */
 void PeriodicBoundary::moveLeft(Mdouble distanceLeft)
 {
     distanceLeft_ = distanceLeft * scaleFactor_;
     shift_ = normal_ * (distanceRight_ - distanceLeft_);
 }
 
+/*!
+ * \details Allows the right periodic wall to be moved to a new position and 
+ * automatically changes its shift value
+ * \param[in] distanceRight     The distance (from the origin) to which the right 
+ *                              boundary is moved
+ */
 void PeriodicBoundary::moveRight(Mdouble distanceRight)
 {
     distanceRight_ = distanceRight * scaleFactor_;
     shift_ = normal_ * (distanceRight_ - distanceLeft_);
 }
 
-Mdouble PeriodicBoundary::getDistance(BaseParticle &p)
+/*!
+ * \details Returns the distance to the closest wall of the boundary to the particle,
+ * , and sets closestToLeftBoundary_ = true if the left wall is the wall closest to the particle. 
+ * Since this function should be called before calculating any Particle-Wall 
+ * interactions, it can also be used to set the shift vector in case of curved walls.
+ * \param[in] p     A reference to the particle which distance to the periodic 
+ *                  boundary is calculated
+ */
+Mdouble PeriodicBoundary::getDistance(BaseParticle& p)
 {
     return getDistance(p.getPosition());
 }
 
-Mdouble PeriodicBoundary::getDistance(const Vec3D &position)
+/*!
+ * \details Returns the distance to the wall closest to the position, and sets 
+   * closestToLeftBoundary_ = true if the left wall is the wall closest to the position. 
+ * \param[in] position  A reference to the position which distance to the periodic 
+ *                      boundary is to be calculated
+ */
+Mdouble PeriodicBoundary::getDistance(const Vec3D& position)
 {
     Mdouble distance = Vec3D::dot(position, normal_);
     
@@ -106,6 +158,23 @@ Mdouble PeriodicBoundary::getDistance(const Vec3D &position)
     }
 }
 
+/*!
+ * \details Shifts the particle (using the closestToLeftBoundary_ value)
+ * \param[in] p         A pointer to the particle which will be shifted.
+ * \todo Reconsider the way in which the shifting of particles is done. Now,
+ * the procedure is as follows:
+ *      > PARTICLE's distance to either of the two walls is gotten by PeriodicBoundary::getDistance
+ *      > Which of the two walls the particle is closest to, is saved in the BOUNDARY's 
+ *        boolean data member closestToLeftBoundary_
+ *      > PARTICLE's position is then shifted based on the BOUNDARY's closestToLeftBoundary_
+ *        data member and shift vector
+ * What might go wrong, is that it is allowed now to do a shift operation on the particle without
+ * being forced to first have the closestToLeftBoundary_ boolean set based on the same
+ * particle. 
+ * Suggestion: get rid of the closestToLeftBoundary_ data member all together (it is
+ * a property of the particle after all, rather than one of the boundary), and implement 
+ * the obtaining of which boundary to shift relatively to directly into the shift function.
+ */
 void PeriodicBoundary::shiftPosition(BaseParticle* p)
 {
     if (closestToLeftBoundary_)
@@ -134,22 +203,33 @@ void PeriodicBoundary::shiftPosition(BaseParticle* p)
  }
  */
 
-void PeriodicBoundary::shiftPositions(Vec3D &postition1, Vec3D &postion2)
+/*!
+ * \details Shifts two given positions by the shift_ vector. 
+ * \param[in] position1     The first position to be shifted
+ * \param[in] position2     The second position to be shifted
+ * \todo (AT) see toDo of PeriodicBoundary::shiftPosition().
+ */
+void PeriodicBoundary::shiftPositions(Vec3D& postition1, Vec3D& position2)
 {
     if (closestToLeftBoundary_)
     {
         postition1 += shift_;
-        postion2 += shift_;
+        position2 += shift_;
         closestToLeftBoundary_ = false;
     }
     else
     {
         postition1 -= shift_;
-        postion2 -= shift_;
+        position2 -= shift_;
         closestToLeftBoundary_ = true;
     }
 }
-
+\
+/*
+ * \details Returns TRUE if last particle/position checked is closest to the 'left' 
+ * wall, and FALSE if it is closest to the 'right' wall. 
+ * \return      value of closestToLeftBoundary_ data member
+ */
 bool PeriodicBoundary::isClosestToLeftBoundary() const
 {
     return closestToLeftBoundary_;
@@ -171,6 +251,11 @@ bool PeriodicBoundary::isClosestToLeftBoundary() const
  }
  }
  */
+
+/*!
+ * \details Reads the boundary properties from an istream
+ * \param[in] is        the istream
+ */
 void PeriodicBoundary::read(std::istream& is)
 {
     BaseBoundary::read(is);
@@ -182,6 +267,10 @@ void PeriodicBoundary::read(std::istream& is)
             >> dummy >> shift_;
 }
 
+/*!
+ * \details Deprecated version of read().
+ * \deprecated Should be gone by Mercury 2.0. Instead, use CubeInsertionBoundary::read().
+ */
 void PeriodicBoundary::oldRead(std::istream& is)
 {
     std::string dummy;
@@ -192,6 +281,10 @@ void PeriodicBoundary::oldRead(std::istream& is)
             >> dummy >> shift_;
 }
 
+/*!
+ * \details Writes boundary's properties to an ostream
+ * \param[in] os    the ostream
+ */
 void PeriodicBoundary::write(std::ostream& os) const
         {
     BaseBoundary::write(os);
@@ -202,6 +295,10 @@ void PeriodicBoundary::write(std::ostream& os) const
             << " shift " << shift_;
 }
 
+/*!
+ * \details Returns the name of the object class
+ * \return      the object's class' name, i.e. 'CubeInsertionBoundary'
+ */
 std::string PeriodicBoundary::getName() const
 {
     return "PeriodicBoundary";
@@ -214,26 +311,51 @@ std::string PeriodicBoundary::getName() const
  }
  */
 
-void PeriodicBoundary::createPeriodicParticles(BaseParticle *p, ParticleHandler &pH)
+/*!
+ * \details Checks the distance of given particle to the closest of both periodic 
+ * walls, and creates a periodic copy of the particle if needed (i.e. if the particle
+ * is closer to the periodic wall than the radius of the largest particle in the
+ * system).
+ * \param[in] p         Particle to be checked and possibly periodically copied
+ * \param[in,out] pH    System's ParticleHandler, (1) from which the interaction radius
+ *                      of its largest particle is retrieved to determine the maximum 
+ *                      distance from the wall at which a particle should still have
+ *                      a periodic copy created, and (2) to which a possible periodic
+ *                      copy of the particle will be added
+ */
+void PeriodicBoundary::createPeriodicParticles(BaseParticle* p, ParticleHandler& pH)
 {
     if (getDistance(*p) < p->getInteractionRadius() + pH.getLargestParticle()->getInteractionRadius())
     {
-        BaseParticle* F0 = p->copy();
-        F0->copyInteractionsForPeriodicParticles(*p);
-
-        shiftPosition(F0);
-                
-        //If Particle is double shifted, get correct original particle
-        BaseParticle* From = p;
-        while (From->getPeriodicFromParticle() != nullptr)
-            From = From->getPeriodicFromParticle();
-        F0->setPeriodicFromParticle(From);
+        //Step 1: Copy the particle to new ghost particle.
+        BaseParticle*  pGhost = p->copy();
         
-        pH.addObject(F0);
+        //Step 2: Copy the interactions of the ghost particle.
+        pGhost->copyInteractionsForPeriodicParticles(*p);
+
+        //Step 3: Shift the ghost to the 'reflected' location.
+        shiftPosition(pGhost);
+                
+        //Step 4: If Particle is double shifted, get correct original particle
+        BaseParticle* from = p;
+        while (from->getPeriodicFromParticle() != nullptr)
+            from = from->getPeriodicFromParticle();
+        pGhost->setPeriodicFromParticle(from);
+        
+        pH.addObject(pGhost);
     }
 }
 
-bool PeriodicBoundary::checkBoundaryAfterParticleMoved(BaseParticle *p, ParticleHandler &pH UNUSED)
+/*!
+ * \details Checks whether given particle has crossed the closest wall, and if so,
+ * shifts its position so as to have it appear at the other wall
+ * \param[in] p         The particle to be checked and possibly shifted
+ * \param pH            The ParticleHandler, which is unused in this implementation
+ * \return              ALWAYS returns FALSE for periodic boundaries. Only returns 
+ *                      TRUE when particle gets actually deleted, e.g. in certain 
+ *                      DeletionBoundary implementations.
+ */
+bool PeriodicBoundary::checkBoundaryAfterParticleMoved(BaseParticle* p, ParticleHandler& pH UNUSED)
 {
     if (getDistance(*p) < 0)
     {

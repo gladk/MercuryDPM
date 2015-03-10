@@ -26,11 +26,6 @@
 #ifndef MD_H
 #define MD_H
 
-//If user has not provided a log lever we set it to INFO by default.
-#ifndef LOG_MAIN_LEVEL
-#define LOG_MAIN_LEVEL
-#endif
-
 //This is the class that defines the std_save routines
 #include "FilesAndRunNumber.h"
 //The vector class contains a 3D vector class.
@@ -43,7 +38,7 @@
 #include "BoundaryHandler.h"
 //This class defines the interaction handler
 #include "InteractionHandler.h"
-//This class defines the interaction handler
+//This class defines the Species handler
 #include "SpeciesHandler.h"
 //#include "Species/Species.h"
 //This class defines the posibleContact lists
@@ -56,34 +51,39 @@
 
 /*!
  * \class DPMBase
- * \brief A class that defines and solves a DPM problem
- * \bug When restarting the first time step is not saved, therefore there is a missing time step after a restart
+ * \brief The DPMBase header includes quite a few header files, defining all the
+ *        handlers, which are essential. Moreover, it defines and solves a DPM problem.
+ *        It is inherited from FilesAndRunNumber (public). 
+ * \bug When restarting the first time step is not saved, therefore there is a missing
+ *      time step after a restart
  */
 class DPMBase : public FilesAndRunNumber
 {
 public:
     /*!
-     * \brief A public constructor, which sets defaults so the problem can be solved off the shelf. This is where the constructor is defined; sets up a basic two dimensional problem which can be solved off the shelf
+     * \brief A function which initialises the member variables to default values, so
+     *        that the problem can be solved off the shelf; sets up a basic two dimensional
+     *        problem which can be solved off the shelf. It is called in the constructor DPMBase().
      */
     void constructor();
 
     /*!
-     * \brief default constructor
+     * \brief Constructor that calls the "void constructor()"
      */
     DPMBase();
     
     /*!
-     * \brief
+     * \brief Copy constructor type-1
      */
     DPMBase(const FilesAndRunNumber& other);
 
     /*!
-     * \brief
+     * \brief Copy constructor type-2
      */    
     DPMBase(const DPMBase& other);
     
     /*!
-     * \brief destructor
+     * \brief virtual destructor
      */
     virtual ~DPMBase();
 
@@ -91,47 +91,66 @@ public:
      * \brief The work horse of the code
      */
     void solve();
-
+    
+    /*!
+     * \brief Checks if the essentials are set properly to go ahead with solving the problem.
+     * \details 1. Checks if at least one species exists in the SpeciesHandler.
+     *          2. Checks if particle dimensions are set.
+     *          3. Checks is system dimensions are set.
+     *          4. Checks if the time step is set or not.
+     */
     void checkSettings();
 
+    /*!
+     * \brief Writes the simulation data onto all the files i.e. .data, .ene, .fstat ...
+     */
     virtual void writeOutputFiles();
 
     /*!
-     * \brief Read arguments before solving
+     * \brief The solve function is the work horse of the code with the user input.
      */
     void solve(int argc, char* argv[]);
 
     /*!
-     * \brief This function allows the initial conditions of the particles to be set, by default locations is random. Remember particle properties must also be defined here.
-     * \todo I (Anthony) wants to change this to be an external function. This has a lot of advantages espcially when using copy-constructors. This is a major change and will break other codes, so therefore has to be done carefully.
-     * \details This sets up the particles initial conditions it is as you expect the user to override this. By default the particles are randomly disibuted
+     * \brief This function allows to set the initial conditions for our problem to be solved, 
+     *        by default particle locations are randomly set. Remember particle properties must
+     *        also be defined here.
+     * \todo I (Anthony) wants to change this to be an external function. This has a lot of advantages
+     *       especially when using copy-constructors. This is a major change and will break other codes,
+     *       so therefore has to be done carefully.
+     * \details This sets up the particles initial conditions it is as you expect the user to override
+     *          this. By default the particles are randomly disibuted
      */
     virtual void setupInitialConditions();
 
     /*!
-     * \brief This creates a scipt which can be used to load the xballs problem to display the data just generated
+     * \brief This writes a script which can be used to load the xballs problem to display the data just generated
      */
     virtual void writeXBallsScript() const;
 
     /*!
-     * \brief Allows the user to set what is written into the info column in the data file. By default is store the Species ID number
+     * \brief A virtual method that allows the user to overrride and set what is written into
+     *        the info column in the data file. By default it returns the Species ID number
      */
     virtual double getInfo(const BaseParticle& P) const;
 
     /*!
-     * \brief Stores all MD data
+     * \brief Stores all the particle data for current save time step. 
+     *        Calls the write function.
      */
     virtual void writeRestartFile();
 
     /*!
-     * \brief Loads all MD data
+     * \brief Reads all the particle data corresponding to the current saved time step.
+     *        Which is what the restart file basically stores. The problem description with the 
+     *        latest particle data.
      */
     int readRestartFile();
 
     /*!
-     * \brief
+     * \brief Also reads all the particle data corresponding to the current saved time step.
      */
-    int readRestartFile(std::string filename);
+    int readRestartFile(std::string fileName);
 
 //    /*!
 //     * \brief Loads all MD data and plots statistics for all timesteps in the .data file
@@ -139,67 +158,82 @@ public:
 //    void statisticsFromRestartData(const char *name);
 
     /*!
-     * \brief Writes all MD data into a restart file
+     * \brief Writes all particle data into a restart file
      */
     virtual void write(std::ostream& os, bool writeAllParticles=true) const;
 
     /*!
-     * \brief Reads all MD data into a restart file
+     * \brief Reads all particle data into a restart file
      */
     virtual void read(std::istream& is);
 
     /*!
-     * \brief Reads all MD data into a restart file; old version
+     * \brief Reads all particle data into a restart file; old version
      */
     virtual void readOld(std::istream &is);
 
     /*!
      * \brief This allows particle data to be reloaded from data files
+     * \details E.g. If one has a data file. This function loads data from the .data
+     *          file i.e. you get position, velocity, angular velocty, radius .. info.
+     *          See also MD::readRestartFile
+     *          For XBalls: 
+     *          Can read in format_ 14 - 8 or format_ 7 data format.
+     *          This code saves in format_ 8 for 2D and format_ 14 for 3D.
+     *          So if no extra parameters are specified it will assume things many parameters,
+     *          like density cannot be set using the data file.
+     * \todo change from deprecated const char* to std::string
      */
-    bool readDataFile(const char* filename, unsigned int format = 0);
+    bool readDataFile(const char* fileName, unsigned int format = 0);
 
     /*!
-     * \brief allows the user to read par.ini files (useful to read MDCLR files)
+     * \brief Allows the user to read par.ini files (useful to read MDCLR files)
      */
-    bool readParAndIniFiles(const char* filename);
+    bool readParAndIniFiles(const char* fileName);
 
     /*!
-     * \brief
+     * \brief Reads the next data file with default format=0. However, one can 
+     *        modify the format based on whether the particle data corresponds to
+     *        3D or 2D data. See XBalls/xballs.txt 
      */
     bool readNextDataFile(unsigned int format = 0);
 
     /*!
-     * \brief
+     * \brief Useful when fileType is chosen as Multiple Files or Multiple files with padded.
      */
-    bool findNextExistingDataFile(Mdouble tmin, bool verbose = true);
+    bool findNextExistingDataFile(Mdouble tMin, bool verbose = true);
 
     /*!
-     * \brief
+     * \brief Operator overloading of DPMBase class.
      */
     friend inline std::ostream& operator<<(std::ostream& os, const DPMBase &md);
 
     /*!
-     * \brief
+     * \brief Can interpret main function input arguments that are passed by the
+     *        driver codes
      */
-    int readArguments(int argc, char *argv[]);
+    bool readArguments(int argc, char *argv[]);
 
     /*!
-     * \brief
+     * \brief 
      */
-    virtual int readNextArgument(int& i, int argc, char *argv[]);
+    virtual bool readNextArgument(int& i, int argc, char *argv[]);
 
     /*!
-     * \brief
+     * \brief Checks if the particle having any interaction with walls or other particles.
      */
     virtual bool checkParticleForInteraction(const BaseParticle& P);
 
-//getters and setters
+    //getters and setters
 
     /*!
      * \brief Access function for the time
      */
     Mdouble getTime() const;
 
+    /*!
+     * \brief Returns the current counter of time steps.
+     */
     unsigned int getNtimeSteps() const;
 
     /*!
@@ -210,105 +244,119 @@ public:
     /*!
      * \brief Allows the upper time limit to be changed
      */
-    void setTimeMax(Mdouble new_tmax);
+    void setTimeMax(Mdouble newTMax);
 
     /*!
-     * \brief Allows the upper time limit to be accessed
+     * \brief Allows the user to access the total simulation time during the simulation.
+     *        Cannot change it though.
      */
     Mdouble getTimeMax() const;
 
-#ifdef CONTACT_LIST_HGRID
-    PossibleContactList& getPossibleContactList();
-#endif
+    #ifdef CONTACT_LIST_HGRID
+        PossibleContactList& getPossibleContactList();
+    #endif
 
     /*!
-     * \brief Sets how often the data is saved using the number of saves wanted, tmax, and dt. See also \ref Files::setSaveCount
+     * \brief 
      */
-    void setDoCGAlways(bool new_);
+    void setDoCGAlways(bool newDoCGFlag);
 
     /*!
-     * \brief \todo{these functions should also update the mixed species}
+     * \todo{these functions should also update the mixed species}
      */
 
     /*!
-     * \brief
+     * \brief Allows to set the flag for enabling or disabling particle rotation 
+     *        in the simulations.
      */
-    void setRotation(bool new_);
+    void setRotation(bool newRotFlag);
 
     /*!
-     * \brief
+     * \brief Returns a flag indicating if particle rotation is enabled or disabled.
      */
     bool getRotation() const;
 
     /*!
-     * \brief
+     * \brief 
      */
     bool getDoCGAlways() const;
     
     /*!
-     * \brief Get xmin
+     * \brief If the length of the problem domain in x-direction is XMax - XMin, 
+     *        then getXMin() returns XMin,
      */
     Mdouble getXMin() const;
 
     /*!
-     * \brief Get xmax
+     * \brief If the length of the problem domain in x-direction is XMax - XMin, 
+     *        then getXMax() returns XMax,
      */
     Mdouble getXMax() const;
 
     /*!
-     * \brief Gets ymin
+     * \brief If the length of the problem domain in y-direction is YMax - YMin,
+     *        then getYMin() returns YMin,
      */
     Mdouble getYMin() const;
 
     /*!
-     * \brief Gets ymax
+     * \brief If the length of the problem domain in y-direction is YMax - YMin,
+     *        then getYMax() returns XMax,
      */
     Mdouble getYMax() const;
 
     /*!
-     * \brief Gets zmin
+     * \brief If the length of the problem domain in z-direction is ZMax - ZMin,
+     *        then getZMin() returns ZMin,
      */
     Mdouble getZMin() const;
 
     /*!
-     * \brief Gets zmax
+     * \brief If the length of the problem domain in z-direction is ZMax - ZMin,
+     *        then getZMax() returns ZMax,
      */
     Mdouble getZMax() const;
     
     /*!
-     * \brief Sets xmin and walls, assuming the standard definition of walls as in the default constructor
+     * \brief If the length of the problem domain in x-direction is XMax - XMin, 
+     *        this method sets XMin.
      */
-    void setXMin(Mdouble new_xmin);
+    void setXMin(Mdouble newXMin);
 
     /*!
-     * \brief
-     */    
-    void setYMin(Mdouble new_ymin);
+     * \brief If the length of the problem domain in y-direction is YMax - YMin,
+     *        this method sets YMin. 
+     */       
+    void setYMin(Mdouble newYMin);
     
     /*!
-     * \brief Sets ymin and walls, assuming the standard definition of walls as in the default constructor
+     * \brief If the length of the problem domain in z-direction is ZMax - ZMin, 
+     *        this method sets ZMin.
      */
-    void setZMin(Mdouble new_zmin);
+    void setZMin(Mdouble newZMin);
     
     /*!
-     * \brief Sets xmax and walls, assuming the standard definition of walls as in the default constructor
+     * \brief If the length of the problem domain in x-direction is XMax - XMin, 
+     *        this method sets XMax.
      */
-    void setXMax(Mdouble new_xmax);
+    void setXMax(Mdouble newXMax);
     
     /*!
-     * \brief Sets ymax and walls, assuming the standard definition of walls as in the default constructor
+     * \brief If the length of the problem domain in y-direction is YMax - YMin, 
+     *        this method sets YMax.
      */
-    void setYMax(Mdouble new_ymax);
+    void setYMax(Mdouble newYMax);
     
     /*!
-     * \brief Sets ymax and walls, assuming the standard definition of walls as in the default constructor
-     */
-    void setZMax(Mdouble new_zmax);
+     * \brief If the length of the problem domain in z-direction is XMax - XMin, 
+     *        this method sets ZMax.
+     */       
+    void setZMax(Mdouble newZMax);
     
     /*!
      * \brief Allows the time step dt to be changed
      */
-    void setTimeStep(Mdouble new_dt);
+    void setTimeStep(Mdouble newDt);
 
     /*!
      * \brief Allows the time step dt to be accessed
@@ -318,27 +366,27 @@ public:
     /*!
      * \brief Set the xball output mode
      */
-    void setXBallsColourMode(int new_cmode);
+    void setXBallsColourMode(int newCMode);
 
     /*!
-     * \brief Get the xball output mode
+     * \brief Get the xball colour mode (CMode)
      */
     int getXBallsColourMode() const;
     
     /*!
-     * \brief Set the scale of vectors in xballs
+     * \brief Set the scale of vectors in xballs.
      */
-    void setXBallsVectorScale(double new_vscale);
+    void setXBallsVectorScale(double newVScale);
 
     /*!
-     * \brief
+     * \brief Returns the scale of vectors used in xballs. 
      */
     double getXBallsVectorScale() const;
 
     /*!
      * \brief Set the additional arguments for xballs
      */
-    void setXBallsAdditionalArguments(std::string new_);
+    void setXBallsAdditionalArguments(std::string newXBArgs);
 
     /*!
      * \brief
@@ -346,141 +394,102 @@ public:
     std::string getXBallsAdditionalArguments() const;
     
     /*!
-     * \brief Set the scale of the xballs problem. The default is fit to screen
+     * \brief Sets the scale of the view (either normal, zoom in or zoom out) to
+     *        display in xballs. The default is fit to screen
      */
-    void setXBallsScale(Mdouble new_scale);
+    void setXBallsScale(Mdouble newScale);
 
     /*!
-     * \brief
+     * \brief Returns the scale of the view in xballs.
      */
     double getXBallsScale() const;
 
     /*!
-     * \brief Allows the gravitational acceleration to be changed
+     * \brief Allows to modify the gravity vector.
      */
-    void setGravity(Vec3D new_gravity);
+    void setGravity(Vec3D newGravity);
 
     /*!
-     * \brief Allows the gravitational acceleration to be accessed
+     * \brief Returns the gravity vector.
      */
     Vec3D getGravity() const;
 
-    void setDimension(int new_dim);
-
     /*!
-     * \brief Allows the dimension of the simulation to be changed
+     * \brief Sets the system and particle dimension.
      */
-    void setSystemDimensions(int new_dim);
+    void setDimension(unsigned int newDim);
 
     /*!
-     * \brief Allows the dimension of the simulation to be accessed. Note there is also a particle dimension
+     * \brief Allows for the dimension of the simulation to be changed.
      */
-    int getSystemDimensions() const;
-
-    ///Allows the dimension of the particle (f.e. for mass) to be changed
-    void setParticleDimensions(int particleDimensions);
-
-    ///Allows the dimension of the particle (f.e. for mass) to be accessed
-    int getParticleDimensions() const;
-
+    void setSystemDimensions(unsigned int newDim);
 
     /*!
-     * \brief Gets restart_version
+     * \brief Returns the dimension of the simulation. Note there is also a particle
+     *        dimension.
+     */
+    unsigned int getSystemDimensions() const;
+
+    /*!
+    * \brief Allows the dimension of the particle (f.e. for mass) to be changed. 
+     *       e.g. discs or spheres.
+    */
+    void setParticleDimensions(unsigned int particleDimensions);
+
+    /*!
+     * \brief Returns the particle dimensions.
+     */
+    unsigned int getParticleDimensions() const;
+
+    /*!
+     * \brief This is to take into account for different Mercury versions.
+     *        Returns the version of the restart file.
      */
     std::string getRestartVersion() const;
 
     /*!
      * \brief Sets restart_version
      */
-    void setRestartVersion(std::string new_);
+    void setRestartVersion(std::string newRV);
 
     /*!
-     * \brief Gets restarted
+     * \brief Returns the flag denoting if the simulation was restarted or not.
      */
     bool getRestarted() const;
     
     /*!
-     * \brief
+     * \brief Allows to set the flag stating if the simulation is to be restarted or not.
      */
-    void setRestarted(bool new_);
+    void setRestarted(bool newRestartedFlag);
 
     /*!
-     * \brief Gets restarted
+     * \brief Returns the flag denoting if the append option is on or off.
      */
     bool getAppend() const;
 
     /*!
-     * \brief Sets restarted
+     * \brief Allows to set the append option.
      */
-    void setAppend(bool new_);
+    void setAppend(bool newAppendFlag);
     
     /*!
-     * \brief Gets ene_ela
+     * \brief Returns the global elastic energy within the system.
      */
     Mdouble getElasticEnergy() const;
 
     /*!
-     * \brief
+     * \brief Returns the global kinetic energy stored in the system.
      */
     Mdouble getKineticEnergy() const;
     
     /*!
-     * \brief
+     * \brief Checks if two particle are in contact or is there any positive overlap
      */
     bool areInContact(const BaseParticle* pI, const BaseParticle* pJ) const;
 
-//functions that should only be used in the class definitions 
-protected:
-    
-    /*!
-     * \brief This does the force computation
-     */
-    virtual void computeAllForces();
-
-    /*!
-     * \brief Computes the forces between particles (internal in the sense that the sum over all these forces is zero i.e. fully modelled forces)
-     */
-    virtual void computeInternalForces(BaseParticle* i);
-
-    /*!
-     * \brief Computes the forces between particles (internal in the sense that the sum over all these forces is zero i.e. fully modelled forces)
-     */
-    virtual void computeInternalForces(BaseParticle* P1, BaseParticle* P2);
-
-    /*!
-     * \brief This is were the computation of external forces takes place (e.g. gravity)
-     */
-    virtual void computeExternalForces(BaseParticle* PI);
-
-    /*!
-     * \brief This is were the walls are
-     */
-    virtual void computeWalls(BaseParticle* PI);
-    
-    /*!
-     * \brief This is a virtual function why the users can add extra code which is execuated only when the code is restarted
-     */
-    virtual void actionsOnRestart();
-
-    /*!
-     * \brief This is actions before the start of the main time loop
-     */
-    virtual void actionsBeforeTimeLoop();
-
-    /*!
-     * \brief This is actions before the start of the main time loop
-     */
-    virtual void hGridActionsBeforeTimeLoop();
-
-    /*!
-     * \brief This is action before the time step is started
-     */
-    virtual void hGridActionsBeforeTimeStep();
-
     /// \bug Why are the hGRID actions public, this seems wrong. Someone please comment [Ant].
-public:
     /*!
-     * \brief
+     * \brief 
      */
     virtual void hGridInsertParticle(BaseParticle *obj UNUSED);
 
@@ -493,56 +502,129 @@ public:
      * \brief
      */
     virtual void hGridRemoveParticle(BaseParticle *obj UNUSED);
-
-protected:
-
-    /*!
-     * \brief
-     */
-    virtual bool getHGridUpdateEachTimeStep() const;
-
-    /*!
-     * \brief This is action before the time step is started
-     */
-    virtual void actionsBeforeTimeStep();
-
-    /*!
-     * \brief This is actions at the end of the code, but before the files are closed
-     */
-    virtual void actionsAfterSolve();
-
-    /*!
-     * \brief This is action after the time step is finished
-     */
-    virtual void actionsAfterTimeStep();
-
-    /*!
-     * \brief This function outputs the location and velocity of the particle in a format the xballs progream can read
-     */
-    virtual void outputXBallsData(std::ostream& os) const;
     
     /*!
      * \brief
      */
+    virtual void hGridUpdateMove(BaseParticle*, Mdouble);
+
+    /*!
+     * \brief
+     * //Not unsigned index because of possible wall collisions.
+     */
+    virtual void gatherContactStatistics(unsigned int index1 UNUSED, int index2 UNUSED, Vec3D Contact UNUSED, Mdouble delta UNUSED, Mdouble ctheta UNUSED, Mdouble fdotn UNUSED, Mdouble fdott UNUSED, Vec3D P1_P2_normal_ UNUSED, Vec3D P1_P2_tangential UNUSED);    
+
+//functions that should only be used in the class definitions 
+protected:
+    
+    /*!
+     * \brief Computes all the forces acting on the particles by using the setTorque
+     * and setForce methods. See BaseInteractible.cc    
+     */
+    virtual void computeAllForces();
+
+    /*!
+     * \brief Computes the forces between particles (internal in the sense that the
+     *        sum over all these forces is zero i.e. fully modelled forces)
+     */
+    virtual void computeInternalForces(BaseParticle* i);
+
+    /*!
+     * \brief Computes the forces between particles (internal in the sense that 
+     *        the sum over all these forces is zero i.e. fully modelled forces)
+     */
+    virtual void computeInternalForces(BaseParticle* P1, BaseParticle* P2);
+
+    /*!
+     * \brief Computes the external forces acting on particles (e.g. gravitational)
+     */
+    virtual void computeExternalForces(BaseParticle* PI);
+
+    /*!
+     * \brief Computes the forces on the particles due to the walls (normals are outward normals)
+     */
+    virtual void computeForcesDueToWalls(BaseParticle* PI);
+    
+    /*!
+     * \brief A virtual function where the users can add extra code which is executed
+     *  only when the code is restarted.
+     */
+    virtual void actionsOnRestart();
+
+    /*!
+     * \brief A virtual function. Allows one to carry out any operations before the start
+     *        of the time loop.
+     */
+    virtual void actionsBeforeTimeLoop();
+
+    /*!
+     * \brief A virtual function that allows one to carry out hGrid operations before the
+     *       start of the time loop.
+     */
+    virtual void hGridActionsBeforeTimeLoop();
+
+    /*!
+     * \brief A virtual function that allows one to set or execute hGrid parameters or 
+     *        operations before every simulation time step.
+     */
+    virtual void hGridActionsBeforeTimeStep();
+    
+    /*!
+     * \brief 
+     */
+    virtual bool getHGridUpdateEachTimeStep() const;
+
+    /*!
+     * \brief A virtual function which allows to define operations to be executed before
+     *        the new time step.
+     */
+    virtual void actionsBeforeTimeStep();
+
+    /*!
+     * \brief A virtual function which allows to define operations to be executed after
+     *       the solve().
+     */
+    virtual void actionsAfterSolve();
+
+    /*!
+     * \brief A virtual function which allows to define operations to be executed after
+     *       time step.
+     */
+    virtual void actionsAfterTimeStep();
+
+    /*!
+     * \brief This function writes the location of the walls and particles in a format the
+     *        XBalls program can read. See XBalls/xballs.txt. However, MercuryDPM supports a much better viewer 
+     *        now called Paraview. See the tutorials section in the documentation.
+     */
+    virtual void outputXBallsData(std::ostream& os) const;
+    
+    /*!
+     * \brief This function writes out the particle locations into an output stream in a 
+     *        format the XBalls program can read.
+     */
     virtual void outputXBallsDataParticle(const unsigned int i,const unsigned int format, std::ostream& os) const;
 
     /*!
-     * \brief This function gathers statistical data for ene file
+     * \brief Writes a header with a certain format for ENE file
      */
     virtual void writeEneHeader(std::ostream& os) const;
 
     /*!
-     * \brief
+     * \brief Writes a header with a certain format for FStat file
      */
     virtual void writeFstatHeader(std::ostream& os) const;
 
     /*!
-     * \brief This function outputs statistical data - The default is to compute the rotational kinetic engergy, linear kinetic energy, and the centre of mass.
+     * \brief This function enables one to write the global energy available in the
+     *        system after each time step. The default is to compute the rotational and 
+     *        translational kinetic energy, potential energy and the centre of mass.
      */
     virtual void writeEneTimestep(std::ostream& os) const;
-
+    
+     // Functions for statistics
     /*!
-     * \brief Functions for statistics
+     * 
      */
     virtual void initialiseStatistics();
 
@@ -551,6 +633,9 @@ protected:
      */
     virtual void outputStatistics();
 
+    /*!
+     *
+     */
     void gatherContactStatistics();
 
     /*!
@@ -564,33 +649,25 @@ protected:
     virtual void finishStatistics();
 
     /*!
-     * \brief This is were the integration is done
+     * \brief This is were the integration is done, at the moment it is
+     *        velocity Verlet integration and is done before the forces are
+     *        computed. See http://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet
      */
     virtual void integrateBeforeForceComputation();
 
     /*!
-     * \brief This is were the integration is done
+     * \brief Integration is done after force computations. We apply the Velocity verlet scheme.
+     *        See http://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet
      */
     virtual void integrateAfterForceComputation();
 
     /*!
-     * \brief
+     * \brief There are a range of boundaries one could implement depending on ones' problem.
+     *        This methods checks for interactions between particles and such range of boundaries.
+     *        See BaseBoundary.h and all the boundaries in the Boundaries folder
      */
     virtual void checkInteractionWithBoundaries();
 
-public:
-    /*!
-     * \brief
-     */
-    virtual void hGridUpdateMove(BaseParticle*, Mdouble);
-
-    /*!
-     * \brief
-     * //Not unsigned index because of possible wall collisions.
-     */
-    virtual void gatherContactStatistics(int index1 UNUSED, int index2 UNUSED, Vec3D Contact UNUSED, Mdouble delta UNUSED, Mdouble ctheta UNUSED, Mdouble fdotn UNUSED, Mdouble fdott UNUSED, Vec3D P1_P2_normal_ UNUSED, Vec3D P1_P2_tangential UNUSED);
-
-protected:
     /*!
      * \brief
      */
@@ -602,7 +679,8 @@ protected:
     virtual void hGridActionsAfterIntegration();
 
     /*!
-     * \brief Broad phase of contact detection goes here. Default check all contacts.
+     * \brief By broad one means to screen and determine an approximate number of particles that a given 
+     *        particle can be in contact with. Hence the word "Broad phase" of contact detection.
      */
     virtual void broadPhase(BaseParticle* i);
 
@@ -617,7 +695,7 @@ protected:
     void initialiseTangentialSprings();
 
     /*!
-     * \brief prints time to std::cout
+     * \brief Displays the current simulation time onto your screen for example.
      */
     virtual void printTime() const;
 
@@ -627,156 +705,190 @@ protected:
     virtual bool continueSolve() const;
 
     /*!
-     * \brief
+     * \brief Displays the interaction details corresponding to the pointer objects
+     *        in the interaction handler.     
      */
     void outputInteractionDetails() const;
 
+    /*!
+     * \brief Checks if the input variable "time" is the current time in the simulation
+     */
     bool isTimeEqualTo(Mdouble time) const;
-
-protected:
 
     /*!
      * \brief Removes periodic duplicate Particles
-     * \details Removes particles created by CheckAndDuplicatePeriodicParticle(int i, int nWallPeriodic)). Note that between these two functions it is not allowed to create additional functions
      */
     void removeDuplicatePeriodicParticles();
 
     /*!
-     * \brief Calls Check_and_Duplicate_Periodic_Particle for all Particles curently in Particles[] and returns the number of particles created
+     * \brief In case of periodic boundaries, the below methods checks and adds particles
+     *        when necessary into the particle handler. See DPMBase.cc and PeriodicBoundary.cc
+     *        for more details.
      */
     void checkAndDuplicatePeriodicParticles();
 
 private:
     
     /*!
-     * \brief The dimension of the simulation i.e. 2D or 3D
+     * \brief The dimensions of the simulation i.e. 2D or 3D
      */
-    int systemDimensions_;
-
-    int particleDimensions_; ///<determines if 2D or 3D volume is used for mass calculations
+    unsigned int systemDimensions_;
 
     /*!
-     * \brief Gravitational acceleration
+     * \brief determines if 2D or 3D particle volume is used for mass calculations
+     */
+    unsigned int particleDimensions_;
+
+    /*!
+     * \brief Gravity vector
      */
     Vec3D gravity_;
 
     /*!
-     * \brief These store the size of the domain, assume walls at the ends
+     * \brief If the length of the problem domain in x-direction is XMax - XMin, 
+     *        the above variable stores XMin.
      */
     Mdouble xMin_;
+    
+    /*!
+     * \brief If the length of the problem domain in x-direction is XMax - XMin,
+     *        the above variable stores XMax.
+     */
     Mdouble xMax_;
+    
+    /*!
+     * \brief If the length of the problem domain in y-direction is YMax - YMin,
+     *        the above variable stores YMin.
+     */    
     Mdouble yMin_;
+    
+    /*!
+     * \brief If the length of the problem domain in y-direction is YMax - XMin,
+     *        the above variable stores YMax.
+     */
     Mdouble yMax_;
+    
+    /*!
+     * \brief If the length of the problem domain in z-direction is ZMax - ZMin,
+     *        the above variable stores ZMin.
+     */
     Mdouble zMin_;
+    
+    /*!
+     * \brief If the length of the problem domain in z-direction is ZMax - ZMin,
+     *        the above variable stores ZMax.
+     */
     Mdouble zMax_;
 
     /*!
-     * \brief This stores the current time
+     * \brief Stores the current simulation time
      */
     Mdouble time_;
 
     /*!
-     * \brief This stores the number of time steps
+     * \brief Stores the number of time steps
      */
     unsigned int ntimeSteps_;
 
     /*!
-     * \brief The size of time step
+     * \brief Stores the simulation time step
      */
     Mdouble timeStep_;
 
     /*!
-     * \brief This stores the final time, where the simulation ends
+     * \brief Stores the duration of the simulation
      */
     Mdouble timeMax_;
 
     /*!
      * \brief used in force calculations
-     * \details stores the potential energy in the elastic springs (global, because it has to be calculated in the force loop
+     * \details Stores the potential energy in the elastic springs (global, because
+     *          it has to be calculated in the force loop
      */
     Mdouble elasticEnergy_;
 
     /*!
-     * \brief
+     * \brief Previous versions of MercuryDPM had a different restart file format, 
+     *        the below member variable allows one to specify the version in order 
+     *        to choose between the available version support.
      */
-    std::string restartVersion_; ///<to read new and old restart data
+    std::string restartVersion_;
 
     /*!
-     * \brief
+     * \brief A bool to check if the simulation was restarted or not.
      */
-    bool restarted_; ///<to read new and old restart data
+    bool restarted_; 
 
     /*!
-     * \brief
+     * \brief A flag to determine if the file has to be appended or not. See DPMBase::Solve()
+     *        for example.
      */
     bool append_;
 
     /*!
-     * \brief
+     * \brief A flag to turn on/off particle rotation.
      */
     bool rotation_;
 
-
-//This is the private data that is only used by the xballs output
+    //This is the private data that is only used by the xballs output
 
     /*!
-     * \brief sets the xballs argument cmode (see xballs.txt)
+     * \brief XBalls is a package to view the particle data. As an alternative MercuryDPM also supports Paraview.
+     * The below variable is used to set the argument cmode in xballs script (see XBalls/xballs.txt)
      */
     int xBallsColourMode_; 
     
     /*!
-     * \brief sets the xballs argument vscale (see xballs.txt)
+     * \brief sets the xballs argument vscale (see XBalls/xballs.txt)
      */
     Mdouble xBallsVectorScale_;
 
     /*!
-     * \brief sets the xballs argument scale (see xballs.txt)
+     * \brief sets the xballs argument scale (see XBalls/xballs.txt)
      */
     Mdouble xBallsScale_;
 
     /*!
-     * \brief std::string where additional xballs argument can be specified (see xballs.txt)
+     * \brief A string of additional arguments for xballs can be specified (see XBalls/xballs.txt). e.g. "-solidf -v0"
      */
     std::string xBallsAdditionalArguments_; 
 
-//This belongs to the hGrid
-
-/*!
- * \brief
- */
-#ifdef CONTACT_LIST_HGRID
-    PossibleContactList possibleContactList;
-#endif
+    //This belongs to the hGrid
+    
+    // defines a Macro for creating an instance of class PossibleContactList. See PossbileContactList.h     
+    #ifdef CONTACT_LIST_HGRID
+        PossibleContactList possibleContactList;
+    #endif
 
 public:
 
     /*!
-     * \brief These are the particle parameters like dissipation etc.
+     * \brief A handler to that stores the species type i.e. elastic, linear visco-elastic... et cetera.
      */
     SpeciesHandler speciesHandler;
 
     /*!
-     * \brief This is a random generator, often used by the initial conditions etc...
+     * \brief This is a random generator, often used for setting up the initial conditions etc...
      */
     RNG random;
 
     /*!
-     * \brief Object of the class particleHandler
+     * \brief An object of the class ParticleHandler, contains the pointers to all the particles created.
      */
     ParticleHandler particleHandler;
 
     /*!
-     * \brief Object of the class wallHandler
+     * \brief An object of the class WallHandler. Contains pointers to all the walls created.
      */
     WallHandler wallHandler;
 
     /*!
-     * \brief Object of the class BoundaryHandler
+     * \brief An object of the class BoundaryHandler which concerns insertion and deletion of particles into or from regions.
      */
     BoundaryHandler boundaryHandler;
 
     /*!
-     * \brief Object of the class InteractionHandler
+     * \brief An object of the class InteractionHandler
      */
     InteractionHandler interactionHandler;
 

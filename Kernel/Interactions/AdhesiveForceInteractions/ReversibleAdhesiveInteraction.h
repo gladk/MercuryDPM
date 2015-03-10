@@ -32,26 +32,57 @@ class BaseParticle;
 class ReversibleAdhesiveSpecies;
 class BaseInteractable;
 
+/*!
+ * \class ReversibleAdheseiveInteraction
+ * \brief Computes the interactions between particles for reversive adhesive contact model.
+ */
 class ReversibleAdhesiveInteraction : public virtual BaseInteraction
 {
 public:
+    /*!
+     * \brief Setting an alias name for ReversibleAdhesiveSpecies.
+     */
     typedef ReversibleAdhesiveSpecies SpeciesType;
+    /*!
+     * \brief Constructor
+     */    
     ReversibleAdhesiveInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
+    /*!
+     * \brief Copy constructor.
+     */    
     ReversibleAdhesiveInteraction(const ReversibleAdhesiveInteraction &p);
+    /*!
+     * \brief Destructor.
+     */        
     virtual ~ReversibleAdhesiveInteraction();
-
-    void computeForce();
-
-    ///Interaction read function, which accepts an std::stringstream as input.
+    /*!
+     * \brief Computes the adhesive forces
+     */    
+    void computeAdhesionForce();
+    /*!
+     * \brief Interaction read function, which accepts an std::istream as input.
+     */        
     void read(std::istream& is);
-
-    ///Interaction print function, which accepts an std::stringstream as input.
+    /*!
+     * \brief Interaction print function, which accepts an std::ostream as input.
+     */        
     void write(std::ostream& os) const;
-
+    /*!
+     * \brief Returns the amount of Elastic energy involved in an interaction. Basically
+     *        used in case you want to write the elastic energy into an output file. 
+     */    
+    /*!
+     * \brief Returns the elastic energy stored in the adhesive spring. 
+     */
     Mdouble getElasticEnergy() const;
-
+    /*!
+     * \brief A dynamic_cast of BaseSpecies pointer type to a pointer to an object of 
+     *        type ReversibleAdhesiveSpecies.
+     */    
     const ReversibleAdhesiveSpecies* getSpecies() const;
-
-    std::string getName() const;
+    /*!
+     * \brief Returns the name of the interaction, see Interaction.h.
+     */    
+    std::string getBaseName() const;
 };
 #endif

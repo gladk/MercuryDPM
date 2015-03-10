@@ -24,16 +24,19 @@
 //SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "EmptyAdhesiveSpecies.h"
+#include <Logger.h>
 
-EmptyAdhesiveSpecies::EmptyAdhesiveSpecies() : BaseSpecies()
+EmptyAdhesiveSpecies::EmptyAdhesiveSpecies()
 {
 #ifdef DEBUG_CONSTRUCTOR
     std::cout<<"EmptyAdhesiveSpecies::EmptyAdhesiveSpecies() finished"<<std::endl;
 #endif
 }
 
-EmptyAdhesiveSpecies::EmptyAdhesiveSpecies(const EmptyAdhesiveSpecies &s)
-        : BaseSpecies(s)
+/*!
+ * \param[in] the species that is copied
+ */
+EmptyAdhesiveSpecies::EmptyAdhesiveSpecies(const EmptyAdhesiveSpecies &s UNUSED)
 {
 #ifdef DEBUG_CONSTRUCTOR
     std::cout<<"EmptyAdhesiveSpecies::EmptyAdhesiveSpecies(const EmptyAdhesiveSpecies &p) finished"<<std::endl;
@@ -47,27 +50,36 @@ EmptyAdhesiveSpecies::~EmptyAdhesiveSpecies()
 #endif   
 }
 
-///EmptyAdhesiveSpecies print function, which accepts an os std::stringstream as input. It prints human readable EmptyAdhesiveSpecies information to the std::stringstream
+/*!
+ * \param[out] output stream (typically the restart file)
+ */
 void EmptyAdhesiveSpecies::write(std::ostream& os UNUSED) const
 {
 }
 
+/*!
+ * \param[in] input stream (typically the restart file)
+ */
 void EmptyAdhesiveSpecies::read(std::istream& is UNUSED)
 {
 }
 
-//the name is set such that the full name does not extend
+/*!
+ * \return a string containing the name of the species (minus the word "Species")
+ */
 std::string EmptyAdhesiveSpecies::getBaseName() const
 {
     return "";
 }
 
-///create values for mixed species
+/*!
+ * \param[in] S,T the two species whose properties are mixed to create the new species
+ */
 void EmptyAdhesiveSpecies::mix(EmptyAdhesiveSpecies* const S UNUSED, EmptyAdhesiveSpecies* const T UNUSED)
 {
 }
 
-///Returns the particle distance below which adhesive forces can occur (needed for contact detection)
+///\return the maximum separation distance below which adhesive forces can occur (needed for contact detection)
 Mdouble EmptyAdhesiveSpecies::getInteractionDistance() const
 {
     return 0.0;

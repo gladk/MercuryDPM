@@ -27,12 +27,11 @@
 #include <iostream>
 #include <iomanip>
 
-#include "Logger.h"
+#include <Logger.h>
 #include "DPMBase.h"
 #include "Particles/BaseParticle.h"
 #include "Species/LinearViscoelasticSlidingFrictionSpecies.h"
 #include "Walls/InfiniteWall.h"
-extern Logger<LOG_MAIN_LEVEL> logger;
 
 ///This tests if moving the wall works with CWall::move(Vec3D velocity,Vec3D dt). 
 ///The wall is moved in normal and tangential direction and the results 
@@ -119,7 +118,7 @@ class MovingWallPrescribedVelocity : public MovingWall
     {
         MovingWall::setupInitialConditions();
         wall->setPosition(Vec3D(0.0, 0.0, 0.0));
-        wall->setPrescribedVelocity([] (double time)
+        wall->setPrescribedVelocity([] (double time UNUSED)
         {
             return Vec3D(0.0,0.0,1);
         });
@@ -136,7 +135,7 @@ class MovingWallPrescribedPositionPrescribedVelocity : public MovingWall
         {
             return Vec3D(0.0,0.0,time);
         });
-        wall->setPrescribedVelocity([] (double time)
+        wall->setPrescribedVelocity([] (double time UNUSED)
         {
             return Vec3D(0.0,0.0,1);
         });
@@ -199,7 +198,7 @@ class MovingWallTangentialPrescribedVelocity : public MovingWallTangential
     {
         MovingWallTangential::setupInitialConditions();
         wall->setPosition(Vec3D(0.0, 0.0, 0.0));
-        wall->setPrescribedVelocity([] (double time)
+        wall->setPrescribedVelocity([] (double time UNUSED)
         {
             return Vec3D(1.0,0.0,0.0);
         });
@@ -216,7 +215,7 @@ class MovingWallTangentialPrescribedPositionPrescribedVelocity : public MovingWa
         {
             return Vec3D(time,0.0,0.0);
         });
-        wall->setPrescribedVelocity([] (double time)
+        wall->setPrescribedVelocity([] (double time UNUSED)
         {
             return Vec3D(1.0,0.0,0.0);
         });
@@ -225,21 +224,21 @@ class MovingWallTangentialPrescribedPositionPrescribedVelocity : public MovingWa
 
 void compareParticles(BaseParticle* Ptest, BaseParticle* Pref, double absError, Vec3D positionDifference, Vec3D velocityDifference, Vec3D orientationDifference, Vec3D AngularVelocityDifference)
 {
-    if (mathsFunc::compare(Ptest->getPosition(), Pref->getPosition() + positionDifference, absError))
+    if (!mathsFunc::isEqual(Ptest->getPosition(), Pref->getPosition() + positionDifference, absError))
     {
-        logger.log(Log::FATAL, "The particle has the wrong position. It is %, however is should be %, the difference is %", Ptest->getPosition(), Pref->getPosition() + positionDifference, Ptest->getPosition() - Pref->getPosition() - positionDifference);
+        logger(FATAL, "The particle has the wrong position. It is %, however is should be %, the difference is %", Ptest->getPosition(), Pref->getPosition() + positionDifference, Ptest->getPosition() - Pref->getPosition() - positionDifference);
     }
-    if (mathsFunc::compare(Ptest->getVelocity(), Pref->getVelocity() + velocityDifference, absError))
+    if (!mathsFunc::isEqual(Ptest->getVelocity(), Pref->getVelocity() + velocityDifference, absError))
     {
-        logger.log(Log::FATAL, "The particle has the wrong velocity. It is %, however is should be %, the difference is %", Ptest->getVelocity(), Pref->getVelocity() + velocityDifference, Ptest->getVelocity() - Pref->getVelocity() - velocityDifference);
+        logger(FATAL, "The particle has the wrong velocity. It is %, however is should be %, the difference is %", Ptest->getVelocity(), Pref->getVelocity() + velocityDifference, Ptest->getVelocity() - Pref->getVelocity() - velocityDifference);
     }
-    if (mathsFunc::compare(Ptest->getOrientation(), Pref->getOrientation() + orientationDifference, absError))
+    if (!mathsFunc::isEqual(Ptest->getOrientation(), Pref->getOrientation() + orientationDifference, absError))
     {
-        logger.log(Log::FATAL, "The particle has the wrong orientation. It is %, however is should be %, the difference is %", Ptest->getOrientation(), Pref->getOrientation() + orientationDifference, Ptest->getOrientation() - Pref->getOrientation() - orientationDifference);
+        logger(FATAL, "The particle has the wrong orientation. It is %, however is should be %, the difference is %", Ptest->getOrientation(), Pref->getOrientation() + orientationDifference, Ptest->getOrientation() - Pref->getOrientation() - orientationDifference);
     }
-    if (mathsFunc::compare(Ptest->getAngularVelocity(), Pref->getAngularVelocity() + AngularVelocityDifference, absError))
+    if (!mathsFunc::isEqual(Ptest->getAngularVelocity(), Pref->getAngularVelocity() + AngularVelocityDifference, absError))
     {
-        logger.log(Log::FATAL, "The particle has the wrong angular velocity. It is %, however is should be %, the difference is %", Ptest->getAngularVelocity(), Pref->getAngularVelocity() + AngularVelocityDifference, Ptest->getAngularVelocity() - Pref->getAngularVelocity() - AngularVelocityDifference);
+        logger(FATAL, "The particle has the wrong angular velocity. It is %, however is should be %, the difference is %", Ptest->getAngularVelocity(), Pref->getAngularVelocity() + AngularVelocityDifference, Ptest->getAngularVelocity() - Pref->getAngularVelocity() - AngularVelocityDifference);
     }
 }
 

@@ -633,7 +633,7 @@ void StatisticsVector<T>::readStatArguments(int argc, char *argv[])
         {
             setMirrorAtDomainBoundary(atof(argv[i + 1]));
         }
-        else if (!strcmp(argv[i], "-stattype"))
+        else if (!strcmp(argv[i], "-stattype") || !strcmp(argv[i], "-statType"))
         {
             //this was already used in Statistics()
         }
@@ -1180,7 +1180,7 @@ void StatisticsVector<T>::statistics_from_fstat_and_data()
             findNextExistingDataFile(getCGTimeMin());
         else
             findNextExistingDataFile(getCGTimeMin(), false);
-        for (int i = 1; i < getDataFile().getCounter(); i++)
+        for (unsigned int i = 1; i < getDataFile().getCounter(); i++)
             jump_fstat();
 
     }
@@ -1345,13 +1345,13 @@ void StatisticsVector<T>::statistics_from_p3()
     //This opens the files the data will be recalled from
     std::string p3p_filename = getName().c_str();
     p3p_filename += ".p3p";
-    bool opened = helpers::openFile(p3p_file, p3p_filename, 1, std::fstream::in);
+    bool opened = helpers::openFile(p3p_file, p3p_filename, std::fstream::in);
     std::string p3c_filename = getName().c_str();
     p3c_filename += ".p3c";
-    helpers::openFile(p3c_file, p3c_filename, 1, std::fstream::in);
+    helpers::openFile(p3c_file, p3c_filename, std::fstream::in);
     std::string p3w_filename = getName().c_str();
     p3w_filename += ".p3w";
-    helpers::openFile(p3w_file, p3w_filename, 1, std::fstream::in);
+    helpers::openFile(p3w_file, p3w_filename, std::fstream::in);
     int version = 3;
     //If p3 is not available, open p4 files
     if (!opened)
@@ -1360,13 +1360,13 @@ void StatisticsVector<T>::statistics_from_p3()
         version = 4;
         p3p_filename = getName().c_str();
         p3p_filename += ".p4p";
-        opened = helpers::openFile(p3p_file, p3p_filename, 1, std::fstream::in);
+        opened = helpers::openFile(p3p_file, p3p_filename, std::fstream::in);
         p3c_filename = getName().c_str();
         p3c_filename += ".p4c";
-        opened = helpers::openFile(p3c_file, p3c_filename, 1, std::fstream::in);
+        opened = helpers::openFile(p3c_file, p3c_filename, std::fstream::in);
         p3w_filename = getName().c_str();
         p3w_filename += ".p4w";
-        opened = helpers::openFile(p3w_file, p3w_filename, 1, std::fstream::in);
+        opened = helpers::openFile(p3w_file, p3w_filename, std::fstream::in);
         if (!opened)
         {
             std::cerr << "could not open " << p3p_filename << std::endl;
@@ -1982,7 +1982,7 @@ bool StatisticsVector<T>::satisfiesInclusionCriteria(BaseParticle* P)
 }
 
 template<StatType T>
-void StatisticsVector<T>::gatherContactStatistics(int index1, int index2, Vec3D Contact, Mdouble delta, Mdouble ctheta, Mdouble fdotn, Mdouble fdott, Vec3D P1_P2_normal_, Vec3D P1_P2_tangential)
+void StatisticsVector<T>::gatherContactStatistics(unsigned int index1, int index2, Vec3D Contact, Mdouble delta, Mdouble ctheta UNUSED, Mdouble fdotn, Mdouble fdott, Vec3D P1_P2_normal_, Vec3D P1_P2_tangential)
 {
     Vec3D P1_P2_VelocityAverage, P1_P2_VelocityDifference, P1_P2_Force;
     Mdouble norm_dist;

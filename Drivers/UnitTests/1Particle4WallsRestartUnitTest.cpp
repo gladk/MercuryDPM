@@ -26,7 +26,6 @@
 #include <Logger.h>
 #include "DPMBase.h"
 #include "Math/Helpers.h"
-extern Logger<LOG_MAIN_LEVEL> logger;
 
 /// In this file, 1 Particle and 4 Walls are loaded from files 
 /// "1Particle4Walls.ini" and "1Particle4Walls.restart". The particles 
@@ -78,8 +77,8 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 	problem.writeRestartFile();
 	
     BaseParticle* p = problem.particleHandler.getObject(0);
-    if (!p->getAngularVelocity().compareTo(Vec3D(0.0,17.7251802668803,0.0), 1e-7))  logger.log(Log::FATAL, "First particles has the wrong angular velocity it is %, while is should be %.",p->getAngularVelocity(),Vec3D(0.0,17.7251802668803,0.0));
-    if (!p->getVelocity().compareTo(Vec3D(0.0,0.0,0.0)  , 1e-7))  logger.log(Log::FATAL, "First particle has the wrong velocity, it is %, while it should be %",p->getVelocity(),0.0);
+    if (!p->getAngularVelocity().isEqualTo(Vec3D(0.0,17.7251802668803,0.0), 1e-7))  logger(FATAL, "First particles has the wrong angular velocity it is %, while is should be %.",p->getAngularVelocity(),Vec3D(0.0,17.7251802668803,0.0));
+    if (!p->getVelocity().isEqualTo(Vec3D(0.0,0.0,0.0)  , 1e-7))  logger(FATAL, "First particle has the wrong velocity, it is %, while it should be %",p->getVelocity(),0.0);
 
     //Now check the rotational energy in the system; it should loose some rotational energy in the first loop due to
 	//sliding, then conserve energy as no tangential dissipation is used.

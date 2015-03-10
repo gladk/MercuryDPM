@@ -29,34 +29,70 @@
 #include "Interactions/BaseInteraction.h"
 class LinearPlasticViscoelasticNormalSpecies;
 class BaseInteractable;
-
+/*!
+ * \class LinearPlasticViscoelasticInteraction
+ * \brief Enables one to compute normal forces in case of a linear plastic visco-elastic interaction.
+ */
 class LinearPlasticViscoelasticInteraction : public virtual BaseInteraction
 {
 public:
+    /*!
+     * \brief
+     */
     LinearPlasticViscoelasticInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
+    /*!
+     * \brief
+     */
     LinearPlasticViscoelasticInteraction(const LinearPlasticViscoelasticInteraction &p);
+    /*!
+     * \brief
+     */
     virtual ~LinearPlasticViscoelasticInteraction();
+    /*!
+     * \brief
+     */
     BaseInteraction* copy() const;
-
+    /*!
+     * \brief
+     */
     void computeLinearPlasticViscoelasticForce();
-    void computeForce();
-
+    /*!
+     * \brief
+     */
+    void computeNormalForce();
+    /*!
+     * \brief
+     */
     ///Interaction read function, which accepts an std::stringstream as input.
     virtual void read(std::istream& is);
-
+    /*!
+     * \brief
+     */
     ///Interaction print function, which accepts an std::stringstream as input.
     virtual void write(std::ostream& os) const;
-
-    virtual std::string getName() const;
-
+    /*!
+     * \brief
+     */
+    virtual std::string getBaseName() const;
+    /*!
+     * \brief
+     */
     Mdouble getElasticEnergy() const;
-
+    /*!
+     * \brief
+     */
     const LinearPlasticViscoelasticNormalSpecies* getSpecies() const;
-
+    /*!
+     * \brief
+     */
     Mdouble getMaxOverlap() const;
-
+    /*!
+     * \brief
+     */
     void setMaxOverlap(const Mdouble maxOverlap);
-
+    /*!
+     * \brief
+     */
     Mdouble getUnloadingStiffness() const;
 
 private:

@@ -30,7 +30,11 @@
 #include "InteractionHandler.h"
 #include <iomanip>
 #include <fstream>
-
+/*!
+ * \param[in] P
+ * \param[in] I
+ * \param[in] timeStamp
+ */
 EmptyFrictionInteraction::EmptyFrictionInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
     : BaseInteraction(P, I, timeStamp)
 {
@@ -38,55 +42,77 @@ EmptyFrictionInteraction::EmptyFrictionInteraction(BaseInteractable* P, BaseInte
     std::cout<<"EmptyFrictionInteraction::EmptyFrictionInteraction() finished"<<std::endl;
 #endif
 }
-
-EmptyFrictionInteraction::EmptyFrictionInteraction(const EmptyFrictionInteraction &p)
+/*!
+ * \param[in] p
+ */
+EmptyFrictionInteraction::EmptyFrictionInteraction(const EmptyFrictionInteraction& p)
     : BaseInteraction(p)
 {
 #ifdef DEBUG_CONSTRUCTOR
     std::cout<<"EmptyFrictionInteraction::EmptyFrictionInteraction(const EmptyFrictionInteraction &p finished"<<std::endl;
 #endif
 }
-
+/*!
+ *
+ */
 EmptyFrictionInteraction::~EmptyFrictionInteraction()
 {
 #ifdef DEBUG_DESTRUCTOR
     std::cout<<"EmptyFrictionInteraction::~EmptyFrictionInteraction() finished"<<std::endl;
 #endif
 }
-
+/*!
+ * \param[in,out] os
+ */
 void EmptyFrictionInteraction::write(std::ostream& os UNUSED) const
 {}
-
+/*!
+ * \param[in,out] is
+ */
 void EmptyFrictionInteraction::read(std::istream& is UNUSED)
 {}
-
-void EmptyFrictionInteraction::computeForce()
+/*!
+ * 
+ */
+void EmptyFrictionInteraction::computeFrictionForce()
 {}
-
+/*!
+ * \param[in] timeStep
+ */
 void EmptyFrictionInteraction::integrate(Mdouble timeStep UNUSED)
 {}
-
+/*!
+ * \return Mdouble
+ */
 Mdouble EmptyFrictionInteraction::getElasticEnergy() const
 {
     return 0.0;
 }
-
+/*!
+ * \return Mdouble
+ */
 Mdouble EmptyFrictionInteraction::getTangentialOverlap() const
 {
-    return 0;
+    return 0.0;
 }
-
+/*!
+ *\return const Vec3D
+ */
 const Vec3D EmptyFrictionInteraction::getTangentialForce() const
 {
     return Vec3D(0.0,0.0,0.0);
 }
-
-const EmptyFrictionSpecies *EmptyFrictionInteraction::getSpecies() const
+/*!
+ * \return const EmptyFrictionSpecies*
+ */
+const EmptyFrictionSpecies* EmptyFrictionInteraction::getSpecies() const
 {
     return dynamic_cast<const EmptyFrictionSpecies *>(getBaseSpecies());
 }
-
-std::string EmptyFrictionInteraction::getName() const
+/*!
+ * \return std::string
+ */
+std::string EmptyFrictionInteraction::getBaseName() const
 {
     return "";
 }

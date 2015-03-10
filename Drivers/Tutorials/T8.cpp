@@ -49,16 +49,16 @@ particleHandler.copyAndAddObject(p0);
 //! [T8:infiniteWalls]
 InfiniteWall w0;
 
-w0.set(Vec3D(1.0,0.0,0.0),getXMax());
+w0.set(Vec3D(1.0,0.0,0.0),Vec3D(getXMax(), 0.0, 0.0));
 wallHandler.copyAndAddObject(w0);
 
-w0.set(Vec3D(-1.0,0.0,0.0),-getXMin());
+w0.set(Vec3D(-1.0,0.0,0.0),Vec3D(getXMin(), 0.0, 0.0));
 wallHandler.copyAndAddObject(w0);
 
-w0.set(Vec3D(0.0,1.0,0.0),getYMax());
+w0.set(Vec3D(0.0,1.0,0.0),Vec3D(0.0, getYMax(), 0.0));
 wallHandler.copyAndAddObject(w0);
 
-w0.set(Vec3D(0.0,-1.0,0.0),-getYMin());
+w0.set(Vec3D(0.0,-1.0,0.0),Vec3D(0.0, getYMin(), 0.0));
 wallHandler.copyAndAddObject(w0);
 //! [T8:infiniteWalls]
 

@@ -27,86 +27,139 @@
 #include "InteractionHandler.h"
 #include "Particles/BaseParticle.h"
 
+/*!
+ * \details Default constructor, make a Coil which is centered in the origin, has
+ * length 1, radius 1, 1 revelation, rotates with 1 rev/s, has thickness 0 and has
+ * not rotated.
+ */
 Coil::Coil()
-        : BaseWall()
 {
     start_.setZero();
-    l_ = 1;
-    r_ = 1;
-    n_ = 1;
-    omega_ = 1;
-    offset_ = 0;
-    thickness_ = 0;
-#ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "Coil() finished" << std::endl;
-#endif              
+    l_ = 1.0;
+    r_ = 1.0;
+    n_ = 1.0;
+    omega_ = 1.0;
+    offset_ = 0.0;
+    thickness_ = 0.0;
+    logger(DEBUG, "Coil() constructor finished");              
 }
 
-Coil::Coil(Vec3D Start, double L, double r, double N, double omega, double thickness)
-        : BaseWall()
+/*!
+ * \param[in] other Coil to be copied into this coil
+ */
+Coil::Coil(const Coil& other) : BaseWall(other)
 {
-    start_ = Start;
-    l_ = L;
+    start_ = other.start_;
+    l_ = other.l_;
+    r_ = other.r_;
+    n_ = other.n_;
+    omega_ = other.omega_;
+    offset_ = other.offset_;
+    thickness_ = other.thickness_;
+    logger(DEBUG, "Coil(const Coil&) copy constructor finished");
+}
+
+/*!
+ * \param[in] start A Vec3D which denotes the centre of the lower end of the Coil.
+ * \param[in] l The length of the Coil, must be positive.
+ * \param[in] r The radius of the Coil, must be positive.
+ * \param[in] n The number of revelations of the Coil, must be positive.
+ * \param[in] omega The rotation speed of the Coil in rev/s.
+ * \param[in] thickness The thickness of the "spiral" of the Coil, must be non-negative.
+ * \details Make a Coil by assigning all input parameters to the data-members of
+ * this class, and setting the offset_ to 0.
+ */
+Coil::Coil(Vec3D start, Mdouble l, Mdouble r, Mdouble n, Mdouble omega, Mdouble thickness)
+{
+    start_ = start;
+    l_ = l;
     r_ = r;
-    n_ = N;
+    n_ = n;
     omega_ = omega;
     thickness_ = thickness;
     offset_ = 0.0;
-#ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "Coil() finished" << std::endl;
-#endif              
+    logger(DEBUG, "Coil(params) constructor with parameters finished.");             
 }
 
-void Coil::set(Vec3D Start, double L, double r, double N, double omega, double thickness)
+Coil::~Coil()
 {
-    start_ = Start;
-    l_ = L;
+    logger(DEBUG, "~Coil() destructor finished.");
+}
+
+/*!
+ * \param[in] start A Vec3D which denotes the centre of the lower end of the Coil.
+ * \param[in] l The length of the Coil, must be positive.
+ * \param[in] r The radius of the Coil, must be positive.
+ * \param[in] n The number of revelations of the Coil, must be positive.
+ * \param[in] omega The rotation speed of the Coil in rev/s.
+ * \param[in] thickness The thickness of the "spiral" of the Coil, must be non-negative.
+ * \details Set the parameters of this Coil by assigning all input parameters to
+ *  the data-members of this class, and setting the offset_ to 0.
+ */
+void Coil::set(Vec3D start, Mdouble l, Mdouble r, Mdouble n, Mdouble omega, Mdouble thickness)
+{
+    start_ = start;
+    l_ = l;
     r_ = r;
-    n_ = N;
+    n_ = n;
     omega_ = omega;
     thickness_ = thickness;
     offset_ = 0.0;
 }
 
+/*!
+ * \return A pointer to a copy of this Coil.
+ */
 Coil* Coil::copy() const
 {
     return new Coil(*this);
 }
 
-bool Coil::getDistanceAndNormal(const BaseParticle &P, Mdouble &distance, Vec3D &normal_return) const
+/*!
+ * \param[in] p BaseParticle we want to calculate the distance and whether it collided of.
+ * \param[out] distance The distance of the BaseParticle to this Coil.
+ * \param[out] normal_return If there was a collision, the normal vector to this Coil will be placed here.
+ * \return A boolean which says whether or not there was a collision.
+ * \details This function computes whether or not there is a collision between 
+ * a given BaseParticle and this Coil. If there is a collision, this
+ * function also computes the distance between the BaseParticle and Coil
+ * and the normal of the IntersectionOfWalls at the intersection point. 
+ * \todo Make this function readable and explain the steps in the details.
+ */
+bool Coil::getDistanceAndNormal(const BaseParticle& p, Mdouble& distance, Vec3D& normal_return) const
 {
-    double Rsqr = pow(P.getPosition().X - start_.X, 2) + pow(P.getPosition().Y - start_.Y, 2);
-    if (Rsqr > pow(r_ + P.getWallInteractionRadius() + thickness_, 2) || Rsqr < pow(r_ - P.getWallInteractionRadius() - thickness_, 2) || P.getPosition().Z > l_ + start_.Z + P.getWallInteractionRadius() + thickness_ || P.getPosition().Z < start_.Z - P.getWallInteractionRadius() - thickness_)
+    Mdouble Rsqr = pow(p.getPosition().X - start_.X, 2) + pow(p.getPosition().Y - start_.Y, 2);
+    if (Rsqr > pow(r_ + p.getWallInteractionRadius() + thickness_, 2) || Rsqr < pow(r_ - p.getWallInteractionRadius() - thickness_, 2) || p.getPosition().Z > l_ + start_.Z + p.getWallInteractionRadius() + thickness_ || p.getPosition().Z < start_.Z - p.getWallInteractionRadius() - thickness_)
     {
         //std::cout<<"Particle is out of first bound checking"<<std::endl;
         //std::cout<<"Rule 1: "<<pow(r-P.getRadius()-thickness_,2)<<"<"<<Rsqr<<"<"<<pow(r+P.getRadius()+thickness_,2)<<std::endl;
         //std::cout<<"Rule 2: "<<Start.Z-P.getRadius()-thickness_<<"<"<<P.getPosition().Z<<"<"<<L+Start.Z+P.getRadius()+thickness_<<std::endl;
         return false;
     }
-    double R = sqrt(Rsqr);
-    double alpha = atan2(P.getPosition().Y - start_.Y, P.getPosition().X - start_.X);
-    double dz = P.getPosition().Z - start_.Z;
+    Mdouble R = sqrt(Rsqr);
+    Mdouble alpha = atan2(p.getPosition().Y - start_.Y, p.getPosition().X - start_.X);
+    Mdouble dz = p.getPosition().Z - start_.Z;
     
-    ///To find the contact point we have to minimize (with respect to q)
-    ///Distance^2=(x-x0-r*cos(2*Pi*(offset+N*q)))^2+(y-y0-r*sin(2*Pi*(offset+N*q)))^2+(z-z0-q*L)^2
-    ///Using polar coordinated (i.e. x-x0=R*cos(alpha), y-y0=R*sin(alpha) and dz=z-z0)
-    ///Distance^2=R^2+r^2-2*R*r*cos(alpha-2*Pi*(offset+N*q))+(dz-q*L)^2
+    //To find the contact point we have to minimize (with respect to q)
+    //Distance^2=(x-x0-r*cos(2*Pi*(offset+N*q)))^2+(y-y0-r*sin(2*Pi*(offset+N*q)))^2+(z-z0-q*L)^2
+    //Using polar coordinated (i.e. x-x0=R*cos(alpha), y-y0=R*sin(alpha) and dz=z-z0)
+    //Distance^2=R^2+r^2-2*R*r*cos(alpha-2*Pi*(offset+N*q))+(dz-q*L)^2
     
-    ///So we have to minimize:
-    ///Distance^2=R^2+r^2-2*R*r*cos(alpha-2*Pi*(offset+N*q))+(dz-q*L)^2
-    ///For this we use the Euler algoritm
+    //So we have to minimize:
+    //Distance^2=R^2+r^2-2*R*r*cos(alpha-2*Pi*(offset+N*q))+(dz-q*L)^2
+    //For this we use the Euler algoritm
     
-    double q; //Current guess
-    double dd; //Derivative at current guess
-    double ddd; //Second derivative at current guess
-    double q0 = dz / l_; //Minimum of the parabolic part
+    Mdouble q; //Current guess
+    Mdouble dd; //Derivative at current guess
+    Mdouble ddd; //Second derivative at current guess
+    Mdouble q0 = dz / l_; //Minimum of the parabolic part
             
-    ///The initial guess will be in the maximum of the cos closest to the minimum of the parabolic part
-    ///Minima of the cos are at
-    ///alpha-2*Pi*(offset+N*q)=2*k*Pi (k=integer)
-    ///q=alpha/(2*Pi*N)-k/N-offset/N (k=integer)
+    //The initial guess will be in the maximum of the cos closest to the minimum of the parabolic part
+    //Minima of the cos are at
+    //alpha-2*Pi*(offset+N*q)=2*k*Pi (k=integer)
+    //q=alpha/(2*Pi*N)-k/N-offset/N (k=integer)
     
-    double k = round(alpha / 2.0 / constants::pi - (offset_ + n_ * q0));
+    Mdouble k = round(alpha / 2.0 / constants::pi - (offset_ + n_ * q0));
     q = alpha / (2 * constants::pi * n_) - k / n_ - offset_ / n_;
     
     //Now apply Newton's method
@@ -129,7 +182,7 @@ bool Coil::getDistanceAndNormal(const BaseParticle &P, Mdouble &distance, Vec3D 
     
     Mdouble distanceSquared = R * R + r_ * r_ - 2 * R * r_ * cos(alpha - 2 * constants::pi * (offset_ + n_ * q)) + pow(dz - q * l_, 2);
     //If distance is too large there is no contact
-    if (distanceSquared >= (P.getWallInteractionRadius() + thickness_) * (P.getWallInteractionRadius() + thickness_))
+    if (distanceSquared >= (p.getWallInteractionRadius() + thickness_) * (p.getWallInteractionRadius() + thickness_))
     {
         //std::cout<<"Particle is out of second bound checking, distance^2="<<distance<<" max="<<(P.getRadius()+thickness_)*(P.getRadius()+thickness_)<<std::endl;
         return false;
@@ -140,38 +193,49 @@ bool Coil::getDistanceAndNormal(const BaseParticle &P, Mdouble &distance, Vec3D 
     ContactPoint.X = start_.X + r_ * cos(2.0 * constants::pi * (offset_ + n_ * q));
     ContactPoint.Y = start_.Y + r_ * sin(2.0 * constants::pi * (offset_ + n_ * q));
     ContactPoint.Z = start_.Z + q * l_;
-    normal_return = ContactPoint - P.getPosition();
+    normal_return = ContactPoint - p.getPosition();
     normal_return /= normal_return.getLength();
     return true;
 }
 
-BaseInteraction* Coil::getInteractionWith(BaseParticle *P, Mdouble timeStamp, InteractionHandler* interactionHandler)
+/*!
+ * \param[in] p Pointer to the BaseParticle which we want to check the interaction for.
+ * \param[in] timeStamp The time at which we want to look at the interaction.
+ * \param[in] interactionHandler A pointer to the InteractionHandler in which the interaction can be found.
+ * \return A pointer to the BaseInteraction that happened between this Coil
+ * and the BaseParticle at the timeStamp.
+ */
+BaseInteraction* Coil::getInteractionWith(BaseParticle* p, Mdouble timeStamp, InteractionHandler* interactionHandler)
 {
     Mdouble distance;
     Vec3D normal;
-    if (getDistanceAndNormal(*P,distance,normal))
+    if (getDistanceAndNormal(*p,distance,normal))
     {
-        BaseInteraction* C = interactionHandler->getInteraction(P, this, timeStamp);
-        C->setNormal(-normal);
-        C->setDistance(distance);
-        C->setOverlap(P->getRadius() - distance);
-        ///todo{DK: What is the contact point for interactions with walls}
-        C->setContactPoint(P->getPosition()-(P->getRadius()- 0.5 * C->getOverlap())*C->getNormal());
-        return C;
+        BaseInteraction* c = interactionHandler->getInteraction(p, this, timeStamp);
+        c->setNormal(-normal);
+        c->setDistance(distance);
+        c->setOverlap(p->getRadius() - distance);
+        ///\todo{DK: What is the contact point for interactions with walls}
+        c->setContactPoint(p->getPosition() - (p->getRadius()- 0.5 * c->getOverlap()) * c->getNormal());
+        return c;
     }
     else
     {
-        return 0;
+        return nullptr;
     }
 }
 
-///Allows the wall to be moved to a new position (also orthogonal to the normal), and setting the velocity
+/*!
+ * \param[in] dt The time for which the Screw has to be turned.
+ */
 void Coil::move_time(Mdouble dt)
 {
     offset_ += omega_ * dt;
 }
 
-///reads wall
+/*!
+ * \param[in,out] is The input stream from which the Coil is read.
+ */
 void Coil::read(std::istream& is)
 {
     BaseWall::read(is);
@@ -185,6 +249,9 @@ void Coil::read(std::istream& is)
             >> dummy >> offset_;
 }
 
+/*!
+ * \param[in,out] is The input stream from which the Coil is read.
+ */
 void Coil::oldRead(std::istream& is)
 {
     std::string dummy;
@@ -195,7 +262,9 @@ void Coil::oldRead(std::istream& is)
             >> dummy >> offset_;
 }
 
-///outputs wall
+/*!
+ * \param[in,out] os The outpus stream to which the Coil is written.
+ */
 void Coil::write(std::ostream& os) const
         {
     BaseWall::write(os);
@@ -208,6 +277,9 @@ void Coil::write(std::ostream& os) const
             << " Offset " << offset_;
 }
 
+/*!
+ * \return The string "Coil".
+ */
 std::string Coil::getName() const
 {
     return "Coil";

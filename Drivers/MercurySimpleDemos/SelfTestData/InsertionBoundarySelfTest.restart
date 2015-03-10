@@ -1,9 +1,9 @@
 restart_version 1.0 name InsertionBoundarySelfTest
-dataFile name InsertionBoundarySelfTest.data fileType ONE_FILE saveCount 500 counter 22 nextSavedTimeStep 10501
-fStatFile name InsertionBoundarySelfTest.fstat fileType ONE_FILE saveCount 20 counter 502 nextSavedTimeStep 10021
-eneFile name InsertionBoundarySelfTest.ene fileType ONE_FILE saveCount 20 counter 502 nextSavedTimeStep 10021
-restartFile name InsertionBoundarySelfTest.restart fileType ONE_FILE saveCount 20 counter 502 nextSavedTimeStep 10021
-statFile name InsertionBoundarySelfTest.stat fileType ONE_FILE saveCount 20 counter 0 nextSavedTimeStep 10001
+dataFile    fileType ONE_FILE saveCount 500 counter 22 nextSavedTimeStep 10501
+fStatFile   fileType ONE_FILE saveCount 20 counter 502 nextSavedTimeStep 10021
+eneFile     fileType ONE_FILE saveCount 20 counter 502 nextSavedTimeStep 10021
+restartFile fileType ONE_FILE saveCount 20 counter 502 nextSavedTimeStep 10021
+statFile    fileType ONE_FILE saveCount 20 counter 0 nextSavedTimeStep 10001
 xMin 0 xMax 1 yMin 0 yMax 1 zMin 0 zMax 1
 timeStep 0.0001 time 1.00009999999991 ntimeSteps 10001 timeMax 1
 systemDimensions 3 particleDimensions 3 gravity 0 0 0

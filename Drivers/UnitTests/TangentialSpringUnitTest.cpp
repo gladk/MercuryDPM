@@ -29,8 +29,6 @@
 #include "Particles/BaseParticle.h"
 #include "Logger.h"
 
-extern Logger<LOG_MAIN_LEVEL> logger;
-
 /// In this file, the rolling behaviour of the tangential spring is tested. This is done by placing one normal partilce on top of a fixed partilce and letting graviry roll it over the other particle until it losses contact.
 class TangentialSpringUnitTest : public DPMBase {
 public:
@@ -78,12 +76,12 @@ int main(int argc, char *argv[])
 	
 	std::vector<BaseParticle*>::iterator pIt = tangentialSpringUnitTestProblem.particleHandler.begin();
     
-    if (!(*pIt)->getPosition().compareTo(Vec3D(0.5,0.5,0.25), 1e-7))  logger.log(Log::FATAL, "First particles is in the wrong position. It is %",(*pIt)->getPosition());
-    if (!(*pIt)->getVelocity().compareTo(Vec3D(0.0,0.0,0.0)  , 1e-7))  logger.log(Log::FATAL, "First particle has the wrong velocity");
+    if (!(*pIt)->getPosition().isEqualTo(Vec3D(0.5,0.5,0.25), 1e-7))  logger(FATAL, "First particles is in the wrong position. It is %",(*pIt)->getPosition());
+    if (!(*pIt)->getVelocity().isEqualTo(Vec3D(0.0,0.0,0.0)  , 1e-7))  logger(FATAL, "First particle has the wrong velocity");
     ++pIt;
 
-    if (!((*pIt)->getPosition().compareTo(Vec3D(0.961524052956078, 0.5, 0.450153103106219), 1e-7)))      logger.log(Log::FATAL, "Second particle has the wrong position. It is % at time %",(*pIt)->getPosition(),tangentialSpringUnitTestProblem.getTime());
-    if (!(*pIt)->getVelocity().compareTo(Vec3D(0.325869890236916, 0, -0.623251003973752)    , 1e-7))  logger.log(Log::FATAL, "Second particle has the wrong velocity. It is %",(*pIt)->getVelocity());
-    if (!(*pIt)->getAngularVelocity().compareTo(Vec3D(0.0,2.11896618998424,0.0)    , 1e-7))  logger.log(Log::FATAL, "Second particles has the wrong angular velocity. It is %", (*pIt)->getAngularVelocity());
+    if (!((*pIt)->getPosition().isEqualTo(Vec3D(0.961524052956078, 0.5, 0.450153103106219), 1e-7)))      logger(FATAL, "Second particle has the wrong position. It is % at time %",(*pIt)->getPosition(),tangentialSpringUnitTestProblem.getTime());
+    if (!(*pIt)->getVelocity().isEqualTo(Vec3D(0.325869890236916, 0, -0.623251003973752)    , 1e-7))  logger(FATAL, "Second particle has the wrong velocity. It is %",(*pIt)->getVelocity());
+    if (!(*pIt)->getAngularVelocity().isEqualTo(Vec3D(0.0,2.11896618998424,0.0)    , 1e-7))  logger(FATAL, "Second particles has the wrong angular velocity. It is %", (*pIt)->getAngularVelocity());
 
 }

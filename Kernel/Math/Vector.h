@@ -47,77 +47,77 @@ class Vec3D
 public:
     
     /*!
-     * \brief 
+     * \brief the vector components
      */
     Mdouble X, Y, Z;
 
     /*!
      * \brief constructor
      */
-    Vec3D(void);
+    Vec3D();
     
     /*!
-     * \brief 
+     * \brief Alternative constructor, taking the three elements as arguments
      */
     Vec3D(const Mdouble x, const Mdouble y, const Mdouble z);
     
     /*!
-     * \brief 
+     * \brief Sets all elements to zero
      */
     void setZero();
     
     /*!
-     * \brief 
+     * \brief Checks if ALL elements are zero
      */
     bool isZero() const;
     
     /*!
-     * \brief 
+     * \brief Adds another vector
      */
     Vec3D operator +(const Vec3D& a) const;
     
     /*!
-     * \brief 
+     * \brief Subtracts another vector
      */
     Vec3D operator -(const Vec3D& a) const;
     
     /*!
-     * \brief 
+     * \brief Adds a scalar
      */
     Vec3D operator +(const Mdouble a) const;
     
     /*!
-     * \brief 
+     * \brief Subtracts a scalar
      */
     Vec3D operator -(const Mdouble a) const;
     
     /*!
-     * \brief 
+     * \brief Multiplies by a scalar
      */
     Vec3D operator *(const Mdouble a) const;
     
     /*!
-     * \brief 
+     * \brief Divides by a scalar
      */
     Vec3D operator /(const Mdouble a) const;
     
     /*!
-     * \brief 
+     * \brief Adds another vector
      */
     Vec3D& operator+=(const Vec3D& a);
     
     /*!
-     * \brief 
+     * \brief Subtracts another vector
      */
     Vec3D& operator-=(const Vec3D& a);
     
     /*!
-     * \brief 
+     * \brief Multiplies by a scalar
      */
     Vec3D& operator*=(const Mdouble a);
     
     /*!
-     * \brief 
+     * \brief Divides by a scalar
      */
     Vec3D& operator/=(const Mdouble a);
     
@@ -214,7 +214,7 @@ public:
     /*!
      * \brief Checks if the length this Vec3D is equal the length of other with a certain tolerance
      */
-    bool compareTo(const Vec3D& other, const double tol) const;
+    bool isEqualTo(const Vec3D& other, const double tol) const;
     
 // 	void ConvertToCylindricalCoordinates()
 // 	{
@@ -232,32 +232,32 @@ public:
     static Vec3D getUnitVector(const Vec3D& a);
     
     /*!
-     * \brief 
+     * \brief Adds elements to an output stream
      */
     friend std::ostream& operator<<(std::ostream& os, const Vec3D& a);
     
     /*!
-     * \brief 
+     * \brief Adds elements to an input stream
      */
     friend std::istream& operator>>(std::istream& is, Vec3D& a);
     
     /*!
-     * \brief 
+     * \brief Adds a scalar to a vector
      */
     friend Vec3D operator+(const Mdouble a, const Vec3D& b);
     
     /*!
-     * \brief 
+     * \brief Subtracts the elements of a vector from a scalar
      */
     friend Vec3D operator-(const Mdouble a, const Vec3D& b);
     
     /*!
-     * \brief 
+     * \brief Subtracts a vector 
      */
     friend Vec3D operator-(const Vec3D& a);
     
     /*!
-     * \brief 
+     * \brief Multiplies all elements by a scalar
      */
     friend Vec3D operator*(const Mdouble a, const Vec3D& b);    
 };
