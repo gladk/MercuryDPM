@@ -184,25 +184,25 @@ double NORMALIZED_POLYNOMIAL<T>::evaluate_2D(double r)
     {
         case 7:
             value1 += coefficients[N - 7] * 2. / 35. * (5. + r2 * (6. + r2 * (8 * r2 + 16)));
-            [[clang::fallthrough]];
+            //[[clang::fallthrough]];
         case 6:
             value1 += coefficients[N - 6] * (8. + (10. + 15. * r2) * r2) / 24.;
             value2 += coefficients[N - 6] * (15. * r2 * r2 * r2) / 24.;
-            [[clang::fallthrough]];
+            //[[clang::fallthrough]];
         case 5:
             value1 += coefficients[N - 5] * .4 * (1. + r2 * (4. / 3. + r2 * 8. / 3.));
-            [[clang::fallthrough]];
+            //[[clang::fallthrough]];
         case 4:
             value1 += coefficients[N - 4] * (2. + r2 * 3.) / 4.;
             value2 += coefficients[N - 4] * .75 * r2 * r2;
-            [[clang::fallthrough]];
+            //[[clang::fallthrough]];
         case 3:
             value1 += coefficients[N - 3] * 2. / 3. * (1. + r2 * 2.);
-            [[clang::fallthrough]];
+            //[[clang::fallthrough]];
         case 2:
             value1 += coefficients[N - 2] * 1.;
             value2 += coefficients[N - 2] * r2;
-            [[clang::fallthrough]];
+            //[[clang::fallthrough]];
         case 1:
             break;
         default:
@@ -230,25 +230,25 @@ double NORMALIZED_POLYNOMIAL<T>::evaluateIntegral(double a, double b, double t)
     {
         case 7:
             value1 += coefficients[N - 7] * (b * (b2 * b2 * b2 / 7.0 + 0.6 * b2 * b2 * t2 + b2 * t2 * t2 + t2 * t2 * t2) - a * (a2 * a2 * a2 / 7.0 + 0.6 * a2 * a2 * t2 + a2 * t2 * t2 + t2 * t2 * t2));
-            [[clang::fallthrough]];
+            //[[clang::fallthrough]];
         case 6:
             value1 += coefficients[N - 6] * (b * rootb * (8. * b2 * b2 + 26. * b2 * t2 + 33. * t2 * t2) - a * roota * (8. * a2 * a2 + 26. * a2 * t2 + 33. * t2 * t2)) / 48.;
             value2 += coefficients[N - 6] * 15. / 48. * t2 * t2 * t2;
-            [[clang::fallthrough]];
+            //[[clang::fallthrough]];
         case 5:
             value1 += coefficients[N - 5] * (b * (b2 * b2 / 5. + 2. / 3. * b2 * t2 + t2 * t2) - a * (a2 * a2 / 5. + 2. / 3. * a2 * t2 + t2 * t2));
-            [[clang::fallthrough]];
+            //[[clang::fallthrough]];
         case 4:
             value1 += coefficients[N - 4] * (b * rootb * (2. * b2 + 5. * t2) - a * roota * (2. * a2 + 5. * t2)) / 8.;
             value2 += coefficients[N - 4] * 3. / 8. * t2 * t2;
-            [[clang::fallthrough]];
+            //[[clang::fallthrough]];
         case 3:
             value1 += coefficients[N - 3] * (b * (b2 / 3. + t2) - a * (a2 / 3. + t2));
-            [[clang::fallthrough]];
+            //[[clang::fallthrough]];
         case 2:
             value1 += coefficients[N - 2] * (b * rootb - a * roota) / 2.;
             value2 += coefficients[N - 2] * t2 / 2.;
-            [[clang::fallthrough]];
+            //[[clang::fallthrough]];
         case 1:
             break;
         default:
@@ -291,25 +291,25 @@ double NORMALIZED_POLYNOMIAL<T>::evaluateIntegral_1D(double a, double b, double 
     {
         case 7:
             value1 += averaged_coefficients[N - 7] * (b * (b2 * b2 * b2 / 7.0 + 0.6 * b2 * b2 * t2 + b2 * t2 * t2 + t2 * t2 * t2) - a * (a2 * a2 * a2 / 7.0 + 0.6 * a2 * a2 * t2 + a2 * t2 * t2 + t2 * t2 * t2));
-            [[clang::fallthrough]];
+            //[[clang::fallthrough]];
         case 6:
             value1 += averaged_coefficients[N - 6] * (b * rootb * (8. * b2 * b2 + 26. * b2 * t2 + 33. * t2 * t2) - a * roota * (8. * a2 * a2 + 26. * a2 * t2 + 33. * t2 * t2)) / 48.;
             value2 += averaged_coefficients[N - 6] * 15. / 48. * t2 * t2 * t2;
-            [[clang::fallthrough]];
+            //[[clang::fallthrough]];
         case 5:
             value1 += averaged_coefficients[N - 5] * (b * (b2 * b2 / 5. + 2. / 3. * b2 * t2 + t2 * t2) - a * (a2 * a2 / 5. + 2. / 3. * a2 * t2 + t2 * t2));
-            [[clang::fallthrough]];
+            //[[clang::fallthrough]];
         case 4:
             value1 += averaged_coefficients[N - 4] * (b * rootb * (2. * b2 + 5. * t2) - a * roota * (2. * a2 + 5. * t2)) / 8.;
             value2 += averaged_coefficients[N - 4] * 3. / 8. * t2 * t2;
-            [[clang::fallthrough]];
+            //[[clang::fallthrough]];
         case 3:
             value1 += averaged_coefficients[N - 3] * (b * (b2 / 3. + t2) - a * (a2 / 3. + t2));
-            [[clang::fallthrough]];
+            //[[clang::fallthrough]];
         case 2:
             value1 += averaged_coefficients[N - 2] * (b * rootb - a * roota) / 2.;
             value2 += averaged_coefficients[N - 2] * t2 / 2.;
-            [[clang::fallthrough]];
+            //[[clang::fallthrough]];
         case 1:
             break;
         default:

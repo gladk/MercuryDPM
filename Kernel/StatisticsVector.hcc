@@ -366,7 +366,7 @@ Vec3D StatisticsVector<T>::getVelocityProfile(Vec3D Position)
         i = 0.0;
     if (ny < 1)
         j = 0.0;
-    if (ny < 1)
+    if (nz < 1)
         k = 0.0;
     int ix = static_cast<int>((i * ny + j) * nz + k);
     Vec3D V;
