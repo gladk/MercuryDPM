@@ -1,20 +1,27 @@
-// This file is part of MercuryDPM.
-// 
-// MercuryDPM is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// MercuryDPM is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-// 
-// You should have received a copy of the GNU General Public License
-// along with MercuryDPM.  If not, see <http://www.gnu.org/licenses/>.
-// 
-// Copyright 2013 The Mercury Developers Team
-// For the list of developers, see <http://www.MercuryDPM.org/Team>
+//Copyright (c) 2013-2014, The MercuryDPM Developers Team. All rights reserved.
+//For the list of developers, see <http://www.MercuryDPM.org/Team>.
+//
+//Redistribution and use in source and binary forms, with or without
+//modification, are permitted provided that the following conditions are met:
+//  * Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name MercuryDPM nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+//
+//THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+//ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+//WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//DISCLAIMED. IN NO EVENT SHALL THE MERCURYDPM DEVELOPERS TEAM BE LIABLE FOR ANY
+//DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+//(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+//ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //#define DEBUG_OUTPUT
 //#define DEBUG_OUTPUT_FULL
@@ -905,13 +912,13 @@ bool DPMBase::readParAndIniFiles(const char* filename)
     if (doubleValue >= 0)
     {
         //   1: time-step for output on time-series protocoll file  -> "ene"
-        unsigned int savecount = static_cast<unsigned int>(std::round(doubleValue / getTimeStep()));
+        unsigned int savecount = static_cast<unsigned int>(round(doubleValue / getTimeStep()));
         setSaveCount(savecount);
         
         //   2: time-step for output on film (coordinate) file      -> "c3d"
         //      (fstat-output is coupled to c3d-output time-step)
         file >> doubleValue;
-        savecount = static_cast<unsigned int>(std::round(doubleValue / getTimeStep()));
+        savecount = static_cast<unsigned int>(round(doubleValue / getTimeStep()));
         getDataFile().setSaveCount(savecount);
         getFStatFile().setSaveCount(savecount);
     }
@@ -1613,7 +1620,8 @@ void DPMBase::writeOutputFiles()
 
     if (getDataFile().saveCurrentTimestep(ntimeSteps_))
     {
-        if (getEneFile().getCounter()==1 && getEneFile().getFileType()!= FileType::NO_FILE)
+        printTime();
+        if ((getRestarted() ||getDataFile().getCounter()==1) && getDataFile().getFileType()!= FileType::NO_FILE)
             writeXBallsScript();
         outputXBallsData(getDataFile().getFstream());
     }
@@ -1653,8 +1661,8 @@ void DPMBase::solve()
     {
         ntimeSteps_ = 0;
         resetFileCounter();
-        setupInitialConditions();
         setTime(0.0);
+        setupInitialConditions();
         setNextSavedTimeStep(0); //reset the counter
 #ifdef DEBUG_OUTPUT
         std::cerr << "Have created the particles initial conditions " << std::endl;
@@ -1704,9 +1712,6 @@ void DPMBase::solve()
     while (getTime() < getTimeMax() && continueSolve())
     {
         writeOutputFiles(); //everything is written at the beginning of the timestep!
-
-        if (getDataFile().saveCurrentTimestep(ntimeSteps_))
-            printTime();
 
         /// Check if rotation_ is on
         rotation_ = speciesHandler.useAngularDOFs();
@@ -2112,4 +2117,9 @@ void DPMBase::outputInteractionDetails() const
      std::cout << (*it2)->getId() << " between " << (*it2)->getP()->getId() << " and " << (*it2)->getI()->getId() << std::endl;
      }
      }*/
+}
+
+bool DPMBase::isTimeEqualTo(Mdouble time) const
+{
+    return getTime()<=time && getTime()+getTimeStep()>time;
 }

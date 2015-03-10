@@ -1,20 +1,27 @@
-// This file is part of MercuryDPM.
-// 
-// MercuryDPM is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// MercuryDPM is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-// 
-// You should have received a copy of the GNU General Public License
-// along with MercuryDPM.  If not, see <http://www.gnu.org/licenses/>.
-// 
-// Copyright 2013 The Mercury Developers Team
-// For the list of developers, see <http://www.MercuryDPM.org/Team>
+//Copyright (c) 2013-2014, The MercuryDPM Developers Team. All rights reserved.
+//For the list of developers, see <http://www.MercuryDPM.org/Team>.
+//
+//Redistribution and use in source and binary forms, with or without
+//modification, are permitted provided that the following conditions are met:
+//  * Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name MercuryDPM nor the
+//    names of its contributors may be used to endorse or promote products
+//    derived from this software without specific prior written permission.
+//
+//THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+//ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+//WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//DISCLAIMED. IN NO EVENT SHALL THE MERCURYDPM DEVELOPERS TEAM BE LIABLE FOR ANY
+//DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+//(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+//ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ///This function outputs the location and velocity of the particle in a format the xballs progream can read  
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,11 +101,15 @@ void DPMBase::writeXBallsScript() const
     script_file << "cd $dirname" << std::endl;
     
     Mdouble scale;
+    Mdouble offset = 0;
+    int verticalOffset = 0;
+    int horizontalOffset = 500.0*(0.0 - getXMin())/(getXMax() - getXMin());
     int format;
     
     if (getSystemDimensions() < 3)
     { // dim = 1 or 2
         format = 8;
+        verticalOffset = 500.*(0.0 - getYMin())/(getYMax() - getYMin());
         if (getXBallsScale() < 0)
         {
             scale = 1.0 / std::max(getYMax() - getYMin(), getXMax() - getXMin());
@@ -111,6 +122,7 @@ void DPMBase::writeXBallsScript() const
     else
     { //dim==3
         format = 14;
+        verticalOffset = 500.*(0.0 - getZMin())/(getZMax() - getZMin());
         if (getXBallsScale() < 0)
         {
             scale = 1.2 / std::max(getZMax() - getZMin(), getXMax() - getXMin());
@@ -123,12 +135,20 @@ void DPMBase::writeXBallsScript() const
     }
     
     script_file << "../../XBalls/xballs -format " << format
-            << " -f " << getDataFile().getFullName()
-            << " -s " << scale
-            << " -cmode " << getXBallsColourMode()
-            << " -cmax -sort "
-            << getXBallsAdditionalArguments()
-    << " $*";
+        << " -f " << getDataFile().getFullName()
+        << " -s " << scale
+        << " -cmode " << getXBallsColourMode()
+        << " -cmax -sort ";
+    if (verticalOffset>=1)
+        script_file << " -o " << verticalOffset;
+    else if  (verticalOffset>=1)
+        script_file << " -mo " << -verticalOffset;
+    if (horizontalOffset>=1)
+        script_file << " -moh " << horizontalOffset;
+    else if  (horizontalOffset>=1)
+        script_file << " -oh " << -horizontalOffset;
+    script_file << getXBallsAdditionalArguments()
+        << " $*";
     ///\todo{thomas:why does vscale have to be integer?}
     if (getXBallsVectorScale() > -1)
     {
