@@ -35,6 +35,7 @@ public:
     MixedSpecies(const Species<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies> &s);
     virtual ~MixedSpecies();
     MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>* copy() const;
+    /// Called by SpeciesHandler::readObject
     void read(std::istream& is);
     void write(std::ostream& os) const;
     void clear();
@@ -99,7 +100,6 @@ MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>* Mi
 template<class NormalForceSpecies, class FrictionForceSpecies, class AdhesiveForceSpecies>
 void MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::write(std::ostream& os) const
 {
-    //BaseSpecies::write(os);
     os << getName();
     os << " idA " << BaseObject::getId();
     os << " idB " << BaseObject::getIndex();
@@ -111,10 +111,12 @@ void MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies
 template<class NormalForceSpecies, class FrictionForceSpecies, class AdhesiveForceSpecies>
 void MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::read(std::istream& is)
 {
-    BaseSpecies::read(is);
+    //note: name is already read by SpeciesHandler::readObject
     std::string dummy;
-    unsigned int index;
+    unsigned int id, index;
+    is >> dummy >> id;
     is >> dummy >> index;
+    BaseObject::setId(id);
     BaseObject::setIndex(index);
     NormalForceSpecies::read(is);
     FrictionForceSpecies::read(is);

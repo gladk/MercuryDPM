@@ -65,7 +65,7 @@ public:
      * \param[in] O A reference to the Object that has to be copied.
      */
     template<typename U>
-    U* copyAndAddObject(U O);
+    U* copyAndAddObject(const U& O);
 
     /*!
      * \brief Creates a copy of a Object and adds it to the BaseHandler.
@@ -251,7 +251,7 @@ template<class T> void BaseHandler<T>::copyContentsFromOtherHandler(const BaseHa
     }
 }
 
-template<class T> template<class U> U* BaseHandler<T>::copyAndAddObject(U O)
+template<class T> template<class U> U* BaseHandler<T>::copyAndAddObject(const U& O)
 {
     U* oCopy = O.copy();
     addObject(oCopy);

@@ -39,6 +39,7 @@ public:
     virtual ~Species();
     Species<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>* copy() const;
     MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>* copyMixed() const;
+    /// Called by SpeciesHandler::readObject
     void read(std::istream& is);
     void write(std::ostream& os) const;
     void clear();

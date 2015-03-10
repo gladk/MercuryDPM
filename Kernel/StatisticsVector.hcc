@@ -1154,7 +1154,7 @@ void StatisticsVector<T>::statistics_from_fstat_and_data()
     }
     else if (verbosity)
     {
-        DPMBase::write(std::cout);
+        DPMBase::write(std::cout, false);
         std::cout << std::endl;
     }
     

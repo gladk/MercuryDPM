@@ -210,6 +210,14 @@ void SpeciesHandler::readObject(std::istream& is)
         exit(-1);
     }
 
+    //remove the default mixed species
+    for (unsigned int i =0; i+1 < getNumberOfObjects(); i++)
+    {
+        ///\todo TW why does deleting these objects create a segmentation fault
+        delete mixedObjects_.back();
+        mixedObjects_.pop_back();
+    }
+
     for (unsigned int i = 0; i+1 < getNumberOfObjects(); i++)
     {
         is >> type;
@@ -217,109 +225,109 @@ void SpeciesHandler::readObject(std::istream& is)
         {
             LinearViscoelasticMixedSpecies species;
             is >> species;
-            mixedObjects_.push_back(&species);
+            mixedObjects_.push_back(species.copy());
         }
         else if (type.compare("LinearPlasticViscoelasticMixedSpecies") == 0)
         {
             LinearPlasticViscoelasticMixedSpecies species;
             is >> species;
-            mixedObjects_.push_back(&species);
+            mixedObjects_.push_back(species.copy());
         }
         else if (type.compare("LinearViscoelasticSlidingFrictionMixedSpecies") == 0)
         {
             LinearViscoelasticSlidingFrictionMixedSpecies species;
             is >> species;
-            mixedObjects_.push_back(&species);
+            mixedObjects_.push_back(species.copy());
         }
         else if (type.compare("LinearPlasticViscoelasticSlidingFrictionMixedSpecies") == 0)
         {
             LinearPlasticViscoelasticSlidingFrictionMixedSpecies species;
             is >> species;
-            mixedObjects_.push_back(&species);
+            mixedObjects_.push_back(species.copy());
         }
         else if (type.compare("LinearViscoelasticFrictionMixedSpecies") == 0)
         {
             LinearViscoelasticFrictionMixedSpecies species;
             is >> species;
-            mixedObjects_.push_back(&species);
+            mixedObjects_.push_back(species.copy());
         }
         else if (type.compare("LinearPlasticViscoelasticFrictionMixedSpecies") == 0)
         {
             LinearPlasticViscoelasticFrictionMixedSpecies species;
             is >> species;
-            mixedObjects_.push_back(&species);
+            mixedObjects_.push_back(species.copy());
         }
         else if (type.compare("LinearViscoelasticIrreversibleAdhesiveMixedSpecies") == 0)
         {
             LinearViscoelasticIrreversibleAdhesiveMixedSpecies species;
             is >> species;
-            mixedObjects_.push_back(&species);
+            mixedObjects_.push_back(species.copy());
         }
         else if (type.compare("LinearPlasticViscoelasticIrreversibleAdhesiveMixedSpecies") == 0)
         {
             LinearPlasticViscoelasticIrreversibleAdhesiveMixedSpecies species;
             is >> species;
-            mixedObjects_.push_back(&species);
+            mixedObjects_.push_back(species.copy());
         }
         else if (type.compare("LinearViscoelasticSlidingFrictionIrreversibleAdhesiveMixedSpecies") == 0)
         {
             LinearViscoelasticSlidingFrictionIrreversibleAdhesiveMixedSpecies species;
             is >> species;
-            mixedObjects_.push_back(&species);
+            mixedObjects_.push_back(species.copy());
         }
         else if (type.compare("LinearPlasticViscoelasticSlidingFrictionIrreversibleAdhesiveMixedSpecies") == 0)
         {
             LinearPlasticViscoelasticSlidingFrictionIrreversibleAdhesiveMixedSpecies species;
             is >> species;
-            mixedObjects_.push_back(&species);
+            mixedObjects_.push_back(species.copy());
         }
         else if (type.compare("LinearViscoelasticFrictionIrreversibleAdhesiveMixedSpecies") == 0)
         {
             LinearViscoelasticFrictionIrreversibleAdhesiveMixedSpecies species;
             is >> species;
-            mixedObjects_.push_back(&species);
+            mixedObjects_.push_back(species.copy());
         }
         else if (type.compare("LinearPlasticViscoelasticFrictionIrreversibleAdhesiveMixedSpecies") == 0)
         {
             LinearPlasticViscoelasticFrictionIrreversibleAdhesiveMixedSpecies species;
             is >> species;
-            mixedObjects_.push_back(&species);
+            mixedObjects_.push_back(species.copy());
         }        
         else if (type.compare("LinearViscoelasticReversibleAdhesiveMixedSpecies") == 0)
         {
             LinearViscoelasticReversibleAdhesiveMixedSpecies species;
             is >> species;
-            mixedObjects_.push_back(&species);
+            mixedObjects_.push_back(species.copy());
         }
         else if (type.compare("LinearPlasticViscoelasticReversibleAdhesiveMixedSpecies") == 0)
         {
             LinearPlasticViscoelasticReversibleAdhesiveMixedSpecies species;
             is >> species;
-            mixedObjects_.push_back(&species);
+            mixedObjects_.push_back(species.copy());
         }
         else if (type.compare("LinearViscoelasticSlidingFrictionReversibleAdhesiveMixedSpecies") == 0)
         {
             LinearViscoelasticSlidingFrictionReversibleAdhesiveMixedSpecies species;
             is >> species;
-            mixedObjects_.push_back(&species);
+            mixedObjects_.push_back(species.copy());
         }
         else if (type.compare("LinearPlasticViscoelasticSlidingFrictionReversibleAdhesiveMixedSpecies") == 0)
         {
             LinearPlasticViscoelasticSlidingFrictionReversibleAdhesiveMixedSpecies species;
             is >> species;
-            mixedObjects_.push_back(&species);
+            mixedObjects_.push_back(species.copy());
         }
         else if (type.compare("LinearViscoelasticFrictionReversibleAdhesiveMixedSpecies") == 0)
         {
             LinearViscoelasticFrictionReversibleAdhesiveMixedSpecies species;
             is >> species;
-            mixedObjects_.push_back(&species);
+            mixedObjects_.push_back(species.copy());
         }
         else if (type.compare("LinearPlasticViscoelasticFrictionReversibleAdhesiveMixedSpecies") == 0)
         {
             LinearPlasticViscoelasticFrictionReversibleAdhesiveMixedSpecies species;
             is >> species;
-            mixedObjects_.push_back(&species);
+            mixedObjects_.push_back(species.copy());
         }
         else if (type.compare("k") == 0) //for backwards compatibility
         {
@@ -331,7 +339,6 @@ void SpeciesHandler::readObject(std::istream& is)
             exit(-1);
         }
     }
-
 }
 
 /// \param[in] is The input stream from which the information is read.
@@ -414,31 +421,6 @@ template<class U> typename U::MixedSpeciesType* SpeciesHandler::getMixedObject(c
 {
     return dynamic_cast<typename U::MixedSpeciesType*>(getMixedObject(S->getIndex(),T->getIndex()));
 }
-
-//LinearViscoelasticMixedSpecies* SpeciesHandler::getMixedObject(const LinearViscoelasticFrictionSpecies* S,const LinearViscoelasticFrictionSpecies* T)
-//{
-//    return dynamic_cast<LinearViscoelasticMixedSpecies*>(getMixedObject(S->getIndex(),T->getIndex()));
-//}
-//LinearPlasticViscoelasticMixedSpecies* SpeciesHandler::getMixedObject(const LinearPlasticViscoelasticSpecies* S,const LinearPlasticViscoelasticSpecies* T)
-//{
-//    return dynamic_cast<LinearPlasticViscoelasticMixedSpecies*>(getMixedObject(S->getIndex(),T->getIndex()));
-//}
-//LinearViscoelasticSlidingFrictionMixedSpecies* SpeciesHandler::getMixedObject(const LinearViscoelasticSlidingFrictionSpecies* S,const LinearViscoelasticSlidingFrictionSpecies* T)
-//{
-//    return dynamic_cast<LinearViscoelasticSlidingFrictionMixedSpecies*>(getMixedObject(S->getIndex(),T->getIndex()));
-//}
-//LinearPlasticViscoelasticSlidingFrictionMixedSpecies* SpeciesHandler::getMixedObject(const LinearPlasticViscoelasticSlidingFrictionSpecies* S,const LinearPlasticViscoelasticSlidingFrictionSpecies* T)
-//{
-//    return dynamic_cast<LinearPlasticViscoelasticSlidingFrictionMixedSpecies*>(getMixedObject(S->getIndex(),T->getIndex()));
-//}
-//LinearViscoelasticFrictionMixedSpecies* SpeciesHandler::getMixedObject(const LinearViscoelasticFrictionSpecies* S,const LinearViscoelasticFrictionSpecies* T)
-//{
-//    return dynamic_cast<LinearViscoelasticFrictionMixedSpecies*>(getMixedObject(S->getIndex(),T->getIndex()));
-//}
-//LinearPlasticViscoelasticFrictionMixedSpecies* SpeciesHandler::getMixedObject(const LinearPlasticViscoelasticFrictionSpecies* S,const LinearPlasticViscoelasticFrictionSpecies* T)
-//{
-//    return dynamic_cast<LinearPlasticViscoelasticFrictionMixedSpecies*>(getMixedObject(S->getIndex(),T->getIndex()));
-//}
 
 const std::vector<BaseSpecies*>& SpeciesHandler::getMixedObjects() const
 {
