@@ -87,21 +87,23 @@ Coil::~Coil()
 }
 
 /*!
- * \param[in] start A Vec3D which denotes the centre of the lower end of the Coil.
- * \param[in] l The length of the Coil, must be positive.
- * \param[in] r The radius of the Coil, must be positive.
- * \param[in] n The number of revelations of the Coil, must be positive.
- * \param[in] omega The rotation speed of the Coil in rev/s.
- * \param[in] thickness The thickness of the "spiral" of the Coil, must be non-negative.
  * \details Set the parameters of this Coil by assigning all input parameters to
  *  the data-members of this class, and setting the offset_ to 0.
+ * 
+ * \param[in] start A Vec3D which denotes the centre of the lower end of the Coil.
+ * \param[in] length        The length of the Coil, must be positive.
+ * \param[in] radius        The radius of the Coil, must be positive.
+ * \param[in] numberOfRevelations   The number of revelations of the Coil, must be positive.
+ * \param[in] omega         The rotation speed of the Coil in rev/s.
+ * \param[in] thickness     The thickness of the "spiral" of the Coil, must be non-negative.
+ * 
  */
-void Coil::set(Vec3D start, Mdouble l, Mdouble r, Mdouble n, Mdouble omega, Mdouble thickness)
+void Coil::set(Vec3D start, Mdouble length, Mdouble radius, Mdouble numberOfRevelations, Mdouble omega, Mdouble thickness)
 {
     start_ = start;
-    l_ = l;
-    r_ = r;
-    n_ = n;
+    l_ = length;
+    r_ = radius;
+    n_ = numberOfRevelations;
     omega_ = omega;
     thickness_ = thickness;
     offset_ = 0.0;

@@ -5,4 +5,7 @@
 }
 div.tabs > ul li:first-child {
 	display:none;
- }
+}
+div.image img[src="../../paraview2.png"]{ 
+    width:98%; 
+}

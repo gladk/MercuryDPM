@@ -94,6 +94,8 @@ public:
      */
     void reverseHistory();
 
+    void rotateHistory(Matrix3D& rotationMatrix);
+    
 private:
     /*!
      * \brief Stores the amount of rolling spring compression. Set in integrate(), used in computing

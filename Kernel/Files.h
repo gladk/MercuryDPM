@@ -27,6 +27,7 @@
 #ifndef OUTPUTFILES_H_
 #define OUTPUTFILES_H_
 #include "File.h"
+#include "GeneralDefine.h"
 
 /*!
  * \class Files
@@ -54,61 +55,90 @@ public:
     virtual ~Files();
 
     /*!
-     * \brief Copy constructor
-     * \todo add const? I believe it has been added.
+     * \brief Copy constructor.
      */
     Files(const Files& other);
             
     //setters and getters
     
     /*!
-     * \brief The non const version. Allows one to edit the File::dataFile_
+     * \brief The non const version. Allows one to edit the File::dataFile
+     * \deprecated dataFile is now protected, so it can be used by all applications.
+     * Please don't use getDataFile() anymore.
      */
+    MERCURY_DEPRECATED
     File& getDataFile();
 
     /*!
-     * \brief The non const version. Allows to edit the File::eneFile_
+     * \brief The non const version. Allows to edit the File::eneFile
+     * \deprecated eneFile is now protected, so it can be used by all applications.
+     * Please don't use getEneFile() anymore.
      */
+    MERCURY_DEPRECATED
     File& getEneFile();
 
     /*!
-     * \brief The non const version. Allows to edit the File::fstatFile_
+     * \brief The non const version. Allows to edit the File::fStatFile
+     * \deprecated fStatFile is now protected, so it can be used by all applications.
+     * Please don't use getFStatFile() anymore.
      */
+    MERCURY_DEPRECATED
     File& getFStatFile();
 
     /*!
-     * \brief The non const version. Allows to edit the File::restartFile_
+     * \brief The non const version. Allows to edit the File::restartFile
+     * \deprecated restartFile is now protected, so it can be used by all applications.
+     * Please don't use getRestartFile() anymore.
      */
+    MERCURY_DEPRECATED
     File& getRestartFile();
 
     /*!
-     * \brief The non const version. Allows to edit the File::statFile_
+     * \brief The non const version. Allows to edit the File::statFile
+     * \deprecated statFile is now protected, so it can be used by all applications.
+     * Please don't use getStatFile() anymore.
      */
+    MERCURY_DEPRECATED
     File& getStatFile();
     
     /*!
-     * \brief The const version. Does not allow for any editing of the File::dataFile_
+     * \brief The const version. Does not allow for any editing of the File::dataFile
+     * \deprecated dataFile is now protected, so it can be used by all applications.
+     * Please don't use getDataFile() anymore.
      */
+    MERCURY_DEPRECATED
     const File& getDataFile() const;
 
     /*!
-     * \brief The const version. Does not allow for any editing of the File::eneFile_
+     * \brief The const version. Does not allow for any editing of the File::eneFile
+     * \deprecated eneFile is now protected, so it can be used by all applications.
+     * Please don't use getEneFile() anymore.
      */
+    MERCURY_DEPRECATED
     const File& getEneFile() const;
 
     /*!
-     * \brief The const version. Does not allow for any editing of the File::fstatFile_
+     * \brief The const version. Does not allow for any editing of the File::fStatFile
+     * \deprecated fStatFile is now protected, so it can be used by all applications.
+     * Please don't use getFStatFile() anymore.
      */
+    MERCURY_DEPRECATED
     const File& getFStatFile() const;
 
     /*!
-     * \brief The const version. Does not allow for any editing of the File::restartFile_
+     * \brief The const version. Does not allow for any editing of the File::restartFile
+     * \deprecated restartFile is now protected, so it can be used by all applications.
+     * Please don't use getRestartFile() anymore.
      */
+    MERCURY_DEPRECATED
     const File& getRestartFile() const;
 
     /*!
-     * \brief The const version. Does not allow for any editing of the File::statFile_
+     * \brief The const version. Does not allow for any editing of the File::statFile
+     * \deprecated statFile is now protected, so it can be used by all applications.
+     * Please don't use getStatFile() anymore.
      */
+    MERCURY_DEPRECATED
     const File& getStatFile() const;
 
     /*!
@@ -148,11 +178,11 @@ public:
      */
     void resetFileCounter();
     /*!
-     * \brief Extracts data from the input stream (which is basically a file you want to read from) into name_, restartFile_ ....
+     * \brief Extracts data from the input stream (which is basically a file you want to read from) into name_, restartFile ....
      */
     void read(std::istream& is);
     /*!
-    * \brief Writes data into a file from the member variables name_, restartFile_, dataFile_ etc.
+    * \brief Writes data into a file from the member variables name_, restartFile, dataFile etc.
     */
     void write(std::ostream& os) const;
     /*!
@@ -168,32 +198,32 @@ public:
     */
     void setNextSavedTimeStep(unsigned int nextSavedTimeStep);
 
-private:
     /*!
      * \brief An instance of class File to handle in- and output into a .data file
      */
-    File dataFile_;
+    File dataFile;
 
     /*!
      * \brief An instance of class File to handle in- and output into a .fstat file
      */
-    File fStatFile_;
+    File fStatFile;
 
     /*!
      * \brief An instance of class File to handle in- and output into a .ene file
      */
-    File eneFile_;
+    File eneFile;
 
     /*!
      * \brief An instance of class File to handle in- and output into a .restart file
      */
-    File restartFile_;
+    File restartFile;
 
     /*!
      * \brief An instance of class File to handle in- and output into a .stat file
      */
-    File statFile_;
-
+    File statFile;
+    
+private:
     /*!
      * \brief the name of the problem, used, e.g., for the files
      */

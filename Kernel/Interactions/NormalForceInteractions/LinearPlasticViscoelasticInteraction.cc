@@ -31,7 +31,11 @@
 #include <fstream>
 #include <Species/NormalForceSpecies/LinearPlasticViscoelasticNormalSpecies.h>
 #include <cmath>    // std::max
-
+/*!
+ * \param[in] P
+ * \param[in] I
+ * \param[in] timeStamp
+ */
 LinearPlasticViscoelasticInteraction::LinearPlasticViscoelasticInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
         : BaseInteraction(P, I, timeStamp)
 {
@@ -40,7 +44,9 @@ LinearPlasticViscoelasticInteraction::LinearPlasticViscoelasticInteraction(BaseI
     std::cout<<"LinearPlasticViscoelasticInteraction::LinearPlasticViscoelasticInteraction() finished"<<std::endl;
 #endif
 }
-
+/*!
+ * \param[in] p 
+ */
 LinearPlasticViscoelasticInteraction::LinearPlasticViscoelasticInteraction(const LinearPlasticViscoelasticInteraction &p)
         : BaseInteraction(p)
 {
@@ -49,7 +55,9 @@ LinearPlasticViscoelasticInteraction::LinearPlasticViscoelasticInteraction(const
     std::cout<<"LinearPlasticViscoelasticInteraction::LinearPlasticViscoelasticInteraction(const LinearPlasticViscoelasticInteraction &p finished"<<std::endl;
 #endif
 }
-
+/*!
+ *
+ */
 LinearPlasticViscoelasticInteraction::~LinearPlasticViscoelasticInteraction()
 {
 #ifdef DEBUG_DESTRUCTOR
@@ -57,27 +65,32 @@ LinearPlasticViscoelasticInteraction::~LinearPlasticViscoelasticInteraction()
 #endif
 }
 
-BaseInteraction* LinearPlasticViscoelasticInteraction::copy() const
-{
-    return new LinearPlasticViscoelasticInteraction(*this);
-}
-
-///BaseParticle print function, which accepts an os std::stringstream as input. It prints human readable BaseParticle information to the std::stringstream
+/*!
+ * \details Calls the write function of BaseInteraction().
+ * \param[in,out] os
+ */
 void LinearPlasticViscoelasticInteraction::write(std::ostream& os) const
-        {
+{
     BaseInteraction::write(os);
 }
-
+/*!
+ * \detials Calls the read function of BaseInteraction().
+ * \param[in,out] is
+ */
 void LinearPlasticViscoelasticInteraction::read(std::istream& is)
 {
     BaseInteraction::read(is);
 }
-
+/*!
+ * \return std::string
+ */
 std::string LinearPlasticViscoelasticInteraction::getBaseName() const
 {
     return "LinearPlasticViscoelastic";
 }
-
+/*!
+ *
+ */
 void LinearPlasticViscoelasticInteraction::computeLinearPlasticViscoelasticForce()
 {
     // Compute the relative velocity vector of particle P w.r.t. I
@@ -148,12 +161,16 @@ void LinearPlasticViscoelasticInteraction::computeLinearPlasticViscoelasticForce
         setTorque(Vec3D(0.0, 0.0, 0.0));
     }
 }
-
+/*!
+ *
+ */
 void LinearPlasticViscoelasticInteraction::computeNormalForce()
 {
     computeLinearPlasticViscoelasticForce();
 }
-
+/*!
+ * \return Mdouble
+ */
 Mdouble LinearPlasticViscoelasticInteraction::getElasticEnergy() const
 {
    if (getOverlap() > 0)
@@ -162,22 +179,30 @@ Mdouble LinearPlasticViscoelasticInteraction::getElasticEnergy() const
         return 0.0;
   ///\todo TW this is not correct; we should count the return energy
 }
-
+/*!
+ * \return const LinearPlasticViscoElasticNormalSpecies*
+ */
 const LinearPlasticViscoelasticNormalSpecies* LinearPlasticViscoelasticInteraction::getSpecies() const
 {
     return dynamic_cast<const LinearPlasticViscoelasticNormalSpecies*>(getBaseSpecies());
 }
-
+/*!
+ * \return Mdouble maxOverlap_
+ */
 Mdouble LinearPlasticViscoelasticInteraction::getMaxOverlap() const
 {
     return maxOverlap_;
 }
-
+/*!
+ * \param[in] maxOverlap
+ */
 void LinearPlasticViscoelasticInteraction::setMaxOverlap(const Mdouble maxOverlap)
 {
     maxOverlap_ = maxOverlap;
 }
-
+/*!
+ * \return Mdouble
+ */
 Mdouble LinearPlasticViscoelasticInteraction::getUnloadingStiffness() const
 {
     const LinearPlasticViscoelasticNormalSpecies* species = getSpecies();

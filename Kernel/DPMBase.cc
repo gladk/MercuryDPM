@@ -33,9 +33,10 @@
 #include <cstdlib>
 #include <limits>
 #include <string>
+#include <sstream>
 #include <cstdio>
 ///todo strcmp relies on this, should be changed to more modern version
-#include <string.h>
+#include <cstring>
 //This is only used to change the file permission of the xball script create, at some point this code may be moved from this file to a different file.
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -985,26 +986,26 @@ void DPMBase::outputXBallsData(std::ostream& os) const
  * \param[in] format (format for specifying if its for 2D or 3D data)
  * \return bool (True or False)
  */
-bool DPMBase::readDataFile(const char* fileName, unsigned int format)
+bool DPMBase::readDataFile(const std::string fileName, unsigned int format)
 {
-    std::string oldFileName = getDataFile().getName();
+    std::string oldFileName = dataFile.getName();
     //This opens the file the data will be recalled from
-    getDataFile().setName(fileName);
-    getDataFile().open(std::fstream::in);
-    if (!getDataFile().getFstream().is_open() || getDataFile().getFstream().bad())
+    dataFile.setName(fileName);
+    dataFile.open(std::fstream::in);
+    if (!dataFile.getFstream().is_open() || dataFile.getFstream().bad())
     {
         std::cout << "Loading data file " << fileName << " failed" << std::endl;
         return false;
     }
 
-    //getDataFile().getFileType() is ignored
-    FileType fileTypeData = getDataFile().getFileType();
-    getDataFile().setFileType(FileType::ONE_FILE);
+    //dataFile.getFileType() is ignored
+    FileType fileTypeData = dataFile.getFileType();
+    dataFile.setFileType(FileType::ONE_FILE);
     readNextDataFile(format);
-    getDataFile().setFileType(fileTypeData);
+    dataFile.setFileType(fileTypeData);
 
-    getDataFile().close();
-    getDataFile().setName(oldFileName);
+    dataFile.close();
+    dataFile.setName(oldFileName);
 
     //std::cout << "Loaded data file " << filename << " (t=" << getTime() << ")" << std::endl;
     return true;
@@ -1014,7 +1015,7 @@ bool DPMBase::readDataFile(const char* fileName, unsigned int format)
  * \param[in] fileName
  * \return bool (True or False)
  */
-bool DPMBase::readParAndIniFiles(const char* fileName)
+bool DPMBase::readParAndIniFiles(const std::string fileName)
 {
     //Opens the par.ini file
     std::fstream file;
@@ -1125,8 +1126,8 @@ bool DPMBase::readParAndIniFiles(const char* fileName)
         //      (fstat-output is coupled to c3d-output time-step)
         file >> doubleValue;
         savecount = static_cast<unsigned int>(round(doubleValue / getTimeStep()));
-        getDataFile().setSaveCount(savecount);
-        getFStatFile().setSaveCount(savecount);
+        dataFile.setSaveCount(savecount);
+        fStatFile.setSaveCount(savecount);
     }
     else
     {
@@ -1189,29 +1190,29 @@ bool DPMBase::readParAndIniFiles(const char* fileName)
  */
 bool DPMBase::findNextExistingDataFile(Mdouble tMin, bool verbose)
 {
-    if (getDataFile().getFileType() == FileType::MULTIPLE_FILES || getDataFile().getFileType() == FileType::MULTIPLE_FILES_PADDED)
+    if (dataFile.getFileType() == FileType::MULTIPLE_FILES || dataFile.getFileType() == FileType::MULTIPLE_FILES_PADDED)
     {
         while (true)// This true corresponds to the if s
         {
-            getDataFile().openNextFile();
+            dataFile.openNextFile();
             //check if file exists and contains data
             int N;
-            getDataFile().getFstream() >> N;
-            if (getDataFile().getFstream().eof() || getDataFile().getFstream().peek() == -1)
+            dataFile.getFstream() >> N;
+            if (dataFile.getFstream().eof() || dataFile.getFstream().peek() == -1)
             {
-                std::cout << "file " << getDataFile().getName() << " not found" << std::endl;
+                std::cout << "file " << dataFile.getName() << " not found" << std::endl;
                 return false;
             }
             //check if tmin condition is satisfied
             Mdouble t;
-            getDataFile().getFstream() >> t;
+            dataFile.getFstream() >> t;
             if (t > tMin)
             {
                 //set_file_counter(get_file_counter()-1);
                 return true;
             }
             if (verbose)
-                std::cout << "Jumping file counter: " << getDataFile().getCounter() << std::endl;
+                std::cout << "Jumping file counter: " << dataFile.getCounter() << std::endl;
         }
     }
     return true;
@@ -1222,8 +1223,8 @@ bool DPMBase::findNextExistingDataFile(Mdouble tMin, bool verbose)
  */
 bool DPMBase::readNextDataFile(unsigned int format)
 {
-    getDataFile().openNextFile(std::fstream::in);
-    //getFStatFile().openNextFile();
+    dataFile.openNextFile(std::fstream::in);
+    //fStatFile.openNextFile();
     //Set the correct formation based of dimension if the formation is not specified by the user
     if (format == 0)
     {
@@ -1244,7 +1245,7 @@ bool DPMBase::readNextDataFile(unsigned int format)
     
     unsigned int N=0;
     Mdouble dummy;
-    getDataFile().getFstream() >> N;
+    dataFile.getFstream() >> N;
 
     //read first parameter and check if we reached the end of the file
     if (N==0)
@@ -1269,26 +1270,26 @@ bool DPMBase::readNextDataFile(unsigned int format)
         //This is the format_ that Stefan's and Vitaley's code saves in - note the axis rotation_
         case 7:
             {
-            getDataFile().getFstream() >> dummy;
+            dataFile.getFstream() >> dummy;
             setTime(dummy);
-            getDataFile().getFstream() >> dummy;
+            dataFile.getFstream() >> dummy;
             setXMin(dummy);
-            getDataFile().getFstream() >> dummy;
+            dataFile.getFstream() >> dummy;
             setYMin(dummy);
-            getDataFile().getFstream() >> dummy;
+            dataFile.getFstream() >> dummy;
             setZMin(dummy);
-            getDataFile().getFstream() >> dummy;
+            dataFile.getFstream() >> dummy;
             setXMax(dummy);
-            getDataFile().getFstream() >> dummy;
+            dataFile.getFstream() >> dummy;
             setYMax(dummy);
-            getDataFile().getFstream() >> dummy;
+            dataFile.getFstream() >> dummy;
             setZMax(dummy);
             //std::cout << " time " << t <<  std::endl;
             Mdouble radius;
             Vec3D position, velocity;
             for (std::vector<BaseParticle*>::iterator it = particleHandler.begin(); it != particleHandler.end(); ++it)
             {
-                getDataFile().getFstream() >> position.X >> position.Z >> position.Y >> velocity.X >> velocity.Z >> velocity.Y >> radius >> dummy;
+                dataFile.getFstream() >> position.X >> position.Z >> position.Y >> velocity.X >> velocity.Z >> velocity.Y >> radius >> dummy;
                 (*it)->setPosition(position);
                 (*it)->setVelocity(velocity);
                 (*it)->setOrientation(Vec3D(0.0, 0.0, 0.0));
@@ -1301,14 +1302,14 @@ bool DPMBase::readNextDataFile(unsigned int format)
             //This is a 2D format_
         case 8:
             {
-            getDataFile().getFstream() >> time_ >> xMin_ >> yMin_ >> xMax_ >> yMax_;
+            dataFile.getFstream() >> time_ >> xMin_ >> yMin_ >> xMax_ >> yMax_;
             zMin_ = 0.0;
             zMax_ = 0.0;
             Mdouble radius;
             Vec3D position, velocity, angle, angularVelocity;
             for (std::vector<BaseParticle*>::iterator it = particleHandler.begin(); it != particleHandler.end(); ++it)
             {
-                getDataFile().getFstream() >> position.X >> position.Y >> velocity.X >> velocity.Y >> radius >> angle.Z >> angularVelocity.Z >> dummy;
+                dataFile.getFstream() >> position.X >> position.Y >> velocity.X >> velocity.Y >> radius >> angle.Z >> angularVelocity.Z >> dummy;
                 (*it)->setPosition(position);
                 (*it)->setVelocity(velocity);
                 (*it)->setOrientation(-angle);
@@ -1320,12 +1321,12 @@ bool DPMBase::readNextDataFile(unsigned int format)
             //This is a 3D format_
         case 14:
             {
-            getDataFile().getFstream() >> time_ >> xMin_ >> yMin_ >> zMin_ >> xMax_ >> yMax_ >> zMax_;
+            dataFile.getFstream() >> time_ >> xMin_ >> yMin_ >> zMin_ >> xMax_ >> yMax_ >> zMax_;
             Mdouble radius;
             Vec3D position, velocity, angle, angularVelocity;
             for (std::vector<BaseParticle*>::iterator it = particleHandler.begin(); it != particleHandler.end(); ++it)
             {
-                getDataFile().getFstream() >> position >> velocity >> radius >> angle >> angularVelocity >> dummy;
+                dataFile.getFstream() >> position >> velocity >> radius >> angle >> angularVelocity >> dummy;
                 (*it)->setPosition(position);
                 (*it)->setVelocity(velocity);
                 (*it)->setOrientation(angle);
@@ -1337,12 +1338,12 @@ bool DPMBase::readNextDataFile(unsigned int format)
             //This is a 3D format_
         case 15:
             {
-            getDataFile().getFstream() >> time_ >> xMin_ >> yMin_ >> zMin_ >> xMax_ >> yMax_ >> zMax_;
+            dataFile.getFstream() >> time_ >> xMin_ >> yMin_ >> zMin_ >> xMax_ >> yMax_ >> zMax_;
             Mdouble radius;
             Vec3D position, velocity, angle, angularVelocity;
             for (std::vector<BaseParticle*>::iterator it = particleHandler.begin(); it != particleHandler.end(); ++it)
             {
-                getDataFile().getFstream() >> position >> velocity >> radius >> angle >> angularVelocity >> dummy >> dummy;
+                dataFile.getFstream() >> position >> velocity >> radius >> angle >> angularVelocity >> dummy >> dummy;
                 (*it)->setPosition(position);
                 (*it)->setVelocity(velocity);
                 (*it)->setOrientation(angle);
@@ -1363,7 +1364,7 @@ bool DPMBase::readNextDataFile(unsigned int format)
  */
 void DPMBase::writeRestartFile()
 {
-    write(getRestartFile().getFstream());
+    write(restartFile.getFstream());
 }
 
 /*!
@@ -1373,16 +1374,16 @@ void DPMBase::writeRestartFile()
  */
 int DPMBase::readRestartFile()
 {
-    if (getRestartFile().open(std::fstream::in))
+    if (restartFile.open(std::fstream::in))
     {
-        read(getRestartFile().getFstream());
-        getRestartFile().close();
+        read(restartFile.getFstream());
+        restartFile.close();
         setRestarted(true);
         return (1);
     }
     else
     {
-        std::cerr << getRestartFile().getName() << " could not be loaded" << std::endl;
+        std::cerr << restartFile.getName() << " could not be loaded" << std::endl;
         return (0);
     }
 }
@@ -1393,7 +1394,7 @@ int DPMBase::readRestartFile()
  */
 int DPMBase::readRestartFile(std::string fileName)
 {
-    getRestartFile().setName(fileName);
+    restartFile.setName(fileName);
     return readRestartFile();
 }
 
@@ -1544,9 +1545,9 @@ void DPMBase::integrateAfterForceComputation()
 //    //This creates the file statistics will be saved to
 //    std::stringstream ss("");
 //    ss << name << ".stat";
-//    getStatFile().setName(ss.str());
-//    getStatFile().setOpenMode(std::fstream::out);
-//    getStatFile().open();
+//    statFile.setName(ss.str());
+//    statFile.setOpenMode(std::fstream::out);
+//    statFile.open();
 //
 //    // Sets up the initial conditions for the simulation
 //    // setupInitialConditions();
@@ -1556,27 +1557,27 @@ void DPMBase::integrateAfterForceComputation()
 //    actionsBeforeTimeLoop();
 //    initialiseStatistics();
 //    hGridActionsBeforeTimeLoop();
-//    writeEneHeader(getEneFile().getFstream());
+//    writeEneHeader(eneFile.getFstream());
 //
-//    while (readDataFile(getDataFile().getName().c_str()))
+//    while (readDataFile(dataFile.getName().c_str()))
 //    {
 //        hGridActionsBeforeTimeLoop();
 //        actionsBeforeTimeStep();
 //        checkAndDuplicatePeriodicParticles();
 //        hGridActionsBeforeTimeStep();
-////        getDataFile().setSaveCurrentTimestep(true);
-////        getEneFile().setSaveCurrentTimestep(true);
-////        getStatFile().setSaveCurrentTimestep(true);
-////        getFStatFile().setSaveCurrentTimestep(true);
+////        dataFile.setSaveCurrentTimestep(true);
+////        eneFile.setSaveCurrentTimestep(true);
+////        statFile.setSaveCurrentTimestep(true);
+////        fStatFile.setSaveCurrentTimestep(true);
 //        computeAllForces();
 //        removeDuplicatePeriodicParticles();
 //        actionsAfterTimeStep();
-//        writeEneTimestep(getEneFile().getFstream());
+//        writeEneTimestep(eneFile.getFstream());
 //        std::cout << std::setprecision(6) << getTime() << std::endl;
 //    }
 //
-//    getDataFile().close();
-//    getStatFile().close();
+//    dataFile.close();
+//    statFile.close();
 //}
 
 /*!
@@ -1662,14 +1663,13 @@ void DPMBase::write(std::ostream& os, bool writeAllParticles) const
     os << "Boundaries " << boundaryHandler.getNumberOfObjects() << std::endl;
     for (std::vector<BaseBoundary*>::const_iterator it = boundaryHandler.begin(); it != boundaryHandler.end(); ++it)
         os << (**it) << std::endl;
-    os << "Particles " << particleHandler.getNumberOfObjects() << std::endl;
     if (writeAllParticles || particleHandler.getNumberOfObjects() < 4)
     {
-        for (std::vector<BaseParticle*>::const_iterator it = particleHandler.begin(); it != particleHandler.end(); ++it)
-            os << (**it) << std::endl;
+        particleHandler.write(os);
     }
     else
     {
+        os << "Particles " << particleHandler.getNumberOfObjects() << std::endl;
         for (unsigned int i = 0; i < 2; i++)
             os << *particleHandler.getObject(i) << std::endl;
         os << "..." << std::endl;
@@ -1795,21 +1795,21 @@ void DPMBase::readOld(std::istream &is)
         >> dummy >> fileTypeFstat
         >> dummy >> fileTypeData
         >> dummy >> fileTypeEne;
-    getDataFile().setSaveCount(saveCountData);
-    getEneFile().setSaveCount(saveCountEne);
-    getStatFile().setSaveCount(saveCountStat);
-    getFStatFile().setSaveCount(saveCountFStat);
+    dataFile.setSaveCount(saveCountData);
+    eneFile.setSaveCount(saveCountEne);
+    statFile.setSaveCount(saveCountStat);
+    fStatFile.setSaveCount(saveCountFStat);
     
-    getFStatFile().setFileType(static_cast<FileType>(fileTypeFstat));
-    getDataFile().setFileType(static_cast<FileType>(fileTypeData));
-    getEneFile().setFileType(static_cast<FileType>(fileTypeEne));
+    fStatFile.setFileType(static_cast<FileType>(fileTypeFstat));
+    dataFile.setFileType(static_cast<FileType>(fileTypeData));
+    eneFile.setFileType(static_cast<FileType>(fileTypeEne));
     
-    //this is optional to allow restart files with and without getRestartFile().getFileType()
+    //this is optional to allow restart files with and without restartFile.getFileType()
     is >> dummy;
     if (!strcmp(dummy.c_str(), "options_restart"))
     {
         is >> fileTypeRestart;
-        getRestartFile().setFileType(static_cast<FileType>(fileTypeRestart));
+        restartFile.setFileType(static_cast<FileType>(fileTypeRestart));
     }
 
     speciesHandler.read(is);
@@ -1847,25 +1847,25 @@ void DPMBase::checkSettings()
 
 void DPMBase::writeOutputFiles()
 {
-    if (getFStatFile().saveCurrentTimestep(ntimeSteps_))
-        writeFstatHeader(getFStatFile().getFstream());
+    if (fStatFile.saveCurrentTimestep(ntimeSteps_))
+        writeFstatHeader(fStatFile.getFstream());
 
-    if (getEneFile().saveCurrentTimestep(ntimeSteps_))
+    if (eneFile.saveCurrentTimestep(ntimeSteps_))
     {
-        if (getEneFile().getCounter()==1 || getEneFile().getFileType()==FileType::MULTIPLE_FILES || getEneFile().getFileType()==FileType::MULTIPLE_FILES_PADDED)
-            writeEneHeader(getEneFile().getFstream());
-        writeEneTimestep(getEneFile().getFstream());
+        if (eneFile.getCounter()==1 || eneFile.getFileType()==FileType::MULTIPLE_FILES || eneFile.getFileType()==FileType::MULTIPLE_FILES_PADDED)
+            writeEneHeader(eneFile.getFstream());
+        writeEneTimestep(eneFile.getFstream());
     }
 
-    if (getDataFile().saveCurrentTimestep(ntimeSteps_))
+    if (dataFile.saveCurrentTimestep(ntimeSteps_))
     {
         printTime();
-        if ((getRestarted() ||getDataFile().getCounter()==1) && getDataFile().getFileType()!= FileType::NO_FILE)
+        if ((getRestarted() ||dataFile.getCounter()==1) && dataFile.getFileType()!= FileType::NO_FILE)
             writeXBallsScript();
-        outputXBallsData(getDataFile().getFstream());
+        outputXBallsData(dataFile.getFstream());
     }
 
-//    if (getStatFile().saveCurrentTimestep(ntimeSteps_))
+//    if (statFile.saveCurrentTimestep(ntimeSteps_))
 //    {
 //        outputStatistics();
 //        gatherContactStatistics();
@@ -1873,10 +1873,10 @@ void DPMBase::writeOutputFiles()
 //    }
 
     //write restart file last, otherwise the output cunters are wrong
-    if (getRestartFile().saveCurrentTimestep(ntimeSteps_))
+    if (restartFile.saveCurrentTimestep(ntimeSteps_))
     {
         writeRestartFile();
-        getRestartFile().close(); //overwrite old restart file if FileType::ONE_FILE
+        restartFile.close(); //overwrite old restart file if FileType::ONE_FILE
     }
 }
 
@@ -1934,7 +1934,7 @@ void DPMBase::solve()
     if (getAppend())
     {
         setOpenMode(std::fstream::out | std::fstream::app);
-        getRestartFile().setOpenMode(std::fstream::out); //Restart files should always be overwritten.
+        restartFile.setOpenMode(std::fstream::out); //Restart files should always be overwritten.
     }
     else
         setOpenMode(std::fstream::out);
@@ -1968,13 +1968,13 @@ void DPMBase::solve()
         // Loop over all particles doing the time integration step
         hGridActionsBeforeIntegration();
         integrateBeforeForceComputation();
-        checkInteractionWithBoundaries();
+        checkInteractionWithBoundaries(); // INSERTION boundaries handled
         hGridActionsAfterIntegration();
 
         // Compute forces
         
         ///\bug{In chute particles are added in actions_before_time_set(), however they are not written to the xballs data yet, but can have a collison and be written to the fstat data}
-        
+        // INSERTION/DELETION boundary flag change
         for (std::vector<BaseBoundary*>::iterator it = boundaryHandler.begin(); it != boundaryHandler.end(); ++it)
         {
             (*it)->checkBoundaryBeforeTimeStep(this);
@@ -1996,7 +1996,7 @@ void DPMBase::solve()
         hGridActionsBeforeIntegration();
         integrateAfterForceComputation();
 
-        checkInteractionWithBoundaries();
+        checkInteractionWithBoundaries(); // DELETION boundaries handled
         hGridActionsAfterIntegration();
 
         //erase interactions that have not been used during the last timestep
@@ -2108,23 +2108,23 @@ bool DPMBase::readNextArgument(int& i, int argc, char *argv[])
     }
     else if (!strcmp(argv[i], "-saveCountData"))
     {
-        getDataFile().setSaveCount(static_cast<unsigned int>(atoi(argv[i + 1])));
+        dataFile.setSaveCount(static_cast<unsigned int>(atoi(argv[i + 1])));
     }
     else if (!strcmp(argv[i], "-saveCountFStat"))
     {
-        getFStatFile().setSaveCount(static_cast<unsigned int>(atoi(argv[i + 1])));
+        fStatFile.setSaveCount(static_cast<unsigned int>(atoi(argv[i + 1])));
     }
     else if (!strcmp(argv[i], "-saveCountStat"))
     {
-        getStatFile().setSaveCount(static_cast<unsigned int>(atoi(argv[i + 1])));
+        statFile.setSaveCount(static_cast<unsigned int>(atoi(argv[i + 1])));
     }
     else if (!strcmp(argv[i], "-saveCountEne"))
     {
-        getEneFile().setSaveCount(static_cast<unsigned int>(atoi(argv[i + 1])));
+        eneFile.setSaveCount(static_cast<unsigned int>(atoi(argv[i + 1])));
     }
     else if (!strcmp(argv[i], "-saveCountRestart"))
     {
-        getRestartFile().setSaveCount(static_cast<unsigned int>(atoi(argv[i + 1])));
+        restartFile.setSaveCount(static_cast<unsigned int>(atoi(argv[i + 1])));
     }
     else if (!strcmp(argv[i], "-dim"))
     {
@@ -2142,23 +2142,23 @@ bool DPMBase::readNextArgument(int& i, int argc, char *argv[])
     }
     else if (!strcmp(argv[i], "-fileTypeFStat"))
     { //uses int input
-        getFStatFile().setFileType(static_cast<FileType>(atoi(argv[i + 1])));
+        fStatFile.setFileType(static_cast<FileType>(atoi(argv[i + 1])));
     }
     else if (!strcmp(argv[i], "-fileTypeRestart"))
     {
-        getRestartFile().setFileType(static_cast<FileType>(atoi(argv[i + 1])));
+        restartFile.setFileType(static_cast<FileType>(atoi(argv[i + 1])));
     }
     else if (!strcmp(argv[i], "-fileTypeData"))
     {
-        getDataFile().setFileType(static_cast<FileType>(atoi(argv[i + 1])));
+        dataFile.setFileType(static_cast<FileType>(atoi(argv[i + 1])));
     }
     else if (!strcmp(argv[i], "-fileTypeStat"))
     {
-        getStatFile().setFileType(static_cast<FileType>(atoi(argv[i + 1])));
+        statFile.setFileType(static_cast<FileType>(atoi(argv[i + 1])));
     }
     else if (!strcmp(argv[i], "-fileTypeEne"))
     {
-        getEneFile().setFileType(static_cast<FileType>(atoi(argv[i + 1])));
+        eneFile.setFileType(static_cast<FileType>(atoi(argv[i + 1])));
     }
     else if (!strcmp(argv[i], "-auto_number"))
     {
@@ -2187,9 +2187,10 @@ bool DPMBase::readNextArgument(int& i, int argc, char *argv[])
             filename = argv[i + 1];
         
         //add ".restart" if necessary
-        const char* fileextension = (filename.c_str() + std::max(0, static_cast<int>(filename.length()) - 8));
-        if (strcmp(fileextension, ".restart"))
+        if (filename.find(".restart") == std::string::npos)
+        {            
             filename = filename + ".restart";
+        }
         
         std::cout << "restart from " << filename << std::endl;
         readRestartFile(filename);
@@ -2198,31 +2199,35 @@ bool DPMBase::readNextArgument(int& i, int argc, char *argv[])
     {
         std::cout<< "Remove old " << getName() << ".* files" << std::endl;
         ///-clean of -c removes all files <name>.*. 
-        std::string filename;
+//        std::string filename;
+        std::ostringstream filename;
         std::vector<std::string> ext {".restart",".stat",".fstat",".data",".ene",".xballs"};
         for (unsigned int j=0; j<ext.size(); j++)
         {
             // remove files with given extension for FileType::ONE_FILE
-            filename = getName()+ext[j];
-            if( !remove( filename.c_str() ) )
+            filename.clear();
+            filename << getName() <<ext[j];
+            if( !remove( filename.str().c_str() ) )
             {
-                std::cout<< "  File " << filename << " successfully deleted" << std::endl;
+                std::cout<< "  File " << filename.str() << " successfully deleted" << std::endl;
             }
             // remove files with given extension for FileType::MULTIPLE_FILES
             unsigned int k=0;
-            filename = getName()+ext[j]+"."+std::to_string(k);
-            while( !remove( filename.c_str() ) )
+            filename.clear(); filename << getName() << ext[j] << '.' << k;
+            while( !remove( filename.str().c_str() ) )
             {
-                std::cout<< "  File " << filename << " successfully deleted" << std::endl;
-                filename = getName()+ext[j]+"."+std::to_string(++k);
+                std::cout<< "  File " << filename.str() << " successfully deleted" << std::endl;
+                filename.clear();
+                filename << getName() << ext[j] << '.' << ++k;
             }
             // remove files with given extension for FileType::MULTIPLE_FILES_PADDED
             k=0;           
-            filename = getName()+ext[j]+"."+to_string_padded(k);
-            while( !remove( filename.c_str() ) )
+            filename.clear(); filename << getName() << ext[j] << '.' << to_string_padded(k);
+            while( !remove( filename.str().c_str() ) )
             {
-                std::cout<< "  File " << filename << " successfully deleted" << std::endl;
-                filename = getName()+ext[j]+"."+to_string_padded(++k);
+                std::cout<< "  File " << filename.str() << " successfully deleted" << std::endl;
+                filename.clear();
+                filename << getName() << ext[j] << '.' << to_string_padded(++k);
             }
         }
         i--;
@@ -2381,6 +2386,7 @@ bool DPMBase::checkParticleForInteraction(const BaseParticle& p)
 /*!
  * \details Removes particles created by CheckAndDuplicatePeriodicParticle(int i, int nWallPeriodic)).
  *          Note that between these two functions it is not allowed to create additional functions
+ * \image html Walls/periodicBoundary.pdf
  */
 void DPMBase::removeDuplicatePeriodicParticles()
 {
@@ -2395,7 +2401,7 @@ void DPMBase::removeDuplicatePeriodicParticles()
 }
 
 /*!
- * 
+ * \image html Walls/periodicBoundary.pdf
  */  
 void DPMBase::checkAndDuplicatePeriodicParticles()
 {

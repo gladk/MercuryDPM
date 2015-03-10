@@ -59,20 +59,13 @@ LinearViscoelasticInteraction::~LinearViscoelasticInteraction()
     std::cout<<"LinearViscoelasticInteraction::~LinearViscoelasticInteraction() finished"<<std::endl;
 #endif
 }
-/*!
- * \return A pointer to the copy of an object that is cloned (Deep copy).
- */
-LinearViscoelasticInteraction* LinearViscoelasticInteraction::copy() const
-{
-    return new LinearViscoelasticInteraction(*this);
-}
 
 /*!
  * \detail Calls the BaseInteraction() write function.
  * \param[in,out] os
  */
 void LinearViscoelasticInteraction::write(std::ostream& os) const
-        {
+{
     BaseInteraction::write(os);
 }
 /*!

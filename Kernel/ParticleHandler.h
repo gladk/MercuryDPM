@@ -47,7 +47,7 @@ public:
     ParticleHandler();
 
     /*!
-     * \brief Copy constructor, it copies the ParticleHandler and all BaseParticle it contains.
+     * \brief Constructor that copies all BaseParticle it contains and then sets the smallest and largest particle.
      */
     ParticleHandler(const ParticleHandler& PH);
 
@@ -137,13 +137,14 @@ public:
     void readObject(std::istream& is);
 
     /*!
-     * \brief Reads BaseParticle into the ParticleHandler from old-style restart data. 
+     * \brief Reads BaseParticle into the ParticleHandler from old-style restart data.
      */
     void readOldObject(std::string type, std::istream& is);
 
+    void write(std::ostream& os) const;
+
     /*!
-     * \brief Checks if the extrema of this ParticleHandler needs updating.
-     * 
+     * \brief Checks if the extrema of this ParticleHandler needs updating. 
      */
     void checkExtrema(BaseParticle* P);
 
@@ -153,7 +154,7 @@ public:
     void checkExtremaOnDelete(BaseParticle* P);
 
     /*!
-     * \brief Computes the mass for all BaseParticle of the given species in this ParticleHandler. 
+     * \brief Computes the mass for all BaseParticle of the given species in this ParticleHandler.
      */
     void computeAllMasses(unsigned int indSpecies);
 

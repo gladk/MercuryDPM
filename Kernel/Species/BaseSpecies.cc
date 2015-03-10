@@ -42,7 +42,7 @@ BaseSpecies::BaseSpecies()
 }
 
 /*!
- * \param[in] the species that is copied
+ * \param[in] p the species that is copied
  */
 BaseSpecies::BaseSpecies(const BaseSpecies &p)
 : BaseObject(p)

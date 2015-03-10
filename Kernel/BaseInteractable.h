@@ -38,32 +38,38 @@ class BaseInteraction;
 class InteractionHandler;
 /*!
  * \class BaseInteractable
- * \brief Inherits from class BaseObject (public)
- * \details
+ * \brief   Defines the basic properties that a interactable object can have.
+ * \details Inherits from class BaseObject (public)
+ *          Also it includes a lot of code to deal with interactable objects
+ *          that have a prescibed motion.
+ *          Most of the code in here is MercuryDPM internal. The only place an
+ *          user will interface with this code is for setting the lambda
+ *          functions that prescribe the motion of infinite mass particles.
+ *          \todo Check prescribed objects have infinite mass.
  */
 class BaseInteractable : public BaseObject
 {
 public:
     /*!
-     * \brief Default BaseInteractable constructor, it simply creates an empty BaseInteractable.
-     * \details
+     * \brief Default BaseInteractable constructor, it simply creates an empty 
+     *        BaseInteractable.
      */
     BaseInteractable();
 
     /*!
-     * \brief Copy constructor. It copies the BaseInteractable and all objects it contains.
-     * \param[in] p the BaseInteractable that has to be copied
+     * \brief Copy constructor. It copies the BaseInteractable and all objects
+     *        it contains
      */
     BaseInteractable(const BaseInteractable &p);
 
     /*!
-     * \brief Destructor, it simply destructs the BaseInteractable and all the objects it contains.
+     * \brief Destructor, it simply destructs the BaseInteractable and all the 
+     *        objects it contains.
      */
     virtual ~BaseInteractable();
 
     /*!
      * \brief Reads a BaseInteractable from an input stream.
-     * \param[in] is The input stream from which the BaseInteractable is read.
      */
     virtual void read(std::istream& is) = 0;
 
@@ -75,218 +81,277 @@ public:
 
     /*!
      * \brief Returns the index of the Species of this BaseInteractable.
-     * \return The index of the Species of this BaseInteractable.
      */
     unsigned int getIndSpecies() const;
 
     /*!
      * \brief Sets the index of the Species of this BaseInteractable.
-     * \param[in] indSpecies The index of the species.
      */
     virtual void setIndSpecies(unsigned int indSpecies);
 
     /*!
      * \brief Returns a pointer to the species of this BaseInteractable.
-     * \return A pointer to the species of this BaseInteractable.
      */
     const ParticleSpecies* getSpecies() const;
 
     /*!
      * \brief Sets the species of this BaseInteractable.
-     * \param[in] species A pointer to the species.
      */
     void setSpecies(const ParticleSpecies* species);
 
     /*!
      * \brief Returns the force on this BaseInteractable.
-     * \return A constant reference to the force on this BaseInteractable.
      */
     const Vec3D& getForce() const;
 
     /*!
      * \brief Returns the torque on this BaseInteractable.
-     * \return A constant reference to the torque on this BaseInteractable.
      */
     const Vec3D& getTorque() const;
 
     /*!
      * \brief Sets the force on this BaseInteractable.
-     * \param[in] force The force on this BaseInteractable.
      */
     void setForce(Vec3D force);
 
     /*!
      * \brief Sets the torque on this BaseInteractable.
-     * \param[in] torque The torque on this BaseInteractable.
      */
     void setTorque(Vec3D torque);
 
     /*!
      * \brief Adds an amount to the force on this BaseInteractable.
-     * \param[in] addForce The amount of force added to this BaseInteractable.
      */
     void addForce(Vec3D addForce);
 
     /*!
      * \brief Adds an amount to the torque on this BaseInteractable.
-     * \param[in] addTorque The amount of torque added to this BaseInteractable.
      */
     void addTorque(Vec3D addTorque);
 
     /*!
      * \brief Returns the position of this BaseInteractable.
-     * \return A constant reference to the position of this BaseInteractable.
      */
     const Vec3D& getPosition() const;
 
     /*!
      * \brief Returns the orientation of this BaseInteractable.
-     * \return A constant reference to the orientation of this BaseInteractable.
      */
     const Vec3D& getOrientation() const;
 
     /*!
      * \brief Sets the position of this BaseInteractable.
-     * \param[in] position The position of this BaseInteractable.
      */
     void setPosition(const Vec3D& position);
 
     /*!
      * \brief Sets the orientation of this BaseInteractable.
-     * \param[in] orientation The orientation of this BaseInteractable.
      */
     void setOrientation(const Vec3D& orientation);
 
     /*!
      * \brief Moves this BaseInteractable by adding an amount to the position.
-     * \param[in] move The distance over which this BaseInteractable is moved.
      */
     virtual void move(const Vec3D& move);
 
     /*!
      * \brief Rotates this BaseInteractable.
-     * \param[in] rotate
      */
     void rotate(const Vec3D& rotate);
 
     /*!
      * \brief Returns a reference to the list of interactions in this BaseInteractable.
-     * \return A reference to the list of interactions in this BaseInteractable.
      */
     const std::list<BaseInteraction*>& getInteractions() const;
 
     /*!
      * \brief Adds an interaction to this BaseInteractable.
-     * \param[in] I A pointer to the BaseInteraction which will be added.
      */
     void addInteraction(BaseInteraction* I);
 
     /*!
      * \brief Removes an interaction from this BaseInteractable.
-     * \param[in] I A pointer to the BaseInteraction which will be removed.
-     * \return True if successful
      */
     bool removeInteraction(BaseInteraction* I);
 
     /*!
-     * \brief Copies interactions to this BaseInteractable whenever a periodic copy made.
-     * \param[in] p A reference to the BaseInteractable from which the BaseInteraction are copied.
+     * \brief Copies interactions to this BaseInteractable whenever a periodic 
+     *        copy made.
      */
     void copyInteractionsForPeriodicParticles(const BaseInteractable &p);
 
+    /*!
+     * \brief set the velocity of the BaseInteractable.
+     */
     void setVelocity(const Vec3D& velocity);
-
+    
+    /*!
+     * \brief set the angular velocity of the BaseInteractble.
+     */
     void setAngularVelocity(const Vec3D& angularVelocity);
 
+    /*!
+     * \brief adds an increment to the velocity.
+     */
     void addVelocity(const Vec3D& velocity);
 
+    /*!
+     * \brief add an increment to the angular velocity.
+     */
     void addAngularVelocity(const Vec3D& angularVelocity);
-
+    
+    /*!
+     * \brief Returns the velocity of this interactable.
+     */
     virtual const Vec3D& getVelocity() const;
 
+    /*!
+     * \brief Returns the angular velocity of this interactable.
+     */
     virtual const Vec3D& getAngularVelocity() const;
 
+    /*!
+     * \brief Allows the position of an infinite mass interactable to be 
+     *        prescribed.
+     */
     void setPrescribedPosition(std::function<Vec3D (double)> prescribedPosition);
 
+    /*!
+     * \brief Computes the position from the user defined prescribed position 
+     *        function.
+     */
     void applyPrescribedPosition(double time);
 
+    /*!
+     * \brief Allows the velocity of an infinite mass interactable to be 
+     *        prescribed.
+     */
     void setPrescribedVelocity(std::function<Vec3D (double)> prescribedVelocity);
 
+    /*!
+     * \brief Computes the velocity from the user defined prescribed velocity
+     *        function.
+     */
     void applyPrescribedVelocity(double time);
 
+    /*!
+     * \brief Allows the orientation of the infinite mass interactbale to be
+     *        prescribed. 
+     */
     void setPrescribedOrientation(std::function<Vec3D (double)> prescribedOrientation);
 
+    /*!
+     * \brief Computes the orientation from the user defined prescribed 
+     *        orientation function.
+     */
     void applyPrescribedOrientation(double time);
 
+    /*!
+     * \brief Allows the angular velocity of the infinite mass interactable to 
+     *         be prescribed.
+     */
     void setPrescribedAngularVelocity(std::function<Vec3D (double)> prescribedAngularVelocity);
 
+    /*!
+     * \brief Computes the angular velocity from the user defined prescribed 
+     *        angular velocity.
+     */
     void applyPrescribedAngularVelocity(double time);
 
     /*!
-     * \brief
-     * \param[in]
-     * \param[out]
+     * \brief Returns the interaction between this object and a given 
+     *        BaseParticle
      * \todo TW make sure this function sets normal, distance, overlap, contact point
+     * \todo AT why is this a BaseParticle and not a BaseInteratable.
      */
     virtual BaseInteraction* getInteractionWith(BaseParticle *P, Mdouble timeStamp, InteractionHandler* interactionHandler)=0;
 
+    /*!
+     * \brief Returns the velocity at the contact point, use by many force laws.
+     */
     virtual const Vec3D getVelocityAtContact(const Vec3D& contact) const;
 
+    /*!
+     * \brief This is part of integrate routine for objects with infinite mass
+     */
     void integrateBeforeForceComputation(double time, double timeStep);
 
+    /*!
+     * \brief This is part of the integration routine for objects with infinite
+     *        mass.
+     */
     void integrateAfterForceComputation(double time, double timeStep);
 
 private:
     /*!
-     * \brief
+     * User defined function which if set describes the position of the 
+     * interactable
      */
     std::function<Vec3D (double)> prescribedPosition_;
+    
+    /*!
+     * User defined function which if set describes the velocity of the
+     * interactable.
+     */
     std::function<Vec3D (double)> prescribedVelocity_;
+    
+    /*!
+     * User defined function which if set describes the orientation of the 
+     * interactable
+     */
     std::function<Vec3D (double)> prescribedOrientation_;
+    
+    /*!
+     * User defined functions which if set describes the angular velocity of the
+     * interactable.
+     */
     std::function<Vec3D (double)> prescribedAngularVelocity_;
 
     /*!
-     * \brief 
+     * Stores the position of the interactable. Exactly what is stored depends
+     * on the type of interactable.
      */
     Vec3D position_;
 
     /*!
-     * \brief 
+     * Stores the orientation of the interactable.  Exactly what is stored 
+     * depends on the type of interatable
      */
     Vec3D orientation_;
 
     /*!
-     * \brief
+     * Store the angular velocity of the interactable.
      */
     Vec3D angularVelocity_;
 
     /*!
-     * \brief 
+     * Stores the force applied to the interactable. 
      */
     Vec3D force_;
 
     /*!
-     * \brief 
+     * Stores the torque applied to the interactable. 
      */
     Vec3D torque_;
 
     /*!
-     * \brief 
+     * Point to the ParticlesSpecies which stores density and other material
+     * properties of the interactable. 
      */
     const ParticleSpecies* species_;
 
     /*!
-     * \brief
+     * Stores the index on the species associated with this interactable.
      */
     unsigned int indSpecies_;
 
     /*!
-     * \brief
+     * Stores the velocity of this interactable.
      */
     Vec3D velocity_;
 
     /*!
-     * \brief 
+     * List of interactions this interactable is involved with. 
      */
     std::list<BaseInteraction*> interactions_;
 };

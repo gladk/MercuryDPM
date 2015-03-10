@@ -284,7 +284,10 @@ public:
 
     /*!
      * \brief Sets the particle's mass
+     * \deprecated Please do not set the mass yourself, but use 
+     * ParticleSpecies->computeMass instead. That makes sure 
      */
+    MERCURY_DEPRECATED
     void setMass(const Mdouble mass);
 
 
@@ -353,7 +356,10 @@ public:
      */
     unsigned int getParticleDimensions() const;
 
-    ///\todo TW: this function should be taken out and replaced by setSpecies
+    /*!
+     * \deprecated Please use setSpecies(const ParticleSpecies*) instead.
+     */
+    MERCURY_DEPRECATED
     void setIndSpecies(unsigned int indSpecies);
 
     /*!
@@ -384,7 +390,7 @@ private:
     BaseParticle* HGridPrevObject_; ///Pointer to the previous Particle in the same HGrid cell
 
     ///Particle attributes
-    Mdouble mass_; ///Particle mass_
+    Mdouble mass_; ///Particle mass_ \todo{TW: why do we need to store mass and inertia; can we take it out?}
     Mdouble invMass_; ///Inverse Particle mass (for computation optimization)
     Mdouble inertia_; ///Particle inertia_
     Mdouble invInertia_; ///Inverse Particle inverse inertia (for computation optimization)
@@ -393,5 +399,13 @@ private:
 
     Vec3D displacement_; ///Displacement (only used in StatisticsVector, StatisticsPoint)
     Vec3D previousPosition_; /// Particle's position at previous time step
+    
+    /*!
+     * Since ParticleSpecies is allowed to set the mass of a BaseParticle, it is
+     * a friend of this class. 
+     * \todo Is it possible to only make the function ParticleSpecies::computeMass
+     * a friend?
+     */
+    friend class ParticleSpecies;
 };
 #endif

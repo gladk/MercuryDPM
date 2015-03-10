@@ -26,6 +26,7 @@
 #include "ChuteInsertionBoundary.h"
 #include "Particles/BaseParticle.h"
 #include "Math/RNG.h"
+#include "Math/ExtendedMath.h"
 
 /*!
  * \details Default constructor. Initiates all properties with 0 value.
@@ -130,8 +131,7 @@ BaseParticle* ChuteInsertionBoundary::generateParticle(RNG& random)
 
     position.X = posMin_.X + P->getRadius();
 
-    ///\todo comparing floating point with == or != is unsafe; should we introduce a Mdouble comparison function with a relative tolerance? \author weinhartt
-    if ((posMax_.Y - posMin_.Y) == 2.0 * radMax_)
+    if (mathsFunc::isEqual(posMax_.Y - posMin_.Y , 2.0 * radMax_, 1e-10))
     {
         position.Y = posMin_.Y + P->getRadius();
     }

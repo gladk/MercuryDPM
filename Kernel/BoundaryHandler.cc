@@ -44,22 +44,26 @@
 ///Constructor of the ParticleHandler class. It creates and empty ParticleHandler.
 BoundaryHandler::BoundaryHandler()
 {
-#ifdef DEBUG_CONSTRUCTOR
     logger(DEBUG, "BoundaryHandler::BoundaryHandler() finished");
-#endif
 }
 
-/// \param[in] BH The BoundaryHandler that has to be copied.
+/*!
+ * \param[in] BH The BoundaryHandler that has to be copied.
+ * \details This is not a copy constructor! It just copies all BaseBoundary from
+ *          the other handler into this handler, and clears all other variables.
+ */
 BoundaryHandler::BoundaryHandler(const BoundaryHandler &BH)
         : BaseHandler<BaseBoundary>()
 {
     copyContentsFromOtherHandler(BH);
-#ifdef DEBUG_CONSTRUCTOR
     logger(DEBUG, "BoundaryHandler::BoundaryHandler(const BoundaryHandler &BH) finished");
-#endif
 }
 
-///\param[in] rhs The BoundaryHandler on the right hand side of the assignment.
+/*!
+ * \param[in] rhs The BoundaryHandler on the right hand side of the assignment.
+ * \details This is not a copy assignment operator! It just copies all BaseBoundary
+ *          from the other handler into this handler, and clears all other variables.
+ */
 BoundaryHandler BoundaryHandler::operator =(const BoundaryHandler& rhs)
 {
     if (this != &rhs)
@@ -67,18 +71,14 @@ BoundaryHandler BoundaryHandler::operator =(const BoundaryHandler& rhs)
         clear();
         copyContentsFromOtherHandler(rhs);
     }
-#ifdef DEBUG_CONSTRUCTOR
     logger(DEBUG, "BoundaryHandler BoundaryHandler::operator =(const BoundaryHandler& rhs)");
-#endif
     return *this;
 }
 
 ///Default destructor. Note that the delete for all boundaries is done in the BaseHandler.
 BoundaryHandler::~BoundaryHandler()
 {
-#ifdef DEBUG_DESTRUCTOR
     logger(DEBUG, "BoundaryHandler::~BoundaryHandler() finished");
-#endif
 }
 
 ///\param[in] P A pointer to the BaseBoundary (or derived class) that has to be added.

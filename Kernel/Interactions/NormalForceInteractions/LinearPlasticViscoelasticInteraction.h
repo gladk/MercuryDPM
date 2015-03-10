@@ -31,51 +31,49 @@ class LinearPlasticViscoelasticNormalSpecies;
 class BaseInteractable;
 /*!
  * \class LinearPlasticViscoelasticInteraction
- * \brief Enables one to compute normal forces in case of a linear plastic visco-elastic interaction.
+ * \brief Computes normal forces in case of a linear plastic visco-elastic interaction.
  */
 class LinearPlasticViscoelasticInteraction : public virtual BaseInteraction
 {
 public:
     /*!
-     * \brief
+     * \brief Constructor.
      */
     LinearPlasticViscoelasticInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
     /*!
-     * \brief
+     * \brief Copy constructor.
      */
     LinearPlasticViscoelasticInteraction(const LinearPlasticViscoelasticInteraction &p);
     /*!
-     * \brief
+     * \brief Destructor.
      */
     virtual ~LinearPlasticViscoelasticInteraction();
     /*!
-     * \brief
+     * \brief Creates a copy of an object of this class. (Deep copy)
      */
-    BaseInteraction* copy() const;
+    //BaseInteraction* copy() const;
     /*!
-     * \brief
+     * \brief Computes the normal forces due to linear plastic visco elastic interaction.
      */
     void computeLinearPlasticViscoelasticForce();
     /*!
-     * \brief
+     * \brief Calls computeLinearPlasticViscoElasticForce().
      */
     void computeNormalForce();
     /*!
-     * \brief
-     */
-    ///Interaction read function, which accepts an std::stringstream as input.
+     * \brief Interaction read function, which accepts an std::istream as input.
+     */    
     virtual void read(std::istream& is);
     /*!
-     * \brief
-     */
-    ///Interaction print function, which accepts an std::stringstream as input.
+     * \brief Interaction write function, which accepts an std::ostream as input.
+     */    
     virtual void write(std::ostream& os) const;
     /*!
-     * \brief
+     * \brief Returns the name of the interaction.
      */
     virtual std::string getBaseName() const;
     /*!
-     * \brief
+     * \brief Computes and returns the amount of elastic energy stored in the spring.
      */
     Mdouble getElasticEnergy() const;
     /*!

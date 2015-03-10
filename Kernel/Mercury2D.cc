@@ -128,7 +128,7 @@ void Mercury2D::hGridFindContactsWithTargetCell(int x, int y, unsigned int l, Ba
     BaseParticle *p = hgrid->getFirstBaseParticleInBucket(bucket);
     while (p != nullptr)
     {
-        ///\bug{TW: This check is not necessary, I believe. This is the most-expensive function in most codes (the two checks in this function slows down granular jet by 15%) and the selftests are not affected. DK: I do think this is neccesary, for example: If two cells hash to the same bucket and a particle in one of these cells check for collisions with the other cell. Then due to the hashingcollision it also gets all particles in it's own cell and thus generating false collisions.}
+//        \bug{TW: This check is not necessary, I believe. This is the most-expensive function in most codes (the two checks in this function slows down granular jet by 15%) and the selftests are not affected. DK: I do think this is neccesary, for example: If two cells hash to the same bucket and a particle in one of these cells check for collisions with the other cell. Then due to the hashingcollision it also gets all particles in it's own cell and thus generating false collisions. TW: ok, so let's leave it in, issue closed.}
         //Check if the BaseParticle *p really is in the target cell (i.e. no hashing error has occurred)
         if ((p->getHGridX() == x) && (p->getHGridY() == y) && (p->getHGridLevel() == l))
         {

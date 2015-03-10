@@ -30,7 +30,11 @@
 #include "InteractionHandler.h"
 #include <iomanip>
 #include <fstream>
-
+/*!
+ * \param[in] P
+ * \param[in] I
+ * \param[in] timeStamp
+ */
 HertzianViscoelasticInteraction::HertzianViscoelasticInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
         : BaseInteraction(P, I, timeStamp)
 {
@@ -38,15 +42,19 @@ HertzianViscoelasticInteraction::HertzianViscoelasticInteraction(BaseInteractabl
     std::cout<<"HertzianViscoelasticInteraction::HertzianViscoelasticInteraction() finished"<<std::endl;
 #endif
 }
-
-HertzianViscoelasticInteraction::HertzianViscoelasticInteraction(const HertzianViscoelasticInteraction &p)
+/*!
+ * \param[in] p
+ */
+HertzianViscoelasticInteraction::HertzianViscoelasticInteraction(const HertzianViscoelasticInteraction& p)
         : BaseInteraction(p)
 {
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout<<"HertzianViscoelasticInteraction::HertzianViscoelasticInteraction(const HertzianViscoelasticInteraction &p finished"<<std::endl;
+    std::cout<<"HertzianViscoelasticInteraction::HertzianViscoelasticInteraction(const HertzianViscoelasticInteraction& p) finished"<<std::endl;
 #endif
 }
-
+/*!
+ *
+ */
 HertzianViscoelasticInteraction::~HertzianViscoelasticInteraction()
 {
 #ifdef DEBUG_DESTRUCTOR
@@ -54,27 +62,30 @@ HertzianViscoelasticInteraction::~HertzianViscoelasticInteraction()
 #endif
 }
 
-HertzianViscoelasticInteraction* HertzianViscoelasticInteraction::copy() const
-{
-    return new HertzianViscoelasticInteraction(*this);
-}
-
-///BaseParticle print function, which accepts an os std::stringstream as input. It prints human readable BaseParticle information to the std::stringstream
+/*!
+ * \param[in,out] os
+ */
 void HertzianViscoelasticInteraction::write(std::ostream& os) const
         {
     BaseInteraction::write(os);
 }
-
+/*!
+ * \param[in,out] is
+ */
 void HertzianViscoelasticInteraction::read(std::istream& is)
 {
     BaseInteraction::read(is);
 }
-
+/*!
+ * \return std::string
+ */
 std::string HertzianViscoelasticInteraction::getBaseName() const
 {
     return "HertzianViscoelastic";
 }
-
+/*!
+ *
+ */
 void HertzianViscoelasticInteraction::computeNormalForce()
 {
     ///\todo TWnow
@@ -106,7 +117,9 @@ void HertzianViscoelasticInteraction::computeNormalForce()
         setTorque(Vec3D(0.0, 0.0, 0.0));
     }
 }
-
+/*!
+ * \return Mdouble
+ */
 Mdouble HertzianViscoelasticInteraction::getElasticEnergy() const
 {
    if (getOverlap() > 0)
@@ -115,7 +128,9 @@ Mdouble HertzianViscoelasticInteraction::getElasticEnergy() const
         return 0.0;
     ///\todo TW This is not correct
 }
-
+/*!
+ * \return const HertzianViscoelasticNormalSpecies*
+ */
 const HertzianViscoelasticNormalSpecies* HertzianViscoelasticInteraction::getSpecies() const
 {
     return dynamic_cast<const HertzianViscoelasticNormalSpecies*>(getBaseSpecies());

@@ -197,7 +197,7 @@ std::string MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForce
  * See Interaction for details.
  * \param[in] P first of the two objects that interact
  * \param[in] I second of the two objects that interact
- * \param[in] timestamp current value of DPMBase::time_
+ * \param[in] timeStamp current value of DPMBase::time_
  * \return pointer to the newly created Interaction.
  */
 template<class NormalForceSpecies, class FrictionForceSpecies, class AdhesiveForceSpecies>

@@ -23,10 +23,12 @@
 //(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include<cmath>
+#include <Logger.h>
 #include "ParticleSpecies.h"
 #include "Interactions/BaseInteraction.h"
 #include "DPMBase.h"
-#include<cmath>
+
 
 class BaseParticle;
 class BaseInteractable;
@@ -98,7 +100,7 @@ void ParticleSpecies::setDensity(Mdouble density)
     }
     else
     {
-        std::cerr << "Error in setDensity(" << density << ")" << std::endl;
+        logger(ERROR, "[ParticleSpecies::setDensity()] Error in the density to be set: % ", density);
         exit(-1);
     }
 }
@@ -111,13 +113,14 @@ Mdouble ParticleSpecies::getDensity() const
     return density_;
 }
 
-BaseInteraction* ParticleSpecies::getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
-{
-    return new BaseInteraction(P, I, timeStamp);
-}
-
 Mdouble ParticleSpecies::getMassFromRadius(const Mdouble radius)
 {
+    if (getHandler() == nullptr)
+    {
+        logger(ERROR, "[Species::MassFromRadius()] No handler has been set, therefore, I can't figure out the dimensions.");
+        return 0;
+    }
+    
     unsigned int particleDimensions = getHandler()->getDPMBase()->getParticleDimensions();
     if (particleDimensions == 3)
     {
@@ -133,8 +136,8 @@ Mdouble ParticleSpecies::getMassFromRadius(const Mdouble radius)
     }
     else
     {
-        std::cerr << "In Species::MassFromRadius the dimension of the particle is set to " << particleDimensions << std::endl;
-        exit(-1);
+       logger(ERROR, "[Species::MassFromRadius()] the dimension of the particle is wrongly set to %",particleDimensions);
+       return 0.0;
     }
 }
 
@@ -148,26 +151,31 @@ void ParticleSpecies::computeMass(BaseParticle* p) const
         {
             case 3:
             {
-                p->setMass(4.0 / 3.0 * constants::pi * p->getRadius() * p->getRadius() * p->getRadius() * getDensity());
-                p->setInertia(.4 * p->getMass() * mathsFunc::square(p->getRadius()));
+                p->mass_ = (4.0 / 3.0 * constants::pi * p->getRadius() * p->getRadius() * p->getRadius() * getDensity());
+                p->invMass_ = 1.0 / (p->mass_);
+                p->inertia_ = (.4 * p->getMass() * mathsFunc::square(p->getRadius()));
+                p->invInertia_ = 1.0 / (p->inertia_);
                 break;
             }
             case 2:
             {
-                p->setMass(constants::pi * p->getRadius() * p->getRadius() * getDensity());
-                p->setInertia(.5 * p->getMass() * mathsFunc::square(p->getRadius()));
+                p->mass_ = (constants::pi * p->getRadius() * p->getRadius() * getDensity());
+                p->invMass_ = 1.0 / (p->mass_);
+                p->inertia_ = (.5 * p->getMass() * mathsFunc::square(p->getRadius()));
+                p->invInertia_ = 1.0 / (p->inertia_);
                 break;
             }
             case 1:
             {
-                p->setMass(2.0 * p->getRadius() * getDensity());
-                p->setInertia(0.0);
+                p->mass_ = (2.0 * p->getRadius() * getDensity());
+                p->invMass_ = 1.0/p->mass_;
+                p->inertia_ = 0.0;
+                p->invInertia_ = std::numeric_limits<Mdouble>::quiet_NaN();
                 break;
             }
             default:
             {
-                std::cerr << "In computeMass() the dimension of the particle is not set" << std::endl;
-                exit(-1);
+                logger(ERROR, "ParticleSpecies::computeMass()] the dimension of the particle is not set");
             }
         }
     }

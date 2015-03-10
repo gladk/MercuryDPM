@@ -111,7 +111,7 @@ void FrictionInteraction::computeFrictionForce()
             rollingSpringVelocity_= rollingRelativeVelocity;
             //integrate(getHandler()->timeStep_);
             rollingSpring_ += rollingSpringVelocity_ * getHandler()->getDPMBase()->getTimeStep();
-
+            
             //Calculate test force acting on P including viscous force
             Vec3D rollingForce = - species->getRollingStiffness() * rollingSpring_ - species->getRollingDissipation() * rollingRelativeVelocity;
 
@@ -223,4 +223,16 @@ void FrictionInteraction::reverseHistory()
     //rollingSpringVelocity_=-rollingSpringVelocity_;
     torsionSpring_=-torsionSpring_;
     torsionSpringVelocity_=-torsionSpringVelocity_;
+}
+
+/*!
+ *
+ */
+void FrictionInteraction::rotateHistory(Matrix3D& rotationMatrix)
+{
+    SlidingFrictionInteraction::rotateHistory(rotationMatrix);
+    rollingSpring_=rotationMatrix*rollingSpring_;
+    rollingSpringVelocity_=rotationMatrix*rollingSpringVelocity_;
+    torsionSpring_=rotationMatrix*torsionSpring_;
+    torsionSpringVelocity_=rotationMatrix*torsionSpringVelocity_;
 }

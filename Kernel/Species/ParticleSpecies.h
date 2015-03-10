@@ -68,17 +68,12 @@ public:
     /// \brief Used in Species::getName to obtain a unique name for each Species.
     std::string getBaseName() const;
 
-    /*!
-     * \brief When a contact between two particles is determined, an Interaction 
-     * object is created, as the type of Interaction depends on the Species type.
-     */
-    BaseInteraction* getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
-
     ///Allows the density to be changed
     ///\todo recalculate masses when setting dim_particle or rho
     void setDensity(Mdouble density);
 
-    ///\todo TW: should getMassFromRadius be removed?
+    ///\todo TW: should getMassFromRadius be removed? IFCD: it is used in at 
+    /// least one driver (AxisymmetricHopper).
     Mdouble getMassFromRadius(const Mdouble radius);
 
     ///Allows the density to be accessed

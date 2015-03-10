@@ -25,8 +25,11 @@
 
 
 #include "File.h"
-#include<sstream>
-#include<iostream>
+
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
 
 ///\todo TW: I am not able to define the operator >> for enum class type (the implementation works fine for the old enum)
 // ///Allows to read a FileType using the operator>>, e.g., is >> fileType;
@@ -47,24 +50,25 @@
 //    return is;
 //}
 /*!
+ * \brief Pads the number
+ * This function tries to pad the number to 4 digits, which is used when
+ * you create multiple files with padded numbers. Any numbers larger than
+ * 4 digits return unmodified.
+ * \param value The value to modify
+ * \returns A padded string
+ */
+std::string to_string_padded(unsigned int value)
+{
+    std::ostringstream out;
+    out << std::setw(4) << std::setfill('0') << value;
+    return out.str();
+}
+
+/*!
  * \param[in,out] os output stream to which the fileType is written
  * \param[in] fileType the fileType that has to be written to the output stream
  * \return the output stream "os" that is returned after adding the fileType string
  */
-std::string to_string_padded(unsigned int value)
-{
-    std::string str;
-    if (value < 10)
-        str="000"+std::to_string(value);
-    else if (value < 100)
-        str="00"+std::to_string(value);
-    else if (value < 1000)
-        str="0"+std::to_string(value);
-    else 
-        str=std::to_string(value);
-    return str;
-}
-
 std::ostream& operator<<(std::ostream&os, FileType fileType)
 {
     if (fileType == FileType::NO_FILE)

@@ -29,6 +29,7 @@
 
 #include "BaseBoundary.h"
 #include "Math/Vector.h"
+#include "Math/Matrix.h"
 
 class BaseParticle;
 class ParticleHandler;
@@ -39,6 +40,7 @@ class ParticleHandler;
  * \details The particles are in {x: normal_left*(x-origin)>0 && normal_right*(x-origin)<0, 
  * with normal* being the unit normal vector of the walls. If a particle moves outside 
  * these boundaries, it will be shifted.
+ * \image html shearCell.png
  */
 class AngledPeriodicBoundary : public BaseBoundary
 {
@@ -78,6 +80,10 @@ public:
      */
     void shiftPosition(BaseParticle* P);
 
+    
+    /*!
+     * \brief only needed in StatisticsVector
+     */
     void shiftPositions(Vec3D&  P1, Vec3D& P2);
 
     /*!
@@ -112,7 +118,6 @@ public:
 
     /*!
      * \brief 
-     * \param[in]
      */
     void createPeriodicParticles(BaseParticle *P, ParticleHandler &pH);
     
@@ -159,10 +164,20 @@ private:
      * \brief 
      */
     Vec3D differenceNormal_;
+
+    Matrix3D rotateLeft; 
+
+    Matrix3D rotateRight; 
+    
     /*!
-     * \brief 
+     * \brief The normalized cross product of the left and right normal vector. 
+     * This vector points in the direction around which the particle is rotated 
+     * when it is moved from one boundary to the other.
+     * This is an internal variable set in the constructor, thus cannot be 
+     * changed directly by the user.
      */
     Vec3D commonAxis_;
+    
     /*!
      * angularShift_ is currently unused; waiting for Quaternions to be implemented
      */

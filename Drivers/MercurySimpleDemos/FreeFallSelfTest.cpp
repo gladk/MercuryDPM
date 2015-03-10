@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 
     freeFallSelfTestProblem.setName("FreeFallSelfTest");
 	freeFallSelfTestProblem.setSaveCount(500);
-	freeFallSelfTestProblem.getFStatFile().setFileType(FileType::NO_FILE);
+	freeFallSelfTestProblem.fStatFile.setFileType(FileType::NO_FILE);
     freeFallSelfTestProblem.setTimeStep(1e-6);
 	freeFallSelfTestProblem.setYMax(0.1);
 	freeFallSelfTestProblem.setXMax(0.01);

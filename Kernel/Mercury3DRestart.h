@@ -73,10 +73,10 @@ public:
         if (!strcmp(argv[i], "-restart") || !strcmp(argv[i], "-r"))
         {
             setName(argv[i + 1]);
-            std::cout << "Reading file " << getRestartFile().getName() << std::endl;
+            std::cout << "Reading file " << restartFile.getName() << std::endl;
             readRestartFile();
             std::cout << "tmax= " << getTimeMax() << std::endl;
-            getRestartFile().getFstream().precision(18);
+            restartFile.getFstream().precision(18);
             setAppend(true);
             printTime();
         }

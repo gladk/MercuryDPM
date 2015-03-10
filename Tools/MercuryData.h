@@ -35,8 +35,49 @@
 /*!
  * Stores a single mercury particle
  * for usage by external converters.
+ * \author dducks
  */
+template<std::size_t NDIMS>
 struct MercuryParticle
+{
+  public:
+    /*!
+     * X Y Z coordinates
+     */
+    double position[NDIMS];
+    /*!
+     * X Y Z velocities
+     */
+    double velocity[NDIMS];
+    /*!
+     * P Y R rotations?
+     */
+    double rotation[NDIMS];
+    /*!
+     * P Y R velocities?
+     */
+    double angularV[NDIMS];
+    
+    /*!
+     * Radius of the particle
+     */
+    double radius;
+    
+    /*!
+     * Index of the species of this particle.
+     */
+    std::size_t speciesID;
+};
+
+/*!
+ * Stores a single 2D mercury particle
+ * for usage by external converters.
+ * Because VTK can't deal with 2D particles,
+ * This means that we'll have to zero-extend
+ * these particles...
+ */
+template<>
+struct MercuryParticle<2>
 {
   public:
     /*!
@@ -65,19 +106,69 @@ struct MercuryParticle
      * Index of the species of this particle.
      */
     std::size_t speciesID;
+
 };
 
 /*!
  * \brief Read a single particle from a istream.
  */
-std::istream& operator>>(std::istream&, MercuryParticle&);
-class MercuryDataFile;
-class MercuryTimeStep;
+template<std::size_t NDIMS>
+std::istream& operator>>(std::istream& in, MercuryParticle<NDIMS>& part)
+{
+  std::size_t i;
+  for (i = 0; i < NDIMS; i++)
+    in >> part.position[i];
+  
+  for (i = 0; i < NDIMS; i++)
+    in >> part.velocity[i];
+    
+  in >> part.radius;
+  
+  for (i = 0; i < NDIMS; i++)
+    in >> part.rotation[i];
+    
+  for (i = 0; i < NDIMS; i++)
+    in >> part.angularV[i];
+    
+  in >> part.speciesID;
+  
+  return in;
+}
 
+template<>
+std::istream& operator>><2>(std::istream& in, MercuryParticle<2>& part)
+{
+  std::size_t i;
+  in >> part.position[0] >> part.position[2];
+  part.position[1] = 0;
+  
+  in >> part.velocity[0] >> part.velocity[2];
+  part.velocity[1] = 0;
+  
+  in >> part.radius;
+
+  in >> part.rotation[1];
+  part.rotation[0] = part.rotation[2] = 0;  
+
+  in >> part.angularV[1];
+  part.angularV[0] = part.angularV[2] = 0;
+    
+  in >> part.speciesID;
+  
+  return in;
+}
+
+
+class MercuryDataFile;
+
+template<std::size_t NDIMS>
+class MercuryTimeStepIterator;
 /*!
  *  Full timestep in the Mercury 3D .data format.
  *  This holds all the particles used in this timestep.
+ * \author dducks
  */
+template<std::size_t NDIMS>
 class MercuryTimeStep
 {
   public:
@@ -104,6 +195,7 @@ class MercuryTimeStep
     /*!
     * \brief Gets the number of particles recorded in this timestep
     * \return the number of particles
+    * \sa size()
     */
     std::size_t getNumberOfParticles() const
     {
@@ -111,9 +203,28 @@ class MercuryTimeStep
     }
     
     /*!
+    * \brief Gets the number of particles recorded in this timestep
+    * \return the number of particles
+    * \sa getNumberOfParticles()
+    */
+    std::size_t size() const
+    {
+      return numParticles_;
+    }
+    
+    /*!
+    * \brief returns the number of dimensions used.
+    * \return the number of dimensions.
+    */
+    constexpr std::size_t getNumberOfDimensions() const
+    {
+      return NDIMS;
+    }
+    
+    /*!
     * \brief Iterator functions for range based for loops
     */
-    std::vector<MercuryParticle>::iterator begin()
+    typename std::vector< MercuryParticle<NDIMS> >::iterator begin()
     {
       return storage_.begin();
     }
@@ -121,7 +232,7 @@ class MercuryTimeStep
     /*!
     * \brief Iterator functions for range based for loops
     */
-    std::vector<MercuryParticle>::const_iterator begin() const
+    typename std::vector< MercuryParticle<NDIMS> >::const_iterator begin() const
     {
       return storage_.begin();
     }
@@ -129,7 +240,7 @@ class MercuryTimeStep
     /*!
     * \brief Iterator functions for range based for loops
     */
-    std::vector<MercuryParticle>::iterator end()
+    typename std::vector< MercuryParticle<NDIMS> >::iterator end()
     {
       return storage_.end();
     }
@@ -137,7 +248,7 @@ class MercuryTimeStep
     /*!
     * \brief Iterator functions for range based for loops
     */
-    std::vector<MercuryParticle>::const_iterator end() const
+    typename std::vector< MercuryParticle<NDIMS> >::const_iterator end() const
     {
       return storage_.end();
     }
@@ -145,7 +256,7 @@ class MercuryTimeStep
     /*!
     * \brief Random access function into the particles.
     */
-    MercuryParticle& operator[](std::size_t idx)
+    MercuryParticle<NDIMS>& operator[](std::size_t idx)
     {
       return storage_[idx];
     }
@@ -153,7 +264,7 @@ class MercuryTimeStep
     /*!
     * \brief Random access function into the particles.
     */
-    const MercuryParticle& operator[](std::size_t idx) const
+    const MercuryParticle<NDIMS>& operator[](std::size_t idx) const
     {
       return storage_[idx];
     }
@@ -192,9 +303,7 @@ class MercuryTimeStep
     /*!
     Minima and maxima of the AABB of the domain; none of these are used.
     */
-    double xMin_, xMax_;
-    double yMin_, yMax_;
-    double zMin_, zMax_;
+    double min_[NDIMS], max_[NDIMS];
     /*!
      * Pointer to the base file, required for the backing std::ifstream
      * \todo Chris, please check if this parameter is needed; it causes a warning with [-Wunused-private-field] \author weinhartt 
@@ -204,20 +313,36 @@ class MercuryTimeStep
     /*!
     * Backing storage vector used for the particles in this timestep
     */
-    std::vector<MercuryParticle> storage_;
+    std::vector< MercuryParticle<NDIMS> > storage_;
     
-    friend std::istream& operator>>(std::istream&, MercuryTimeStep&);
-    friend class MercuryTimeStepIterator;
+    template<std::size_t NDIMS2>
+    friend std::istream& operator>>(std::istream&, MercuryTimeStep<NDIMS2>&);
+    
+    friend class MercuryTimeStepIterator<NDIMS>;
+    
     friend class MercuryDataFile;
 };
 
 /*!
 * Reads the timestep header into the ts
 * \param[in,out] in The istream where we read from
-* \param[out] ts The timestream read into
+* \param[out] step The timestream read into
 * \return in for chaining.
 */
-std::istream& operator>>(std::istream&, MercuryTimeStep&);
+template<std::size_t NDIMS>
+std::istream& operator>>(std::istream& in, MercuryTimeStep<NDIMS>& step)
+{
+  std::size_t i;
+  in >> step.numParticles_ >> step.time_;
+  
+  for (i = 0; i < NDIMS; i++)
+    in >> step.min_[i];
+    
+  for (i = 0; i < NDIMS; i++)
+    in >> step.max_[i];
+
+  return in;
+}
 
 /*!
  * Lazy timestep iterator
@@ -226,14 +351,16 @@ std::istream& operator>>(std::istream&, MercuryTimeStep&);
  * This is a ForwardIterator as described by the C++11 standard
  * This iterator invalidates any references to its dereferenced value
  * when incremented.
+ * \author dducks
  */
+template<std::size_t NDIMS>
 class MercuryTimeStepIterator
 {
   public:
     /*!
      * \brief Not-equals operator, as defined for ForwardIterators
      */
-    bool operator!=(MercuryTimeStepIterator other) const
+    bool operator!=(MercuryTimeStepIterator<NDIMS> other) const
     {
       return (isEOFTimeStep_ != other.isEOFTimeStep_);
     }
@@ -241,7 +368,7 @@ class MercuryTimeStepIterator
     /*!
      * \brief Dereference operator, as defined for ForwardIterators
      */
-    MercuryTimeStep& operator*()
+    MercuryTimeStep<NDIMS>& operator*()
     {
       return lastReadTimeStep_;
     }
@@ -249,13 +376,15 @@ class MercuryTimeStepIterator
     /*!
      * \brief Const dereference operator, as defined for constant ForwardIterators
      */
-    const MercuryTimeStep& operator*() const
+    const MercuryTimeStep<NDIMS>& operator*() const
     {
       return lastReadTimeStep_;
     }
     
     /*!
      * \brief Pre-increment operator, as defined for ForwardIterators
+     * This method populates the timestep, including all the particles
+     * in there. It also resizes the backing storage mechanism.
      */
     void operator++();
   
@@ -282,7 +411,7 @@ class MercuryTimeStepIterator
     /*!
      * The complete last read timestep, used for caching
      */
-    MercuryTimeStep lastReadTimeStep_;
+    MercuryTimeStep<NDIMS> lastReadTimeStep_;
     /*!
      * Status flag for EOF checking
      */
@@ -300,6 +429,7 @@ class MercuryTimeStepIterator
  * Lazy loader for .data files.
  * This class allows you to iterate over all the
  * particles in it.
+ * \author dducks
  */
 class MercuryDataFile
 {
@@ -307,9 +437,11 @@ class MercuryDataFile
     /*!
      * Opens the Mercury 3D .data file with filename
      * file.
-     * \param[in] file The filename
+     * \param[in] name The filename
      */
-    MercuryDataFile(std::string file);
+    MercuryDataFile(std::string name)
+      : file_(name)
+    { }
 
     /*!
      * \brief Gives the status of the backing std::ifstream
@@ -332,8 +464,68 @@ class MercuryDataFile
      * file is consistent or the particle entries are valid.
      * It can however serve as a first sanity check.
      * \returns true if the file appears to be a valid Mercury 3D .data file.
+     * \sa MercuryDataFile::isMercury2DDataFile()
      */
-    bool isMercury3DDataFile();
+    template<std::size_t NDIMS>
+    bool isMercuryDataFile()
+    {
+      //Store the position, so we can jump back at the end of the function..
+      std::ios::pos_type currentPosition = file_.tellg();
+      //and jump to the start
+      file_.seekg(0);
+      //get the first line
+      std::string line;
+      std::getline(file_, line);
+      file_.seekg(currentPosition); //and pretend nothing has happened
+      
+      std::istringstream lineStream(line);
+      
+      //We'll try to find out if there were exactly enough arguments.
+      MercuryTimeStep<NDIMS> step;
+      lineStream >> step;
+      
+      //Did we reach the end yet?
+      bool isValid = lineStream.good();
+      double dummy;
+      lineStream >> dummy;
+      
+      //now we should have reached it.
+      isValid = isValid && !lineStream.good();
+      return isValid;
+    }
+    
+    /*!
+     * Proxy class because the compiler needs more information
+     * about the iterable type (namely the dimension). This can't
+     * be inferred as it needs two levels of inferrence while the
+     * standard allows for only one.
+     */
+    template<std::size_t NDIMS>
+    class IteratorProxy
+    {
+    private:
+      IteratorProxy(MercuryDataFile* pData)
+        : data_(pData)
+      { }
+      
+      MercuryDataFile* data_;
+    public:
+      MercuryTimeStepIterator<NDIMS> begin()
+      { 
+        return data_->begin<NDIMS>();
+      }
+      MercuryTimeStepIterator<NDIMS> end()
+      {
+        return data_->end<NDIMS>();
+      }
+      friend class MercuryDataFile;
+    };
+    
+    template<std::size_t NDIMS>
+    IteratorProxy<NDIMS> as()
+    { 
+      return {this};
+    };
     
     /*!
      * \brief Returns a forwarditerator to the timesteps
@@ -344,7 +536,8 @@ class MercuryDataFile
      * get invalidated. 
      * This function makes no guarantee for the validity of the file-state.
      */
-    MercuryTimeStepIterator begin()
+    template<std::size_t NDIMS>
+    MercuryTimeStepIterator<NDIMS> begin()
     {
       file_.seekg(0);
       return {this};
@@ -353,7 +546,8 @@ class MercuryDataFile
     /*!
      * \brief Returns a forwarditerator one past the last timestep.
      */
-    MercuryTimeStepIterator end() const
+    template<std::size_t NDIMS>
+    MercuryTimeStepIterator<NDIMS> end() const
     {
       return {};
     }
@@ -363,9 +557,47 @@ class MercuryDataFile
      */
     std::ifstream file_;
     
+    template<std::size_t NDIMS>
     friend class MercuryTimeStep;
+    template<std::size_t NDIMS>
     friend class MercuryTimeStepIterator;
 };
 
+template<std::size_t NDIMS>
+void MercuryTimeStepIterator<NDIMS>::operator++()
+{
+  lastReadTimeStep_.ID_++;
+      
+  std::string line;
+  std::getline(dataFile_->file_, line);
+  
+  std::istringstream lineStream(line);
+  
+  lineStream >> lastReadTimeStep_;
+  
+  //I hope we didn't went beyond end of file...
+  if (lineStream.eof())
+  {
+//   logger(WARN, "The timestep header detected an EOF.. Usually this"
+//                " means that the format was not what it appeared to be."
+//                "\nproceed with caution!");
+  }
+  //Resize the backing storage container to make sure we can actually
+  //fit all the particles in there.
+  lastReadTimeStep_.storage_.resize(lastReadTimeStep_.numParticles_);  
+  //Well, now that we're set up, read all the particles
+  for (MercuryParticle<NDIMS>& part : lastReadTimeStep_)
+  {
+    //line by line, because no data format can be trusted.
+    std::getline(dataFile_->file_, line);
+    lineStream.clear();
+    lineStream.str(line);
+   
+    lineStream >> part;
+  }
+  
+  if (dataFile_->file_.eof())
+    isEOFTimeStep_ = true;
+}
 
 #endif

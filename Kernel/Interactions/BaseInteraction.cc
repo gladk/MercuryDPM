@@ -99,6 +99,7 @@ void BaseInteraction::write(std::ostream& os) const
     os << getName();
     if (dynamic_cast<BaseParticle*>(I_) != nullptr)
         os << " particleIds " << P_->getId() << " " << I_->getId();
+        ///\todo should we output id's here? os << " id " << getId() << " particleIds " << P_->getId() << " " << I_->getId();
     else
         os << " particleWallIds " << P_->getId() << " " << I_->getId();
     os <<" timeStamp "<<timeStamp_<< " force " << force_ << " torque " << torque_;
@@ -109,7 +110,7 @@ void BaseInteraction::write(std::ostream& os) const
  *          interaction.
  *          Note, this can be from any istream but would normally be a file
  *          See also BaseInteaction::write
- * \parm[in] is     std::istream to which the information is read from.
+ * \param[in] is     std::istream to which the information is read from.
  */
 void BaseInteraction::read(std::istream& is)
 {
@@ -619,16 +620,6 @@ const BaseSpecies* BaseInteraction::getBaseSpecies() const
 }
 
 /*!
- * \details Makes and returns a pointer to a copy of this interaction.
- * \return  A pointer to a BaseInteraction this a copy of the current 
- *          interaction.
- */
-BaseInteraction* BaseInteraction::copy() const
-{
-    return new BaseInteraction(*this);
-}
-
-/*!
  * \details The children of this class will implement this function; however,
  *          it is blank.
  *          This function will do the actually force calculation for this
@@ -661,6 +652,16 @@ Mdouble BaseInteraction::getElasticEnergy() const
  */
 void BaseInteraction::reverseHistory()
 {
+}
+
+void BaseInteraction::rotateHistory(Matrix3D& rotationMatrix)
+{
+    contactPoint_=rotationMatrix*contactPoint_;
+    relativeVelocity_=rotationMatrix*relativeVelocity_;
+    force_=rotationMatrix*force_;
+    torque_=rotationMatrix*torque_;
+    normal_=rotationMatrix*normal_;
+    ///\todo some of these might be unneccesary
 }
 
 /*!

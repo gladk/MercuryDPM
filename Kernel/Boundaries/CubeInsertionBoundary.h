@@ -36,7 +36,6 @@ class RNG;
      * \class CubeInsertionBoundary
      * \brief It's an insertion boundary which has cuboidal shape (yes, 'CuboidalInsertionBoundary' 
      * would have been the correct name).
-     * \todo define constructors and destructor
      */
 
 class  CubeInsertionBoundary : public InsertionBoundary
@@ -51,6 +50,11 @@ public:
      * \brief Copy constructor with deep copy.
      */
     CubeInsertionBoundary(const CubeInsertionBoundary& other);
+    
+    /*!
+     * \brief Destructor: default destructor.
+     */
+    ~CubeInsertionBoundary();
     
     /*!
      * \brief Creates a copy on the heap and returns a pointer.

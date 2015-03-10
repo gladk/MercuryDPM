@@ -26,15 +26,16 @@
 ///This function outputs the location and velocity of the particle in a format the xballs progream can read  
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //icc means included cc file
-void DPMBase::outputXBallsDataParticle(const unsigned int i,const unsigned int format, std::ostream& os) const
+
+void DPMBase::outputXBallsDataParticle(const unsigned int i, const unsigned int format, std::ostream& os) const
 {
-    //getDataFile().precision(14);
+    //dataFile.precision(14);
     ///\todo{changes in *.icc files are not immediately regognized by the makefile!}
     //This outputs the data about particle i again to the file.
     switch (format)
     {
         case 8:
-            {
+        {
             if (getSystemDimensions() == 1)
             {
                 os << particleHandler.getObject(i)->getPosition().X << " 0 " << particleHandler.getObject(i)->getVelocity().X << " 0 " << particleHandler.getObject(i)->getRadius() << " 0 0 0" << std::endl;
@@ -44,39 +45,39 @@ void DPMBase::outputXBallsDataParticle(const unsigned int i,const unsigned int f
             {
                 Vec3D angle = particleHandler.getObject(i)->getOrientation();
                 os
-                << particleHandler.getObject(i)->getPosition().X << " "
-                        << particleHandler.getObject(i)->getPosition().Y << " "
-                        << particleHandler.getObject(i)->getVelocity().X << " "
-                        << particleHandler.getObject(i)->getVelocity().Y << " "
-                        << particleHandler.getObject(i)->getRadius() << " "
-                        << -angle.Z << " " // negative b/c we are plotting (x,y) coordinates on the xz-axis of xballs
-                        << -particleHandler.getObject(i)->getAngularVelocity().Z << " "
-                        << getInfo(*particleHandler.getObject(i)) << std::endl;
+                    << particleHandler.getObject(i)->getPosition().X << " "
+                    << particleHandler.getObject(i)->getPosition().Y << " "
+                    << particleHandler.getObject(i)->getVelocity().X << " "
+                    << particleHandler.getObject(i)->getVelocity().Y << " "
+                    << particleHandler.getObject(i)->getRadius() << " "
+                    << -angle.Z << " " // negative b/c we are plotting (x,y) coordinates on the xz-axis of xballs
+                    << -particleHandler.getObject(i)->getAngularVelocity().Z << " "
+                    << getInfo(*particleHandler.getObject(i)) << std::endl;
             }
             break;
         }
         case 14:
-            {
+        {
             Vec3D angle = particleHandler.getObject(i)->getOrientation();
             os
-                    << particleHandler.getObject(i)->getPosition().X << " "
-                    << particleHandler.getObject(i)->getPosition().Y << " "
-                    << particleHandler.getObject(i)->getPosition().Z << " "
-                    << particleHandler.getObject(i)->getVelocity().X << " "
-                    << particleHandler.getObject(i)->getVelocity().Y << " "
-                    << particleHandler.getObject(i)->getVelocity().Z << " "
-                    << particleHandler.getObject(i)->getRadius() << " "
-                    << angle.X << " " // negative b/c we are plotting (x,y) coordinates on the xz-axis of xballs
-                    << angle.Y << " " // negative b/c we are plotting (x,y) coordinates on the xz-axis of xballs
-                    << angle.Z << " " // negative b/c we are plotting (x,y) coordinates on the xz-axis of xballs
-                    << particleHandler.getObject(i)->getAngularVelocity().X << " "
-                    << particleHandler.getObject(i)->getAngularVelocity().Y << " "
-                    << particleHandler.getObject(i)->getAngularVelocity().Z << " "
-                    << getInfo(*particleHandler.getObject(i)) << std::endl;
+                << particleHandler.getObject(i)->getPosition().X << " "
+                << particleHandler.getObject(i)->getPosition().Y << " "
+                << particleHandler.getObject(i)->getPosition().Z << " "
+                << particleHandler.getObject(i)->getVelocity().X << " "
+                << particleHandler.getObject(i)->getVelocity().Y << " "
+                << particleHandler.getObject(i)->getVelocity().Z << " "
+                << particleHandler.getObject(i)->getRadius() << " "
+                << angle.X << " " // negative b/c we are plotting (x,y) coordinates on the xz-axis of xballs
+                << angle.Y << " " // negative b/c we are plotting (x,y) coordinates on the xz-axis of xballs
+                << angle.Z << " " // negative b/c we are plotting (x,y) coordinates on the xz-axis of xballs
+                << particleHandler.getObject(i)->getAngularVelocity().X << " "
+                << particleHandler.getObject(i)->getAngularVelocity().Y << " "
+                << particleHandler.getObject(i)->getAngularVelocity().Z << " "
+                << getInfo(*particleHandler.getObject(i)) << std::endl;
             break;
         } //end case 3
         default:
-            {
+        {
             std::cerr << "format not found" << std::endl;
             break;
         }
@@ -86,30 +87,31 @@ void DPMBase::outputXBallsDataParticle(const unsigned int i,const unsigned int f
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 ///This automatically creates an xballs script to plot the data you have just generated///
 /////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void DPMBase::writeXBallsScript() const
 {
     std::stringstream file_name;
     std::ofstream script_file;
     file_name << getName() << ".xballs";
     script_file.open((file_name.str()).c_str());
-    
+
     ///First put in all the script lines. All these lines do is move you to the correct directory from any location
     script_file << "#!/bin/bash" << std::endl;
     script_file << "x=$(echo $0 | cut -c2-)" << std::endl;
     script_file << "file=$PWD$x" << std::endl;
     script_file << "dirname=`dirname \"$file\"`" << std::endl;
     script_file << "cd $dirname" << std::endl;
-    
+
     Mdouble scale;
     //Mdouble offset = 0;
     int verticalOffset = 0;
-    int horizontalOffset = static_cast<int>(500.0*(0.0 - getXMin())/(getXMax() - getXMin()));
+    int horizontalOffset = static_cast<int> (500.0 * (0.0 - getXMin()) / (getXMax() - getXMin()));
     int format;
-    
+
     if (getSystemDimensions() < 3)
     { // dim = 1 or 2
         format = 8;
-        verticalOffset = static_cast<int>(500.*(0.0 - getYMin())/(getYMax() - getYMin()));
+        verticalOffset = static_cast<int> (500. * (0.0 - getYMin()) / (getYMax() - getYMin()));
         if (getXBallsScale() < 0)
         {
             scale = 1.0 / std::max(getYMax() - getYMin(), getXMax() - getXMin());
@@ -122,7 +124,7 @@ void DPMBase::writeXBallsScript() const
     else
     { //dim==3
         format = 14;
-        verticalOffset = static_cast<int>(500.*(0.0 - getZMin())/(getZMax() - getZMin()));
+        verticalOffset = static_cast<int> (500. * (0.0 - getZMin()) / (getZMax() - getZMin()));
         if (getXBallsScale() < 0)
         {
             scale = 1.2 / std::max(getZMax() - getZMin(), getXMax() - getXMin());
@@ -131,21 +133,21 @@ void DPMBase::writeXBallsScript() const
         {
             scale = getXBallsScale();
         }
-        
+
     }
-    
-    script_file <<  getMercuryBuildDir() <<"/XBalls/xballs -format " << format
-        << " -f " << getDataFile().getFullName()
+
+    script_file << getMercuryBuildDir() << "/XBalls/xballs -format " << format
+        << " -f " << dataFile.getFullName()
         << " -s " << scale
         << " -cmode " << getXBallsColourMode()
         << " -cmax -sort ";
-    if (verticalOffset>=1)
+    if (verticalOffset >= 1)
         script_file << " -o " << verticalOffset;
-    else if  (verticalOffset>=1)
+    else if (verticalOffset >= 1)
         script_file << " -mo " << -verticalOffset;
-    if (horizontalOffset>=1)
+    if (horizontalOffset >= 1)
         script_file << " -moh " << horizontalOffset;
-    else if  (horizontalOffset>=1)
+    else if (horizontalOffset >= 1)
         script_file << " -oh " << -horizontalOffset;
     script_file << getXBallsAdditionalArguments()
         << " $*";
@@ -155,11 +157,11 @@ void DPMBase::writeXBallsScript() const
         script_file << " -vscale " << getXBallsVectorScale();
     }
     script_file.close();
-    
+
     //This line changes teh file permision and give the owener (i.e. you) read, write and excute permission to the file.
 #ifdef UNIX
     chmod((file_name.str().c_str()), S_IRWXU);
 #endif
-    
+
 }
 

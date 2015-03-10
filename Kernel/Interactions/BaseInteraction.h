@@ -28,6 +28,7 @@
 
 #include "BaseObject.h"
 #include "Math/Vector.h"
+#include "Math/Matrix.h"
 
 class InteractionHandler;
 class BaseParticle;
@@ -97,14 +98,14 @@ public:
      */
     void setDistance(Mdouble distance);
 
-     /*!
+    /*!
      * \brief Sets the normal vector between the two interacting objects.
      */
     void setNormal(Vec3D normal);
 
-   /*!
-    * \brief Set the overlap between the two interacting object.
-    */
+    /*!
+     * \brief Set the overlap between the two interacting object.
+     */
     void setOverlap(Mdouble overlap);
 
     /*!
@@ -166,15 +167,15 @@ public:
      * \brief Returns a Mdouble with the current overlap between the two interacting objects.
      */
     Mdouble getOverlap() const;
-    
+
     /*!
      * \brief Removes this interaction from its interaction hander.
      */
     void removeFromHandler();
 
     /*!
-      * \brief This copies the interactions of the original particle and replaces the original with the ghost copy.
-      */
+     * \brief This copies the interactions of the original particle and replaces the original with the ghost copy.
+     */
     void copySwitchPointer(const BaseInteractable* original, BaseInteractable* ghost) const;
 
     /*!
@@ -182,61 +183,67 @@ public:
      * \todo Thomas please document this; as this is the area you are currently rewriting.
      */
     void gatherContactStatistics();
-    
-     /*!
+
+    /*!
      * \brief Returns a pointer to first object involved in the interaction (normally a particle).
      */
     BaseInteractable* getP();
-    
+
     /*
      * \brief Returns a pointer to the second object involved in the interaction (often a wall or a particle). 
      */
     BaseInteractable* getI();
-    
+
     /*
      * \brief Returns a constant pointer to the first object involved in the interaction.
      */
     const BaseInteractable* getP() const;
-    
+
     /*!
      * \brief Returns a constant pointer to the second object involved in the interaction.
      */
     const BaseInteractable* getI() const;
-    
+
     /*!
      * \brief Returns an Mdouble which is the time stamp of the interaction. 
      */
     Mdouble getTimeStamp() const;
-    
+
     /*!
      * \brief integrates variables of the interaction which need to be integrate e.g. the tangential overlap.
      */
     virtual void integrate(Mdouble timeStep);
-    
+
     /*!
      * \brief get the length of the current tangential overlap 
      */
     virtual Mdouble getTangentialOverlap() const;
-    
+
     /*!
      * \brief Returns an Mdouble which is the norm (length) of distance vector 
      */
     Mdouble getDistance() const;
-    
+
     /*!
      * \brief Returns a constant reference to a vector of relative velocity
      */
     const Vec3D& getRelativeVelocity() const;
-    
+
     /*!
      * \brief Returns a double which is the norm  (length) of the relative velocity vector.
      */
     Mdouble getNormalRelativeVelocity() const;
-    
+
     /*!
      * \brief Returns the absolute value of the norm (length) of the Normal force vector.
      */
     Mdouble getAbsoluteNormalForce() const;
+
+
+    /*!
+     * \brief Makes a copy of the interaction and returns a pointer to the copy.
+     */
+    virtual BaseInteraction* copy() const = 0;
 
 protected:
 
@@ -249,7 +256,7 @@ protected:
      * \brief Returns a Mdouble to the effective radius of the interaction. (Not corrected for the overlap)
      */
     Mdouble getEffectiveRadius() const;
-    
+
     /*!
      * \brief Returns a Mdouble to the effective radius corrected for the overlaps of the particles. 
      */
@@ -262,34 +269,34 @@ protected:
      * \brief add an force increment to the total force.
      */
     void addForce(Vec3D force);
-    
+
     /*
      * \brief add a torque increment to the total torque.
      */
     void addTorque(Vec3D torque);
 
     //these functions are only used for normal forces and should be made private by the normal forces:
-    
+
     /*!
      * \brief set total force (this is used by the normal force, tangential forces are added use addForce)
      */
     void setForce(Vec3D force);
-    
+
     /*!
      * \brief set the total force (this is used by the normal force, tangential torques are added use addTorque)
      */
     void setTorque(Vec3D torque);
-    
+
     /*!
      * \brief set the relative velocity of the current of the interactions.
      */
     void setRelativeVelocity(Vec3D relativeVelocity);
-    
+
     /*!
      * \brief set the normal component of the relative velocity. 
      */
     void setNormalRelativeVelocity(Mdouble normalRelativeVelocit);
-    
+
     /*!
      * \brief the absolute values of the norm (length) of the normal force
      */
@@ -300,15 +307,20 @@ protected:
      */
     const BaseSpecies* getBaseSpecies() const;
 
-    /*!
-     * \brief Makes a copy of the interaction and returns a pointer to the copy.
-     */
-    virtual BaseInteraction* copy() const;
 
     /*!
      * \brief When periodic particles some interaction need certain history properties reversing. This is the function for that.
      */
     virtual void reverseHistory();
+
+public: 
+    
+    /*!
+     * \brief When periodic particles are used, some interactions need certain 
+     * history properties rotated (e.g. tangential springs). 
+     * This is the function for that.
+     */
+    virtual void rotateHistory(Matrix3D& rotationMatrix);
 
 private:
 
@@ -327,29 +339,29 @@ private:
      * This is the second of the two interactable object involved in the interaction; often a particle or a wall, hence I because it is general interactable. 
      */
     BaseInteractable* I_;
-    
+
     /*!
      * This is Vec3D which stores the contact point of the interaction.
      */
     Vec3D contactPoint_;
 
-   
-    
+
+
     /*!
      * Variables calculated by the normal force routines used in other force routines (but not changed by them).
      */
     Vec3D relativeVelocity_;
-    
+
     /*!
      * Variables calculated by NormalForceInteraction, used in other force routines (but not changed by them)
      */
     Mdouble normalRelativeVelocity_;
-    
+
     /*!
      * Variables calculated by NormalForceInteraction, used by FrictionForceInteraction and AdhesiveForceInteraction (but not changed by them)
      */
     Mdouble absoluteNormalForce_;
-    
+
     /*!
      * Variables calculated by  NormalForceInteraction, used by FrictionForceInteraction and AdhesiveForceInteraction (but not changed by them)
      */
@@ -359,7 +371,7 @@ private:
      * First computed by NormalForceInteraction, but added to by FrictionForceInteraction and AdhesiveForceInteraction.
      */
     Vec3D force_;
-    
+
     /*!
      * First computed by NormalForceInteraction, but added to by FrictionForceInteraction and AdhesiveForceInteraction.
      */
@@ -369,17 +381,17 @@ private:
      * Mdouble which store the last timeStamp the interaction was active.
      */
     Mdouble timeStamp_;
-    
+
     /*!
      * Vec3D which stores the normal vector of the interaction.
      */
-   Vec3D normal_;
-    
+    Vec3D normal_;
+
     /*!
      * Mdouble which stores the current overlap.
      */
     Mdouble overlap_;
-    
+
     /*!
      * Pointer to the species of the interaction could be a mixed species or a species.
      */

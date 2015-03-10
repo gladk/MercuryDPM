@@ -55,6 +55,14 @@ CubeInsertionBoundary::CubeInsertionBoundary(const CubeInsertionBoundary& other)
 }
 
 /*!
+ * \details Destructor. Since there are no pointers in this class, there is no 
+ *          need for any actions here.
+ */
+CubeInsertionBoundary::~CubeInsertionBoundary()
+{
+}
+
+/*!
  * \details Copy method; creates a copy on the heap and returns its pointer. 
  * \return      pointer to the copy on the heap
  */

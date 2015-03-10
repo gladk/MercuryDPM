@@ -26,6 +26,7 @@
 #ifndef MD_H
 #define MD_H
 
+#include <string>
 //This is the class that defines the std_save routines
 #include "FilesAndRunNumber.h"
 //The vector class contains a 3D vector class.
@@ -96,7 +97,7 @@ public:
      * \brief Checks if the essentials are set properly to go ahead with solving the problem.
      * \details 1. Checks if at least one species exists in the SpeciesHandler.
      *          2. Checks if particle dimensions are set.
-     *          3. Checks is system dimensions are set.
+     *          3. Checks if system dimensions are set.
      *          4. Checks if the time step is set or not.
      */
     void checkSettings();
@@ -182,14 +183,13 @@ public:
      *          This code saves in format_ 8 for 2D and format_ 14 for 3D.
      *          So if no extra parameters are specified it will assume things many parameters,
      *          like density cannot be set using the data file.
-     * \todo change from deprecated const char* to std::string
      */
-    bool readDataFile(const char* fileName, unsigned int format = 0);
+    bool readDataFile(const std::string fileName, unsigned int format = 0);
 
     /*!
      * \brief Allows the user to read par.ini files (useful to read MDCLR files)
      */
-    bool readParAndIniFiles(const char* fileName);
+    bool readParAndIniFiles(const std::string fileName);
 
     /*!
      * \brief Reads the next data file with default format=0. However, one can 

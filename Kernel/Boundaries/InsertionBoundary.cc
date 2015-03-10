@@ -48,7 +48,8 @@ InsertionBoundary::InsertionBoundary(const InsertionBoundary& other)
 }
 
 /*!
- * \details Destructor
+ * \details Destructor that deletes the BaseParticle that is copied and inserted
+ *          at every insertion.
  */
 InsertionBoundary::~InsertionBoundary()
 {
@@ -61,7 +62,7 @@ InsertionBoundary::~InsertionBoundary()
  * \param[in] particleToCopy  Particle that will be copied and inserted in the domain
  * \param[in] maxFailed       Number of times that the wall may fail to insert a particle
  */
-void InsertionBoundary::set(BaseParticle* particleToCopy, std::size_t maxFailed)
+void InsertionBoundary::set(BaseParticle* particleToCopy, unsigned int maxFailed)
 {
     particleToCopy_ = particleToCopy->copy();
     maxFailed_ = maxFailed;
@@ -75,7 +76,7 @@ void InsertionBoundary::set(BaseParticle* particleToCopy, std::size_t maxFailed)
  */
 void InsertionBoundary::checkBoundaryBeforeTimeStep(DPMBase* md)
 {
-    std::size_t failed = 0;
+    unsigned int failed = 0;
     BaseParticle* p0;
     //try max_failed times to find new insertable particle
     while (failed <= maxFailed_)
@@ -104,7 +105,7 @@ void InsertionBoundary::checkBoundaryBeforeTimeStep(DPMBase* md)
  * \details Returns the number of particles inserted in the boundary
  * \return  the number of particles inserted
  */
-std::size_t InsertionBoundary::getNumberOfParticlesInserted() const
+unsigned int InsertionBoundary::getNumberOfParticlesInserted() const
 {
     return numberOfParticlesInserted_;
 }
@@ -113,9 +114,8 @@ std::size_t InsertionBoundary::getNumberOfParticlesInserted() const
  * \details Sets the maximum number of times InsertionBoundary::checkBoundaryBeforeTimeStep()
  * may try to insert a particle and fail, before the insertion of particles stops.
  * \param[in] maxFailed     the maximum number of particle insertion trials
- * \todo Are we using std::size_t now? Then we should use it all appropriate places (such as getNumberOfObjects())
  */
-void InsertionBoundary::setMaxFailed(std::size_t maxFailed)
+void InsertionBoundary::setMaxFailed(unsigned int maxFailed)
 {
     maxFailed_=maxFailed;
 }
@@ -124,7 +124,7 @@ void InsertionBoundary::setMaxFailed(std::size_t maxFailed)
  * \details Return maxFailed_ (see InsertionBoundary::setMaxFailed).
  * \return the maximum number of particle insertion trials
  */
-std::size_t InsertionBoundary::getMaxFailed() const
+unsigned int InsertionBoundary::getMaxFailed() const
 {
     return maxFailed_;
 }

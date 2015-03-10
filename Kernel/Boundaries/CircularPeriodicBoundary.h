@@ -72,8 +72,6 @@ public:
     
     /*!
      * \brief
-     * \param[in]
-     * \return
      */
     bool checkBoundaryAfterParticleMoved(BaseParticle *P, ParticleHandler &pH);
     

@@ -55,16 +55,18 @@
  */
 SpeciesHandler::SpeciesHandler()
 {
-#ifdef DEBUG_CONSTRUCTOR
     logger(DEBUG, "SpeciesHandler::SpeciesHandler() finished");
-#endif
 }
 
 /*!
  * \param[in] other The SpeciesHandler that has to be copied.
+ * \details This is not a copy constructor! This constructor copies only all 
+ *          BaseSpecies and MixedSpecies and copies the pointer to the DPMBase. 
+ *          It sets all other data members to 0 or nullptr.
  */
 SpeciesHandler::SpeciesHandler(const SpeciesHandler& other)
 {
+    clear();
     setDPMBase(other.getDPMBase());
     copyContentsFromOtherHandler(other);
     for (BaseSpecies* mixSpec : other.mixedObjects_) 
@@ -72,14 +74,15 @@ SpeciesHandler::SpeciesHandler(const SpeciesHandler& other)
       mixedObjects_.push_back(mixSpec->copy());
       mixedObjects_.back()->setHandler(this);
     }
-#ifdef DEBUG_CONSTRUCTOR
     logger(DEBUG, "SpeciesHandler::SpeciesHandler(const SpeciesHandler &other) finished");
-#endif
 }
 
 /*!
  * \param[in] rhs The BoundaryHandler on the right hand side of the assignment.
  * \return The SpeciesHandler that is a copy of the input SpeciesHandler rhs.
+ * \details This is not a copy assignment operator! It copies only all 
+ *          BaseSpecies and MixedSpecies and copies the pointer to the DPMBase. 
+ *          It sets all other data members to 0 or nullptr.
  */
 SpeciesHandler SpeciesHandler::operator =(const SpeciesHandler& rhs)
 {
@@ -99,9 +102,7 @@ SpeciesHandler SpeciesHandler::operator =(const SpeciesHandler& rhs)
         }
     }
 
-#ifdef DEBUG_CONSTRUCTOR
-    Logger(DEBUG, "SpeciesHandler SpeciesHandler::operator =(const SpeciesHandler& rhs)");
-#endif
+    logger(DEBUG, "SpeciesHandler SpeciesHandler::operator =(const SpeciesHandler& rhs)");
     return *this;
 }
 /*!
@@ -119,9 +120,7 @@ SpeciesHandler::~SpeciesHandler()
         delete mixSpec;
     }
     mixedObjects_.clear();
-#ifdef DEBUG_DESTRUCTOR
     logger(DEBUG, "SpeciesHandler::~SpeciesHandler() finished");
-#endif
 }
 /*!
  * \param[in] is The input stream from which the information is read.
@@ -547,7 +546,8 @@ BaseSpecies* SpeciesHandler::getMixedObject(const unsigned int id1, const unsign
 void SpeciesHandler::addObject(ParticleSpecies* const S)
 {
     BaseHandler<ParticleSpecies>::addObject(S);
-    logger(INFO, "Part / Mix: % / %", objects_.size(), mixedObjects_.size());
+    //logger(INFO, "Part / Mix: % / %", objects_.size(), mixedObjects_.size());
+    ///\todo TW don't put logger messages that only make sense for one application!
     for (unsigned int id = 0; id + 1 < getNumberOfObjects(); ++id)
     {
         mixedObjects_.push_back(S->copyMixed());

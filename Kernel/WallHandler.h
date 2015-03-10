@@ -48,12 +48,12 @@ public:
     WallHandler();
 
   /*!
-   * \brief Copy constructor, it copies the WallHandler and all BaseWall it contains.
+   * \brief Constructor that copies a pointer to the DPMBase and all BaseWall in the given WallHandler.
    */
     WallHandler(const WallHandler& BH);
 
   /*!
-   * \brief Copy assignment operator.
+   * \brief Assignment operator that copies the pointer to the DPMBase and all BaseWall in the given WallHandler.
    */
     WallHandler operator =(const WallHandler& rhs);
     
@@ -73,7 +73,7 @@ public:
     void readObject(std::istream& is);
 
     /*!
-     * \brief Reads a Basewall into the WallHandler from old-style restart data.     
+     * \brief Reads a BaseWall into the WallHandler from old-style restart data.     
      */
     void readOldObject(std::istream& is);
 

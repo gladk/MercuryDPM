@@ -40,10 +40,10 @@ public:
     /// \brief Default constructor, it creates an empty SpeciesHandler.
     SpeciesHandler();
 
-    /// \brief Copy constructor, it copies the SpeciesHandler and all ParticleSpecies it contains.
-    SpeciesHandler(const SpeciesHandler&other);
+    /// \brief Constructor that copies all species and the pointer to the DPMBase from the given SpeciesHandler.
+    SpeciesHandler(const SpeciesHandler& other);
 
-    /// \brief Copy assignment operator.
+    /// \brief Assignment operator that copies all species and the pointer to the DPMBase from the given SpeciesHandler.
     SpeciesHandler operator =(const SpeciesHandler& rhs);
     
     /// \brief Destructor, it destructs the SpeciesHandler and all ParticleSpecies it contains.

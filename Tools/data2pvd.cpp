@@ -29,9 +29,14 @@
 #include <Logger.h>
 
 #include "MercuryData.h"
+#include "VTKData.h"
+
+/*! \brief Templated version to automagically generate VTK output files. */
+template<std::size_t NDIMS>
+int transformMercuryToVTK(MercuryDataFile& file, std::string prefix);
 
 /*
-* This program converts Mercury 3D .data files to ParaView
+* This program converts Mercury .data files to ParaView
 * .pvd and VTK .vtu XML-files. Every timestep is written to
 * an independent .vtu Unstructured Grid file.
 *
@@ -73,188 +78,109 @@ int main(int argc, char** argv)
     logger(FATAL, "Could not open ''%' for input.\n"
                  "Please make sure the file exists and you have the appropriate rights.", argv[1]);
   }
-  //And were we using a 3D file format?
-  if (!infile.isMercury3DDataFile())
-  {
-    logger(ERROR, "The file '%' does not seem to be a Mercury 3D .data file.\n"
-                  "Mercury 2D .data files are unsupported. Please make sure you are reading\n"
-                  "the correct file.", argv[1]);
-  }
-  
+  //make sure we don't end in a slash, as this both breaks the creation of a relative path right now,
+  //and it's really not what you want to end up with...
   if (std::string(argv[2]).back() == '/')
   {
     logger(ERROR, "The output prefix ends in a slash. This is not allowed.");
   }
-  
-  //Well, lets try to open the record file..
-  std::ofstream outfile(argv[2] + std::string(".pvd"));
-  //Succeeded?
-  if (!outfile)
+
+  //And were we using a 3D file format?
+  if (infile.isMercuryDataFile<3>())
   {
-    //Nope. Print an error and exit.
-    logger(FATAL, "Could not open '%.pvd' for output.\n"
-                 "Please make sure you have the appropriate rights.", argv[2]);
+    logger(VERBOSE, "Assuming 3D data format.");
+    return transformMercuryToVTK<3>(infile, argv[2]);
+  }//Or a 2d format?
+  else if (infile.isMercuryDataFile<2>())
+  {
+    logger(VERBOSE, "Assuming 2D data format.");
+    return transformMercuryToVTK<2>(infile, argv[2]);
+  }//halp...
+  else
+  {
+    logger(ERROR, "The file '%' does not seem to be a Mercury .data file.\n"
+                  "Please make sure you are reading the correct file.", argv[1]);
+    return 4;
   }
+}
+
+/*! this function reads the NDIMS-dimensional Mercury .data file,
+ * and writes all the corresponding VTK output files.
+ */
+template<std::size_t NDIMS>
+int transformMercuryToVTK(MercuryDataFile& infile, std::string prefix)
+{
+  //We really want to describe our exit code.
+  int exitCode = 0;
   
-  //So, write the headers...
-  outfile <<
-    "<?xml version=\"1.0\"?>\n"
-    "<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"LittleEndian\">\n"
-    " <Collection>\n";
-  
-  int exitCode = 0; //So we can flag errors!
-  //And for every timestep...
-  for (const MercuryTimeStep& ts : infile)
-  {
-    //Open a file containing the data.
-    std::ostringstream filename;
-    filename << argv[2] << "_" << ts.getTimeStepID() << ".vtu";
+  //We'll set up a descriptor.
+  //Let the compiler figure out what the types / dimensions are, that's too
+  //much work anyway. Oh and make sure position is used as both a datafield
+  //and the actual position of the object.
+  VTKPointDescriptor< MercuryParticle<NDIMS> > descriptor;
+  descriptor
+    .addProperty( "Position",    & MercuryParticle< NDIMS >::position , true)
+    .addProperty( "Velocity",    & MercuryParticle< NDIMS >::velocity  )
+    .addProperty( "Rotation",    & MercuryParticle< NDIMS >::rotation  )
+    .addProperty( "AngVelocity", & MercuryParticle< NDIMS >::angularV  )
+    .addProperty( "Radius",      & MercuryParticle< NDIMS >::radius    )
+    .addProperty( "Species",     & MercuryParticle< NDIMS >::speciesID );
     
-    std::ofstream tsfile(filename.str());
-    if (!tsfile)
+  // We want a Collection file which lists all individual files
+  VTKCollection collection( prefix + ".pvd" );
+  // First, make sure it is sane.
+  if (!collection)
+    logger( FATAL, "Could not open '%.pvd' for output.\n"
+                   "Please make sure you have the appropriate permissions and try again.", prefix);
+  
+  std::size_t timestepCount = 0;
+  
+  //Now, read all the timesteps as if they were NDIMS long.
+  for (const MercuryTimeStep<NDIMS> & ts : infile.as<NDIMS>())
+  {
+    //Generate the filename for the individual data files.
+    std::ostringstream filename;
+    filename << prefix << '_' << ts.getTimeStepID() << ".vtu";
+    
+    //We'll set up a datafile containing the individual timestep.
+    VTKUnstructuredGrid< MercuryParticle<NDIMS> > timeStepFile(filename.str(), &descriptor);
+    if (!timeStepFile) //but not after we've done some sanity checking!
     {
-      //Hmm. this is weird.
-      //Normally, the master file would have failed.
-      //Write whatever we got, and then exit..
-      logger(WARN, "Could not open '%' for output\n"
-                   "Please make sure you have the appropriate rights.", filename.str());
+      logger(WARN, "Could not open '%' for output.\n"
+                   "Please make sure you have the appropriate permissions and try again.", filename.str());
       exitCode = 6;
       break;
     }
-    //Weird... we didn't expect an EOF / IOError here...    
-    if (!infile) {
-      logger(WARN,"An IO error occurred while processing '%'.", argv[1]);
+    
+    if (!infile) //Some sanity checking? More sanity checking! ALL the sanity checking!!!
+    {
+      logger(WARN, "An IOError occurred during the reading of the input file.\n"
+                   "Please make sure you are feeding this tool mercury data files.");
+      exitCode = 5; 
       break;
     }
+    //Okay. we done.
+    //Let's write.
+    timeStepFile.write(ts);
     
-    //Okay, write the header first...
-    //(and some information about the cells, which we aren't using.)
-    tsfile <<
-       "<?xml version=\"1.0\"?>\n"
-       "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n"
-       " <UnstructuredGrid>\n"
-       "  <Piece NumberOfPoints=\"" << ts.getNumberOfParticles() << "\" NumberOfCells=\"0\">\n"
-       "   <Cells>\n"
-       "    <DataArray type=\"Int32\" name=\"connectivity\" format=\"ascii\">\n"
-       "       0\n"
-       "    </DataArray>\n"
-       "    <DataArray type=\"Float32\" name=\"offset\" format=\"ascii\">\n"
-       "       0\n"
-       "    </DataArray>\n"
-       "    <DataArray type=\"UInt8\" name=\"types\" format=\"ascii\">\n"
-       "       1\n"
-       "    </DataArray>\n"
-       "   </Cells>\n"
-       "   <Points>\n";
-     
-     //Start by writing the positions..
-     tsfile << 
-       "     <DataArray type=\"Float32\" NumberOfComponents=\"3\" format=\"ascii\">\n";
-     for (const MercuryParticle& part : ts)
-     {
-       tsfile << part.position[0] << " "
-              << part.position[1] << " "
-              << part.position[2] << " "; 
-     }
-     tsfile << "\n"
-       "     </DataArray>\n"
-       "    </Points>\n"
-       "    <PointData>\n";
-     
-     //And we want the positions as a dataarray as well
-     //(@dducks: do we?)
-     tsfile << 
-       "    <DataArray type=\"Float32\" Name=\"Positions\" NumberOfComponents=\"3\" format=\"ascii\">\n";
-     for (const MercuryParticle& part : ts)
-     {
-       tsfile << part.position[0] << " "
-              << part.position[1] << " "
-              << part.position[2] << " "; 
-     }
-     tsfile << "\n"
-       "     </DataArray>\n";
-
-     //Next step: Speeds!
-     tsfile << "    <DataArray type=\"Float32\" Name=\"Velocities\" NumberOfComponents=\"3\" format=\"ascii\">\n";
-     for (const MercuryParticle& part : ts)
-     {
-       tsfile << part.velocity[0] << " "
-              << part.velocity[1] << " "
-              << part.velocity[2] << " "; 
-     }
-     tsfile << "\n     </DataArray>\n";
-     
-     //But our particles have rotation too...
-     //So positions...
-     tsfile << "    <DataArray type=\"Float32\" Name=\"Rotations\" NumberOfComponents=\"3\" format=\"ascii\">\n";
-     for (const MercuryParticle& part : ts)
-     {
-       tsfile << part.rotation[0] << " "
-              << part.rotation[1] << " "
-              << part.rotation[2] << " "; 
-     }
-     tsfile << "\n     </DataArray>\n";
-
-     //And speeds for rotations..
-     tsfile << "    <DataArray type=\"Float32\" Name=\"AngularVelocities\" NumberOfComponents=\"3\" format=\"ascii\">\n";
-     for (const MercuryParticle& part : ts)
-     {
-       tsfile << part.angularV[0] << " "
-              << part.angularV[1] << " "
-              << part.angularV[2] << " "; 
-     }
-     tsfile << "\n     </DataArray>\n";
-
-     //Lets write our radii.
-     tsfile << "    <DataArray type=\"Float32\" Name=\"Radii\" NumberOfComponents=\"1\" format=\"ascii\">\n";
-     for (const MercuryParticle& part : ts)
-     {
-       tsfile << part.radius << " ";
-     }
-     tsfile << "\n     </DataArray>\n";
-
-     //And of course our species IDs...
-     tsfile << "    <DataArray type=\"UInt32\" Name=\"Species\" NumberOfComponents=\"1\" format=\"ascii\">\n";
-     for (const MercuryParticle& part : ts)
-     {
-       tsfile << part.speciesID << " ";
-     }
-     tsfile << "\n     </DataArray>\n";
-     
-     tsfile <<
-     "   </PointData>\n"
-     "   <CellData/>\n"
-     "  </Piece>\n"
-     " </UnstructuredGrid>\n"
-     "</VTKFile>\n";
-     tsfile.close();
-     
-     //Et voila! Un VTK Unstructured grid file.
-     //Now just add it to the index file...
-     
-     //@dducks: Okay, the user may output in a subdirectory. 
-     //Therefore we should strip anything off until the last slash.
-     std::string strippedPath = filename.str();
-     std::string::size_type slashPosition = strippedPath.rfind('/');
-     if (slashPosition != std::string::npos) {
-       //There is a slash in here
-       strippedPath = strippedPath.substr(slashPosition+1);
-     }
-     
-     outfile <<
-     "  <DataSet group=\"\" part=\"0\" timestep=\"" << ts.getTimeStepID() <<"\" file=\"" << strippedPath << "\" />\n";
-     //Done.
-     //Note the timestep=getTimeStepID(). If somebody finds a way to get it working reliably in ParaView,
-     //this could be changed into getTime(). ParaView docs say it should parse floats... but in practice, it doesn't.
-     //(or I'm doing something stupid, which of course is also very possible)
+    //So, a user may give an output path which is in a different directory. 
+    // However, since the index files resides in the same output directory
+    // as the timestep files, we need to specify relative paths.
+    std::string strippedPath = filename.str();
+    //so, we try to find the last / - because to hell with everybody with other
+    //path seperators...
+    std::string::size_type slashPosition = strippedPath.rfind('/');
+    //and take only the last part. It's not the last character, trust me.
+    //we checked for that in main().
+    if (slashPosition != std::string::npos)
+      strippedPath = strippedPath.substr(slashPosition + 1);
+    //And now put the relative path in the listing file
+    collection.append(strippedPath);
+    
+    timestepCount++;
   }
   
-  //We can either be done, or an error has occurred which allows us to at least write the data so far..
-  outfile << " </Collection>\n"
-             "</VTKFile>\n";
-  //So, write a footer
-  //Flush it
-  outfile.close();
-  //and return a sensible error code (or 0 in case of success).
+  logger(INFO, "Written % timesteps in a %D system.", timestepCount, NDIMS);
+  
   return exitCode;
 }

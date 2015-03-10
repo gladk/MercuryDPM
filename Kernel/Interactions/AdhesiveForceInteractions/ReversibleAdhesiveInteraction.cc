@@ -91,12 +91,12 @@ void ReversibleAdhesiveInteraction::computeAdhesionForce()
 }
 
 /*!
- * \todo @TW 
+ * \todo TW 
  * \return Mdouble
  */
 Mdouble ReversibleAdhesiveInteraction::getElasticEnergy() const
 {
-    return 0.0; //@TW
+    return 0.0;
 }
 /*!
  * \return a constant pointer to an instance of this class.

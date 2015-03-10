@@ -23,102 +23,115 @@
 //(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+//! [CST:headers]
 #include "Mercury3D.h"
 #include "Particles/BaseParticle.h"
 #include "Walls/InfiniteWall.h"
 #include "Walls/InfiniteWallWithHole.h"
 #include "Walls/Coil.h"
 #include "Species/LinearViscoelasticSpecies.h"
- 
-class CoilSelfTest : public Mercury3D{
-	private:
-	
-	void setupInitialConditions()
-	{
-		setName("CoilSelfTest");
-        setSystemDimensions(3);
+//! [CST:headers]
+
+//! [CST:class]
+class CoilSelfTest : public Mercury3D {
+    
+private:
+
+    void setupInitialConditions() {
+        //! [CST:initial]
+        // gravity, particle radius
         setGravity(Vec3D(0.0, -9.8, 0.0));
-		setTimeStep(0.02*0.05);
-		setTimeMax(2.0);
-		setSaveCount(helpers::getSaveCountFromNumberOfSavesAndTimeMaxAndTimestep(1000, getTimeMax(), getTimeStep()));
-		particleRadius=0.2;
+        particleRadius = 0.2;
+        
+        // set problem geometry
+        setXMax(1.0);
+        setYMax(5.0);
+        setZMax(2.0);
+        setXMin(-1.0);
+        setYMin(-1.0);
+        //! [CST:initial]
+        
+        //! [CST:species]
+        species = speciesHandler.copyAndAddObject(LinearViscoelasticSpecies());
+        species->setDensity(1000);
+        species->setCollisionTimeAndRestitutionCoefficient(0.05, 0.8, pow(particleRadius, 3) * constants::pi * 4.0 / 3.0 * 1000);
+        //! [CST:species]
+        
+        //! [CST:walls]
+        frontWall = wallHandler.copyAndAddObject(InfiniteWall());
+        frontWall->set(Vec3D(-1, 0, 0), Vec3D(getXMin(), 0, 0));
+        backWall = wallHandler.copyAndAddObject(InfiniteWall());
+        backWall->set(Vec3D(1, 0, 0), Vec3D(getXMax(), 0, 0));
+        bottomWall = wallHandler.copyAndAddObject(InfiniteWall());
+        bottomWall->set(Vec3D(0, -1, 0), Vec3D(0, getYMin(), 0));
+        topWall = wallHandler.copyAndAddObject(InfiniteWall());
+        topWall->set(Vec3D(0, 1, 0), Vec3D(0, getYMax(), 0));
+        leftWall = wallHandler.copyAndAddObject(InfiniteWall());
+        leftWall->set(Vec3D(0, 0, -1), Vec3D(0, 0, getZMin()));
 
-		setXMax(1.0);
-		setYMax(5.0);
-		setZMax(2.0);
-		setXMin(-1.0);
-		setYMin(-1.0);
-
-	    species = speciesHandler.copyAndAddObject(LinearViscoelasticSpecies());
-		species->setDensity(1000);
-		species->setCollisionTimeAndRestitutionCoefficient(0.05,0.8, pow(particleRadius,3)*constants::pi*4.0/3.0*1000);
-
-		frontWall = wallHandler.copyAndAddObject(InfiniteWall());
-		frontWall->set(Vec3D(-1, 0, 0), Vec3D(getXMin(), 0, 0));
-		backWall = wallHandler.copyAndAddObject(InfiniteWall());
-		backWall->set(Vec3D( 1, 0, 0),  Vec3D(getXMax(), 0, 0));
-		bottomWall = wallHandler.copyAndAddObject(InfiniteWall());
-		bottomWall->set(Vec3D( 0,-1, 0), Vec3D(0, getYMin(), 0));
-		topWall = wallHandler.copyAndAddObject(InfiniteWall());
-		topWall->set(Vec3D( 0, 1, 0),  Vec3D(0, getYMax(), 0));
-		leftWall = wallHandler.copyAndAddObject(InfiniteWall());
-		leftWall->set(Vec3D( 0, 0,-1), Vec3D(0, 0, getZMin()));
-		
-		rightWall = wallHandler.copyAndAddObject(InfiniteWallWithHole());
-		rightWall->set(Vec3D(0,0,1),getZMax(),1.0);
-		
-		coil = wallHandler.copyAndAddObject(Coil());
-        ///Here coil properties are set
-		///Coil(Start position,Length,Radius,Number of turns,Rotation speed,Thickness)
-		coil->set(Vec3D(0,0,0),1.0,1.0-particleRadius,2.0,-1.0,0.5*particleRadius);
-		
-		particleHandler.clear();
-		BaseParticle p0;
-		p0.setSpecies(species);
-		p0.setVelocity(Vec3D(0.0,0.0,0.0));
-		p0.setRadius(particleRadius);
-
+        rightWall = wallHandler.copyAndAddObject(InfiniteWallWithHole());
+        rightWall->set(Vec3D(0, 0, 1), getZMax(), 1.0);
+        //! [CST:walls]
+        
+        //! [CST:coil]
+        // creation of the coil and setting of its properties
+        coil = wallHandler.copyAndAddObject(Coil());
+        // set(Start position, Length, Radius, Number of turns, Rotation speed, Thickness)
+        coil->set(Vec3D(0, 0, 0), 1.0, 1.0 - particleRadius, 2.0, -1.0, 0.5 * particleRadius);
+        //! [CST:coil]
+        
+        //! [CST:particle]
+        particleHandler.clear();
+        BaseParticle p0;
+        p0.setSpecies(species);
+        p0.setVelocity(Vec3D(0.0, 0.0, 0.0));
+        p0.setRadius(particleRadius);
+        //! [CST:particle]
+        
         /*
         //Single test case
         double distance;
-		Vec3D normal;
+                Vec3D normal;
         p0.setPosition(Vec3D(1.0,0.0,0.0));
         if(coil->getDistance_and_normal(p0, distance, normal))
-			std::cout<<"Collision, distance screw="<<distance<<std::endl;
-		else
-			std::cout<<"No collision, distance screw="<<distance<<std::endl;
-        */
-
-        //Simple run settings
-        //Nx*Ny*Nz particles are created evenly spaced between [xMin_,xMax_]*[yMin_,yMax_]*[zMin_,zMax_] and checked for contact with the coil
-		int Nx=static_cast<int>(std::floor((getXMax()-getXMin())/(2.1*particleRadius)));
-		int Ny=static_cast<int>(std::floor((getYMax()-getYMin())/(2.1*particleRadius)));
-		int Nz=static_cast<int>(std::floor((getZMax()-getZMin())/(2.1*particleRadius)));
-		Mdouble distance;
-		Vec3D normal;		
-		for(int i=0;i<Nx;i++)
-			for(int j=0;j<Ny;j++)
-				for(int k=0;k<Nz;k++)
-				{
-					p0.setPosition(Vec3D(getXMin()+(getXMax()-getXMin())*(0.5+i)/Nx,getYMin()+(getYMax()-getYMin())*(0.5+j)/Ny,getZMin()+(getZMax()-getZMin())*(0.5+k)/Nz));
-                    if(!coil->getDistanceAndNormal(p0, distance, normal))
-                    {
-						particleHandler.copyAndAddObject(p0);
-                    }
-                    else
-                    {
+                        std::cout<<"Collision, distance screw="<<distance<<std::endl;
+                else
+                        std::cout<<"No collision, distance screw="<<distance<<std::endl;
+         */
+        
+        //! [CST:placeparticles]
+        // Nx*Ny*Nz particles are created and placed on evenly spaced positions in 
+        // the domain [xMin_,xMax_]*[yMin_,yMax_]*[zMin_,zMax_] (unless their position 
+        // is already occupied by the coil).
+        int Nx = static_cast<int> (std::floor((getXMax() - getXMin()) / (2.1 * particleRadius)));
+        int Ny = static_cast<int> (std::floor((getYMax() - getYMin()) / (2.1 * particleRadius)));
+        int Nz = static_cast<int> (std::floor((getZMax() - getZMin()) / (2.1 * particleRadius)));
+        Mdouble distance;
+        Vec3D normal;
+        
+        // Place particles
+        for (int i = 0; i < Nx; i++)
+            for (int j = 0; j < Ny; j++)
+                for (int k = 0; k < Nz; k++) {
+                    p0.setPosition(Vec3D(getXMin()+(getXMax() - getXMin())*(0.5 + i) / Nx, getYMin()+(getYMax() - getYMin())*(0.5 + j) / Ny, getZMin()+(getZMax() - getZMin())*(0.5 + k) / Nz));
+                    if (!coil->getDistanceAndNormal(p0, distance, normal)) {
+                        particleHandler.copyAndAddObject(p0);
+                    } else {
                         //std::cout<<p0.getPosition()<<std::endl;
                     }
-				}
-	}
-	
-	void actionsBeforeTimeStep()
-    {
-	  if (getTime()>1)
-			coil->move_time(getTimeStep());
-			
-	}
-	
+                }
+        //! [CST:placeparticles]
+    }
+    
+    //! [CST:beforetime]
+    void actionsBeforeTimeStep() {
+        if (getTime() > 1)
+            coil->move_time(getTimeStep());
+
+    }
+    //! [CST:beforetime]
+
+    //! [CST:datamembers]
 public:
     double particleRadius;
     LinearViscoelasticSpecies* species;
@@ -129,10 +142,26 @@ public:
     InfiniteWall* bottomWall;
     InfiniteWall* leftWall;
     InfiniteWallWithHole* rightWall;
+    //! [CST:datamembers]
 };
+//! [CST:class]
 
-int main(int argc UNUSED, char *argv[] UNUSED)
-{
-	CoilSelfTest problem;
-	problem.solve();
+//! [CST:main]
+int main(int argc UNUSED, char *argv[] UNUSED) {
+    
+    // create CoilSelfTest object
+    CoilSelfTest problem;
+    
+    // set some basic problem properties
+    problem.setName("CoilSelfTest");
+    problem.setSystemDimensions(3);
+    problem.setTimeStep(0.02 * 0.05);
+    problem.setTimeMax(2.0);
+    problem.setSaveCount(helpers::getSaveCountFromNumberOfSavesAndTimeMaxAndTimestep(1000, problem.getTimeMax(), problem.getTimeStep()));
+    
+    // actually solving the problem
+    problem.solve();
+    
 }
+//! [CST:main]
+// the end

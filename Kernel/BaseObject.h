@@ -118,9 +118,5 @@ private:
      * \brief unique identifier within handler (remains constant even if particle is moved)
      */
     unsigned int id_;
-
-    /*!
-     * \todo put the handler_ back in
-     */
 };
 #endif

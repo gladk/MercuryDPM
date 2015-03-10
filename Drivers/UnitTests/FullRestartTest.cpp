@@ -131,15 +131,15 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     FullRestartTest normal;
     normal.setName("FullRestartTest_Normal");
     normal.setupInitialConditions();
-    normal.getRestartFile().open();
+    normal.restartFile.open();
     normal.writeRestartFile();
     
     FullRestartTest restart;
     restart.readRestartFile("FullRestartTest_Normal.restart");
     restart.setName("FullRestartTest_Restart");
-    restart.getRestartFile().close();
-    restart.getRestartFile().setOpenMode(std::fstream::out);
-    restart.getRestartFile().open();
+    restart.restartFile.close();
+    restart.restartFile.setOpenMode(std::fstream::out);
+    restart.restartFile.open();
     restart.writeRestartFile();
     restart.write(std::cout);
 }

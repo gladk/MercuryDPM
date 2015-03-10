@@ -25,64 +25,64 @@
 
 // Tutorial 2
 
+/*
+** This file is annotated with DoxyFile comments in order to show the code on
+** the documentation - This is not needed for your real drivers.
+** Please ignore these comments.
+*/
+
 #include <Species/LinearViscoelasticSpecies.h>
-#include "Mercury3D.h"
-#include "Particles/BaseParticle.h"
+#include <Mercury3D.h>
+#include <Particles/BaseParticle.h>
 
 class Tutorial2 : public Mercury3D
 {
-public:
+  public:
 
-void setupInitialConditions()
-{	
-BaseParticle p0;
-p0.setRadius(0.05);
-p0.setPosition(Vec3D(0.5*getXMax(),0.5*getYMax(),getZMax()));
-p0.setVelocity(Vec3D(0.0,0.0,0.0));
-particleHandler.copyAndAddObject(p0);
-}
+  void setupInitialConditions()
+  {	
+    BaseParticle p0;
+    p0.setRadius(0.05);
+    p0.setPosition(Vec3D(0.5*getXMax(),0.5*getYMax(),getZMax()));
+    p0.setVelocity(Vec3D(0.0,0.0,0.0));
+    particleHandler.copyAndAddObject(p0);
+  }
 
 };
 
 int main(int argc, char *argv[])
 {
 
-// Problem setup
-Tutorial2 problem;
+  // Problem setup
+  Tutorial2 problem;
 
-//
-problem.setName("Tutorial2");
-problem.setSystemDimensions(3);
-problem.setGravity(Vec3D(0.0,0.0,-9.81));
-problem.setXMax(1.0);
-problem.setYMax(1.0);
-problem.setZMax(5.0);
-problem.setTimeMax(1.5);
-//
+  problem.setName("Tutorial2");
+  problem.setSystemDimensions(3);
+  problem.setGravity(Vec3D(0.0,0.0,-9.81));
+  problem.setXMax(1.0);
+  problem.setYMax(1.0);
+  problem.setZMax(5.0);
+  problem.setTimeMax(1.5);
 
 //! [T2:speciesProp]
-// The normal spring stiffness and normal dissipation is computed and set as 
-// For collision time tc=0.005 and restitution coefficeint rc=1.0, 
-auto species = problem.speciesHandler.copyAndAddObject(LinearViscoelasticSpecies());
-species->setDensity(2500.0); // sets the species type-0 density
-species->setStiffness(258.5);// sets the spring stiffness
-species->setDissipation(0.0);// sets the dissipation
+  // The normal spring stiffness and normal dissipation is computed and set as 
+  // For collision time tc=0.005 and restitution coefficeint rc=1.0, 
+  auto species = problem.speciesHandler.copyAndAddObject(LinearViscoelasticSpecies());
+  species->setDensity(2500.0); // sets the species type-0 density
+  species->setStiffness(258.5);// sets the spring stiffness
+  species->setDissipation(0.0);// sets the dissipation
 //! [T2:speciesProp]
 
-//
-problem.setSaveCount(10);
-problem.getDataFile().setFileType(FileType::ONE_FILE);
-problem.getRestartFile().setFileType(FileType::ONE_FILE);
-problem.getFStatFile().setFileType(FileType::NO_FILE);
-problem.getEneFile().setFileType(FileType::NO_FILE);
-//
+  problem.setSaveCount(10);
+  problem.dataFile.setFileType(FileType::ONE_FILE);
+  problem.restartFile.setFileType(FileType::ONE_FILE);
+  problem.fStatFile.setFileType(FileType::NO_FILE);
+  problem.eneFile.setFileType(FileType::NO_FILE);
 
-//
-problem.setXBallsAdditionalArguments("-solidf -v0");	
-//
+  problem.setXBallsAdditionalArguments("-solidf -v0");	
 
-//
-problem.setTimeStep(.005/50.0);// (collision time)/50.0
-problem.solve(argc, argv);
-//
+  problem.setTimeStep(.005/50.0);// (collision time)/50.0
+  problem.solve(argc, argv);
+  
+  return 0;
 }

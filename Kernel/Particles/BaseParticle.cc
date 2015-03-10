@@ -37,7 +37,7 @@
  */
 BaseParticle::BaseParticle()
 {
-    handler_ = 0;
+    handler_ = nullptr;
     displacement_.setZero();
     radius_ = 1.0;
     mass_ = invMass_ = 1.0;
@@ -46,23 +46,24 @@ BaseParticle::BaseParticle()
     
     periodicFromParticle_ = nullptr;
 #ifdef CONTACT_LIST_HGRID
-    firstPossibleContact=0;
+    firstPossibleContact = nullptr;
 #endif
-    HGridNextObject_ = 0;
-    HGridPrevObject_ = 0;
+    HGridNextObject_ = nullptr;
+    HGridPrevObject_ = nullptr;
     HGridLevel_ = 99999;
     HGridX_ = 99999;
     HGridY_ = 99999;
     HGridZ_ = 99999;
     
-#ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "BaseParticle::BaseParticle() finished"<<std::endl;
-#endif        
+    logger(DEBUG, "BaseParticle::BaseParticle() finished");
 }
 
 /*!
- * \details copy constructor.
- * Consider using the copy() function for polymorphism.
+ * \details Constructor that copies most of the properties of the given particle.
+ *          Please note that not everything is copied, for example the position 
+ *          in the HGrid is not determined yet by the end of this constructor. 
+ *          It also does not copy the interactions and the pointer to the handler
+ *          that handles this particle. Use with care.
  * \param[in,out] p  Reference to the BaseParticle this one should become a copy of.
  */
 BaseParticle::BaseParticle(const BaseParticle &p)
@@ -76,8 +77,8 @@ BaseParticle::BaseParticle(const BaseParticle &p)
     inertia_ = p.getInertia();
     invInertia_ = p.getInvInertia();
     
-    HGridNextObject_ = 0;
-    HGridPrevObject_ = 0;
+    HGridNextObject_ = nullptr;
+    HGridPrevObject_ = nullptr;
     HGridX_ = 99999;
     HGridY_ = 99999;
     HGridZ_ = 99999;
@@ -85,30 +86,27 @@ BaseParticle::BaseParticle(const BaseParticle &p)
     
     periodicFromParticle_ = p.periodicFromParticle_;
 #ifdef CONTACT_LIST_HGRID
-    firstPossibleContact=0;
+    firstPossibleContact = nullptr;
 #endif
-#ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "BaseParticle::BaseParticle(BaseParticle &p) finished"<<std::endl;
-#endif            
+    logger(DEBUG, "BaseParticle::BaseParticle(BaseParticle &p) finished");
 }
 
 /*!
- * \details Destructor
+ * \details Destructor. It asks the ParticleHandler to check if this was the 
+ *          smallest or largest particle and adjust itself accordingly.
  */
 BaseParticle::~BaseParticle()
 {
-    if (getHandler())
+    if (getHandler() != nullptr)
     {
         getHandler()->checkExtremaOnDelete(this);
     }
-#ifdef DEBUG_DESTRUCTOR
-    std::cerr << "BaseParticle::~BaseParticle() finished"<<std::endl;
-#endif    
+    logger(DEBUG, "BaseParticle::~BaseParticle() of particle % finished.", getId());
 }
 
 /*!
  * \details Copy method. Uses copy constructor to create a copy on the heap. 
- * Useful for polymorphism.
+ *          Useful for polymorphism.
  * \return pointer to the particle's copy
  */
 BaseParticle* BaseParticle::copy() const
@@ -118,8 +116,8 @@ BaseParticle* BaseParticle::copy() const
 
 /*!
  * \details Returns the volume of the BaseParticle, which is calculated using
- * its number of dimensions and radius.
- * \return the actual volume
+ *          its number of dimensions and radius.
+ * \return The actual volume of this BaseParticle.
  */
 Mdouble BaseParticle::getVolume() const
 {
@@ -177,11 +175,12 @@ void BaseParticle::unfix()
 
 /*!
  * \details BaseParticle print method, which accepts an os std::ostream as 
- * input. It prints human readable BaseParticle information to the std::ostream
- * \param[out] os    stream to which the info is written
+ *          input. It prints human readable BaseParticle information to the 
+ *          std::ostream.
+ * \param[in,out] os    stream to which the info is written
  */
 void BaseParticle::write(std::ostream& os) const
-        {
+{
     BaseInteractable::write(os);
     os << " radius " << radius_
             << " invMass " << invMass_
@@ -190,7 +189,7 @@ void BaseParticle::write(std::ostream& os) const
 
 /*!
  * \details Returns the name of the object; in this case 'BaseParticle'.
- * \return the object name.
+ * \return The object name.
  */
 std::string BaseParticle::getName() const
 {
@@ -199,10 +198,11 @@ std::string BaseParticle::getName() const
 
 /*!
  * \details Particle read function. Has an std::istream as argument, from which 
- * it extracts the radius_, invMass_ and invInertia_, respectively. From these 
- * the mass_ and inertia_ are deduced. An additional set of properties is read 
- * through the call to the parent's method BaseInteractable::read().
- * \param[in,out] is    istream with particle properties.
+ *          it extracts the radius_, invMass_ and invInertia_, respectively. 
+ *          From these the mass_ and inertia_ are deduced. An additional set of 
+ *          properties is read through the call to the parent's method
+ *          BaseInteractable::read().
+ * \param[in,out] is    input stream with particle properties.
  */
 void BaseParticle::read(std::istream& is)
 {
@@ -221,12 +221,12 @@ void BaseParticle::read(std::istream& is)
 
 /*!
  * \details This is the previously used version of the read function. Now just kept
- * for legacy purposes. 
+ *          for legacy purposes. 
  * \deprecated Should be gone in Mercury 2.0. Use BaseParticle::read() instead.
  */
 void BaseParticle::oldRead(std::istream& is)
 {
-    ///todo{fix this function}
+    ///\todo{fix this function} IFCD: what is broken about it?
 
     unsigned int indSpecies;
     Vec3D orientation;
@@ -247,8 +247,8 @@ void BaseParticle::oldRead(std::istream& is)
 
 /*!
  * \details Adds the particle's HGridLevel_ and HGRid x/y/z positions to an 
- * std::ostream.
- * \param[out] os    the ostream which has the mentioned properties added.
+ *          std::ostream.
+ * \param[in,out] os    the ostream which has the mentioned properties added.
  */
 void BaseParticle::printHGrid(std::ostream& os) const
         {
@@ -287,10 +287,10 @@ BaseParticle* BaseParticle::getHGridPrevObject() const
     return HGridPrevObject_;
 }
 
+#ifdef CONTACT_LIST_HGRID
 /*!
  * \details 
  */
-#ifdef CONTACT_LIST_HGRID
 PossibleContact* BaseParticle::getFirstPossibleContact() const
 {   
     return firstPossibleContact;
@@ -436,7 +436,7 @@ const Vec3D& BaseParticle::getPreviousPosition() const
  * moving to that class.
  */ 
 const Vec3D BaseParticle::getDisplacement2(Mdouble xmin, Mdouble xmax, Mdouble ymin, Mdouble ymax, Mdouble zmin, Mdouble zmax, Mdouble t) const
-        {
+{
     Vec3D disp = getPosition() - getPreviousPosition();
     if (xmax > xmin && fabs(disp.X) > .5 * (xmax - xmin))
     {
@@ -580,21 +580,18 @@ void BaseParticle::setRadius(const Mdouble radius)
         getHandler()->checkExtrema(this);
     }
 }
-
 /*!
  * \details Sets the mass_ of the particle
  * \param[in] mass  the new particle's  mass
- * \todo (AT) The mass could theoretically now be set without resetting the radius
- * to match the species' density. The BaseParticle::setRadius() function DOES reset
- * the mass to match the density. I'd say both should implement the adaptation of
- * the other, with a match CHECK implemented in at least one of them (to prevent 
- * an infinite loop).
  */
 void BaseParticle::setMass(const Mdouble mass)
 {
-    if (mass >= 0.0)
+    logger(WARN, "WARNING: Do not use particle->setMass, instead use "
+            "particleSpecies->computeMass, since this function can cause "
+            "inconsistencies between the mass, density and radius of this particle!");
+    if(mass >= 0.0)
     {
-        if (invMass_ != 0.0)
+        if(invMass_ != 0.0) //InvMass=0 is a flag for a fixed particle
         {
             mass_ = mass;
             invMass_ = 1.0 / mass;
@@ -602,10 +599,9 @@ void BaseParticle::setMass(const Mdouble mass)
     }
     else
     {
-        std::cerr << "Error in set_Mass(" << mass << ")" << std::endl;
-        exit(-1);
+        logger(ERROR, "Error in BaseParticle::setMass, the given mass to be set must be positive.");
     }
-} //InvMass=0 is a flag for a fixed particle
+} 
 
 /*!
  * \details This is used to set the particle displacement_ 
@@ -718,7 +714,7 @@ BaseInteraction* BaseParticle::getInteractionWith(BaseParticle *P, Mdouble timeS
     }
     else
     {
-        return 0;
+        return nullptr;
     }
 }
 
@@ -730,6 +726,10 @@ BaseInteraction* BaseParticle::getInteractionWith(BaseParticle *P, Mdouble timeS
  */
 void BaseParticle::integrateBeforeForceComputation(double time, double timeStep)
 {
+    ///\todo If the position is described by the used, one should also call 
+    ///BaseInteractabld::integrateBeforeForceComputation. To check if it works 
+    ///correctly, remove the p0.fixParticle() line from the DrivenParticleUnitTest
+    ///\author irana
     if (getInvMass() == 0.0)
     {
         BaseInteractable::integrateBeforeForceComputation(time, timeStep);
@@ -782,13 +782,13 @@ unsigned int BaseParticle::getParticleDimensions() const
 /*!
  * \details Set the particle's species and species' index. Logs a warning if
  * no ParticleHandler is assigned. 
- * \param[in] indSpecies    the species' index
+ * \param[in] indSpecies    The index of the species in the SpeciesHandler.
  */
 void BaseParticle::setIndSpecies(unsigned int indSpecies)
 {
     if (handler_ != nullptr)
     {
-        setSpecies(getHandler()->getDPMBase()->speciesHandler.getObject(indSpecies));
+        setSpecies(handler_->getDPMBase()->speciesHandler.getObject(indSpecies));
         ///\todo TW do we have to update the species stored in the interactions here?
     }
     else
@@ -801,22 +801,25 @@ void BaseParticle::setIndSpecies(unsigned int indSpecies)
 }
 
 /*!
- * \details Sets the particle's species
+ * \details Sets the particle's species. If this particle does not have a 
+ *          handler yet, this function also assigns the ParticleHandler in the 
+ *          same DPMBase as the SpeciesHandler of the given species as its handler.
  * \param[in] species   pointer to the ParticleSpecies object, to be set as the 
- * particle's species.
+ *                      particle's species.
  */
 void BaseParticle::setSpecies(const ParticleSpecies* species)
 {
     BaseInteractable::setSpecies(species);
 
-    //set pointer to particle Handler, which is needed to retrieve species information
-    if (getHandler()== nullptr)
+    //set pointer to the ParticleHandler handler_, which is needed to retrieve 
+    //species information
+    if (handler_ == nullptr)
     {
         SpeciesHandler* sH = species->getHandler();
-        if (sH!= nullptr)
+        if (sH != nullptr)
         {
             DPMBase* dB = sH->getDPMBase();
-            if (dB!= nullptr)
+            if (dB != nullptr)
             {
                 setHandler(&dB->particleHandler);
             }

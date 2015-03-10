@@ -54,15 +54,11 @@ InfiniteWall::~InfiniteWall()
 }
 
 /*!
- * Wall copy method. It calls the copy contructor of this Wall, useful for polymorphism
+ * Wall copy method. It calls the copy constructor of this Wall, useful for polymorphism
  */
 InfiniteWall* InfiniteWall::copy() const
 {
     return new InfiniteWall(*this);
-}
-
-void InfiniteWall::clear()
-{
 }
 
 /*
@@ -95,7 +91,7 @@ void InfiniteWall::setNormal(const Vec3D normal)
 void InfiniteWall::set(Vec3D normal, Mdouble positionInNormalDirection)
 {
     logger(WARN, "InfiniteWall::set(Vec3D, Mdouble) is deprecated. Use set(Vec3D, Vec3D) instead.");
-    set(normal,positionInNormalDirection*normal);
+    set(normal, positionInNormalDirection*normal);
 }
 
 /*!
@@ -146,7 +142,7 @@ void InfiniteWall::read(std::istream& is)
     BaseWall::read(is);
     std::string dummy;
     is >> dummy >> normal_;
-    is >> dummy >>factor_;
+    is >> dummy >> factor_;
 }
 
 /*!
@@ -169,7 +165,7 @@ void InfiniteWall::write(std::ostream& os) const
 {
     BaseWall::write(os);
     os << " normal " << normal_
-            << " factor "<<factor_;
+       << " factor "<< factor_;
 }
 
 /*!

@@ -1,0 +1,29 @@
+/*! \mainpage MercuryDPM Reference Manual
+    \anchor main_page
+MercuryDPM is a free, open source software package for performing discrete particle simulations. This aim of this manual is to provide all the necessary information to guide a new user through the installation process, the use of Mercury to explore a variety of common industrial and natural systems, and even the creation of new code to model complex and novel systems. \n
+
+ 
+
+\ref installing \n
+\ref IntroductionToTheCode \n
+\ref DirectoryStructure \n
+\ref Tutorials \n
+\ref analysing \n
+\ref Netbeans
+
+For more information regarding the code, visit http://mercurydpm.org/
+
+*/
+
+/*! \page Netbeans Set up Netbeans editor to compile Mercury DPM
+Writing, compiling, and debugging code is easier if you use a integrated development environment (IDE), such as NetBeans. 
+
+To use MercuryDPM with Netbeans:
+- Install Netbeans for C/C++ from https://netbeans.org/downloads/ and run the application.
+- Click on <em>%File -> New Project</em> and click <em>Next</em>. 
+- Specify the folder in which you have installed Mercury (e.g., <em>~/MercuryDPM/Alpha/</em>), select <em>Custom</em> configuration mode and click <em>Next</em>. 
+- Click on <em>Run configure script in subfolder</em>, then click <em>Next</em> repeatedly until the button gets disabled. 
+- Finally, click <em>Finish</em>. 
+
+Now your project will be set up, which will take a few minutes. After that, you are ready to go.
+*/

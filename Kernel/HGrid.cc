@@ -115,12 +115,6 @@ void HGrid::insertParticleToHgrid(BaseParticle *obj)
 
 /*!
  * \details Computes a hash from parameters, the result is in range [0, numberOfBuckets_-1].
- * \todo Note, here we convert from a int to a long int and back; I assume this is 
- * done to ensure that there is no overflow, but it is ugly code, IMHO.
- * If so, why don't we take the modulo first, i.e. h1 %= numberOfBuckets_; 
- * it will have the same result, and since numberOfBuckets_ should be nowhere 
- * near the overflow value, we can savely use unsigned int everywhere (including the int x,y,z,l values!!).
- * Can someone confirm this? \author weinhartt
  * \param[in] x The coordinate of the cell in x direction for which the hash must be computed.
  * \param[in] y The coordinate of the cell in y direction for which the hash must be computed.
  * \param[in] z The coordinate of the cell in z direction for which the hash must be computed.

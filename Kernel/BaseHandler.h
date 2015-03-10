@@ -36,14 +36,11 @@
 #include "Math/Helpers.h"
 #include "Logger.h"
 
-///\todo TW: someone help: how do I add a logger here? Guess its implemented. Did you mean something else TW?
-
 class DPMBase;
 
 /*!
  * \class BaseHandler
- * \brief Container to store all objects that one creates in a simulation. This is where a container to store an umpteen number of pointers is created
- * . Its just pointers everywhere ;)
+ * \brief Container to store the pointers to all objects that one creates in a simulation. 
  * \details The BaseHandler allows one to create a container to store all pointer objects of a templated type T 
  * It is implemented by a (protected) vector of pointers to objects of type T. Once the container is created, the BaseHandler
  * also provides the provision to manipulate the pointers i.e. by accessing, adding, deleting and few more operations by using its
@@ -60,7 +57,7 @@ public:
     BaseHandler();
 
     /*!
-     * \brief Copy constructor, it copies the content of BaseHandler it contains.
+     * \brief Constructor that copies the objects of the given handler into itself and sets other variables to 0/nullptr.
      */
     BaseHandler(const BaseHandler<T>& BH);
 
@@ -199,14 +196,13 @@ public:
     virtual std::string getName() const = 0;
 
 protected:
-    //This should not be private. That's just annoying. @dducks
     /*!
      * \brief The actual list of Object pointers
      * 
      * The list of Object pointers. This handler is responsible for the memory-deallocation
      * of these objects.
      */
-    std::vector<T*> objects_;
+    std::vector<T*> objects_;    
     
 private:
     /*!
@@ -235,29 +231,28 @@ template<class T> BaseHandler<T>::BaseHandler()
 {
     DPMBase_ = nullptr;
     clear();
-#ifdef DEBUG_CONSTRUCTOR
     logger(DEBUG, "Basehandler<T>::BaseHandler() finished");
-    //std::cout << "BaseHandler<T>::BaseHandler() finished" << std::endl;
-#endif
 }
 
-///\param[in] BH A reference to the BaseHandler that has to be copied.
+/*!
+ * \param[in] BH A reference to the BaseHandler that has to be copied.
+ * \details This is not a copy constructor! It only copies the vector objects_
+ *          from the given handler, and sets all other variables to 0/nullptr.
+ * \todo Should max objects be set to the number of objects after this constructor?
+ *       Maybe in copyContentsFromOtherHandler?
+ */
 template<class T> BaseHandler<T>::BaseHandler(const BaseHandler<T>& BH)
 {
     DPMBase_ = nullptr;
     clear();
     copyContentsFromOtherHandler(BH);
-#ifdef DEBUG_CONSTRUCTOR
     logger(DEBUG,"BaseHandler<T>::BaseHandler(const BaseHandler &BH) finished");
-#endif
 }
 
 template<class T> BaseHandler<T>::~BaseHandler()
 {
     clear();
-#ifdef DEBUG_DESTRUCTOR
     logger(DEBUG, "BaseHandler<T>::~BaseHandler() finished");
-#endif
 }
 
 ///\param[in] BH A reference to the BaseHandler of which the objects have to be copied.
@@ -269,7 +264,7 @@ template<class T> void BaseHandler<T>::copyContentsFromOtherHandler(const BaseHa
     }
 }
 
-///\param[in] BH A reference to the BaseHandler of which the objects have to be copied.
+///\param[in] O A reference to the BaseHandler of which the objects have to be copied.
 template<class T> template<class U> U* BaseHandler<T>::copyAndAddObject(const U& O)
 {
     U* oCopy = O.copy();
@@ -303,13 +298,13 @@ template<class T> void BaseHandler<T>::addObject(T* O)
 /*!
  * This methods removes a particle. This methods invalidates ANY iterators to
  * particles in this container. This method may shuffle the order of objects in this container.
- * \param[in] id An unsigned integer that gives the id of the Object that has to be removed.
+ * \param[in] index An unsigned integer that gives the id of the Object that has to be removed.
  */
-template<class T> void BaseHandler<T>::removeObject(unsigned const int id)
+template<class T> void BaseHandler<T>::removeObject(unsigned const int index)
 {
-    if (id >= getNumberOfObjects())
+    if (index >= getNumberOfObjects())
     {
-        logger(ERROR, "In: void %::removeOject(const unsigned int id) const, no object exists with index %, number of objects is %", getName(), id, getNumberOfObjects());
+        logger(ERROR, "In: void %::removeOject(const unsigned int index) const, no object exists with index %, number of objects is %", getName(), index, getNumberOfObjects());
         return;
     }
     
@@ -320,24 +315,24 @@ template<class T> void BaseHandler<T>::removeObject(unsigned const int id)
     //with the last one (in case it already is, it is invariant); then
     //remove the last one.
     //So, we want the last index.
-    std::size_t lastIdx = objects_.size() - 1;
+    std::size_t lastIndex = objects_.size() - 1;
   
     //So, step one, retrieve the pointer
-    T* objectToDelete = objects_[id];
+    T* objectToDelete = objects_[index];
 
-    if (id != lastIdx) //Are we not the last object?
+    if (index != lastIndex) //Are we not the last object?
     {
       //well.. let's swap.
-      T* objectToMove = objects_[lastIdx];
+      T* objectToMove = objects_[lastIndex];
 
-      objects_[id] = objectToMove; //place it back
-      objects_[lastIdx] = objectToDelete; //Just to make sure.
+      objects_[index] = objectToMove; //place it back
+      objects_[lastIndex] = objectToDelete; //Just to make sure.
 
       //and notify it of the change.
-      objects_[id]->moveInHandler(id);
+      objects_[index]->moveInHandler(index);
       //Even though we are going to delete this particle,
       //we still need to keep it consistent.
-      objects_[lastIdx]->moveInHandler(lastIdx);
+      objects_[lastIndex]->moveInHandler(lastIndex);
     }
     
     //And _NOW_ we delete it.
@@ -411,44 +406,44 @@ template<class T> T* BaseHandler<T>::getObjectById(const unsigned int id)
         if (obj->getId() == id) //Found it, so return!
             return obj;
     }
-    logger(ERROR, "Object with id % could not be found.", id);
+    logger(ERROR, "[BaseHandler::getObjectById()] in Object* %: Object with ID % could not be found.", getName(), id);
     return nullptr;
 }
 
-///\param[in] id the index of the requested Object.
+///\param[in] index the index of the requested Object.
 ///\return A pointer to the requested Object.  
-template<class T> T* BaseHandler<T>::getObject(const unsigned int id)
+template<class T> T* BaseHandler<T>::getObject(const unsigned int index)
 {
 #ifdef NDEBUG
-    return objects_[id];
+    return objects_[index];
 #else
-    if (id >= getNumberOfObjects())
+    if (index >= getNumberOfObjects())
     {
-        logger(ERROR, "Object couldn't be found because ID (%) is higher than number of objects. (Handler = %)", id, getName());
+        logger(ERROR, "[BaseHandler::getObject(const unsigned int index)] in Object* %: Object couldn't be found because index (%) is higher than number of objects.", getName(), index);
         return nullptr;
     }
     else
     {
-        return objects_[id];
+        return objects_[index];
     }
 #endif
 }
 
-/// \param[in] id the index of the requested Object.
+/// \param[in] index the index of the requested Object.
 /// \return A constant pointer to the requested Object.
-template<class T> const T* BaseHandler<T>::getObject(const unsigned int id) const
+template<class T> const T* BaseHandler<T>::getObject(const unsigned int index) const
 {
 #ifdef NDEBUG
-    return objects_[id];
+    return objects_[index];
 #else
-    if (id >= getNumberOfObjects())
+    if (index >= getNumberOfObjects())
     {
-        logger(ERROR, "In: Object* % :getObject(const unsigned int id) const. No Object exist with index % number of objects is %", getName(), id, getNumberOfObjects());
+        logger(ERROR, "[BaseHandler::getObject(const unsigned int index) const] in Object* %: No object exist with index % number of objects is %", getName(), index, getNumberOfObjects());
         return nullptr;
     }
     else
     {
-        return objects_[id];
+        return objects_[index];
     }
 #endif
 }
@@ -466,7 +461,6 @@ template<class T> const T* BaseHandler<T>::getLastObject() const
 }
 
 ///\return The number of Objects in this BaseHandler.
-///\todo TW: should we change this to size_type?
 template<class T> unsigned int BaseHandler<T>::getNumberOfObjects() const
 {
     return objects_.size();
@@ -522,7 +516,7 @@ template<class T> DPMBase* BaseHandler<T>::getDPMBase()
 #else
     if (DPMBase_ == nullptr)
     {
-        logger(ERROR, "%::getDPMBase(): pointer to DPMBase class is not set.", getName());
+        logger(ERROR, "[BaseHandler::getDPMBase()] in Object* %: pointer to DPMBase class is not set.", getName());
     }
     return DPMBase_;
 #endif
@@ -536,7 +530,7 @@ template<class T> DPMBase* BaseHandler<T>::getDPMBase() const
 #else
     if (DPMBase_ == nullptr)
     {
-        logger(ERROR, "%::getDPMBase(): pointer to DPMBase class is not set.", getName());
+        logger(ERROR, "[BaseHandler::getDPMBase() const] in Object* %: pointer to DPMBase class is not set.", getName());
     }
     return DPMBase_;
 #endif

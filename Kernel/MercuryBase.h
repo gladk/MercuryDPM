@@ -49,9 +49,16 @@ enum HGridMethod
 };
 
 /*!
- * \brief   Enum class that indicates what the ratio of the size of the cells in 
+ * \brief   Enum that indicates what the ratio of the size of the cells in 
  *          different levels is.
- * \todo    Look up in the HGrid what the different values mean.
+ * \details The options for the distribution of cell-sizes are:
+ *          - OLDHGRID Each cell is twice as big as the one below it, for example
+ *            (1, 2, 4, 8, ...).
+ *          - LINEAR The difference between the cell sizes at each level is the 
+ *            same, for example (1, 2, 3, 4, ...).
+ *          - EXPONENTIAL Each cell size is a constant factor c > 1 bigger than 
+ *            the one below it, for example with c = 3, (1, 3, 9, 27, ...).
+ *          - USER The cell sizes are defined by the user.
  */
 enum HGridDistribution
 {
@@ -182,12 +189,12 @@ public:
     /*!
      * \brief Gets the desired size of the smallest cells of the HGrid.
      */
-    virtual double getHGridTargetMinInteractionRadius() const;
+    virtual Mdouble getHGridTargetMinInteractionRadius() const;
     
     /*!
      * \brief Gets the desired size of the largest cells of the HGrid.
      */
-    virtual double getHGridTargetMaxInteractionRadius() const;
+    virtual Mdouble getHGridTargetMaxInteractionRadius() const;
     
     /*!
      * \brief Checks if given BaseParticle has an interaction with a BaseWall or other BaseParticle.
@@ -197,7 +204,7 @@ public:
     /*!
      * \brief Virtual function that enables inheriting classes to implement a function to let the user set the cell size of the HGrid.
      */
-    virtual double userHGridCellSize(unsigned int level);
+    virtual Mdouble userHGridCellSize(unsigned int level);
 
 protected:
     

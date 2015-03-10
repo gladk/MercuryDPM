@@ -1,0 +1,452 @@
+
+/*! \page Tutorials Fun with MercuryDPM (Guide for tutorials)
+
+The idea behind these tutorials, listed below, is to help the user improve his/her rapport with coding and problem solving in MercuryDPM. Most of the tutorials are designed to solve a simple problem. Each tutorial illustrates a new feature of MercuryDPM and gradually builds up on its level of difficulty.\n
+\n
+- \subpage BeginnerTutorials
+- \subpage AdvancedTutorials
+
+Note: In case of any typos or suggestions for new tutorials, please do not hesitate to contact the MercuryDPM team.
+
+(Return to \ref main_page "the main page")
+*/
+
+/*! \page BeginnerTutorials Beginner tutorials
+This page contains the following tutorials: \n
+
+- \ref T1
+- \ref T2
+- \ref T3
+- \ref T4
+- \ref T5
+- \ref T6
+- \ref T7
+- \ref T8
+- \ref T9
+
+\section T1 T1: Particle motion in outer space
+\image html Tutorials/T1/T1_fig1_particle.jpg Particle moving with a constant velocity in outer space.
+###Problem description: 
+%File \b Tutorial1.cpp is setup to simulate a particle moving with a constant velocity in the absence of gravity, i.e. \f$ g= 0 m/s^2\f$. Below we describe each bit of the \b T1.cpp in detail.\n
+
+###Headers:
+To setup this problem code, below are the necessary headers (from the kernel) and the standard libraries, we include in \b Tutorial1.cpp. 
+\snippet Drivers/Tutorials/Tutorial1.cpp T1:headers
+Details concerning the above included headers (from the kernel) can be found in
+
+###Class Tutorial1:
+A class named \a Tutorial1 inherits from \a Mercury3D and is defined as below
+\snippet Drivers/Tutorials/Tutorial1.cpp T1:class
+The below function creates and sets up  the problems’ initial conditions
+\code void setupInitialConditions()\endcode
+
+###How to create a particle?
+A particle is created and copied in a manner shown below
+\snippet Drivers/Tutorials/Tutorial1.cpp T1:createParticle
+\a p0 is an instance of the class \a BaseParticle and its properties like radius, initial position and velocity are set as above. The bit \code particleHandler.copyAndAddObject(p0)\endcode creates the particle \a p0 and adds a copy of it needed for the simulation.
+
+###Main function:
+In the main function, 
+\# Problem properties, such as gravity, spatial dimensions (x,y,z), total run time are set as below
+\snippet Drivers/Tutorials/Tutorial1.cpp T1:problemSetup
+\# A particle can be of any type. There exist a variety of particle types, e.g. glass, plastic etc. Each of them behave differently when in action. Initially, when a particle is created, it attains the properties of a default species type with ‘0’ as its index. However, one can changes the species properties, as below.
+\snippet Drivers/Tutorials/Tutorial1.cpp T1:speciesProp
+\# Data output is vital to analyse simulations, which leads to defining ways to save the simulation data for post processing.\n
+The simulations generate several types of data files. See \ref OutputFiles.\n
+Below we set the flags corresponding to each data file type.
+\snippet Drivers/Tutorials/Tutorial1.cpp T1:output
+\# For XBalls users, additional display options can be set as below
+\snippet Drivers/Tutorials/Tutorial1.cpp T1:visualOutput  
+\# After all the simulation parameters are set, we reach a point where we put all the above bits of code in action by the following statements
+\snippet Drivers/Tutorials/Tutorial1.cpp T1:solve
+To see the above snippets as a whole, goto \ref T1code
+
+\section T2 T2: Particle motion on earth
+\image html Tutorials/T2/T2_fig1_particle.jpg Particle falling due to gravity.
+####Problem descritpion:
+In \b Tutorial2.cpp, we simulate a particle when dropped under the influence of gravity, \f$ g = 9.81 m/s^2\f$. Basically this is an extension of \b T1.cpp with few minor changes. All we need to do is change the following \n
+- initial particle position and velocity in Class Tutorial2
+\code
+p0.setPosition(0.5*getXMax(),0.5*getYMax(),getZMax());
+p0.setVelocity(Vec3D(0.0,0.0,0.0));
+\endcode
+- gravity vector in the main function of \b Tutorial2.cpp
+\code
+problem.setGravity(Vec3D(0.0,0.0,-9.81));
+\endcode
+
+To see the whole code with the above snippets included, goto \ref T2code
+
+\section T3 T3: Bouncing ball (elastic)
+\image html Tutorials/T3/T3_fig1_particle_wall.jpg Particle bouncing off the blue wall.
+####Problem description: 
+In \b Tutorial3.cpp, we simulate a particle bouncing off a wall assuming the collision between the particle and the wall is elastic. By elastic we mean that the particle velocity before and after collision remains the same. Implying that the restitution coefficient is unity. Additionally, we will learn how to add a wall over which the ball bounces.
+
+####Headers:
+\snippet Drivers/Tutorials/Tutorial3.cpp T3:headers
+In order to add a wall to our problem setup we need to consider including the header 
+\code #include “Walls/InfiniteWall.h” \endcode
+
+#### Class Tutorial3:
+\snippet Drivers/Tutorials/Tutorial3.cpp T3:class
+The above class is basically an extension when compared to Class Tutorial1 or Class Tutorial2. Only difference being the addition of the wall which is done as shown in the snippet below
+\snippet Drivers/Tutorials/Tutorial3.cpp T3:infiniteWall
+The above set of statements, create and place the wall at \f$ Z_{min} \f$.\n 
+
+Note: Don’t forget to include the InfiniteWall.h header, as shown in the header section. In some sense, creation and addition of a wall is similar to creation and addition of a particle.
+
+#### Main function:
+As usual, the problem is setup in the main function, see \ref T3code.
+
+\section T4 T4: Bouncing ball with dissipation (inelastic)
+
+####Problem description:
+In \b Tutorial4.cpp, the difference between an elastic and inelastic collision between a particle and a wall is illustrated. The only difference between \b T3.cpp and \b T4.cpp is the value of the restitution coefficient. In \b T4.cpp, the coefficient of restitution is set to
+\code double rc = 0.88; // restitution coefficient \endcode
+See \ref T4code for more details.
+
+\section T5 T5: Elastic collision (2 particles)
+\image html Tutorials/T5/T5_fig1_two_particles.jpg Particles moving towards each other.
+####Problem description:
+So far, in the above tutorials, we have seen how a particle and a wall interact during a collision.\n
+In this tutorial, we illustrate how two particles interact using \b Tutorial5.cpp. For this purpose, we need two particles.\n
+The particles may or may not be of the same species type. But, here we shall assume they are of same species and same size.\n
+As usual, we begin with including the required headers
+####Headers:
+\snippet Drivers/Tutorials/Tutorial5.cpp T5:headers
+
+####Class Tutorial5:
+\snippet Drivers/Tutorials/Tutorial5.cpp T5:class
+On comparison between the above class and Class Tutorial1, we see how an additional particle is added. In the above class, in function 
+\code void setupParticleInitialConditions(){} \endcode
+two particles are created, and positioned oppositely apart at a certain distance between them. Both the particles, have a certain velocity directing them towards each other. 
+
+####Main function:
+Similar to \b Tutorial1.cpp, the problem is setup in \ref T5code
+
+\section T6 T6: Elastic collisions with periodic boundaries
+\image html Tutorials/T6/T6_fig1_perboun_two_particles.jpg (a) Illustrates the idea behind periodic boundaries, particle exiting boundary b2 re-enters through boundary b1 <br> (b) Illustrates the problem setup.
+####Problem description:
+In the previous tutorial, we illustrated elastic collision between two particles of same type and size traveling towards each other.\n
+In order to have multiple collisions, in the problem setup as Tutorial 5, we will use periodic boundaries in X.
+
+####Headers:
+\snippet Drivers/Tutorials/Tutorial6.cpp T6:headers
+Above are the headers necessary for this problem.
+
+####Class Tutorial6:
+\snippet Drivers/Tutorials/Tutorial6.cpp T6:class
+In the Class Tutorial6\n
+(i) we create two particles of same type and different sizes.\n
+(ii) we setup periodic boundaries in X-direction as
+\snippet Drivers/Tutorials/Tutorial6.cpp T6:periodicBoundary
+
+Note:\n
+To create periodic boundaries one has to include the header ‘Boundaries/PeriodicBoundary.h’.\n
+Be aware that the periodic boundary is not the same as an infinite wall.
+
+####Main function:
+Similar to \b Tutorial5.cpp, the problem is setup to solve, see \ref T6code
+
+\section T7 T7: Motion of a particle in a two dimensional (2D) box
+\image html Tutorials/T7/T7_fig1_particle_2Dbox.jpg Particle motion in a box (blue and black denote the walls).
+####Problem description:
+In previous tutorials, we have seen how a particle interacts with a wall and itself. In this tutorial, we will learn to design boxes of different shapes by using more than one wall. As an example, in absence of gravity, we will simulate a particle moving in a two dimensional square shaped box. We consider two dimensions only for the sake of simplicity.  
+
+In Tutorial 3, we have shown you how to setup a wall. This tutorial builds itself on the same idea i.e. setting up walls.
+####Headers:
+\snippet Drivers/Tutorials/Tutorial7.cpp T7:headers
+We use the same headers as used in Tutorial 3.
+
+####Class Tutorial7:
+\snippet Drivers/Tutorials/Tutorial7.cpp T7:class
+In this class, we setup a 2D square shaped box or a polygon by adding more walls as shown above. In total, we have 4 walls forming our box within which the particle will traverse.
+
+Note: As we simulate in 2D, no walls are set in z-direction.
+
+####Main function:
+As our simulation is two dimensional, we set the system dimensions as 2
+\code problem.setSystemDimensions(2);\endcode
+
+Complete code for the above problem description can be found in \ref T7code
+ 
+\section T8 T8: Motion of a particle in a box with an obstacle
+\image html Tutorials/T8/T8_fig1_particle_2Dbox_obstacle.jpg
+####Problem description:
+We extend the problem setup of Tutorial 7, by adding a rectangular block as shown in the above figure. To create this block of wall or obstacle, we will use the Class FiniteWall. Before we go ahead it is advised to know the difference between an infinite wall and finite wall, see \ref WallTypes. As an example, we create an obstacle using a set of finite walls and place it within the box created using a set of infinite walls. See the above figure.
+####Headers:
+\snippet Drivers/Tutorials/Tutorial8.cpp T8:headers
+####Class Tutorial8:
+\image html Tutorials/T8/T8_fig2_finitewall.jpg
+The class Tutorial7 from the previous tutorial is extended by adding the finite wall setup. See the below snippet.
+\snippet Drivers/Tutorials/Tutorial8.cpp T8:finiteWall
+####Main function:
+Similar to Tutorial 7, the above described problem is setup in \ref T8code
+
+\section T9 T9: Motion of a ball over an inclined plane (Sliding + Rolling)
+\image html Tutorials/T9/T9_fig1_particle_slid_roll_incline.jpg
+
+
+####Problem description:
+####Headers:
+####Class Tutorial9:
+####Main function:
+
+
+\page Tcodes Codes for tutorials 
+
+\section T1code Particle motion in outer space (code)
+Return to tutorial \ref T1
+\includelineno Drivers/Tutorials/Tutorial1.cpp
+Return to tutorial \ref T1
+
+\section T2code Particle motion on earth (code)
+Return to tutorial \ref T2
+\includelineno Drivers/Tutorials/Tutorial2.cpp
+Return to tutorial \ref T2
+
+\section T3code Bouncing ball - elastic (code)
+Return to tutorial \ref T3
+\includelineno Drivers/Tutorials/Tutorial3.cpp
+Return to tutorial \ref T3
+
+\section T4code Bouncing ball - inelastic (code)
+Return to tutorial \ref T4
+\includelineno Drivers/Tutorials/Tutorial4.cpp
+Return to tutorial \ref T4
+
+\section T5code Elastic collision - 2 particles (code)
+Return to tutorial \ref T5
+\includelineno Drivers/Tutorials/Tutorial5.cpp
+Return to tutorial \ref T5
+
+\section T6code Elastic collisions with periodic boundaries (code)
+Return to tutorial \ref T6
+\includelineno Drivers/Tutorials/Tutorial6.cpp
+Return to tutorial \ref T6
+
+\section T7code Motion of a particle in a two dimensional box (code)
+Return to tutorial \ref T7
+\includelineno Drivers/Tutorials/Tutorial7.cpp
+Return to tutorial \ref T7
+
+\section T8code Motion of a particle in a box with an obstacle (code)
+Return to tutorial \ref T8
+\includelineno Drivers/Tutorials/Tutorial8.cpp
+Return to tutorial \ref T8
+
+\section T9code Motion of a ball over an inclined plane (code)
+Return to tutorial \ref T9
+\includelineno Drivers/Tutorials/Tutorial9.cpp
+Return to tutorial \ref T9
+
+
+\section CoilSelfTestCode Particles driven by a rotating coil (code)
+Return to tutorial \ref CoilSelfTest
+\dontinclude Drivers/MercurySimpleDemos/CoilSelfTest.cpp
+\skip #include
+\until the end
+Return to tutorial \ref CoilSelfTest
+
+
+\section ChuteDemoCode Particles on an inclined chute (code)
+Return to tutorial \ref ChuteDemo
+\dontinclude Drivers/ChuteDemos/ChuteDemo.cpp
+\skip #include
+\until the end
+Return to tutorial \ref ChuteDemo
+
+\section RoughBottomDemoCode Particles on a chute with a multilayered bottom (code)
+Return to tutorial \ref RoughBottomDemo
+\dontinclude Drivers/ChuteDemos/roughBottomDemo.cpp
+\skip #include
+\until the end
+Return to tutorial \ref RoughBottomDemo
+
+
+\page WallTypes Different types of walls
+Walls are crucial in most of our problem setups and hence we have a variety of walls to suit the needs of our users.
+\section InfWall Infinite Wall
+\image html Walls/infiniteWall.jpg Infinite wall
+A standard wall is a plane defined  as {x: normal*x=position}, with normal being the outward unit normal vector of the wall. A particle touches a standard wall if position-normal*x<=radius. Given the normal, a wall can be placed at any given position.\n
+The black strip denotes the inner side of the wall. The particles interact with the wall along the blue strip.  
+\section FinWall Finite Wall
+\image html Walls/finiteWall.jpg A block of wall formed by set of infinite walls.
+Finite wall is basically a set of infinite walls or A finite wall is convex polygon defined by a set of normals normal_i and positions position_i. For example, to create a polygonal obstacle (in 2D or 3D), we consider the a set of infinite walls and create the obstacle as an intersection of all the infinite walls. See above figure corresponding to finite walls. 
+
+
+*/
+
+/*! \page AdvancedTutorials Advanced tutorials
+\section AdvancedOverview Overview
+This page contains the following tutorials:\n\n
+
+\b /Drivers/MercurySimpleDemos:
+- CoilSelfTest.cpp: \ref CoilSelfTest
+- 
+
+\b /Drivers/ChuteDemos:
+- ChuteDemo.cpp: 				\ref ChuteDemo
+- roughBottomDemo.cpp: 			\ref RoughBottomDemo
+- hopper_demo.cpp: 				\ref ChuteWithHopper
+- AxiSymmetricHopper.cpp/.h: 	\ref AxiHopper
+- 
+
+\section CoilSelfTest Particles driven by a rotating coil
+### Problem description
+%File \b CoilSelfTest.cpp treats particles placed in a feeder being driven forward by a rotating coil. The entire code of this problem can be viewed here: \ref CoilSelfTestCode.
+
+### Headers
+The following headers are included:
+\snippet Drivers/MercurySimpleDemos/CoilSelfTest.cpp CST:headers
+These are basically the headers used for the beginner tutorials, except for the additional Coil class.
+
+### Class CoilSelfTest
+CoilSelfTest, like many of the previous tutorials, inherits from the Mercury3D class.
+\code class CoilSelfTest : public Mercury3D { \endcode \n
+The different components of the class will be explained in turn in the following.
+
+### Data members
+CoilSelfTest has the following (public) data members:
+\snippet Drivers/MercurySimpleDemos/CoilSelfTest.cpp CST:datamembers
+The six walls are what makes up the rectangular container, which initially contains the particles. The right wall contains a hole,
+which serves as an exit for the particles. The coil is an object on its own (of the Coil class, obviously), and is to be placed right
+in front of the container exit hole. \b particleRadius and \b species determine the particles' radius and species (i.e., material properties),
+respectively.
+
+### SetupInitialConditions()
+The method which sets up the initial conditions of the problem takes up the major part of the driver. \n
+The method starts by a specification of some elementary problem properties, like direction of gravity (-Y), particle radius and the geometrical size of the system. 
+\snippet Drivers/MercurySimpleDemos/CoilSelfTest.cpp CST:initial
+
+Next, the particle species is defined. The particles in this problem will use a linear visco-elastic (normal) contact model.
+The dissipation and stiffness defining the contact model can be set in different ways. In this example the contact model properties are set by giving a collision time, coefficient of restitution and the particle mass. 
+\snippet Drivers/MercurySimpleDemos/CoilSelfTest.cpp CST:species
+
+The particles are initially contained by a container made up of six walls, five of which are defined to be infinite. The wall in the positive Z-direction is different. Its normal is set (<tt>rightWall->set(...</tt>) in the positive Z-direction (<tt>Vec3D(0, 0, 1)</tt>), is set a distance \c zMax_ (which is returned by <tt>getZMax()</tt>) from the origin, and contains a 'hole' (which is practically a horizontal tube, since the wall is 'infinite') around the X-axis of radius \c 1.0 in order to let the particles through. 
+\snippet Drivers/MercurySimpleDemos/CoilSelfTest.cpp CST:walls
+
+After that the Coil object is added. Its properties are subsequently set by using the Coil::set() method, specifying its starting position (the origin, i.e. <tt>Vec3D(0,0,0)</tt>), its length (<tt>1.0</tt>), its radius (<tt>1.0 - particleRadius</tt>), its number of turns (<tt>2.0</tt>), its rotation speed (<tt>-1.0</tt> revelations per second) and its thickness (<tt>0.5 * particleRadius</tt>). \n
+NB: its direction or central axis is not specified, since these are the Z-direction and the Z-axis, respectively, by default.
+\snippet Drivers/MercurySimpleDemos/CoilSelfTest.cpp CST:coil
+
+The particle properties are set subsequently. The particleHandler is cleared just to be sure, the particle to be copied into the container is created and the previously set species is assigned to it. The particle is assigned a zero velocity and the previously defined particle radius.
+\snippet Drivers/MercurySimpleDemos/CoilSelfTest.cpp CST:particle
+
+After specifying the particle properties, the container is filled with copies of the particle. In this example, particles are placed in a rectangular grid pattern, on evenly spaced positions. First, the number of particles that fit in each direction is computed. Then, a triple for-loop passes every possible particle position, and a particle is placed on the position if there's no part of the coil there. 
+\snippet Drivers/MercurySimpleDemos/CoilSelfTest.cpp CST:placeparticles
+
+### actionsBeforeTimeStep()
+The \b actionsBeforeTimeStep() method specifies all actions that need to be performed at the beginning of each time step, i.e. \a before the actual numerical solution at that time step is computed. In this case, it states that from 1 second into the simulation time and onward, the coil should turn with the given rotational speed.
+\snippet Drivers/MercurySimpleDemos/CoilSelfTest.cpp CST:beforetime
+
+### <tt> int %main()</tt>
+In the main program, a CoilSelfTest object is created, after which some of its basic properties are set like its number of dimensions (three), time step and saving parameters. Lastly, the problem is actually solved by calling its \b solve() method. 
+\snippet Drivers/MercurySimpleDemos/CoilSelfTest.cpp CST:main
+
+(Return to \ref AdvancedOverview "Overview of advanced tutorials")
+
+
+\section ChuteDemo Particles on an inclined chute
+### Problem description
+%File \b ChuteDemo.cpp treats particles cascading down an inclined chute. The entire code of this problem can be viewed here: \ref ChuteDemoCode.
+
+\htmlonly
+<video src="chutedemo_compressed.ogv" id="movie" controls height="240"> henk </video>
+\endhtmlonly
+
+### Headers
+The following headers are included:
+\snippet Drivers/ChuteDemos/ChuteDemo.cpp ChuteDemo:include 
+The particle species is manually set here, and therefore needs to be included. We're treating a chute problem here, and the Chute class needs to be included therefore as well. The particles, walls and boundaries classes are already implemented by the chute class and don't need inclusion here.
+
+### <tt> int %main()</tt>
+Since the whole structure of the problem is already implemented in the Chute class, no separate class needs to be set up. The setup of initial conditions of the Chute class is shortly treated at \ref ChuteSetupInitialConditions "the end of this section". \n
+
+The main driver program starts by initialising a Chute object. Next, the most basic problem properties are set, namely its name (which determines the naming of the data output files), save count (which is the number of time steps skipped between every saved one), particle 
+collision time (which is a species property, but also used in setting the time step), time step and maximum time. Note, that the total number of time steps saved to the output files is not directly set, but is equal to the maximum time divided by time step size \a and save count.
+
+\snippet Drivers/ChuteDemos/ChuteDemo.cpp ChuteDemo:initial
+
+\n
+Next, the particle properties are set. \c setFixedParticleRadius() sets the radius of the fixed chute bottom particles, while \c setInflowParticleRadius() sets the inflow particles to be monidisperse with the given particle radius. If inflow particles with random radii are desired, \c setMinInflowParticleRadius() and \c setMaxInflowParticleRadius() can be used instead to set the minimum and maximum particle radius, respectively. \n
+The particle species (i.e. its intrinsic material properties) are set next, by specifying the density (<tt>species.setDensity()</tt>) and
+the characteristic collision time and coefficient of restitution (with a typical particle mass given; <tt>species.setCollisionTimeAndRestitutionCoefficient(\f$ t_c, r_c, m\f$)</tt>).
+
+\snippet Drivers/ChuteDemos/ChuteDemo.cpp ChuteDemo:particles
+
+\n
+The chute properties are subsequently set by specifying the chute's length, width and angle relative to the horizontal.
+\snippet Drivers/ChuteDemos/ChuteDemo.cpp ChuteDemo:chute
+
+\n
+The chute inflow parameters (besides the previously set inflow particle properties) are set by specifying the inflow height (in Z-direction), the mean iflow particle velocity (in X-direction), and the particle velocity variance (in ratio of the mean velocity).
+\snippet Drivers/ChuteDemos/ChuteDemo.cpp ChuteDemo:inflow
+
+\n
+After all the problem parameters are specified, the simulation is run by calling the \b solve() method.
+\code problem.solve(); \endcode
+
+### \anchor ChuteSetupInitialConditions Chute::setupInitialConditions()
+
+\dontinclude Kernel/Chute.cc
+\skip InitialConditions()
+\until }
+
+The setup of initial conditions of the Chute class starts by checking for the presence of a species, and returns an error if there is none. Make sure therefore that you assign a species to the Chute object's \b speciesHandler before you call the \b solve() method. \n
+After that, the side walls (in the Y-direction) are set up by calling Chute::setSideWalls(). These are set to be solid, infinite walls by default, but can be set to be \a periodic instead by setting Chute::isChutePeriodic_ to be \b true. \n
+A particle is then created (on the \a heap) which is assigned the first (and only) species in the speciesHandler which we earlier specified in the driver (\b ChuteDemo.cpp).\n
+A ChuteInsertionBoundary is created, and its parameters subsequently set by its \b set() method. The set() method arguments are, respectively:
+- \c p: the previously specified particle
+- \c maxFailed_: internally used parameter
+- <tt> Vec3D(getXMin(), getYMin(), getZMin())</tt>: the first defining corner of the cuboidal insertion boundary
+- <tt> Vec3D(getXMax(), getYMax(), getZMax())</tt>: the second defining corner of the cuboidal insertion boundary
+- \c min- / \c maxInflowParticleRadius_: the minimum and maximum radii of inflow particles
+- \c fixedParticleRadius_: the particle radius making up the chute bottom
+- \c inflowVelocity(Variance)_: the mean velocity of inflow particles and the allowed variance about the mean
+
+After setting the insertion boundary characteristics, it is added to the problem's \b boundaryHandler. \n
+Lastly, the chute's bottom is created. The \a type of bottom created may be set by calling the Chute::setRoughBottomType() method in the driver, giving either of the following four arguments (which are of type \c enum \c RoughBottomType):
+- FLAT: just a flat wall (of the species given in the driver)
+- MONOLAYER_ORDERED: (a single layer of) fixed particles in a rectangular grid pattern
+- MONOLAYER_DISORDERED: (\b default) a single layer of randomly placed particles 
+- MULTILAYER: a few layers of randomly placed particles, with a random variation in vertical position as well 
+
+(Return to \ref AdvancedOverview "Overview of advanced tutorials")
+
+\section RoughBottomDemo Particles on a chute with a multilayered bottom
+### Problem description
+%File \b roughBottomDemo.cpp treats particles cascading down an inclined chute with a rough bottom consisting of multiple layers of fixed particles. The entire code of this problem can be viewed here: \ref RoughBottomDemoCode.
+
+### Headers
+### Class ...
+### Data members
+### SetupInitialConditions()
+### actionsBeforeTimeStep() 
+### <tt> int %main()</tt>
+
+
+\section ChuteWithHopper Chute with hopper
+### Problem description
+%File \b roughBottomDemo.cpp treats particles which flow from a hopper onto an inclined chute below. The entire code of this problem can be viewed here: \ref RoughBottomDemoCode.
+### Headers
+### Class ...
+### Data members
+### SetupInitialConditions()
+### actionsBeforeTimeStep() 
+### <tt> int %main()</tt>
+
+
+\section AxiHopper Axisymmetric hopper
+### Problem description
+### Headers
+### Class ...
+### Data members
+### SetupInitialConditions()
+### actionsBeforeTimeStep() 
+### <tt> int %main()</tt>
+
+
+
+
+*/

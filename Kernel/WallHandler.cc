@@ -40,25 +40,29 @@
  */
 WallHandler::WallHandler()
 {
-#ifdef DEBUG_CONSTRUCTOR
+    clear();
     logger(DEBUG, "WallHandler::WallHandler() finished");
-#endif
 }
 
 /*! 
  * \param[in] WH The WallHandler that has to be copied.
+ * \details This is not a copy constructor! It only copies the pointer to the 
+ *          DPMBase and the BaseWall in objects_, it sets the other data members
+ *          to 0 or nullptr.
  */
 WallHandler::WallHandler(const WallHandler &WH)
 {
+    clear();
     setDPMBase(WH.getDPMBase());
     copyContentsFromOtherHandler(WH);
-#ifdef DEBUG_CONSTRUCTOR
     logger(DEBUG, "WallHandler::WallHandler(const WallHandler &PH) finished");
-#endif
 }
 
 /*!
  * \param[in] rhs The WallHandler on the right hand side of the assignment.
+ * \details This is not a copy assignment operator! It only copies the pointer to the 
+ *          DPMBase and the BaseWall in objects_, it sets the other data members
+ *          to 0 or nullptr.
  */
 WallHandler WallHandler::operator =(const WallHandler& rhs)
 {
@@ -88,6 +92,12 @@ WallHandler::~WallHandler()
  */ 
 void WallHandler::addObject(BaseWall* W)
 {
+    if (W->getSpecies() == nullptr)
+    {
+        logger(WARN, "WARNING: The wall with ID % that is added in WallHandler::addObject "
+                "does not have a species yet. Please make sure that you have "
+                "set the species somewhere in the driver code.", W->getId());
+    }
     //Puts the wall in the Wall list
     BaseHandler<BaseWall>::addObject(W);
     //set the particleHandler pointer

@@ -16,7 +16,7 @@
 #endif
 
 #endif
-
+#include <cstdlib>
 #include <iostream>
 /*
 *  We need these to actually exists. These are used as tags in the template metaprogramming for

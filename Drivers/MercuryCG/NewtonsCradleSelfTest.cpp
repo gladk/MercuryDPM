@@ -106,7 +106,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 	stats1.setYMinStat(0.5);
 	stats1.setYMaxStat(1.55);
     std::cout << stats1.getName() + "_" + str[i] + "T_XYZ.stat" << std::endl;
-	stats1.getStatFile().setName(stats1.getName() + "_" + str[i] + "T_XYZ.stat");
+	stats1.statFile.setName(stats1.getName() + "_" + str[i] + "T_XYZ.stat");
 	stats1.set_h(0.0005);
 	stats1.setCGWidth(w);
 	stats1.setSuperExact(false);
@@ -122,7 +122,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 		
 		StatisticsVector<Z> stats0("NewtonsCradleSelfTest");
 		stats0.setZMinStat(-0.5);
-	    stats0.getStatFile().setName(stats0.getName() + "_" + str[i] + "T_XYZ.stat");
+	    stats0.statFile.setName(stats0.getName() + "_" + str[i] + "T_XYZ.stat");
 		stats0.set_h(0.02);
 		stats0.setCGWidth(w);
 		stats0.setSuperExact(true);
@@ -133,7 +133,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 
 		StatisticsVector<XYZ> stats2("NewtonsCradleSelfTest");
 		stats2.setZMinStat(-0.5);
-	    stats2.getStatFile().setName(stats2.getName() + "_" + str[i] + "T_XYZ.stat");
+	    stats2.statFile.setName(stats2.getName() + "_" + str[i] + "T_XYZ.stat");
 		stats2.set_h(0.02);
 		stats2.setNY(1);
 		stats2.setCGWidth(w);
@@ -146,7 +146,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 		/* Current the 2D statistics is not implement this tets will be added when it is.
 		StatisticsVector<XZ> stats1("NewtonsCradleSelfTest");
 		stats1.setZMinStat(-0.5);
-   	        stats1.getStatFile().setName(str[i] + "T_XZ.stat");
+   	        stats1.statFile.setName(str[i] + "T_XZ.stat");
 		stats1.set_h(0.02);
 		stats1.setCGWidth(w);
 		stats1.setSuperExact(true);

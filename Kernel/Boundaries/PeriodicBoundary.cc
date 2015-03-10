@@ -209,17 +209,17 @@ void PeriodicBoundary::shiftPosition(BaseParticle* p)
  * \param[in] position2     The second position to be shifted
  * \todo (AT) see toDo of PeriodicBoundary::shiftPosition().
  */
-void PeriodicBoundary::shiftPositions(Vec3D& postition1, Vec3D& position2)
+void PeriodicBoundary::shiftPositions(Vec3D& position1, Vec3D& position2)
 {
     if (closestToLeftBoundary_)
     {
-        postition1 += shift_;
+        position1 += shift_;
         position2 += shift_;
         closestToLeftBoundary_ = false;
     }
     else
     {
-        postition1 -= shift_;
+        position1 -= shift_;
         position2 -= shift_;
         closestToLeftBoundary_ = true;
     }

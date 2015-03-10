@@ -113,11 +113,6 @@ std::string FrictionSpecies::getBaseName() const
     return "Friction";
 }
 
-BaseInteraction* FrictionSpecies::getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
-{
-    return new FrictionInteraction(P, I, timeStamp);
-}
-
 /*!
  * \details Returns true for any FrictionForceSpecies except EmptyFrictionSpecies, 
  * because for spherical particles, torques are only caused by tangential forces. 

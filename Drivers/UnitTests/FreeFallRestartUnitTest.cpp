@@ -80,7 +80,7 @@ void runFreeFall(int argc, char *argv[])
     FreeFallProblem.setTimeStep(1e-6);
 	FreeFallProblem.setYMax(0.1);
 	FreeFallProblem.setXMax(0.01);
-    FreeFallProblem.getDataFile().getFstream().precision(10);
+    FreeFallProblem.dataFile.getFstream().precision(10);
 	FreeFallProblem.solve(argc,argv);
 }
 

@@ -140,6 +140,8 @@ public:
 
     ///\brief Reverses the parameters of the contact force.
     void reverseHistory() final;
+    
+    void rotateHistory(Matrix3D& rotationMatrix) final;
 };
 
 template<class NormalForceInteraction, class FrictionForceInteraction, class AdhesiveForceInteraction>
@@ -178,7 +180,7 @@ Interaction<NormalForceInteraction, FrictionForceInteraction, AdhesiveForceInter
 }
 
 /*!
- * \details Writes Interaction properties in human-readable form to a file, typically Files::restartFile_.
+ * \details Writes Interaction properties in human-readable form to a file, typically Files::restartFile.
  * \param [out] os the ostream to which the data is written.
  */
 template<class NormalForceInteraction, class FrictionForceInteraction, class AdhesiveForceInteraction>
@@ -190,7 +192,7 @@ void Interaction<NormalForceInteraction, FrictionForceInteraction, AdhesiveForce
 }
 
 /*!
- * \details Reads Interaction properties in human-readable form from a file, typically Files::restartFile_.
+ * \details Reads Interaction properties in human-readable form from a file, typically Files::restartFile.
  * \param [in] is the istream from which the data is read.
  */
 template<class NormalForceInteraction, class FrictionForceInteraction, class AdhesiveForceInteraction>
@@ -212,6 +214,14 @@ void Interaction<NormalForceInteraction, FrictionForceInteraction, AdhesiveForce
     NormalForceInteraction::reverseHistory();
     FrictionForceInteraction::reverseHistory();
     AdhesiveForceInteraction::reverseHistory();
+}
+
+template<class NormalForceInteraction, class FrictionForceInteraction, class AdhesiveForceInteraction>
+void Interaction<NormalForceInteraction, FrictionForceInteraction, AdhesiveForceInteraction>::rotateHistory(Matrix3D& rotationMatrix)
+{
+    NormalForceInteraction::rotateHistory(rotationMatrix);
+    FrictionForceInteraction::rotateHistory(rotationMatrix);
+    AdhesiveForceInteraction::rotateHistory(rotationMatrix);
 }
 
 /*!

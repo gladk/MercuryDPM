@@ -91,7 +91,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     logger(INFO,"Testing particle particles collision for elastic plastic forces. \n"
         "This will be done for serveral values of scaled relative velocity chi");
     
-    //PlasticForceUnitTestProblem.getRestartFile().getFstream().precision(20);
+    //PlasticForceUnitTestProblem.restartFile.getFstream().precision(20);
     
 	//Set up constant data that will be used
     const std::vector<double> chi = {0.34, 0.69, 1.1, 1.37};

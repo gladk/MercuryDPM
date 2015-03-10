@@ -84,11 +84,6 @@ public:
     Mdouble getSlidingFrictionCoefficientStatic() const;
 
     /*!
-     * \brief allocates a new SlidingFrictionInteraction object and returns a pointer to it.
-     */
-    BaseInteraction* getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
-
-    /*!
      * \brief Returns true if torques have to be calculated.
      */
     bool getUseAngularDOFs() const;

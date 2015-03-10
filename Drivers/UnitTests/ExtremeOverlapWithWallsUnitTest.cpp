@@ -112,12 +112,12 @@ int main(int argc, char *argv[])
     species->setDissipation(1e-2);
     OverlapProblem.setName("ExtremeOverlapWithWallsUnitTest");
     OverlapProblem.setFileType(FileType::NO_FILE);
-	OverlapProblem.getDataFile().setFileType(FileType::ONE_FILE);
+	OverlapProblem.dataFile.setFileType(FileType::ONE_FILE);
 	OverlapProblem.setSaveCount(1000);
     OverlapProblem.setDimension(3);
     OverlapProblem.setTimeStep(1e-7);
 	OverlapProblem.setTimeMax(0.01);
-    // OverlapProblem.getDataFile().getFstream().precision(10);
+    // OverlapProblem.dataFile.getFstream().precision(10);
 	OverlapProblem.solve(argc,argv);
     
     Vec3D position = OverlapProblem.particleHandler.getObject(0)->getPosition();

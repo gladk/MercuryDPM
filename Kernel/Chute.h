@@ -37,15 +37,19 @@ class InsertionBoundary;
  *    * MONOLAYER_ORDERED:      Bottom will be a rectangularly ordered monolayer of particles
  *    * MONOLAYER_DISORDERED:   Bottom will be a disordered monolayer of particles
  *    * MULTILAYER:             Bottom will be a multilayer of particles
+ *    * FLAT:                   Flat bottom (not rough)
  * See also the documentation of Chute::createBottom().
  * 
  * \todo consider converting to an enum class. 
  * \todo consider changing to just 'bottomType' and add 'FLAT' (or something similar)
  * as an option so that from ALL bottom types can be chosen with just ONE enumerator
+ * IFCD: I did add FLAT, but since there are multiple users using RoughBottomType,
+ * it might be a bad idea to change the interface with BottomType. Please also
+ * check if I have forgotten places to add "FLAT" to make this a complete interface.
  */
 enum RoughBottomType
 {
-    MONOLAYER_ORDERED, MONOLAYER_DISORDERED, MULTILAYER
+    MONOLAYER_ORDERED, MONOLAYER_DISORDERED, MULTILAYER, FLAT
 };
 /*!
  * \class Chute
@@ -64,28 +68,28 @@ public:
     Chute();
     
     /*!
-     * \brief Copy-constructor, converts an existing DPMBase problem into a Chute problem
+     * \brief Copy constructor, converts an existing DPMBase problem into a Chute problem
      */
     Chute(const DPMBase& other);
 
     /*!
-     * \brief Copy-constructor, converts an existing MercuryBase problem into a Chute problem
+     * \brief Copy constructor, converts an existing MercuryBase problem into a Chute problem
      */  
     Chute(const MercuryBase& other);
 
     /*!
-     * \brief Copy-constructor, converts an existing Mercury3D problem into a Chute problem
+     * \brief Copy constructor, converts an existing Mercury3D problem into a Chute problem
      */   
     Chute(const Mercury3D& other);
     
     /*!
-     * \brief Default copy-constructor
+     * \brief Default copy constructor
      */ 
     Chute(const Chute& other);
 
     /*!
      * \brief This is the actual constructor METHOD; it is called by all constructors above 
-     * (except the default copy-constructor).
+     * (except the default copy constructor).
      */
     void constructor();
 
@@ -118,11 +122,6 @@ public:
      * \brief Reads all chute properties from an istream
      */
     void read(std::istream& is);
-
-    /*!
-     * \brief Writes all chute properties to an ostream
-     */
-    virtual void write(std::ostream& os) const;
 
     /*!
      * \brief This function writes the Chute properties to an ostream, and adds 

@@ -25,10 +25,10 @@
 
 // Tutorial 10: This tutorial shows how to load restart and data files
 
-#include "Mercury3D.h"
-#include "Math/Helpers.h"
+#include <Mercury3D.h>
+#include <Math/Helpers.h>
 
-int main()
+int main(int argc, char* argv[])
 {
     //writeToFile is used here to create a restart and a data file, which will be loaded below.
     helpers::writeToFile("Tutorial10.ini.restart",
@@ -67,3 +67,4 @@ int main()
 
     return 0;
 }
+

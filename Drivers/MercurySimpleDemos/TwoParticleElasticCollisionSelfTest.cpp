@@ -75,6 +75,6 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 	twoParticleElasticCollisionProblem.setTimeMax(0.25);
 	twoParticleElasticCollisionProblem.setSaveCount(10);
     twoParticleElasticCollisionProblem.setTimeStep(2e-5);
-	twoParticleElasticCollisionProblem.getFStatFile().setFileType(FileType::NO_FILE);
+	twoParticleElasticCollisionProblem.fStatFile.setFileType(FileType::NO_FILE);
 	twoParticleElasticCollisionProblem.solve();
 }

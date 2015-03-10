@@ -42,7 +42,7 @@ public:
     InteractionHandler();
 
     /*!
-     * \brief Copy constructor, it copies the InteractionHandler and all BaseInteraction it contains.
+     * \brief Copy constructor, but since interactions must not be copied, it creates an empty InteractionHandler.
      */
     InteractionHandler(const InteractionHandler& IH);
 

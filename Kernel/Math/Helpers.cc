@@ -28,6 +28,7 @@
 #include <sys/stat.h>
 #include <sstream>
 #include <string>
+#include <Logger.h>
 
 helpers::KAndDisp helpers::computeKAndDispFromCollisionTimeAndRestitutionCoefficientAndEffectiveMass(Mdouble tc, Mdouble r, Mdouble mass)
 {
@@ -347,8 +348,8 @@ unsigned int helpers::getSaveCountFromNumberOfSavesAndTimeMaxAndTimestep(unsigne
     }
     else
     {
-        std::cerr << "Error in getSaveCountFromNumberOfSavesAndTimeMaxAndTimestep (" << numberOfSaves << "," << timeMax << "," << timestep << ")" << std::endl;
-        std::cerr << "Arguments need to be positive" << std::endl;
+        logger(ERROR, "[Helpers::getSaveCountFromNumberOfSavesAndTimeMaxAndTimestep()] numberOfSaves: %, timeMax: %, timestep: %", numberOfSaves, timeMax, timestep);
+        logger(ERROR, " Arguments need to be positive");
         exit(-1);
     }
 }
@@ -377,7 +378,7 @@ unsigned int helpers::getSaveCountFromNumberOfSavesAndTimeMaxAndTimestep(unsigne
  * 
  * Example of usage:
  * > std::stringstream line(std::stringstream::in | std::stringstream::out);
- * > std::stringstream is = getRestartFile().getFStream();
+ * > std::stringstream is = restartFile.getFStream();
  * > helpers::getLineFromStringStream(is, line);
  * > std::string dummy; 
  * > line >> dummy; 
@@ -403,8 +404,9 @@ void helpers::getLineFromStringStream(std::istream& in, std::stringstream& out)
  * > "1 0 0 0 0 1 1 1\n"
  * > "0.5 0.5 0  0 0 0.5  0  0 0 0  0 0 0  0\n");
  *          
- * \param[in]  in the stringstream from which a line is read out should be initialized as std::stringstream(std::stringstream::out)
- * \param[out] out the stringstream into which the line is read; should be initialized as std::stringstream(std::stringstream::in | std::stringstream::out)         
+ * \param[in] filename the name of the file
+ * \param[in] filecontent the content         
+ * \returns true on success.
  */
 bool helpers::writeToFile(std::string filename, std::string filecontent)
 {

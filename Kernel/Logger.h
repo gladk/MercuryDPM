@@ -306,15 +306,15 @@ class Logger {
      operator()(const LL<LOGLEVEL> log UNUSED, const std::string& format, Args&&... arg) {
          std::stringstream msgstream;
          createMessage(msgstream, format.c_str(), arg...);
-         if        (LOGLEVEL <= Log::FATAL   || MERCURY_LOGLEVEL <= Log::FATAL)   {
+         if        (LOGLEVEL <= Log::FATAL)   {
            loggerOutput->onFatal(module, msgstream.str());
-         } else if (LOGLEVEL <= Log::ERROR   || MERCURY_LOGLEVEL <= Log::ERROR)   {
+         } else if (LOGLEVEL <= Log::ERROR)   {
            loggerOutput->onError(module, msgstream.str());
-         } else if (LOGLEVEL <= Log::WARN    || MERCURY_LOGLEVEL <= Log::WARN)    {
+         } else if (LOGLEVEL <= Log::WARN)    {
            loggerOutput->onWarn(module, msgstream.str());
-         } else if (LOGLEVEL <= Log::INFO    || MERCURY_LOGLEVEL <= Log::INFO)    {
+         } else if (LOGLEVEL <= Log::INFO)    {
            loggerOutput->onInfo(module, msgstream.str());
-         } else if (LOGLEVEL <= Log::VERBOSE || MERCURY_LOGLEVEL <= Log::VERBOSE) {
+         } else if (LOGLEVEL <= Log::VERBOSE) {
            loggerOutput->onVerbose(module, msgstream.str());
          } else {
            loggerOutput->onDebug(module, msgstream.str());
@@ -327,6 +327,32 @@ class Logger {
          
      }
      
+     template<Log LOGLEVEL, typename... Args>
+     typename std::enable_if<!((L < LOGLEVEL) || (MERCURY_LOGLEVEL < LOGLEVEL)), void>::type
+     operator()(const LL<LOGLEVEL> log UNUSED, const char * format, Args&&... arg) {
+         std::stringstream msgstream;
+         createMessage(msgstream, format, arg...);
+         if        (LOGLEVEL <= Log::FATAL)   {
+           loggerOutput->onFatal(module, msgstream.str());
+         } else if (LOGLEVEL <= Log::ERROR)   {
+           loggerOutput->onError(module, msgstream.str());
+         } else if (LOGLEVEL <= Log::WARN)    {
+           loggerOutput->onWarn(module, msgstream.str());
+         } else if (LOGLEVEL <= Log::INFO)    {
+           loggerOutput->onInfo(module, msgstream.str());
+         } else if (LOGLEVEL <= Log::VERBOSE) {
+           loggerOutput->onVerbose(module, msgstream.str());
+         } else {
+           loggerOutput->onDebug(module, msgstream.str());
+         }
+     }
+     
+     template<Log LOGLEVEL, typename... Args>
+     typename std::enable_if<L < LOGLEVEL || MERCURY_LOGLEVEL < LOGLEVEL, void>::type
+     operator()(const LL<LOGLEVEL> log UNUSED, const char * format UNUSED, Args&&... arg UNUSED) {
+         
+     }
+
     
     /*!
      * \brief Oldskool log method.

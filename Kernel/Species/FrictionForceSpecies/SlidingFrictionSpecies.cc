@@ -177,14 +177,6 @@ Mdouble SlidingFrictionSpecies::getSlidingFrictionCoefficientStatic() const
 }
 
 /*!
- * \return a pointer to the new SlidingFrictionInteraction.
- */
-BaseInteraction* SlidingFrictionSpecies::getNewInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
-{
-    return new SlidingFrictionInteraction(P, I, timeStamp);
-}
-
-/*!
  * \details Returns true for any FrictionForceSpecies except EmptyFrictionSpecies, 
  * because for spherical particles, torques are only caused by tangential forces. 
  * See SpeciesHandler::useAngularDOFs for more details

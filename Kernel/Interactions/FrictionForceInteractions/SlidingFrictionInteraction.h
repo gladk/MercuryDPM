@@ -101,6 +101,8 @@ public:
      */
     void reverseHistory();
 
+    void rotateHistory(Matrix3D& rotationMatrix);
+
 private:
     /*!
      * \brief Stores the amount of sliding spring (\f$\delta\f$) compression from the expression \f$f_t=-k*\delta-\nu*relVel\f$.

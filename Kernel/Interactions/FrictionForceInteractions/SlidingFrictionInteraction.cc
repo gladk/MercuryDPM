@@ -148,7 +148,7 @@ void SlidingFrictionInteraction::computeFrictionForce()
 //    }
 }
 /*!
- * \param[in] timeStep
+ * \param[in] timeStep the dt
  */
 void SlidingFrictionInteraction::integrate(Mdouble timeStep)
 {
@@ -198,4 +198,11 @@ void SlidingFrictionInteraction::reverseHistory()
     slidingSpring_=-slidingSpring_;
     slidingSpringVelocity_=-slidingSpringVelocity_;
     tangentialForce_=-tangentialForce_;
+}
+
+void SlidingFrictionInteraction::rotateHistory(Matrix3D& rotationMatrix)
+{
+    slidingSpring_=rotationMatrix*slidingSpring_;
+    slidingSpringVelocity_=rotationMatrix*slidingSpringVelocity_;
+    tangentialForce_=rotationMatrix*tangentialForce_;
 }

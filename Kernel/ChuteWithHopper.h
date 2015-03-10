@@ -32,7 +32,7 @@
  * \brief ChuteWithHopper has a hopper as inflow.
  * \details The hopper has two parts as follows to create the finite hopper walls, we take vector between two wall points in xz-plane, then rotate clockwise and make unit length.
  * \image html hopper.jpg "Sketch of the hopper"
- *  A,B,C denote three points on the left and right hopper walls which are used to construct the hopper. Shift denotes the space by which the chute has to be shifted to the right such that the hopper is in the domain. Note: the wall direction has to be set seperately either period of walls.
+ *  A,B,C denote three points on the left and right hopper walls which are used to construct the hopper. Shift denotes the space by which the chute has to be shifted to the right such that the hopper is in the domain. Note: the wall direction has to be set separately either period of walls.
  */
 class ChuteWithHopper : public Chute
 {
@@ -40,22 +40,23 @@ public:
 
 //Constructors:
     /*!
-     * \brief This is a copy constructor for Chute problems \bug This copy construct is untested
+     * \brief This is a copy constructor for Chute problems 
+     * \bug This copy construct is untested
      */
     ChuteWithHopper(const Chute& other);
 
     /*!
-     * \brief
+     * \brief Copy constructor, converts an existing Mercury3D object into a ChuteWithHopper object
      */
     ChuteWithHopper(const Mercury3D& other);
 
     /*!
-     * \brief
+     * \brief Copy constructor, converts an existing MercuryBase object into a ChuteWithHopper object
      */
     ChuteWithHopper(const MercuryBase& other);
 
     /*!
-     * \brief
+     * \brief Copy constructor, converts an existing DPMBase object into a ChuteWithHopper object
      */
     ChuteWithHopper(const DPMBase& other);
 
@@ -67,17 +68,19 @@ public:
 //Setters and getters:
 
     /*!
-     * \brief
+     * \brief Sets the hopper filling percentage. 
      */
     void setHopperFillingPercentage(Mdouble hopperFillingPercentage);
 
     /*!
-     * \brief
+     * \brief Sets the vertical distance of the lowest hopper point relative to the start
+     * of the chute.
      */
     void setHopperLowestPoint(Mdouble hopperLowestPoint);
 
     /*!
-     * \brief
+     * \brief Returns the vertical distance of the lowest hopper point relative to the start
+     * of the chute.
      */
     Mdouble getHopperLowestPoint();
 
@@ -92,114 +95,121 @@ public:
     void setChuteLength(Mdouble chuteLength);
 
     /*!
-     * \brief
+     * \brief Sets an extra shift in X-direction of the whole system
      */
     void setIsHopperCentred(bool isHopperCentred);
 
     /*!
-     * \brief
+     * \brief Sets the height above which the hopper is filled with new particles
      */
     void setHopperLowerFillingHeight(Mdouble hopperLowerFillingHeight);
 
     /*!
-     * \brief
+     * \brief Sets the shift in X-direction of the whole setup after rotation
      */
     void setHopperShift(Mdouble hopperShift);
 
     /*!
-     * \brief This lifts the hopper above the plane of the chute
+     * \brief This lifts the hopper above the plane of the chute (after rotation)
      */
     void setHopperLift(Mdouble hopperLift);
 
     /*!
-     * \brief
+     * \brief Returns the hopper's lift above the chute bottom plane 
      */
     Mdouble getHopperLift();
     
     /*!
-     * \brief
+     * \brief Returns the shift in X-direction of the whole setup after rotation
      */
     Mdouble getHopperShift();
 
     /*!
-     * \brief
+     * \brief Sets whether the hopper should have vertical (1) or inclined (2) walls
+     * in Y-direction
      */
     void setHopperDimension(Mdouble hopperDimension);
 
     /*!
-     * \brief
+     * \brief Sets the alignment of hopper with chute bottom
      */
     void setIsHopperAlignedWithBottom(bool isHopperAlignedWithBottom);
 
     /*!
-     * \brief
+     * \brief Returns the angle of the hopper entrance relative to the vertical
      */
     Mdouble getHopperAngle();
 
     /*!
-     * \brief
+     * \brief Returns the width of the hopper entrance
      */
     Mdouble getHopperLength();
 
     /*!
-     * \brief
+     * \brief Returns the width of the hopper exit
      */
     Mdouble getHopperExitLength();
 
     /*!
-     * \brief
+     * \brief Returns the height of the hopper relative to the chute start
      */
     Mdouble getHopperHeight();
 
     /*!
-     * \brief
+     * \brief Returns the height of the lowest hopper point above the chute
      */
     Mdouble getHopperExitHeight();
     
     /*!
-     * \brief
+     * \brief Returns whether the setup is shifted another 40 units in X-direction
      */
     bool getIsHopperCentred();
     
     /*!
-     * \brief
+     * \brief Returns the vertical percentage of the hopper insertion boundary which 
+     * is filled 
      */
     Mdouble getHopperFillingPercentage();
     
     /*!
-     * \brief
+     * \brief Returns whether the hopper has vertical (1) or inclined (2) walls in Y-direction
      */
     unsigned int getHopperDimension();
 
 //Other member functions:
 
     /*!
-     * \brief
+     * \brief Sets up the initial conditions for the problem
      */
     virtual void setupInitialConditions();
 
     /*!
-     * \brief
+     * \brief Sets the hopper's geometrical properties
      */
     void setHopper(Mdouble ExitLength, Mdouble ExitHeight, Mdouble Angle, Mdouble Length, Mdouble Height);
 
     /*!
-     * \brief
+     * \brief Returns the theoretical maximum particle velocity due to gravity
      */
     Mdouble getMaximumVelocityInducedByGravity();
-
+    
     /*!
-     * \brief This function reads all chute data
+     * \brief Returns smallest particle radius over maximum gravitational velocity
+     */
+    Mdouble getTimeStepRatio();
+    
+    /*!
+     * \brief Reads setup properties from an istream
      */
     virtual void read(std::istream& is);
 
     /*!
-     * \brief
+     * \brief Writes setup properties to an ostream
      */
     void write(std::ostream& os, bool writeAllParticles=true) const;
 
     /*!
-     * \brief
+     * \brief Reads setup properties from a string
      */
     bool readNextArgument(int& i, int argc, char *argv[]);
 
@@ -267,7 +277,7 @@ private:
      */
     Mdouble hopperFillingPercentage_;
     /*!
-     * \brief The z coordinate of the right C point (when the left C point is in the origin)
+     * \brief The NEGATIVE z coordinate of the right C point (when the left C point is in the origin)
      */
     Mdouble hopperLowestPoint_;
 };

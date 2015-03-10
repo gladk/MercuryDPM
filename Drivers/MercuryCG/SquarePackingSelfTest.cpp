@@ -104,7 +104,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 
 	std::cout << "Get statistics" << std::endl;
 	StatisticsVector<Y> stats("SquarePackingSelfTest");
-    stats.getStatFile().setName("SquarePackingSelfTest.Y.stat");
+    stats.statFile.setName("SquarePackingSelfTest.Y.stat");
 	double n = 500;
 	stats.setN(n);
 	stats.setCGWidth(.1);
@@ -116,7 +116,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 
 	std::cout << "Get fully averaged statistics" << std::endl;
 	StatisticsVector<O> statsO("SquarePackingSelfTest");
-	statsO.getStatFile().setName("SquarePackingSelfTest.O.stat");
+	statsO.statFile.setName("SquarePackingSelfTest.O.stat");
     statsO.setCGTimeMin(problem.getTimeMax()*.98);
     statsO.setTimeMaxStat(1e20);
 	statsO.statistics_from_fstat_and_data();

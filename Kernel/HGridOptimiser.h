@@ -30,8 +30,8 @@
 #include "MercuryBase.h"
 
 /*!
- * \class HGridOptimiser
- * \brief
+ * \brief 
+ * \todo Find out what this class does and document it.
  */
 class HGridOptimiser
 {
@@ -47,7 +47,7 @@ public:
     void initialisePolyFunc(double omega, std::vector<double>& coeff, unsigned int numberOfCells, int verbosity);
 
     /*!
-     * \brief 
+     * \brief Assigns a BaseParticle of given radius to a certain cell.
      */
     unsigned int radius2Cell(double r);
 
@@ -67,12 +67,12 @@ public:
     double intCell2Max(unsigned int i);
 
     /*!
-     * \brief 
+     * \brief Computes the left bound of the cell with given ordinal number.
      */
     double cell2Min(unsigned int i);
 
     /*!
-     * \brief 
+     * \brief Computes the right bound of the cell with given ordinal number.
      */
     double cell2Max(unsigned int i);
 
@@ -94,17 +94,17 @@ public:
     /*!
      * \brief 
      */
-    double expectedCellsIntegralCellTeller(double start, double end, unsigned int i, int p, double h);
+    double expectedCellsIntegralCellNumerator(double start, double end, unsigned int i, int p, double h);
 
     /*!
      * \brief 
      */
-    double diffHExpectedCellsIntegralCellTeller(double start, double end, unsigned int i, int p, double h);
+    double diffHExpectedCellsIntegralCellNumerator(double start, double end, unsigned int i, int p, double h);
 
     /*!
      * \brief 
      */
-    double expectedCellsIntegralCellNoemer(double start, double end, unsigned int i);
+    double expectedCellsIntegralCellDenominator(double start, double end, unsigned int i);
 
     /*!
      * \brief 
@@ -127,7 +127,7 @@ public:
     double diffHExpectedCellsIntegral(double start, double end, int p, double h);
 
     /*!
-     * \brief 
+     * \brief The amount of work that has to be done to run a simulation using the HGrid, in steps.
      */
     double calculateWork(std::vector<double>& hGridCellSizes, HGridMethod method, int verbosity);
 
@@ -167,13 +167,44 @@ public:
     void histNumberParticlesPerCell(std::vector<double>& hGridCellSizes);
 
 private:
-    unsigned int NCells;///
-    double rMin;///
-    double rMax;///
-    double length;///
-    double cellCheckOverContactCheckRatio_;///
-    int dimension;///
-    std::vector<double> cellN;///
+    /*!
+     * \brief Number of cells, usually called levels in the HGrid.
+     */
+    unsigned int numCells_;
+    /*!
+     * \brief Radius of the smallest particle, "rounded" to the largest double that is 
+     *        smaller than the radius of each particle.
+     */
+    double rMin_;
+    /*!
+     * \brief Radius of the largest particle, "rounded" to the smallest double that
+     *        is larger than the radius of each particle. 
+     */
+    double rMax_;///
+    /*!
+     * \brief The weighted length of the domain. 
+     * \details The weighted length is computed by multiplying the lengths of all
+     *          directions with each other, and then taking the appropriate type
+     *          of root so that the unit is the same as that of a length (square 
+     *          root for 2D, cube root for 3D).
+     */
+    double length_;
+    /*!
+     * \brief The ratio of the time required for a single geometric contact
+     *        detection over the time required to retrieve information from a cell.
+     *        This seems to be only used for checking the effort required by the HGrid, not
+     *        to compute the cell sizes.
+     */
+    double cellCheckOverContactCheckRatio_;
+    /*!
+     * \brief The dimension of the system, usually 3, sometimes 2 or 1.
+     */
+    unsigned int dimension_;
+    
+    //Something with cells. Still have to find out which property the double represents.
+    //Could be the number of particles in that cell (see initialise), but then 
+    //you'd expect an unsigned int and not a double.
+    std::vector<double> cellN_;///
     std::vector<double> intCellN;///
 };
 

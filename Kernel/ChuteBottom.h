@@ -36,88 +36,93 @@
  * dimensions as the Chute, and places a thin slice of that layer 
  * as fixed particles at the base of the chute.
  */
-class ChuteBottom : public Chute
-{
-    
+class ChuteBottom : public Chute {
 public:
 
-//constructors
-/*! 
- * \brief This is the default constructor. All it does is set sensible defaults.
- */
+    //constructors
+    /*! 
+     * \brief This is the default constructor. All it does is set sensible defaults.
+     */
     ChuteBottom();
 
     /*!    
-     * \brief Copy-constructor for creates an HGRID problem from an existing MD problem
+     * \brief Copy constructor, converts an existing DPMBase object into a ChuteBottom object
      */
     ChuteBottom(const DPMBase& other);
 
     /*!
-     * \brief
+     * \brief Copy constructor, converts an existing MercuryBase object into a ChuteBottom object
      */
     ChuteBottom(const MercuryBase& other);
 
     /*!
-     * \brief
+     * \brief Copy constructor, converts an existing Mercury3D object into a ChuteBottom object
      */
     ChuteBottom(const Mercury3D& other);
 
     /*!
-     * \brief
+     * \brief Copy constructor, converts an existing Chute object into a ChuteBottom object
      */
     ChuteBottom(const Chute& other);
-
-//setters and getters
+    
     /*!
-     * \brief
+     * \brief Default copy constructor
+     */
+    ChuteBottom(const ChuteBottom& other);
+
+    //setters and getters
+    /*!
+     * \brief Returns the thickness of the multilayer rough bottom
      */
     Mdouble getThickness();
 
     /*!
-     * \brief
+     * \brief Sets the thickness of the multilayer rough bottom
      */
     void setThickness(Mdouble thickness);
 
     /*!
-     * \brief
+     * \brief Returns TRUE if the bottom is periodic in Y
      */
     Mdouble getIsBottomPeriodic();
 
     /*!
-     * \brief
+     * \brief Sets whether the bottom should be periodic in Y
      */
     void setIsBottomPeriodic(bool isBottomPeriodic);
 
-//other public member functions
+    //other public member functions
 
     /*!
-     * \brief
+     * \brief Makes a multilayered rough bottom with thickness thickness_
      */
     void makeRoughBottom(Chute &chute);
 
     /*!
-     * \brief
+     * \brief Sets up initial conditions before running a chute simulation
      */
     void setupInitialConditions();
 
     /*!
-     * \brief
+     * \brief Performs all necessary actions before the start of a time step (none in this case)
      */
     void actionsBeforeTimeStep();
 
 private:
     /*!
-     * \brief This is the actual constructor it is called do both constructors above.
+     * \brief This is the actual constructor METHOD; it is called by all constructors above 
+     * (except the default copy constructor).
      */
     void constructor();
 
     /*!
-     * \brief
+     * \brief Thickness of the multilayer chute rough bottom. See also documentation of 
+     * ChuteBottom::makeRoughBottom().
      */
     Mdouble thickness_;
 
     /*!
-     * \brief
+     * \brief TRUE if the bottom is periodic in Y.
      */
     bool isBottomPeriodic_;
 };

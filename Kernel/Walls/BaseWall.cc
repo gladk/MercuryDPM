@@ -30,10 +30,8 @@
 
 BaseWall::BaseWall()
 {
-    handler_ = 0;
-#ifdef DEBUG_CONSTRUCTOR
+    handler_ = nullptr;
     logger(DEBUG, "BaseWall::BaseWall() finished");
-#endif
 }
 
 /*!
@@ -43,16 +41,17 @@ BaseWall::BaseWall(const BaseWall& w)
         : BaseInteractable(w)
 {
     handler_ = w.handler_;
-#ifdef DEBUG_CONSTRUCTOR
     logger(DEBUG, "BaseWall::BaseWall(const BaseWall &p) finished");
-#endif
 }
 
 BaseWall::~BaseWall()
 {
-#ifdef DEBUG_CONSTRUCTOR
     logger(DEBUG, "BaseWall::~BaseWall() finished");
-#endif   
+}
+
+void BaseWall::clear()
+{
+    logger(WARN, "BaseWall::clear(), this function shouldn't be called");
 }
 
 /*!
@@ -69,11 +68,6 @@ void BaseWall::read(std::istream& is)
 void BaseWall::write(std::ostream& os) const
 {
     BaseInteractable::write(os);
-}
-
-void BaseWall::clear()
-{
-    logger(WARN, "BaseWall::clear(), this function shouldn't be called");
 }
 
 /*!

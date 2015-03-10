@@ -33,17 +33,17 @@
 Files::Files()
 {
     //constructor();
-    getDataFile().getFstream().precision(13);
-    getFStatFile().getFstream().precision(13);
-    getEneFile().getFstream().precision(13);
-    getRestartFile().getFstream().precision(15);
-    getStatFile().getFstream().precision(5);
-    getStatFile().getFstream().setf(std::ios::left);
+    dataFile.getFstream().precision(13);
+    fStatFile.getFstream().precision(13);
+    eneFile.getFstream().precision(13);
+    restartFile.getFstream().precision(15);
+    statFile.getFstream().precision(5);
+    statFile.getFstream().setf(std::ios::left);
 }
 
 Files::~Files()
 {
-    // TODO Auto-generated destructor stub
+
 }
 /*!
 * \details Also sets the name of Files to be the same as the one from which one makes a copy.
@@ -55,74 +55,75 @@ Files::Files(const Files& other)
     setName(other.getName());
 }
 /*! 
- * \returns File& (A reference of object type File i.e. File& dataFile_)
+ * \returns File& (A reference of object type File i.e. File& dataFile)
  */
 File& Files::getDataFile()
 {
-    return dataFile_;
+    return dataFile;
 }
 /*! 
- * \returns File& (A reference of object type File i.e. File& eneFile_)
+ * \returns File& (A reference of object type File i.e. File& eneFile)
  */
 File& Files::getEneFile()
 {
-    return eneFile_;
+    return eneFile;
 }
 /*! 
- * \returns File& (A reference of object type File i.e. File& fStatFile_)
+ * \returns File& (A reference of object type File i.e. File& fStatFile)
  */
 File& Files::getFStatFile()
 {
-    return fStatFile_;
+    return fStatFile;
 }
 /*! 
- * \returns File& (A reference of object type File i.e. File& restartFile_)
+ * \returns File& (A reference of object type File i.e. File& restartFile)
  */
 File& Files::getRestartFile()
 {
-    return restartFile_;
+    return restartFile;
 }
 /*! 
- * \returns File& (A reference of object type File i.e. File& statFile_)
+ * \returns File& (A reference of object type File i.e. File& statFile)
  */
 File& Files::getStatFile()
 {
-    return statFile_;
+    return statFile;
 }
 /*! 
- * \returns const File& (A const reference of object type File i.e. const File& dataFile_)
+ * \returns const File& (A const reference of object type File i.e. const File& dataFile)
  */
 const File& Files::getDataFile() const
 {
-    return dataFile_;
+    return dataFile;
 }
+
 /*! 
- * \returns const File& (A const reference of object type File i.e. const File& eneFile_)
+ * \returns const File& (A const reference of object type File i.e. const File& eneFile)
  */
 const File& Files::getEneFile() const
 {
-    return eneFile_;
+    return eneFile;
 }
 /*! 
- * \returns const File& (A const reference of object type File i.e. const File& fstatFile_)
+ * \returns const File& (A const reference of object type File i.e. const File& fStatFile)
  */
 const File& Files::getFStatFile() const
 {
-    return fStatFile_;
+    return fStatFile;
 }
 /*! 
- * \returns const File& (A const reference of object type File i.e. const File& restartFile_)
+ * \returns const File& (A const reference of object type File i.e. const File& restartFile)
  */
 const File& Files::getRestartFile() const
 {
-    return restartFile_;
+    return restartFile;
 }
 /*! 
- * \returns const File& (A const reference of object type File i.e. const File& statFile_)
+ * \returns const File& (A const reference of object type File i.e. const File& statFile)
  */
 const File& Files::getStatFile() const
 {
-    return statFile_;
+    return statFile;
 }
 /*! 
  * \returns const File& (A const reference of object type std::string i.e. const std::string& name_)
@@ -132,15 +133,15 @@ const std::string& Files::getName() const
     return name_;
 }
 /*!
- * \param[in] saveCount
+ * \details sets the number of time steps skipped between each save for ALL data files.
  */
 void Files::setSaveCount(unsigned int saveCount)
 {
-    getDataFile().setSaveCount(saveCount);
-    getFStatFile().setSaveCount(saveCount);
-    getRestartFile().setSaveCount(saveCount);
-    getStatFile().setSaveCount(saveCount);
-    getEneFile().setSaveCount(saveCount);
+    dataFile.setSaveCount(saveCount);
+    fStatFile.setSaveCount(saveCount);
+    restartFile.setSaveCount(saveCount);
+    statFile.setSaveCount(saveCount);
+    eneFile.setSaveCount(saveCount);
 }
 /*!
  * \param[in] name
@@ -148,11 +149,11 @@ void Files::setSaveCount(unsigned int saveCount)
 void Files::setName(const std::string& name)
 {
     name_ = name; // was before this->name_ = name
-    getDataFile().setName(name_ + ".data");
-    getFStatFile().setName(name_ + ".fstat");
-    getRestartFile().setName(name_ + ".restart");
-    getStatFile().setName(name_ + ".stat");
-    getEneFile().setName(name_ + ".ene");
+    dataFile.setName(name_ + ".data");
+    fStatFile.setName(name_ + ".fstat");
+    restartFile.setName(name_ + ".restart");
+    statFile.setName(name_ + ".stat");
+    eneFile.setName(name_ + ".ene");
 }
 /*!
  * \param[in] name
@@ -167,42 +168,42 @@ void Files::setName(const char* name)
  */
 void Files::setFileType(FileType fileType)
 {
-    getDataFile().setFileType(fileType);
-    getFStatFile().setFileType(fileType);
-    getRestartFile().setFileType(fileType);
-    getStatFile().setFileType(fileType);
-    getEneFile().setFileType(fileType);
+    dataFile.setFileType(fileType);
+    fStatFile.setFileType(fileType);
+    restartFile.setFileType(fileType);
+    statFile.setFileType(fileType);
+    eneFile.setFileType(fileType);
 }
 
 //void Files::openNextFile(const int counter)
 //{
 //    getDataFile().openNextFile(counter);
-//    getFStatFile().openNextFile(counter);
-//    getRestartFile().openNextFile(counter);
-//    getStatFile().openNextFile(counter);
+//    fStatFile.openNextFile(counter);
+//    restartFile.openNextFile(counter);
+//    statFile.openNextFile(counter);
 //    getEneFile().openNextFile(counter);
 //}
 /*!
- * \details This implicitly calles the setCounter() function defined in File.h
+ * \details This implicitly calls the setCounter() function defined in File.h
  */
 void Files::resetFileCounter()
 {
-    getDataFile().setCounter(0);
-    getFStatFile().setCounter(0);
-    getRestartFile().setCounter(0);
-    getStatFile().setCounter(0);
-    getEneFile().setCounter(0);
+    dataFile.setCounter(0);
+    fStatFile.setCounter(0);
+    restartFile.setCounter(0);
+    statFile.setCounter(0);
+    eneFile.setCounter(0);
 }
 /*!
  * \param[in] openmode 
  */
 void Files::setOpenMode(std::fstream::openmode openMode)
 {
-    getDataFile().setOpenMode(openMode);
-    getFStatFile().setOpenMode(openMode);
-    getRestartFile().setOpenMode(openMode);
-    getStatFile().setOpenMode(openMode);
-    getEneFile().setOpenMode(openMode);
+    dataFile.setOpenMode(openMode);
+    fStatFile.setOpenMode(openMode);
+    restartFile.setOpenMode(openMode);
+    statFile.setOpenMode(openMode);
+    eneFile.setOpenMode(openMode);
 }
 /*!
  * \param[in,out] is (a reference of the input stream)
@@ -211,11 +212,11 @@ void Files::read(std::istream& is)
 {
     std::string dummy;
     is >> dummy >> name_;
-    is >> dummy >> dataFile_;
-    is >> dummy >> fStatFile_;
-    is >> dummy >> eneFile_;
-    is >> dummy >> restartFile_;
-    is >> dummy >> statFile_;
+    is >> dummy >> dataFile;
+    is >> dummy >> fStatFile;
+    is >> dummy >> eneFile;
+    is >> dummy >> restartFile;
+    is >> dummy >> statFile;
 }
 /*!
  * \details 
@@ -226,42 +227,42 @@ void Files::read(std::istream& is)
 void Files::write(std::ostream& os) const
 {
     os << " name " << name_<< std::endl;
-    os << "dataFile    " << dataFile_ << std::endl;
-    os << "fStatFile   " << fStatFile_ << std::endl;
-    os << "eneFile     " << eneFile_ << std::endl;
-    os << "restartFile " << restartFile_ << std::endl;
-    os << "statFile    " << statFile_ << std::endl;
+    os << "dataFile    " << dataFile << std::endl;
+    os << "fStatFile   " << fStatFile << std::endl;
+    os << "eneFile     " << eneFile << std::endl;
+    os << "restartFile " << restartFile << std::endl;
+    os << "statFile    " << statFile << std::endl;
 }
 /*!
  *
  */
 void Files::openFiles()
 {
-    getDataFile().open();
-    getFStatFile().open();
-    getRestartFile().open();
-    //getStatFile().open();
-    getEneFile().open();
+    dataFile.open();
+    fStatFile.open();
+    restartFile.open();
+    //statFile.open();
+    eneFile.open();
 }
 /*!
  * 
  */
 void Files::closeFiles()
 {
-    getDataFile().close();
-    getFStatFile().close();
-    getRestartFile().close();
-    getStatFile().close();
-    getEneFile().close();
+    dataFile.close();
+    fStatFile.close();
+    restartFile.close();
+    statFile.close();
+    eneFile.close();
 }
 /*!
  * \param[in] nextSavedTimeStep
  */
 void Files::setNextSavedTimeStep(unsigned int nextSavedTimeStep)
 {
-    getDataFile().setNextSavedTimeStep(nextSavedTimeStep);
-    getFStatFile().setNextSavedTimeStep(nextSavedTimeStep);
-    getRestartFile().setNextSavedTimeStep(nextSavedTimeStep);
-    getStatFile().setNextSavedTimeStep(nextSavedTimeStep);
-    getEneFile().setNextSavedTimeStep(nextSavedTimeStep);
+    dataFile.setNextSavedTimeStep(nextSavedTimeStep);
+    fStatFile.setNextSavedTimeStep(nextSavedTimeStep);
+    restartFile.setNextSavedTimeStep(nextSavedTimeStep);
+    statFile.setNextSavedTimeStep(nextSavedTimeStep);
+    eneFile.setNextSavedTimeStep(nextSavedTimeStep);
 }

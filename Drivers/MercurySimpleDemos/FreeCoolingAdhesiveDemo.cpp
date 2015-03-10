@@ -107,8 +107,9 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 	//problem.setHGridCellOverSizeRatio(1.2);
 	problem.setHGridUpdateEachTimeStep(true);
 
-    problem.getDataFile().setFileType(FileType::ONE_FILE);
-    problem.getFStatFile().setFileType(FileType::NO_FILE);
+        
+    problem.dataFile.setFileType(FileType::ONE_FILE);
+    problem.fStatFile.setFileType(FileType::NO_FILE);
     problem.solve();
     std::cout << problem.particleHandler.getObject(0)->getRadius() << std::endl;
     std::cout << problem.particleHandler.getObject(0)->getInteractionRadius() << std::endl;

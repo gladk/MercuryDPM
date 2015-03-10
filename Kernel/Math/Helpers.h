@@ -53,6 +53,7 @@ namespace helpers
     /*!
      * \brief Calculates the collision time for a given stiffness, dissipation, and effective mass
      * \deprecated use species->computeCollisionTime(2.0*effectiveMass) instead
+     * \todo This does not result in the same value as the given alternative.
      */
     MERCURY_DEPRECATED
     Mdouble computeCollisionTimeFromKAndDispAndEffectiveMass(Mdouble k, Mdouble disp, Mdouble mass);

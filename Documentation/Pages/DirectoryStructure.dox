@@ -1,0 +1,65 @@
+/*! \page DirectoryStructure Directory Structure
+
+# Information for users of this application
+
+Before you use MercuryDPM, it is useful to learn a little about the design of the code and what it is intended to do. 
+
+## General Information
+
+MercuryDPM is entirely written in C++. The basic architecture is to have a core kernel code (located in Kernel/) that is general and flexible, and very small driver codes (located in Drivers/) that pick out the parts of the kernel required to solve specific problems. 
+
+To create efficient and readable code, we use the object-oriented nature of C++ as well as templates and modern C++11 features (as a general rule, the code should compile on all compilers that are less than 24 months out of date). 
+
+## Directory Structure
+
+MercuryDPM is contained in two directories:
+
+ - The source directory, i.e., the directory in which MercuryDPM is installed (usually `~/MercuryDPM`),
+ - the build directory, i.e. the directory in which MercuryDPM applications are compiled and executed (usually ~/MercuryBuild).
+
+At the top level of the source directory you will find six main subdirectories
+-# Drivers/
+This is the only directory you need to create new application codes or modify existing ones; all other directories contain either documentation or files required as input files in the codes contained in this directory.
+\n It has a series of subdirectories, for example Tutorials/, that contain a series of demo codes illustrating how to write applications in MercuryDPM. 
+\todo TW What happened to the Template directory?
+
+-# Kernel/
+\n Contains the heart of the code. Users should not change the Kernel files. Instead, the classes and functions defined here are should be used (and possibly modified) in the Driver files. 
+-# Scripts/
+Contains a script used by `make test` and `make fullTest` to check if two output files are equal.
+You don't need to worry about the contains of this directory at all; however, for the interested reader:
+
+  - fpdiff.py : Calculated the floating point different between number in text file. This is part of the internal working of the selftest routine. This original version of this code was created for the oomph-lib project at  the University of Manchester.
+  - self_test : Makes calls to fpdiff.py passing the locations of newly create data and existing golddata. If writes error logs if something is different between the new data file and the golddata.
+
+-# Tools/
+Contains the source files required to use paraview.
+-# Documentation/
+\n Contains the raw .dox files for creating documentation pages, like the one you are reading right now, as well as the images used in the documentation. 
+-# Configuration/ 
+\n These files specify how the documentation and the code is configured.
+
+At the top level of the build directory you will find seven main subdirectories
+-# Drivers/
+\n This is the only directory you need to compile and execute codes; all other directories contain either documentation or files required to compile the code in Drivers/. The subdirectories here are the same as the subdirectories in the source directory. 
+\n Type `make fullTest` in Drivers/ to compile and execute a check of all parts of the code to confirm everything is functioning as intended. 
+\n Type `make` followed by the name of the .cpp file to compile an individual application. E.g., `make T1` will compile the application `T1.cpp`, creating an executable in `Drivers/Tutorials` which can be run by typing `./T1`.
+-# Kernel/
+\n Contains object files for each .cc file in the Kernel. These files are required to compile a Driver code. Users don't have to worry about these files.
+-# Tools/
+\n Contains the executable needed to view paraview output. The executable is created by typing `make data2pvd` 
+-# Documentation/ 
+\n Contains the documentation. You can create the documentation by typing `make doc` (or `make docClean` if the existing docuentation is corrupt), assuming you set Mercury_BUILD_DOCUMENTATION to true. The main page can then be accessed by opening Documentation/html/index.html in your browser.
+-# Configuration/ 
+\n Contains files needed to create the documentation. These files are automatically created by cmake and should not be modified.
+-# CMakeFiles/ 
+\n Contains files needed by the `make` command. These files are automatically created by cmake and should not be modified.
+-# Testing/ 
+\n Contains log files created by the `make test` command.
+
+## Output files
+
+Running a code will (in general) generate four files called some_name.data, some_name.xballs, some_name.stat. and some_name.ene. The files with .data extension contain all the position and velocity information for every particles. The .stat extension, contains macroscopic statistics about the problem (the information contained is semi-driver dependent). The .ene file contain some basic bulk information about the system i.e. centre of mass, total kinetic energy, total potential energy, etc. Finally .xballs extension is an a script file that to run to plot for .data output file using xballs. 
+\todo TW Anthony, please add information about your new output file here.
+
+*/

@@ -29,29 +29,55 @@
 #include "Interactions/BaseInteraction.h"
 class BaseInteractable;
 class HertzianViscoelasticNormalSpecies;
-
+/*!
+ * \class HertzianViscoelasticInteraction
+ * \brief Computes normal forces for a Herztian visco-elastic interaction.
+ */
 class HertzianViscoelasticInteraction : public virtual BaseInteraction
 {
 public:
+    /*!
+     * \brief An alias for HertzianViscoelasticNormalSpecies.
+     */    
     typedef HertzianViscoelasticNormalSpecies SpeciesType;
-
+    /*!
+     * \brief Constructor.
+     */
     HertzianViscoelasticInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
+    /*!
+     * \brief Copy constructor.
+     */
     HertzianViscoelasticInteraction(const HertzianViscoelasticInteraction &p);
+    /*!
+     * \brief Destructor.
+     */
     virtual ~HertzianViscoelasticInteraction();
-    HertzianViscoelasticInteraction* copy() const;
-
+    //
+    //    HertzianViscoelasticInteraction* copy() const;
+    //
+    /*!
+     * \brief Computes the amount of normal force due to an Herztian visco-elastic interaction.
+     */
     void computeNormalForce();
-
-    ///Interaction read function, which accepts an std::stringstream as input.
+    /*!
+     * \brief Interaction read function, which accepts an std::istream as input.
+     */    
     void read(std::istream& is);
-
-    ///Interaction print function, which accepts an std::stringstream as input.
+    /*!
+     * \brief Interaction write function, which accepts an std::ostream as input.
+     */    
     void write(std::ostream& os) const;
-
+    /*!
+     * \brief Returns the name of the interaction.
+     */
     std::string getBaseName() const;
-
+    /*!
+     * \brief Computes and returns the amount of elastic energy stored in the spring.
+     */
     Mdouble getElasticEnergy() const;
-
+    /*!
+     * \brief Returns a const pointer of type HerztianViscoelasticNormalSpecies (dynamic-cast).
+     */
     const HertzianViscoelasticNormalSpecies* getSpecies() const;
 };
 #endif

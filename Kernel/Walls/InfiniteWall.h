@@ -35,11 +35,9 @@
 #include "Math/Vector.h"
 
 /*!
- * \class InfiniteWall
  * \brief A standard wall is a plane defined  as {x: normal*x=position}, with normal being the outward unit normal vector of the wall. 
  * \details Please note that this wall is infinite and straight.
  *  A particle touches an infinite wall if position-normal*x<=radius.
- * \todo remove access to set Nwalls and wall set etc.. and add function add_wall. This would have stoped a lot of bugs in my own (Anthony's) driver codes.
  */
 
 class InfiniteWall : public BaseWall
@@ -67,11 +65,6 @@ public:
     InfiniteWall* copy() const override;
 
     /*!
-     * \brief Empty function, but is used for polymorphism.
-     */
-    void clear();
-
-    /*!
      * \brief Defines a standard wall, given an outward normal vector s.t. normal*x=normal*point for all x of the wall.
      */
     void set(Vec3D normal, Vec3D point);
@@ -83,7 +76,8 @@ public:
 
     /*!
      * \brief Defines a standard wall by computing normal*position = point and using the overloaded function set(Vec3D, vec3D).
-     * \deprecated We will go to the new interface, namely set(Vec3D, Vec3D).
+     * \deprecated In Mercury 2, the user will have to use the new interface, 
+     *             namely set(Vec3D, Vec3D).
      */
     MERCURY_DEPRECATED
     void set(Vec3D normal, Mdouble position);
@@ -92,8 +86,8 @@ public:
     
     /*!
      * \brief Move the wall to a new position by giving the new position in the direction of the unit normal vector.
-     * \deprecated We will go the new interface, namely move(Vec3D) that is 
-     * implemented in BaseInteractable.
+     * \deprecated In Mercury 2, the user will have the new interface, namely 
+     *             move(Vec3D) that is implemented in BaseInteractable.
      */
     MERCURY_DEPRECATED
     void move(Mdouble position);
@@ -126,7 +120,7 @@ public:
     /*!
      * \brief Returns the name of the object, in this case the string "InfiniteWall".
      */
-    virtual std::string getName() const;
+    std::string getName() const override;
 
     /*!
      * \brief Access function for normal.
@@ -145,10 +139,8 @@ private:
     Vec3D normal_;
 
     /*!
-     * This is the factor to rescale to unit vectors.
-     * \todo{TW: it is unnecessary to store the factor; remove?}
-     * IFCD: It seems to not be unnecessary if someone defined a normal with non-unit
-     * length and wants to move the wall.
+     * This is the factor used to rescale the normal given by the user to a unit
+     * vector. It is only used by the deprecated function move(Mdouble).
      */
     Mdouble factor_;
 };

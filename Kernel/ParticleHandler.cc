@@ -32,19 +32,25 @@
 #include "Species/ParticleSpecies.h"
 
 
-
-///Constructor of the ParticleHandler class. It creates and empty ParticleHandler.
+/*!
+ * \details Constructor of the ParticleHandler class. It creates and empty 
+ *          ParticleHandler.
+ */
 ParticleHandler::ParticleHandler()
 {
     largestParticle_ = nullptr;
     smallestParticle_ = nullptr;
-#ifdef DEBUG_CONSTRUCTOR
     logger(DEBUG, "ParticleHandler::ParticleHandler() finished");
-#endif
 }
 
-///\param[in] PH The ParticleHandler that has to be copied. 
+/*!
+ * \param[in] PH The ParticleHandler that has to be copied. 
+ * \details This is not a copy constructor! It copies the DPMBase and all 
+ *          BaseParticle, and sets the other variables to 0. After that, it 
+ *          computes the smallest and largest particle in this handler.
+ */
 ParticleHandler::ParticleHandler(const ParticleHandler& PH)
+    : BaseHandler<BaseParticle>() 
 {
     clear();
     setDPMBase(PH.getDPMBase());
@@ -56,12 +62,15 @@ ParticleHandler::ParticleHandler(const ParticleHandler& PH)
         computeLargestParticle();
         computeSmallestParticle();
     }
-#ifdef DEBUG_CONSTRUCTOR
     logger(DEBUG, "ParticleHandler::ParticleHandler(const ParticleHandler &PH) finished");
-#endif
 }
 
-///\param[in] rhs The ParticleHandler on the right hand side of the assignment.
+/*!
+ * \param[in] rhs The ParticleHandler on the right hand side of the assignment.
+ * \details This is not a copy assignment operator! It copies the DPMBase and all 
+ *          BaseParticle, and sets the other variables to 0. After that, it 
+ *          computes the smallest and largest particle in this handler.
+ */
 ParticleHandler ParticleHandler::operator =(const ParticleHandler& rhs)
 {
     if (this != &rhs)
@@ -76,31 +85,47 @@ ParticleHandler ParticleHandler::operator =(const ParticleHandler& rhs)
             computeSmallestParticle();
         }
     }
-#ifdef DEBUG_CONSTRUCTOR
     logger(DEBUG, "ParticleHandler::operator = (const ParticleHandler& rhs) finished");
-#endif
     return *this;
 }
 
-///Set the pointers to largestParticle_ and smallestParticle_ to nullptr, then let
-///the BaseHandler destroy all particles.
+/*!
+ * \details Set the pointers to largestParticle_ and smallestParticle_ to 
+ *          nullptr, all BaseParticle are destroyed by the BaseHandler afterwards.
+ */
 ParticleHandler::~ParticleHandler()
 {
     //First reset the pointers, such that they are not checked twice when removing particles
     largestParticle_ = nullptr;
     smallestParticle_ = nullptr;
-#ifdef DEBUG_DESTRUCTOR
     logger(DEBUG, "ParticleHandler::~ParticleHandler() finished");
-#endif
 }
 
-///\param[in] P A pointer to the BaseParticle (or derived class) that has to be added. 
-/// \todo Also insert the particle in the HGRID
+/*!
+ * \param[in] P A pointer to the BaseParticle that has to be added. 
+ * \details To add a BaseParticle to the ParticleHandler, first check if it has
+ *          a species, since it is as common bug to use a BaseParticle without
+ *          species, which leads to a segmentation fault. To help the user with
+ *          debugging, a warning is given if a particle without species is added.
+ *          After that, the actions for adding the particle to the BaseHandler
+ *          are taken, which include adding it to the vector of pointers to all 
+ *          BaseParticle and assigning the correct id and index. Then the 
+ *          particle is added to the HGrid, the particle is told that this is its
+ *          handler, its mass is computed and finally it is checked if this is 
+ *          the smallest or largest particle in this ParticleHandler.
+ */
 void ParticleHandler::addObject(BaseParticle* P)
 {
+    if (P->getSpecies() == nullptr)
+    {
+        logger(WARN, "WARNING: The particle with ID % that is added in "
+                "ParticleHandler::addObject does not have a species yet."
+                "Please make sure that you have "
+                "set the species somewhere in the driver code.", P->getId());
+    }
     //Puts the particle in the Particle list
     BaseHandler<BaseParticle>::addObject(P);
-    if (getDPMBase())
+    if (getDPMBase() != nullptr)
     {
         //This places the particle in this grid
         getDPMBase()->hGridInsertParticle(P);
@@ -115,9 +140,13 @@ void ParticleHandler::addObject(BaseParticle* P)
     checkExtrema(P);
 }
 
-/// \param[in] id The index of which BaseParticle has to be removed from the ParticleHandler
-/// \details The BaseParticle at position id is removed by moving the last 
-/// BaseParticle in the vector to the position of id. It also removes the BaseParticle from the HGrid.
+/*!
+ * \param[in] id    The index of which BaseParticle has to be removed from this 
+ *                  ParticleHandler.
+ * \details         The BaseParticle at position id is removed by moving the last 
+ *                  BaseParticle in the vector to the position of id. It also 
+ *                  removes the BaseParticle from the HGrid.
+ */
 void ParticleHandler::removeObject(unsigned const int id)
 {
 #ifdef CONTACT_LIST_HGRID
@@ -127,7 +156,10 @@ void ParticleHandler::removeObject(unsigned const int id)
     BaseHandler<BaseParticle>::removeObject(id);
 }
 
-/// \details It also removes the particle from the HGrid.
+/*!
+ * \details Function that removes the last object from this ParticleHandler. It
+ *          also removes the particle from the HGrid.
+ */
 void ParticleHandler::removeLastObject()
 {
 #ifdef CONTACT_LIST_HGRID
@@ -175,17 +207,23 @@ void ParticleHandler::computeLargestParticle()
     }
 }
 
-///\return A pointer to the to the smallest BaseParticle (by interactionRadius) in this ParticleHandler.
+/*!
+ * \return  A pointer to the to the smallest BaseParticle (by interactionRadius) 
+ *          in this ParticleHandler.
+ */
 BaseParticle* ParticleHandler::getSmallestParticle() const
 {
     if (smallestParticle_ == nullptr)
     {
-        logger(WARN, "No particles to set getSmallestParticle()");
+        logger(WARN, "No particles to return in getSmallestParticle()");
     }
     return smallestParticle_;
 }
 
-///\return A pointer to the largest BaseParticle (by interactionRadius) in this ParticleHandler.
+/*!
+ * \return A pointer to the largest BaseParticle (by interactionRadius) in this 
+ *         ParticleHandler.
+ */
 BaseParticle* ParticleHandler::getLargestParticle() const
 {
     if (largestParticle_ == nullptr)
@@ -195,7 +233,9 @@ BaseParticle* ParticleHandler::getLargestParticle() const
     return largestParticle_;
 }
 
-///\return A pointer to the fastest BaseParticle in this ParticleHandler.
+/*!
+ * \return A pointer to the fastest BaseParticle in this ParticleHandler.
+ */
 BaseParticle* ParticleHandler::getFastestParticle() const
 {
     if (getNumberOfObjects() == 0)
@@ -216,8 +256,11 @@ BaseParticle* ParticleHandler::getFastestParticle() const
     return p;
 }
 
-/// \param[in] i Direction for which you want the particle with lowest coordinates.
-/// \return A pointer to the particle with the lowest coordinates in direction i in this ParticleHandler.
+/*!
+ * \param[in] i Direction for which you want the particle with lowest coordinates.
+ * \return      A pointer to the particle with the lowest coordinates in the
+ *              given direction in this ParticleHandler.
+ */
 BaseParticle* ParticleHandler::getLowestPositionComponentParticle(const int i) const
 {
     if (getNumberOfObjects() == 0)
@@ -238,8 +281,11 @@ BaseParticle* ParticleHandler::getLowestPositionComponentParticle(const int i) c
     return p;
 }
 
-/// \param[in] i Direction for which you want the particle with highest coordinates.
-/// \return A pointer to the particle with the highest coordinates in direction i in this ParticleHandler.
+/*!
+ * \param[in] i Direction for which one wants the particle with highest coordinates.
+ * \return      A pointer to the particle with the highest coordinates in 
+ *              direction i in this ParticleHandler.
+ */
 BaseParticle* ParticleHandler::getHighestPositionComponentParticle(const int i) const
 {
     if (getNumberOfObjects() == 0)
@@ -261,8 +307,11 @@ BaseParticle* ParticleHandler::getHighestPositionComponentParticle(const int i) 
     return p;
 }
 
-/// \param[in] i Direction for which you want the particle with lowest velocity.
-/// \return A pointer to the particle with the lowest velocity in direction i in this ParticleHandler.
+/*!
+ * \param[in] i Direction for which you want the particle with lowest velocity.
+ * \return      A pointer to the particle with the lowest velocity in direction 
+ *              i in this ParticleHandler.
+ */
 BaseParticle* ParticleHandler::getLowestVelocityComponentParticle(const int i) const
 {
     if (getNumberOfObjects() == 0)
@@ -283,8 +332,11 @@ BaseParticle* ParticleHandler::getLowestVelocityComponentParticle(const int i) c
     return p;
 }
 
-/// \param[in] i Direction for which you want the particle with highest velocity.
-/// \return A pointer to the particle with the highest velocity in direction i in this ParticleHandler.
+/*!
+ * \param[in] i Direction for which you want the particle with highest velocity.
+ * \return      A pointer to the particle with the highest velocity in direction
+ *              i in this ParticleHandler.
+ */
 BaseParticle* ParticleHandler::getHighestVelocityComponentParticle(const int i) const
 {
     if (!getNumberOfObjects())
@@ -305,7 +357,9 @@ BaseParticle* ParticleHandler::getHighestVelocityComponentParticle(const int i) 
     return p;
 }
 
-/// \return A pointer to the to the lightest BaseParticle (by mass) in this ParticleHandler.
+/*!
+ * \return A pointer to the to the lightest BaseParticle (by mass) in this ParticleHandler.
+ */
 BaseParticle* ParticleHandler::getLightestParticle() const
 {
     if (getNumberOfObjects() == 0)
@@ -326,8 +380,11 @@ BaseParticle* ParticleHandler::getLightestParticle() const
     return p;
 }
 
-///Note that the pointers to smallestParticle_ and largestParticle_ are set to nullptr
-///since these particles don't exist anymore after calling this function.
+/*!
+ * \details Note that the pointers to smallestParticle_ and largestParticle_ are
+ *          set to nullptr since these particles don't exist anymore after 
+ *          calling this function.
+ */
 void ParticleHandler::clear()
 {
     smallestParticle_ = nullptr;
@@ -335,7 +392,9 @@ void ParticleHandler::clear()
     BaseHandler<BaseParticle>::clear();
 }
 
-/// \param[in] is The input stream from which the information is read.
+/*!
+ * \param[in] is The input stream from which the information is read.
+ */
 void ParticleHandler::readObject(std::istream& is)
 {
     std::string type;
@@ -367,13 +426,15 @@ void ParticleHandler::readObject(std::istream& is)
     }
 }
 
-/// \param[in] type The first value of the position.
-/// \param[in] is The input stream from which the information is read.
-/// The old objects did not have their type in the beginning of the line. Instead, 
-/// the first string of the file was the position in x-direction. 
-/// Since we already read the first string of the file, we need to give it to this
-/// function and convert it to the position in x-direction. The rest of the stream
-/// is then read in the usual way.
+/*!
+ * \param[in] type The first value of the position.
+ * \param[in] is The input stream from which the information is read.
+ * \details The old objects did not have their type in the beginning of the line. 
+ *          Instead, the first string of the file was the position in x-direction. 
+ *          Since we already read the first string of the file, we need to give 
+ *          it to this function and convert it to the position in x-direction. 
+ *          The rest of the stream is then read in the usual way.
+ */
 void ParticleHandler::readOldObject(std::string type, std::istream& is)
 {
     //read in next line
@@ -394,7 +455,8 @@ void ParticleHandler::readOldObject(std::string type, std::istream& is)
 
     line >> position.Y >> position.Z >> velocity >> radius >> orientation >> angularVelocity >> inverseMass >> inverseInertia >> indSpecies;
     
-    //Put the values in the particle
+    //Put the values in the particle    
+    particle.setIndSpecies(indSpecies);
     particle.setPosition(position);
     particle.setVelocity(velocity);
     particle.setRadius(radius);
@@ -405,18 +467,26 @@ void ParticleHandler::readOldObject(std::string type, std::istream& is)
     else
     {
         particle.setInertia(1./inverseInertia);
-        particle.setMass(1./inverseMass);
     }
-    particle.setIndSpecies(indSpecies);
     
     //Put the particle in the  handler
     copyAndAddObject(particle);
 }
 
-/// \param[in] P A pointer to the particle, which properties have to be checked against the ParticleHandlers extrema.
+void ParticleHandler::write(std::ostream& os) const
+{
+    os << "Particles " << getNumberOfObjects() << std::endl;
+    for (BaseParticle* it : *this)
+        os << (*it) << std::endl;
+}
+
+/*!
+ *  \param[in] P A pointer to the particle, which properties have to be checked 
+ *               against the ParticleHandlers extrema.
+ */
 void ParticleHandler::checkExtrema(BaseParticle* P)
 {
-    if (P==largestParticle_) 
+    if (P == largestParticle_) 
     {
         //if the properties of the largest particle changes
         computeLargestParticle();
@@ -426,7 +496,7 @@ void ParticleHandler::checkExtrema(BaseParticle* P)
         largestParticle_ = P;
     }
     
-    if (P==smallestParticle_) 
+    if (P == smallestParticle_) 
     {
         //if the properties of the smallest particle changes
         computeSmallestParticle();
@@ -437,7 +507,9 @@ void ParticleHandler::checkExtrema(BaseParticle* P)
     }
 }
 
-///\param[in] P A pointer to the particle, which is going to get deleted.
+/*!
+ * \param[in] P A pointer to the particle, which is going to get deleted.
+ */
 void ParticleHandler::checkExtremaOnDelete(BaseParticle* P)
 {
     if (P == largestParticle_)
@@ -450,7 +522,10 @@ void ParticleHandler::checkExtremaOnDelete(BaseParticle* P)
     }
 }
 
-///\param[in] indSpecies Unsigned integer with the index of the species for which the masses must be computed.
+/*!
+ * \param[in] indSpecies Unsigned integer with the index of the species for which
+ *                       the masses must be computed.
+ */
 void ParticleHandler::computeAllMasses(unsigned int indSpecies)
 {
      for (BaseParticle* particle : objects_)
@@ -470,7 +545,9 @@ void ParticleHandler::computeAllMasses()
     }
 }
 
-/// \return The string "ParticleHandler"
+/*!
+ * \return The string "ParticleHandler".
+ */
 std::string ParticleHandler::getName() const
 {
     return "ParticleHandler";

@@ -34,8 +34,8 @@ AxisymmetricIntersectionOfWalls::AxisymmetricIntersectionOfWalls()
 /*!
  * \param[in] other The AxisymmetricIntersectionOfWalls that must be copied.
  */
-AxisymmetricIntersectionOfWalls::AxisymmetricIntersectionOfWalls(const AxisymmetricIntersectionOfWalls &p)
-        : IntersectionOfWalls(p)
+AxisymmetricIntersectionOfWalls::AxisymmetricIntersectionOfWalls(const AxisymmetricIntersectionOfWalls &other)
+        : IntersectionOfWalls(other)
 {
     logger(DEBUG, "AxisymmetricIntersectionOfWalls(const AxisymmetricIntersectionOfWalls &p) finished");
 }

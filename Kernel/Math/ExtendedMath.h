@@ -106,7 +106,7 @@ namespace mathsFunc
      * \param[in] v1 The first Mdouble
      * \param[in] v2 The second Mdouble
      * \param[in] absError The allowed maximum absolute error
-     * \return False if the two Mdouble are equal
+     * \return True if the two Mdouble are equal
      */
     bool isEqual(Mdouble v1,Mdouble v2, double absError);
     /*!

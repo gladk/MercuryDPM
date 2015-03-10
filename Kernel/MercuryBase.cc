@@ -196,26 +196,27 @@ bool MercuryBase::getHGridUpdateEachTimeStep() const
  *          to the distribution. USER just takes the cell sizes given by the user.
  *          OLDHGRID computes the smallest cell size and then makes the cells of
  *          each subsequent level twice as big.
- * \todo Convert all double to Mdouble.
  */
 void
 MercuryBase::hGridRebuild()
 {
 
-    std::vector<double> cellSizes;
+    std::vector<Mdouble> cellSizes;
 
-    double minParticleInteractionRadius = getHGridTargetMinInteractionRadius();
-    double maxParticleInteractionRadius = getHGridTargetMaxInteractionRadius();
+    Mdouble minParticleInteractionRadius = getHGridTargetMinInteractionRadius();
+    Mdouble maxParticleInteractionRadius = getHGridTargetMaxInteractionRadius();
     if(minParticleInteractionRadius == 0.0 || minParticleInteractionRadius == maxParticleInteractionRadius)
     {
         //this case is executed if the particleHandler is empty (minParticleInteractionRadius == 0)
         //or if the particle distribution is monodispersed. 
-        //nextafter(d,std::numeric_limits<max>) chooses the smallest double that is bigger than d.
-        double maxCellSize = nextafter(2.0 * maxParticleInteractionRadius * getHGridCellOverSizeRatio(), std::numeric_limits<double>::max());
+        //nextafter(d,std::numeric_limits<Mdouble>::max()) chooses the smallest 
+        // Mdouble that is bigger than d.
+        Mdouble maxCellSize = nextafter(2.0 * maxParticleInteractionRadius * getHGridCellOverSizeRatio(), std::numeric_limits<Mdouble>::max());
         cellSizes.push_back(maxCellSize);
         if(getHGridMaxLevels() != 1)
         {
-            logger(WARN, "Warning: While rebuilding the hgrid: the number of levels was set to one, as the particle distribution is monodispersed");
+            logger(INFO, "While rebuilding the hgrid: the number of levels was "
+                    "set to one, as the particle distribution is monodispersed");
         }
     }
     else
@@ -224,13 +225,13 @@ MercuryBase::hGridRebuild()
         {
         case LINEAR:
         {
-            double minCellSize = nextafter(2.0 * minParticleInteractionRadius * getHGridCellOverSizeRatio(), 0.0);
-            double maxCellSize = nextafter(2.0 * maxParticleInteractionRadius * getHGridCellOverSizeRatio(), std::numeric_limits<double>::max());
+            Mdouble minCellSize = nextafter(2.0 * minParticleInteractionRadius * getHGridCellOverSizeRatio(), 0.0);
+            Mdouble maxCellSize = nextafter(2.0 * maxParticleInteractionRadius * getHGridCellOverSizeRatio(), std::numeric_limits<Mdouble>::max());
             //std::cout << "HGrid: using a linear cell size distribution from " << minCellSize << " to " << maxCellSize << " over " << getHGridMaxLevels() << " levels" << std::endl;
             for(unsigned int i = 0; i + 1 < getHGridMaxLevels(); i++)
             {
-                ///\todo cast i to double explicitly.
-                cellSizes.push_back(minCellSize + (maxCellSize - minCellSize) * (i + 1.0) / getHGridMaxLevels());
+                cellSizes.push_back(minCellSize + (maxCellSize - minCellSize) 
+                * (static_cast<Mdouble>(i + 1)) / getHGridMaxLevels());
             }
             //The last cell is added separately because in some cases accuracy was lost when calculating it.
             cellSizes.push_back(maxCellSize);
@@ -238,13 +239,14 @@ MercuryBase::hGridRebuild()
         }
         case EXPONENTIAL:
         {
-            double minCellSize = nextafter(2.0 * minParticleInteractionRadius * getHGridCellOverSizeRatio(), 0.0);
-            double maxCellSize = nextafter(2.0 * maxParticleInteractionRadius * getHGridCellOverSizeRatio(), std::numeric_limits<double>::max());
+            Mdouble minCellSize = nextafter(2.0 * minParticleInteractionRadius * getHGridCellOverSizeRatio(), 0.0);
+            Mdouble maxCellSize = nextafter(2.0 * maxParticleInteractionRadius * getHGridCellOverSizeRatio(), std::numeric_limits<Mdouble>::max());
             //std::cout << "HGrid: using an exponential cell size distribution from " << minCellSize << " to " << maxCellSize << " over " << getHGridMaxLevels() << " levels" << std::endl;
             for(unsigned int i = 0; i + 1 < getHGridMaxLevels(); i++)
             {
-                ///\todo explicitly cast i to double
-                cellSizes.push_back(minCellSize * std::pow(maxCellSize / minCellSize, (i + 1.0) / getHGridMaxLevels()));
+                cellSizes.push_back(minCellSize 
+                * std::pow(maxCellSize / minCellSize, static_cast<Mdouble>(i + 1) 
+                / getHGridMaxLevels()));
             }
             //The last cell is added separately because in some cases accuracy was lost when calculating it.
             cellSizes.push_back(maxCellSize);
@@ -260,7 +262,7 @@ MercuryBase::hGridRebuild()
         }
         case OLDHGRID:
         {
-            double minCellSize = nextafter(2.0 * minParticleInteractionRadius * getHGridCellOverSizeRatio(), 0.0);
+            Mdouble minCellSize = nextafter(2.0 * minParticleInteractionRadius * getHGridCellOverSizeRatio(), 0.0);
 
             //std::cout<<"HGrid: using the old HGrid cell size distribution starting from " <<minCellSize<<std::endl;
             for(unsigned int i = 0; i < getHGridMaxLevels(); i++)
@@ -400,11 +402,10 @@ const HGrid* MercuryBase::getHGrid() const
 /*!
  * \param[in] level The level of the cell we want to know the size set by the user for.
  * \return The size of the cells at the given level.
- * \todo Convert the double to Mdouble.
  */
-double MercuryBase::userHGridCellSize(unsigned int level)
+Mdouble MercuryBase::userHGridCellSize(unsigned int level)
 {
-    logger(WARN, "In double MercuryBase::userHGridCellSize(unsigned int level) with level= %", level);
+    logger(WARN, "In Mdouble MercuryBase::userHGridCellSize(unsigned int level) with level= %", level);
     logger(WARN, "If you want to use user defined HGrid cell sizes, this function should be redefined");
     return 0.0;
 }
@@ -481,10 +482,12 @@ Mdouble MercuryBase::getHGridCellOverSizeRatio() const
 /*!
  * \param[in] hGridCellOverSizeRatio The desired maximum ratio between the cells
  *                                   and the size of the BaseParticle it contains.
+ * \todo IFCD: I changed the if unequal to if equal, can someone check this is correct?
  */
 void MercuryBase::setHGridCellOverSizeRatio(Mdouble hGridCellOverSizeRatio)
 {
-    if (std::abs(hGridCellOverSizeRatio_-hGridCellOverSizeRatio)<1e-10)
+    //If the hGridCellOverSizeRatio changes significantly, assign the given parameter.
+    if (mathsFunc::isEqual(hGridCellOverSizeRatio_, hGridCellOverSizeRatio, 1e-10))
     {
         gridNeedsUpdate_ = true;
         hGridCellOverSizeRatio_ = hGridCellOverSizeRatio;
@@ -569,7 +572,7 @@ unsigned int MercuryBase::getHGridTargetNumberOfBuckets() const
  * \return The interaction radius of the smallest particle multiplied by the maximum
  *         ratio between the cell size and particle size.
  */
-double MercuryBase::getHGridTargetMinInteractionRadius() const
+Mdouble MercuryBase::getHGridTargetMinInteractionRadius() const
 {
     if (particleHandler.getNumberOfObjects() == 0)
     {
@@ -585,7 +588,7 @@ double MercuryBase::getHGridTargetMinInteractionRadius() const
  * \return The interaction radius of the largest particle multiplied by the maximum
  *         ratio between the cell size and particle size.
  */
-double MercuryBase::getHGridTargetMaxInteractionRadius() const
+Mdouble MercuryBase::getHGridTargetMaxInteractionRadius() const
 {
     if (particleHandler.getNumberOfObjects() == 0)
     {

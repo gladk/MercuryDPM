@@ -25,6 +25,8 @@
 #include "AngledPeriodicBoundary.h"
 #include "ParticleHandler.h"
 #include "Particles/BaseParticle.h"
+#include "Math/MatrixSymmetric.h"
+#include "Interactions/BaseInteraction.h"
 
 /*!
  * \details 
@@ -42,19 +44,31 @@ AngledPeriodicBoundary* AngledPeriodicBoundary::copy() const
  * The shift vector is set assuming that the domain is rectangular (shift parallel 
  * to normal).
  * \param[in] normalLeft
+ * \param[in] normalRight
+ * \param[in] origin
  */
 void AngledPeriodicBoundary::set(Vec3D normalLeft, Vec3D normalRight, Vec3D origin)
 {
     origin_ = origin;
     leftNormal_ = normalLeft / Vec3D::getLength(normalLeft);
     rightNormal_ = normalRight / Vec3D::getLength(normalRight);
-    commonAxis_ = Vec3D::cross(leftNormal_, rightNormal_);
-    commonAxis_ /= Vec3D::getLength(commonAxis_);
+    //http://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d
+    Vec3D v = Vec3D::cross(leftNormal_, rightNormal_);
+    Mdouble s = Vec3D::getLength(v);
+    Mdouble c = Vec3D::dot(leftNormal_, rightNormal_);
+    Matrix3D vx = {0, -v.Z, v.Y,
+        v.Z, 0, -v.X,
+        -v.Y, v.X, 0};
+    Matrix3D eye = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+    rotateLeft = eye - vx + vx * vx * ((1 - c) / s / s);
+    rotateRight = eye + vx + vx * vx * ((1 - c) / s / s);
+    //std::cout << "rotationMatrix" << rotationMatrix << std::endl; 
+    commonAxis_ = v / s;
     leftRadialAxis_ = Vec3D::cross(leftNormal_, commonAxis_);
     rightRadialAxis_ = Vec3D::cross(rightNormal_, commonAxis_);
     differenceNormal_ = rightNormal_ - leftNormal_;
     differenceRadialAxis_ = rightRadialAxis_ - leftRadialAxis_;
-    ///\todo{I cannot calculate angular shift; right now this works only for quarter 
+    ///\todo{TW: I cannot calculate angular shift; right now this works only for quarter 
     // walls; maybe this has to wait till quaternions are implemented.}
     //angularShift = 0;
     // std::cout << "common_axis " << common_axis
@@ -67,7 +81,7 @@ void AngledPeriodicBoundary::set(Vec3D normalLeft, Vec3D normalRight, Vec3D orig
 /*!
  * \details 
  */
-Mdouble AngledPeriodicBoundary::distance(const BaseParticle &P)
+Mdouble AngledPeriodicBoundary::distance(const BaseParticle & P)
 {
     return distance(P.getPosition());
 }
@@ -75,12 +89,12 @@ Mdouble AngledPeriodicBoundary::distance(const BaseParticle &P)
 /*!
  * \details 
  */
-Mdouble AngledPeriodicBoundary::distance(const Vec3D &P)
+Mdouble AngledPeriodicBoundary::distance(const Vec3D & P)
 {
     Vec3D position = P - origin_;
     Mdouble distance_left = Vec3D::dot(position, leftNormal_);
     Mdouble distance_right = -Vec3D::dot(position, rightNormal_);
-    
+
     if (distance_left < distance_right)
     {
         leftWall_ = true;
@@ -98,7 +112,7 @@ Mdouble AngledPeriodicBoundary::distance(const Vec3D &P)
 /*!
  * \details 
  */
-void AngledPeriodicBoundary::shiftPosition(BaseParticle* P)
+void AngledPeriodicBoundary::shiftPosition(BaseParticle * P)
 {
     Vec3D position = P->getPosition() - origin_;
     if (leftWall_)
@@ -113,9 +127,19 @@ void AngledPeriodicBoundary::shiftPosition(BaseParticle* P)
         Mdouble radialAngularDistance = Vec3D::dot(P->getOrientation(), leftRadialAxis_);
         ///\todo{TW: not sure how to calculate the angular position in common_axis direction}
         P->rotate(normalAngularDistance * differenceNormal_ + radialAngularDistance * differenceRadialAxis_);
+        Mdouble normalAngularVelocity = Vec3D::dot(P->getAngularVelocity(), leftNormal_);
+        Mdouble radialAngularVelocity = Vec3D::dot(P->getAngularVelocity(), leftRadialAxis_);
+        P->angularAccelerate(normalAngularVelocity * differenceNormal_ + radialAngularVelocity * differenceRadialAxis_);
         leftWall_ = false;
         ///\todo tangential spring
-        //std::cout << "shift to right wall, " << P->getPosition() << std::endl;
+        //std::cout << "shift to right wall, " << P->getInteractions().size() << std::endl;
+        for (BaseInteraction* i : P->getInteractions())
+        {
+            if (i->getP()->getIndex() >= P->getIndex())
+            {
+                i->rotateHistory(rotateRight);
+            }
+        }
     }
     else
     {
@@ -128,15 +152,25 @@ void AngledPeriodicBoundary::shiftPosition(BaseParticle* P)
         Mdouble normalAngularDistance = Vec3D::dot(P->getOrientation(), rightNormal_);
         Mdouble radialAngularDistance = Vec3D::dot(P->getOrientation(), rightRadialAxis_);
         P->rotate(-normalAngularDistance * differenceNormal_ - radialAngularDistance * differenceRadialAxis_);
+        Mdouble normalAngularVelocity = Vec3D::dot(P->getAngularVelocity(), rightNormal_);
+        Mdouble radialAngularVelocity = Vec3D::dot(P->getAngularVelocity(), rightRadialAxis_);
+        P->angularAccelerate(-normalAngularVelocity * differenceNormal_ - radialAngularVelocity * differenceRadialAxis_);
         leftWall_ = true;
         //std::cout << "shift to left wall, " << P->getPosition() << std::endl;
+        for (BaseInteraction* i : P->getInteractions())
+        {
+            if (i->getP()->getIndex() >= P->getIndex()) //if it is the deleted interaction
+            {
+                i->rotateHistory(rotateLeft);
+            }
+        }
     }
 }
 
 /*!
  * \details 
  */
-void AngledPeriodicBoundary::shiftPositions(Vec3D& P1, Vec3D& P2)
+void AngledPeriodicBoundary::shiftPositions(Vec3D& P1, Vec3D & P2)
 {
     ///\todo TW: this still doesn't shift all data
     Vec3D position1 = P1 - origin_;
@@ -147,20 +181,20 @@ void AngledPeriodicBoundary::shiftPositions(Vec3D& P1, Vec3D& P2)
     {
         normalDistance = Vec3D::dot(position1, leftNormal_);
         radialDistance = Vec3D::dot(position1, leftRadialAxis_);
-        P1+=(normalDistance * differenceNormal_ + radialDistance * differenceRadialAxis_);
+        P1 += (normalDistance * differenceNormal_ + radialDistance * differenceRadialAxis_);
         normalDistance = Vec3D::dot(position2, leftNormal_);
         radialDistance = Vec3D::dot(position2, leftRadialAxis_);
-        P2+=(normalDistance * differenceNormal_ + radialDistance * differenceRadialAxis_);
+        P2 += (normalDistance * differenceNormal_ + radialDistance * differenceRadialAxis_);
         leftWall_ = false;
     }
     else
     {
         normalDistance = Vec3D::dot(position1, rightNormal_);
         radialDistance = Vec3D::dot(position1, rightRadialAxis_);
-        P1+=(-normalDistance * differenceNormal_ - radialDistance * differenceRadialAxis_);
+        P1 += (-normalDistance * differenceNormal_ - radialDistance * differenceRadialAxis_);
         normalDistance = Vec3D::dot(position2, rightNormal_);
         radialDistance = Vec3D::dot(position2, rightRadialAxis_);
-        P2+=(-normalDistance * differenceNormal_ - radialDistance * differenceRadialAxis_);
+        P2 += (-normalDistance * differenceNormal_ - radialDistance * differenceRadialAxis_);
         leftWall_ = true;
     }
 }
@@ -168,7 +202,7 @@ void AngledPeriodicBoundary::shiftPositions(Vec3D& P1, Vec3D& P2)
 /*!
  * \details 
  */
-void AngledPeriodicBoundary::read(std::istream& is)
+void AngledPeriodicBoundary::read(std::istream & is)
 {
     BaseBoundary::read(is);
     std::string dummy;
@@ -179,7 +213,7 @@ void AngledPeriodicBoundary::read(std::istream& is)
 /*!
  * \details 
  */
-void AngledPeriodicBoundary::oldRead(std::istream& is)
+void AngledPeriodicBoundary::oldRead(std::istream & is)
 {
     std::string dummy;
     is >> dummy >> leftNormal_ >> dummy >> rightNormal_ >> dummy >> origin_;
@@ -189,12 +223,12 @@ void AngledPeriodicBoundary::oldRead(std::istream& is)
 /*!
  * \details 
  */
-void AngledPeriodicBoundary::write(std::ostream& os) const
-        {
+void AngledPeriodicBoundary::write(std::ostream & os) const
+{
     BaseBoundary::write(os);
     os << " normal_left " << leftNormal_
-            << " normal_right " << rightNormal_
-            << " origin " << origin_;
+        << " normal_right " << rightNormal_
+        << " origin " << origin_;
 }
 
 /*!
@@ -208,7 +242,7 @@ std::string AngledPeriodicBoundary::getName() const
 /*!
  * \details 
  */
-Vec3D& AngledPeriodicBoundary::getNormal()
+Vec3D & AngledPeriodicBoundary::getNormal()
 {
     if (leftWall_)
         return leftNormal_;
@@ -227,29 +261,45 @@ Mdouble AngledPeriodicBoundary::getOpeningAngle()
 /*!
  * \details 
  */
-void AngledPeriodicBoundary::createPeriodicParticles(BaseParticle *P, ParticleHandler &pH)
+void AngledPeriodicBoundary::createPeriodicParticles(BaseParticle *p, ParticleHandler & pH)
 {
-    if (distance(*P) < P->getInteractionRadius() + pH.getLargestParticle()->getInteractionRadius())
+    if (distance(*p) < p->getInteractionRadius() + pH.getLargestParticle()->getInteractionRadius())
     {
-        BaseParticle* F0 = P->copy();
-        shiftPosition(F0);
+        //std::cout << "Copy particle " << p->getIndex() << " to new ghost particle" << std::endl;
+        //Step 1: Copy the particle to new ghost particle.
+        BaseParticle* pGhost = p->copy();
 
-        //If Particle is Mdouble shifted, get correct original particle
-        BaseParticle* From = P;
-        while (From->getPeriodicFromParticle() != nullptr)
-            From = From->getPeriodicFromParticle();
-        F0->setPeriodicFromParticle(From);
-        
-        pH.addObject(F0);
+        //std::cout << "pGhostInteractions " << pGhost->getInteractions().size();
+        //Step 2: Copy the interactions to the ghost particle.
+        pGhost->copyInteractionsForPeriodicParticles(*p);
+        //std::cout << "-> " << pGhost->getInteractions().size() << std::endl;
+
+        //Step 3: Shift the ghost to the 'reflected' location.
+        shiftPosition(pGhost);
+        //rotateHistory
+        //std::cout << "pGhostPosition " << pGhost->getPosition() << std::endl;
+
+        //        BaseParticle* F0 = P->copy();
+        //        shiftPosition(F0);
+
+        //Step 4: If Particle is double shifted, get correct original particle
+        BaseParticle* from = p;
+        while (from->getPeriodicFromParticle() != nullptr)
+            from = from->getPeriodicFromParticle();
+        pGhost->setPeriodicFromParticle(from);
+
+        pH.addObject(pGhost);
     }
 }
 
 /*!
  * \details 
  */
-bool AngledPeriodicBoundary::checkBoundaryAfterParticleMoved(BaseParticle *P, ParticleHandler &pH UNUSED)
+bool AngledPeriodicBoundary::checkBoundaryAfterParticleMoved(BaseParticle *P, ParticleHandler & pH UNUSED)
 {
     if (distance(*P) < 0)
+    {
         shiftPosition(P);
+    }
     return false;
 }

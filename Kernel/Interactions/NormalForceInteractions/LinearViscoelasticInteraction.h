@@ -56,7 +56,7 @@ public:
     /*!
      * \brief Creates a copy of an object of this class. (Deep copy)
      */
-    LinearViscoelasticInteraction* copy() const;
+    //LinearViscoelasticInteraction* copy() const;
     /*!
      * \brief Computes the normal force caused due to normal collision between particles or particle-wall.
      */

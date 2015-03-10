@@ -30,8 +30,8 @@
 /*!
  * \class CylindricalWall
  * \brief
- * \deprecated Don't use this anymore.
- * \todo Throw this class away.
+ * \deprecated This class will be gone in Mercury 2.0, use 
+ * AxisymmetricIntersectionOfWalls instead.
  */
 class CylindricalWall : public BaseWall
 {

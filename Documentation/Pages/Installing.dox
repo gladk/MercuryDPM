@@ -1,0 +1,219 @@
+/*! \page installing Installing the Code
+
+###Preliminary Steps for Windows Users Only
+
+Since MercuryDPM was originally designed for use with Unix systems, Windows users must first install suitable software to allow compatibility.
+
+We recommend the program <I>Cygwin</I>, which can be obtained from http://cygwin.com/install.html. 
+
+After downloading and opening the relevant executable (.exe) file, follow the default instructions until you see a screen resembling the one below asking you to select packages:
+
+\image html CygwinPackages2.png
+
+
+At this point, the packages listed should be included by clicking on the ‘+’ icon of the relevant heading and then clicking the name of the relevant package until a version number is displayed.
+
+The majority of the relevant packages may be found under the <I>’devel’ </I> heading which can be seen in the above image, although it may be easier to simply find the relevant packages using the search bar at the top-left of the window. It is not necessary at this point to fully understand the function of each package; for now, they simply need to be installed.
+
+####Necessary Packages
+	<ol>
+		<li><span style="font-weight: normal;"> Complete X11 package</span></li>
+		
+<li><span style="font-weight: normal;"> cmake: Cross-platform makefile generation system</span></li>
+	
+	<li><span style="font-weight: normal;"> cmake-gui: Cross-platform makefile generation system (<I>Note:</I> cmake-gui is <B>not available</B> in the 32-bit version of Cygwin. For 32-bit machines ‘ccmake’ — which is included with cmake, above — may instead be used). </span></li>
+	
+	<li><span style="font-weight: normal;"> make: the GNU version of the 'make' utility</span></li>
+
+	<li> If you do not already have a c++ complier installed, you should also install the ‘gcc-g++ C++ compiler’ package, which is also under the devel heading.
+	
+	<li><span style="font-weight: normal;"> <I> Optional:</I> You may additionally wish to install ‘gnuplot’ and ‘gnuplot-x11’ which will allow you to easily and quickly visualise results produced using Mercury. </span></li>
+	</ol>
+	
+<I>Note:</I> It is highly advisable to keep your Cygwin updated to the latest version.
+
+In addition to Cygwin, the installation of Mercury DPM will require an SVN client such as  ’TortoiseSVN’, which may be downloaded from http://tortoisesvn.net. Once downloaded, TortoiseSVN may be simply installed using the default setup.
+
+Once this process is complete, we are ready to download Mercury itself! This can be achieved by following the simple steps below:
+
+<ol>
+<li> Open the Windows explorer. </li>
+<li> Choose a folder into which you want to copy the MercuryDPM source code, for example ‘’C:/cygwin/home/username/MercuryDPM’’ </li>
+<li> Right click and select: <I>’’SVN Checkout…’’</I>. You will then see the screen shown below:</li>
+
+\image html CygwinCheckout.png
+
+<li>At the url type ‘’http://svn.mercurydpm.org/SourceCode/Beta'' <sup>&dagger;</sup> </li>
+<li>Click ‘’ok’’ and wait for the checkout to finish. Click ‘’ok’’</li>
+</ol>
+	
+
+<sup>&dagger;</sup><I>Note:</I> If you want to download the ‘’release’’ version of Mercury, simply replace <I>’’beta’’</I> in the above path with <I>’’release/[RELEASE NUMBER]’’</I>. The number of the current release can be found on the <a href= “http://mercurydpm.org”>Mercury website</a>.  
+
+<ul>
+	<li>Open the "XWin Server" tool (under Start Menu -&gt; Cygwin)<sup>&dagger;&dagger;</sup>. You should now get a terminal similar to that used on Mac and Linux machines.</li>
+	<li>You are now ready to follow the installation steps listed below for Mac/Linux users. If cmake-gui is not installed use ccmake instead.</li>
+
+
+
+</ul>
+
+<sup>&dagger;&dagger;</sup>It should be noted that the ‘’XWin Server’’ is <B><I>not</I></B> the same as the main Cygwin terminal. 
+
+
+###General Requirements for All Operating Systems
+
+
+<ul>
+	<li>Compiler with c++11 features, for instance clang 3.4 or higher.</li>
+
+	<li>svn (‘subversion’) version 1.7 or above; this can be downloaded from https://subversion.apache.org/</li>
+
+	<li>cmake version 2.8 or higher (http://cmake.org/cmake/resources/software.html)</li>
+
+	<li><I>Optional:</I> doxygen, which may be used to create documentation while building your own source code.</li>
+	
+	<li>For <B>Mac users</B>, the latest version of <a href= “https://developer.apple.com/xcode/downloads/“>Xcode</a> is recommended; if you want to visualise your results, <a href = “”>XQuartz</a> may be installed as an alternative to X11. 
+
+</ul>
+
+Once the above procedures have been followed and the relevant packages installed, we are ready to begin installing Mercury!
+
+<h4><strong>Installation steps</strong></h4>
+<h5><strong><strong>For Mac/Linux users</strong></strong></h5>
+<ul>
+	<li><span style="font-weight: normal;"> Open the terminal or shell. Create a directory called "MercuryDPM", at a location of your choice, by typing</span>
+	<div>
+		<pre>
+mkdir MercuryDPM
+		</pre>
+	</div>
+	</li>
+	<li> To get into mercuryDPM, type
+	<div>
+		<pre>
+cd MercuryDPM/
+		</pre>
+	</div>
+	</li>
+	<li>Once in the folder MercuryDPM, <a href="http://mercurydpm.org/assets/downloads/MercuryDPM_beta.tar.gz">download</a> or check out the beta version of the DPM source by typing
+	<div>
+		<pre>
+svn checkout https://svn.MercuryDPM.org/SourceCode/Beta MercurySource
+		</pre>
+	</div>
+	The above command downloads the DPM source code into the folder named "MercurySource"
+		
+	</li>
+	<li><span style="font-weight: normal;"> In the current folder, i.e. mercuryDPM, create another directory called "MercuryBuild"</span>
+	<div>
+		<pre>
+mkdir MercuryBuild
+		</pre>
+	</div>
+	</li>
+	<li> Get into the folder "MercuryBuild" by typing
+	<div>
+		<pre>
+cd MercuryBuild
+		</pre>
+	</div>
+	</li>
+	<h5><strong> <strong>With cmake GUI</strong> </strong></h5>
+	<ul>
+		<li> Assuming cmake is successfully installed, go to the newly created "MercuryBuild" directory. 		From here, you can create the executables from the Mercury source code by typing:
+		<div>
+			<pre>
+cmake-gui ../MercurySource/
+			</pre>
+		</div>
+		</li>
+		<li> A GUI pops up on your screen as in the picture shown below
+		<div>
+\image html cmake-gui1.png
+		</div>
+		<ol>
+			<li>Click on "Browse Source" and locate the "MercurySource" directory.</li>
+			<li>Click on "Browse Build" and locate the "MercuryBuild" directory.</li>
+			<li>Make sure option "Grouped" is selected and "Advanced" is deselected.</li>
+			<li>Click "Configure"</li>
+		</ol>
+		</li>
+		<li>After clicking on "Configure", the following window appears on your screen:
+		<div>
+\image html cmake-gui2.png
+		</div>
+		<ol>
+		<li>Select "Unix makefiles" under specify the generator for this code</li>
+			<li>Choose "use default native compilers"</li>
+			<li>Click on "Done"</li>
+		</ol>
+		</li>
+		<li>Clicking on "Done", builds all the files in the directory "mercuryDPMSource" and creates the executables.</li>
+		<li>The building/installation progress is visible in the bottom panel of your cmake window screen, as seen in the screenshot below.
+		<div>
+\image html cmake-gui3.png 
+		</div>
+		<ol>
+			<li>Any red line in the bottom panel, indicates that some package is missing or needs to be installed to have a successful "configure". In that case, click on the "Advanced" option to see exactly where the issue is or contact any of the MercuryDPM team of developers.</li>
+			<li>Once configured for the first time, under the group named 'CMAKE' type 'Release' at 'CMAKE_BUILD_TYPE'. See the picture above.</li>
+		</ol>
+		</li>
+		<li> Optional: for documentation tick the box make_BUILD_DOCUMENTATION, in the picture as shown below, before you click on configure.
+		<div>
+\image html cmake-gui4.png
+		</div>
+		</li>
+		<li>Once you entered all options and configured, click on 'generate'.</li>
+		<li>To check if successfully installed, go to your build directory "MercuryBuild" using the terminal and type
+		<div>
+			<pre>
+make fullTest
+			</pre>
+		</div>
+		</li>
+		<li>If all the tests have passed, MercuryDPM is successfully installed on your machine.</li>
+	</ul>
+	<h5><strong><strong>Without cmake GUI</strong></strong></h5>
+	<ul>
+		<li> For users without the GUI, cmake does include an alternative curses-based interface called 'ccmake'.</li>
+		<li> At the terminal, in directory MercuryBuild type
+		<div>
+			<pre>
+ccmake ../MercurySource/
+			</pre>
+			<div>
+\image html ccmake-1.png
+			</div>
+		</div>
+		<ol>
+			<li>As seen in the above picture, pressing the key 'c' configures or builds the object files or executables from the source directory (MercurySource).</li>
+			<li>Moreover, before configuring, 'BUILD_DOCUMENTATION' or/and 'Xballs_Support' can be enabled or disabled.</li>
+			<li>Cmake experts can toggle to advanced mode by pressing the key 't' to have more options and choices.</li>
+		</ol>
+		<div>
+\image html ccmake-2.png
+		</div>
+		</li>
+		<li>Once configured, press the key 'g' to generate the executables.</li>
+	</ul>
+</ul>
+<ul>
+	<li>To check if successfully installed, go to your build directory "MercuryBuild" using the terminal and type
+	<div>
+		<pre>
+make fullTest
+		</pre>
+	</div>
+	</li>
+	<li>If all the tests have passed, MercuryDPM is successfully installed on your machine.</li>
+</ul>
+
+<h4><strong> <strong>mercuryDPM mailing list</strong> </strong></h4>
+<ul>
+	<li> Please now follow the instructions to <a href="http://mercurydpm.org/support/mailing-list">sign up for the mailing list</a>, in order to receive updates about the code.</li>
+</ul>
+
+
+
+*/

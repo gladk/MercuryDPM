@@ -44,13 +44,12 @@ public:
     BoundaryHandler();
 
     /*!
-     * \brief Copy constructor, it copies the BoundaryHandler and all BaseBoundary it contains.
+     * \brief Constructor that copies all BaseBoundary it contains and sets the other variables to 0/nullptr.
      */
     BoundaryHandler(const BoundaryHandler& BH);
 
     /*!
-     * \brief Assignment operator.
-     * 
+     * \brief Assignment operator, copies only the vector of BaseBoundary and sets the other variables to 0/nullptr.
      */
     BoundaryHandler operator=(const BoundaryHandler& rhs);
     

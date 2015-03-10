@@ -38,21 +38,22 @@
  */
 InteractionHandler::InteractionHandler()
 {
-#ifdef DEBUG_CONSTRUCTOR
-    std::cout << "InteractionHandler::InteractionHandler() finished" << std::endl;
-#endif
+    logger(DEBUG, "InteractionHandler::InteractionHandler() finished");
 }
 
 /*!
  * \param[in] IH The InteractionHandler that has to be copied.
+ * \details This is not a copy constructor! It only clears all variables, since 
+ *          by default interactions are not copied.
+ * \todo Please check if interactions indeed don't need to be copied.
  */
 InteractionHandler::InteractionHandler(const InteractionHandler& IH UNUSED)
-: BaseHandler()
+: BaseHandler<BaseInteraction>()
 {
     //By default interactions are not copied.
-#ifdef DEBUG_CONSTRUCTOR
-    std::cout << "InteractionHandler::InteractionHandler(const InteractionHandler &IH) finished" << std::endl;
-#endif
+    logger(DEBUG, "InteractionHandler::InteractionHandler(const "
+           "InteractionHandler &IH) finished, please note that no interactions"
+           " have been copied.");
 }
 
 /*!
@@ -64,17 +65,13 @@ InteractionHandler InteractionHandler::operator =(const InteractionHandler& rhs)
     {
         clear();
     }
-#ifdef DEBUG_CONSTRUCTOR
-    std::cout << "InteractionHandler::operator =(const InteractionHandler& rhs)" << std::endl;
-#endif
+    logger(DEBUG, "InteractionHandler::operator =(const InteractionHandler& rhs) finished.");
     return *this;
 }
 
 InteractionHandler::~InteractionHandler()
 {
-#ifdef DEBUG_DESTRUCTOR
-    std::cout << "InteractionHandler::~InteractionHandler() finished" << std::endl;
-#endif
+    logger(DEBUG, "InteractionHandler::~InteractionHandler() finished");
 }
 
 /*!
@@ -137,12 +134,21 @@ BaseInteraction* InteractionHandler::getInteraction(BaseInteractable* P, BaseInt
 }
 
 /*!
- * \details Deleting an interaction between two object where one of them is periodic 
- * is difficult, because its interaction information has to be saved.
+ * \details Deleting the three periodic interactions between two real particles 
+ * is difficult, because its interaction information has to be saved. 
+ * If the two real particles interacted (which can be checked by looking at the 
+ * time stamp), the interaction between the real particles is kept, and all 
+ * interactions that involve ghost particles gets removed; 
+ * otherwise, the interaction between the lower-indexed real particle with the 
+ * ghost particle of the higher indexed particles is saved (with the ghost 
+ * particle replaced by the real particle), and all other interactions removed.
+ * 
+ * This is what this function is intended for, and it does it in the following way:
  * When an interaction is removed the periodic particle has to be stored in the I pointer
  * So when an interaction is removed where P is normal and I is periodic, 
  * and the information is new it will be transfered when the index of P is 
  * lower than the index of the real particle of I. 
+ * \image html Walls/periodicBoundary.pdf
  * \param[in] the id of the Interaction that needs to be deleted.
  */
 void InteractionHandler::removeObjectKeepingPeriodics(unsigned const int id)
@@ -230,8 +236,8 @@ std::string InteractionHandler::getName() const
 void InteractionHandler::write(std::ostream& os) const
 {
     os << "Interactions " << getNumberOfObjects() << std::endl;
-    for (std::vector<BaseInteraction*>::const_iterator it = begin(); it != end(); ++it)
-        os << (**it) << std::endl;
+    for (BaseInteraction* i : *this)
+        os << (*i) << std::endl;
 }
 
 /*!

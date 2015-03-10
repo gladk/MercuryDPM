@@ -67,7 +67,7 @@ public:
     Matrix3D operator +(const Matrix3D& A) const;
     
     /*!
-     * \brief Matrix substraction 
+     * \brief Matrix subtraction 
      */
     Matrix3D operator -(const Matrix3D& A) const;
     
@@ -77,7 +77,7 @@ public:
     Matrix3D operator +(const Mdouble a) const;
     
     /*!
-     * \brief Scalar substraction
+     * \brief Scalar subtraction
      */
     Matrix3D operator -(const Mdouble a) const;
     
@@ -87,9 +87,14 @@ public:
     Matrix3D operator *(const Mdouble a) const;
     
     /*!
-     * \brief Vector mltiplication
+     * \brief Vector multiplication
      */
     Vec3D operator *(const Vec3D& a) const;
+    
+    /*!
+     * \brief Matrix multiplication
+     */
+    Matrix3D operator *(const Matrix3D& a) const;
     
     /*!
      * \brief Scalar division
@@ -138,7 +143,6 @@ public:
 
     /*!
      * \brief 'Special' cross product; CP of vector with each column of a matrix
-     * \TWH
      */
     static Matrix3D cross(const Vec3D& a, const Matrix3D& b);
     

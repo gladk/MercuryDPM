@@ -67,12 +67,14 @@ public:
     /*!
      * \brief Wall copy method. It calls the copy constructor of this Wall, useful for polymorphism
      */
-    virtual IntersectionOfWalls* copy() const override;
+    IntersectionOfWalls* copy() const override;
 
     /*!
      * \brief Removes all parts of the walls.
+     * \deprecated Please don't use any clear() anymore, it will be gone soon.
      */
-    virtual void clear() override;
+    MERCURY_DEPRECATED
+    void clear();
 
     /*!
      * \brief Adds a wall to the set of infinite walls, given an outward normal vector s.t. normal*x=normal*point
@@ -134,7 +136,7 @@ public:
     /*!
      * \brief Returns the name of the object, here the string "IntersectionOfWalls".
      */
-    virtual std::string getName() const override;
+    std::string getName() const override;
 
     /*!
      * \brief Get the interaction between this IntersectionOfWalls and given BaseParticle at a given time.

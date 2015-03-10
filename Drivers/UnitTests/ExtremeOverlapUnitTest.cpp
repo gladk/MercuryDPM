@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
     
     OverlapProblem.setName("ExtremeOverlapUnitTest");
     OverlapProblem.setFileType(FileType::NO_FILE);
-	OverlapProblem.getDataFile().setFileType(FileType::ONE_FILE);
+	OverlapProblem.dataFile.setFileType(FileType::ONE_FILE);
 	OverlapProblem.setSaveCount(10000);
     OverlapProblem.setDimension(2);
     OverlapProblem.setTimeStep(1e-8);

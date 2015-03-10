@@ -173,7 +173,7 @@ void StatisticsVector<T>::constructor()
     doDoublePoints = false;
     
     // additional stuff
-    getStatFile().setFileType(FileType::ONE_FILE);
+    statFile.setFileType(FileType::ONE_FILE);
 }
 
 template<StatType T>
@@ -569,7 +569,7 @@ void StatisticsVector<T>::readStatArguments(int argc, char *argv[])
         }
         else if (!strcmp(argv[i], "-statfilename") | !strcmp(argv[i], "-o"))
         {
-            getStatFile().setName(argv[i + 1]);
+            statFile.setName(argv[i + 1]);
             ///\todo this should also set the ene,restart filename
             // setName(argv[i+1]);
         }
@@ -896,10 +896,10 @@ void StatisticsVector<T>::initialiseStatistics()
         std::cout << "tint set, time goes from: " << getCGTimeMin() << " to: " << getTimeMaxStat() << std::endl;
     }
 
-    getStatFile().open();
+    statFile.open();
 
-    getStatFile().getFstream() << Points.begin()->write_variable_names() << std::endl;
-    getStatFile().getFstream() << print_CG() << std::endl;
+    statFile.getFstream() << Points.begin()->write_variable_names() << std::endl;
+    statFile.getFstream() << print_CG() << std::endl;
     
     //std::couts variables
     if (verbosity > 1)
@@ -938,21 +938,21 @@ void StatisticsVector<T>::write_statistics()
     std::cout << "writing statistics for t=" << getTime() << std::endl;
 
     // write to .stat file
-    getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << getTime() << std::endl;
+    statFile.getFstream() << std::left << std::setprecision(8) << std::setw(6) << getTime() << std::endl;
     for (unsigned int i = 0; i < Points.size(); i++)
-        getStatFile().getFstream() << Points[i];
+        statFile.getFstream() << Points[i];
     //std::cout << "S" << Points[2] << std::endl;
     if (getDoGradient())
     {
-        getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << getTime() << std::endl;
+        statFile.getFstream() << std::left << std::setprecision(8) << std::setw(6) << getTime() << std::endl;
         for (unsigned int i = 0; i < dx.size(); i++)
-            getStatFile().getFstream() << dx[i];
-        getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << getTime() << std::endl;
+            statFile.getFstream() << dx[i];
+        statFile.getFstream() << std::left << std::setprecision(8) << std::setw(6) << getTime() << std::endl;
         for (unsigned int i = 0; i < dy.size(); i++)
-            getStatFile().getFstream() << dy[i];
-        getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << getTime() << std::endl;
+            statFile.getFstream() << dy[i];
+        statFile.getFstream() << std::left << std::setprecision(8) << std::setw(6) << getTime() << std::endl;
         for (unsigned int i = 0; i < dz.size(); i++)
-            getStatFile().getFstream() << dz[i];
+            statFile.getFstream() << dz[i];
     }
     
 }
@@ -962,7 +962,7 @@ void StatisticsVector<T>::finishStatistics()
 {
     if (getDoTimeAverage())
         write_time_average_statistics();
-    getStatFile().close();
+    statFile.close();
 }
 
 template<StatType T>
@@ -1076,9 +1076,9 @@ void StatisticsVector<T>::write_time_average_statistics()
     }
     
     // write average to .stat file
-    getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << getCGTimeMin() << " " << getTime() << std::endl;
+    statFile.getFstream() << std::left << std::setprecision(8) << std::setw(6) << getCGTimeMin() << " " << getTime() << std::endl;
     for (unsigned int i = 0; i < timeAverage.size(); i++)
-        getStatFile().getFstream() << timeAverage[i];
+        statFile.getFstream() << timeAverage[i];
     // write to std::cout
     StatisticsPoint<T> avg = average(timeAverage);
     std::cout << "Averages: " << avg.print() << std::endl;
@@ -1086,24 +1086,24 @@ void StatisticsVector<T>::write_time_average_statistics()
     if (getDoVariance())
     {
         // write variance to .stat file
-        getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << getCGTimeMin() << " " << getTime() << " " << std::endl;
+        statFile.getFstream() << std::left << std::setprecision(8) << std::setw(6) << getCGTimeMin() << " " << getTime() << " " << std::endl;
         for (unsigned int i = 0; i < timeVariance.size(); i++)
-            getStatFile().getFstream() << timeVariance[i];
+            statFile.getFstream() << timeVariance[i];
         //StatisticsPoint<T> var = average(timeVariance);
     } //end if (getDoVariance)
     
     if (getDoGradient())
     {
         // write variance to .stat file
-        getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << getCGTimeMin() << " " << getTime() << " " << std::endl;
+        statFile.getFstream() << std::left << std::setprecision(8) << std::setw(6) << getCGTimeMin() << " " << getTime() << " " << std::endl;
         for (unsigned int i = 0; i < timeAverage.size(); i++)
-            getStatFile().getFstream() << dxTimeAverage[i];
-        getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << getCGTimeMin() << " " << getTime() << " " << std::endl;
+            statFile.getFstream() << dxTimeAverage[i];
+        statFile.getFstream() << std::left << std::setprecision(8) << std::setw(6) << getCGTimeMin() << " " << getTime() << " " << std::endl;
         for (unsigned int i = 0; i < timeAverage.size(); i++)
-            getStatFile().getFstream() << dyTimeAverage[i];
-        getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << getCGTimeMin() << " " << getTime() << " " << std::endl;
+            statFile.getFstream() << dyTimeAverage[i];
+        statFile.getFstream() << std::left << std::setprecision(8) << std::setw(6) << getCGTimeMin() << " " << getTime() << " " << std::endl;
         for (unsigned int i = 0; i < timeAverage.size(); i++)
-            getStatFile().getFstream() << dzTimeAverage[i];
+            statFile.getFstream() << dzTimeAverage[i];
     }
     
     setCGTimeMin(getTime());
@@ -1113,14 +1113,14 @@ template<StatType T>
 void StatisticsVector<T>::statistics_from_fstat_and_data()
 {
     std::cout << "set " << " positions" << std::endl;
-    getDataFile().setCounter(0);
-    getFStatFile().setCounter(0);
+    dataFile.setCounter(0);
+    fStatFile.setCounter(0);
 
     //This opens the file the data will be recalled from
-    if (getDataFile().getFileType() == FileType::ONE_FILE)
-        getDataFile().open(std::fstream::in);
-    if (getFStatFile().getFileType() == FileType::ONE_FILE)
-        getFStatFile().open(std::fstream::in);
+    if (dataFile.getFileType() == FileType::ONE_FILE)
+        dataFile.open(std::fstream::in);
+    if (fStatFile.getFileType() == FileType::ONE_FILE)
+        fStatFile.open(std::fstream::in);
 
 
     //load first set of timesteps to obtain xdim, ydim, zdim
@@ -1130,7 +1130,7 @@ void StatisticsVector<T>::statistics_from_fstat_and_data()
     {
         if (readNextDataFile(format))
             break;
-        getFStatFile().openNextFile(std::fstream::in);
+        fStatFile.openNextFile(std::fstream::in);
     }
 
     //set tminstat to smallest time evaluated
@@ -1142,9 +1142,9 @@ void StatisticsVector<T>::statistics_from_fstat_and_data()
     
     if (verbosity > 1)
     {
-        std::cout << "Input from " << getDataFile().getName() << std::endl;
-        std::cout << "Input from " << getFStatFile().getName() << std::endl;
-        std::cout << "Output to " << getStatFile().getName() << std::endl << std::endl;
+        std::cout << "Input from " << dataFile.getName() << std::endl;
+        std::cout << "Input from " << fStatFile.getName() << std::endl;
+        std::cout << "Output to " << statFile.getName() << std::endl << std::endl;
     }
     
     initialiseStatistics();
@@ -1153,7 +1153,7 @@ void StatisticsVector<T>::statistics_from_fstat_and_data()
     ///\todo: should be heaviest particle
 //    if (verbosity > 1)
 //    {
-//        //getLargestParticle()->computeMass(getSpecies()); //This should already have been done in readNextDataFile();
+//        //getLargestParticle()->computeMass(getSpecies()); //This should already have been done in readNextdataFile;
 //        Mdouble mass = particleHandler.getLargestParticle()->getMass();
 //        std::cout << "Collision Time " << speciesHandler.getObject(0)->getCollisionTime(mass)
 //            << " and restitution coefficient " << speciesHandler.getObject(0)->getRestitutionCoefficient(mass)
@@ -1174,13 +1174,13 @@ void StatisticsVector<T>::statistics_from_fstat_and_data()
 
 
     //this increases the file counter
-    if ((getFStatFile().getFileType() == FileType::MULTIPLE_FILES || getFStatFile().getFileType() == FileType::MULTIPLE_FILES_PADDED) && getTime() < getCGTimeMin())
+    if ((fStatFile.getFileType() == FileType::MULTIPLE_FILES || fStatFile.getFileType() == FileType::MULTIPLE_FILES_PADDED) && getTime() < getCGTimeMin())
     {
         if (verbosity > 1)
             findNextExistingDataFile(getCGTimeMin());
         else
             findNextExistingDataFile(getCGTimeMin(), false);
-        for (unsigned int i = 1; i < getDataFile().getCounter(); i++)
+        for (unsigned int i = 1; i < dataFile.getCounter(); i++)
             jump_fstat();
 
     }
@@ -1222,7 +1222,7 @@ void StatisticsVector<T>::statistics_from_fstat_and_data()
             
         }
         //if step size>1, skip a number of steps.
-        if (getDataFile().getFileType() == FileType::ONE_FILE)
+        if (dataFile.getFileType() == FileType::ONE_FILE)
             for (unsigned int i = 1; i < getStepSize(); i++)
             {
                 //you only get here if you change the step size and you use a single data file
@@ -1235,8 +1235,8 @@ void StatisticsVector<T>::statistics_from_fstat_and_data()
         setTimeMaxStat(getTime());
     
     finishStatistics();
-    getDataFile().close();
-    getFStatFile().close();
+    dataFile.close();
+    fStatFile.close();
 }
 
 template<StatType T>
@@ -1385,10 +1385,10 @@ void StatisticsVector<T>::statistics_from_p3()
         setCGTimeMin(getTime() - getTimeStep());
     DPMBase::writeRestartFile();
     
-    getDataFile().open(std::fstream::out);
+    dataFile.open(std::fstream::out);
     DPMBase::setSystemDimensions(3);
     setParticleDimensions(3);
-    DPMBase::outputXBallsData(getDataFile().getFstream());
+    DPMBase::outputXBallsData(dataFile.getFstream());
     DPMBase::writeXBallsScript();
     //exit(-1);
     
@@ -1952,23 +1952,23 @@ bool StatisticsVector<T>::loadPositions(const char* filename)
 template<StatType T>
 void StatisticsVector<T>::jump_fstat()
 {
-    if (getFStatFile().getFileType() == FileType::MULTIPLE_FILES || getFStatFile().getFileType() == FileType::MULTIPLE_FILES_PADDED)
+    if (fStatFile.getFileType() == FileType::MULTIPLE_FILES || fStatFile.getFileType() == FileType::MULTIPLE_FILES_PADDED)
     {
-        getFStatFile().openNextFile();
+        fStatFile.openNextFile();
         if (verbosity > 1)
-            std::cout << "Using fstat file counter: " << getFStatFile().getCounter() << std::endl;
+            std::cout << "Using fstat file counter: " << fStatFile.getCounter() << std::endl;
         ///\todo make sure the counters for fstat and data are used right here (check for consistency)
     }
     else
     {
         //read in first three lines (should start with '#')
         std::string dummy;
-        getline(getFStatFile().getFstream(), dummy);
-        getline(getFStatFile().getFstream(), dummy);
-        getline(getFStatFile().getFstream(), dummy);
+        getline(fStatFile.getFstream(), dummy);
+        getline(fStatFile.getFstream(), dummy);
+        getline(fStatFile.getFstream(), dummy);
         //read in all lines belonging to this timestep
-        while ((getFStatFile().getFstream().peek() != -1) && (getFStatFile().getFstream().peek() != '#'))
-            getline(getFStatFile().getFstream(), dummy);
+        while ((fStatFile.getFstream().peek() != -1) && (fStatFile.getFstream().peek() != '#'))
+            getline(fStatFile.getFstream(), dummy);
     }
 }
 
@@ -2149,11 +2149,11 @@ void StatisticsVector<T>::gather_force_statistics_from_fstat_and_data()
 {
     //read in first three lines (should start with '#')
     std::string dummy;
-    if (getFStatFile().getFileType() == FileType::MULTIPLE_FILES || getFStatFile().getFileType() == FileType::MULTIPLE_FILES_PADDED)
-        getFStatFile().openNextFile(std::fstream::in);
-    getline(getFStatFile().getFstream(), dummy);
-    getline(getFStatFile().getFstream(), dummy);
-    getline(getFStatFile().getFstream(), dummy);
+    if (fStatFile.getFileType() == FileType::MULTIPLE_FILES || fStatFile.getFileType() == FileType::MULTIPLE_FILES_PADDED)
+        fStatFile.openNextFile(std::fstream::in);
+    getline(fStatFile.getFstream(), dummy);
+    getline(fStatFile.getFstream(), dummy);
+    getline(fStatFile.getFstream(), dummy);
     
     static Mdouble time;
     static int index1, index2;
@@ -2165,8 +2165,8 @@ void StatisticsVector<T>::gather_force_statistics_from_fstat_and_data()
     
     int counter = 0;
     //go through each line in the fstat file; break when eof or '#' or newline
-    while ((getFStatFile().getFstream().peek() != -1) && (getFStatFile().getFstream().peek() != '#'))
-    { //(!getFStatFile().eof())
+    while ((fStatFile.getFstream().peek() != -1) && (fStatFile.getFstream().peek() != '#'))
+    { //(!fStatFile.eof())
         counter++;
         /* # 1: time
          # 2: particle Number i
@@ -2181,7 +2181,7 @@ void StatisticsVector<T>::gather_force_statistics_from_fstat_and_data()
          # 11-13: P1_P2_normal unit vector nx, ny, nz
          # 14-16: tangential unit vector tx, ty, tz
          */
-        getFStatFile().getFstream()
+        fStatFile.getFstream()
                 >> time
                 >> index1
                 >> index2
@@ -2193,7 +2193,7 @@ void StatisticsVector<T>::gather_force_statistics_from_fstat_and_data()
                 >> P1_P2_normal_
                 >> P1_P2_tangential;
         ///\todo{fstat misses torque; any new implementation of storing forces should also store the torque}
-        getFStatFile().getFstream().ignore(256, '\n');
+        fStatFile.getFstream().ignore(256, '\n');
         //Finished reading fstat file
         gatherContactStatistics(index1, index2, Contact, delta, ctheta, fdotn, fdott, P1_P2_normal_, P1_P2_tangential);
         
@@ -2429,8 +2429,8 @@ void StatisticsVector<T>::evaluate_particle_statistics(std::vector<BaseParticle*
                 Points[i].Momentum += (*P)->getVelocity() * ((*P)->getMass() * phi);
                 Points[i].MomentumFlux += MatrixSymmetric3D::selfDyadic((*P)->getVelocity()) * ((*P)->getMass() * phi);
             }
-            Points[i].DisplacementMomentum += (*P)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * getDataFile().getSaveCount()) * ((*P)->getMass() * phi);
-            Points[i].DisplacementMomentumFlux += MatrixSymmetric3D::selfDyadic((*P)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * getDataFile().getSaveCount())) * ((*P)->getMass() * phi);
+            Points[i].DisplacementMomentum += (*P)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * dataFile.getSaveCount()) * ((*P)->getMass() * phi);
+            Points[i].DisplacementMomentumFlux += MatrixSymmetric3D::selfDyadic((*P)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * dataFile.getSaveCount())) * ((*P)->getMass() * phi);
             Points[i].EnergyFlux += (*P)->getVelocity() * ((*P)->getMass() * (*P)->getVelocity().getLengthSquared() / 2 * phi);
             
             Vec3D LocalAngularMomentum = Vec3D::cross(Points[0].clearAveragedDirections((*P)->getPosition() - Points[i].getPosition()), (*P)->getVelocity()) * (*P)->getMass()
@@ -2450,7 +2450,7 @@ void StatisticsVector<T>::evaluate_particle_statistics(std::vector<BaseParticle*
                     for (std::vector<BaseParticle*>::iterator Q = particleHandler.begin(); Q != particleHandler.end(); ++Q)
                     {
                         double phiQ = Points[i].CG_function((*Q)->getPosition()); //Course graining function
-                        Points[i].Displacement += MatrixSymmetric3D::symmetrisedDyadic((*P)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * getDataFile().getSaveCount()) - (*Q)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * getDataFile().getSaveCount()), d_phi) * ((*P)->getMass() * (*Q)->getMass() * phiQ);
+                        Points[i].Displacement += MatrixSymmetric3D::symmetrisedDyadic((*P)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * dataFile.getSaveCount()) - (*Q)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * dataFile.getSaveCount()), d_phi) * ((*P)->getMass() * (*Q)->getMass() * phiQ);
                     }
                     //end:Displacement
                 }
@@ -2458,25 +2458,25 @@ void StatisticsVector<T>::evaluate_particle_statistics(std::vector<BaseParticle*
                 dx[i].Nu += (*P)->getVolume() * d_phi.X;
                 dx[i].Density += (*P)->getMass() * d_phi.X;
                 dx[i].Momentum += (*P)->getVelocity() * ((*P)->getMass() * d_phi.X);
-                dx[i].DisplacementMomentum += (*P)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * getDataFile().getSaveCount()) * ((*P)->getMass() * d_phi.X);
+                dx[i].DisplacementMomentum += (*P)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * dataFile.getSaveCount()) * ((*P)->getMass() * d_phi.X);
                 dx[i].MomentumFlux += MatrixSymmetric3D::selfDyadic((*P)->getVelocity()) * ((*P)->getMass() * d_phi.X);
-                dx[i].DisplacementMomentumFlux += MatrixSymmetric3D::selfDyadic((*P)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * getDataFile().getSaveCount())) * ((*P)->getMass() * d_phi.X);
+                dx[i].DisplacementMomentumFlux += MatrixSymmetric3D::selfDyadic((*P)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * dataFile.getSaveCount())) * ((*P)->getMass() * d_phi.X);
                 dx[i].EnergyFlux += (*P)->getVelocity() * ((*P)->getMass() * (*P)->getVelocity().getLengthSquared() / 2 * d_phi.X);
                 
                 dy[i].Nu += (*P)->getVolume() * d_phi.Y;
                 dy[i].Density += (*P)->getMass() * d_phi.Y;
                 dy[i].Momentum += (*P)->getVelocity() * ((*P)->getMass() * d_phi.Y);
-                dy[i].DisplacementMomentum += (*P)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * getDataFile().getSaveCount()) * ((*P)->getMass() * d_phi.Y);
+                dy[i].DisplacementMomentum += (*P)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * dataFile.getSaveCount()) * ((*P)->getMass() * d_phi.Y);
                 dy[i].MomentumFlux += MatrixSymmetric3D::selfDyadic((*P)->getVelocity()) * ((*P)->getMass() * d_phi.Y);
-                dy[i].DisplacementMomentumFlux += MatrixSymmetric3D::selfDyadic((*P)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * getDataFile().getSaveCount())) * ((*P)->getMass() * d_phi.Y);
+                dy[i].DisplacementMomentumFlux += MatrixSymmetric3D::selfDyadic((*P)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * dataFile.getSaveCount())) * ((*P)->getMass() * d_phi.Y);
                 dy[i].EnergyFlux += (*P)->getVelocity() * ((*P)->getMass() * (*P)->getVelocity().getLengthSquared() / 2 * d_phi.Y);
                 
                 dz[i].Nu += (*P)->getVolume() * d_phi.Z;
                 dz[i].Density += (*P)->getMass() * d_phi.Z;
                 dz[i].Momentum += (*P)->getVelocity() * ((*P)->getMass() * d_phi.Z);
-                dz[i].DisplacementMomentum += (*P)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * getDataFile().getSaveCount()) * ((*P)->getMass() * d_phi.Z);
+                dz[i].DisplacementMomentum += (*P)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * dataFile.getSaveCount()) * ((*P)->getMass() * d_phi.Z);
                 dz[i].MomentumFlux += MatrixSymmetric3D::selfDyadic((*P)->getVelocity()) * ((*P)->getMass() * d_phi.Z);
-                dz[i].DisplacementMomentumFlux += MatrixSymmetric3D::selfDyadic((*P)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * getDataFile().getSaveCount())) * ((*P)->getMass() * d_phi.Z);
+                dz[i].DisplacementMomentumFlux += MatrixSymmetric3D::selfDyadic((*P)->getDisplacement2(getXMin(), getXMax(), getYMin(), getYMax(), getZMin(), getZMax(), getTimeStep() * dataFile.getSaveCount())) * ((*P)->getMass() * d_phi.Z);
                 dz[i].EnergyFlux += (*P)->getVelocity() * ((*P)->getMass() * (*P)->getVelocity().getLengthSquared() / 2 * d_phi.Z);
             } //end if getDoGradient
         } //end if phi
@@ -2665,7 +2665,7 @@ template<> double StatisticsVector<O>::setInfinitelyLongDistance()
 template<StatType T>
 void StatisticsVector<T>::writeOutputFiles()
 {
-    if (getStatFile().saveCurrentTimestep(getNtimeSteps()))
+    if (statFile.saveCurrentTimestep(getNtimeSteps()))
     {
         outputStatistics();
         DPMBase::gatherContactStatistics();

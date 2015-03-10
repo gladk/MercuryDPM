@@ -34,6 +34,7 @@ class RNG;
   /*!
    * \class InsertionBoundary
    * \brief Boundary structure for boundaries used for insertion of particles
+   * \todo IFCD: Should operator= be implemented here and in the derived classes?
    */
 class InsertionBoundary : public BaseBoundary
 {
@@ -49,14 +50,14 @@ public:
     InsertionBoundary(const InsertionBoundary& other);
     
   /*!
-   * \brief Destructor: default.
+   * \brief Destructor: delete the particle that has to be copied at every insertion.
    */    
     virtual ~InsertionBoundary();
     
   /*!
    * \brief Sets the particle that will be inserted and the maximum number of times for which insertion may fail.
    */
-    void set(BaseParticle* particleToCopy, std::size_t maxFailed);
+    void set(BaseParticle* particleToCopy, unsigned int maxFailed);
     
   /*!
    * \brief Purely virtual function that generates one particle.
@@ -77,17 +78,17 @@ public:
   /*!
    * \brief Gets the number of particles inserted by the boundary.
    */    
-    std::size_t getNumberOfParticlesInserted() const;
+    unsigned int getNumberOfParticlesInserted() const;
     
   /*!
    * \brief Sets the number of times that the wall may fail to insert a particle.
    */
-    void setMaxFailed(std::size_t maxFailed);
+    void setMaxFailed(unsigned int maxFailed);
     
   /*!
    * \brief Gets the number of times that the boundary may fail to insert a particle.
    */
-    std::size_t getMaxFailed() const;
+    unsigned int getMaxFailed() const;
     
   /*!
    * \brief Sets the particle that will be inserted through the insertion boundary.
@@ -118,12 +119,12 @@ private:
   /*!
    * \brief Number of times that the wall may fail to insert a particle.
    */
-    std::size_t maxFailed_;
+    unsigned int maxFailed_;
     
   /*!
    * \brief Number of particles that are already inserted.
    */
-    std::size_t numberOfParticlesInserted_;
+    unsigned int numberOfParticlesInserted_;
 };
 
 #endif

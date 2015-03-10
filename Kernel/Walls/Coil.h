@@ -33,6 +33,8 @@
  * \brief This class defines a coil in the z-direction from a (constant) starting point, a (constant) length L, a (constant) radius r, a (constant) number or revelations N and a (constant) rotation speed (rev/s)
  * \details q is a new coordinate going from 0 to 1 and t is the time, x=xs+r*cos(2*pi(offset+N*q)), y=ys+r*sin(2*pi*(offset+N*q)) and z=zs+q*L
  * \todo IFCD: Can someone look at the details of the documentation of class Coil? I can't make sense of them.
+ * \todo Coil is now fixed in Z-direction, centered around the Z-axis. Consider converting to more general
+ *  parameters, with direction of choise and central axis of choice.
  */
 
 class Coil : public BaseWall
@@ -61,7 +63,7 @@ public:
     /*!
      * \brief Set all parameters of this Coil.
      */
-    void set(Vec3D Start, Mdouble L, Mdouble r, Mdouble N, Mdouble omega, Mdouble thickness);
+    void set(Vec3D Start, Mdouble length, Mdouble radius, Mdouble numberOfRevelations, Mdouble omega, Mdouble thickness);
 
     /*!
      * \brief Copy this Coil and return a pointer to the copy, useful for polymorphism.

@@ -71,9 +71,10 @@ public:
     void write(std::ostream& os) const;
     
     /*!
-     * \brief A function that outputs that it should not be called.
-     * \todo IFCD Can this function be safely removed/be made pure virtual?
+     * \brief A function that removes all data from this BaseWall, so sets handler_ to nullptr.
+     * \deprecated Please don't use any clear() anymore, it will be gone soon.
      */
+    MERCURY_DEPRECATED
     virtual void clear();
     
     /*!
