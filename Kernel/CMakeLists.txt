@@ -56,8 +56,8 @@ add_library(DPMBase STATIC
     Interactions/FrictionForceInteractions/SlidingFrictionInteraction.cc
     Interactions/FrictionForceInteractions/FrictionInteraction.cc
     Interactions/AdhesiveForceInteractions/EmptyAdhesiveInteraction.cc
-    Interactions/AdhesiveForceInteractions/LinearReversibleAdhesiveInteraction.cc
-    Interactions/AdhesiveForceInteractions/LinearIrreversibleAdhesiveInteraction.cc
+    Interactions/AdhesiveForceInteractions/ReversibleAdhesiveInteraction.cc
+    Interactions/AdhesiveForceInteractions/IrreversibleAdhesiveInteraction.cc
 
 	Species/BaseSpecies.cc
 	Species/ParticleSpecies.cc
@@ -68,8 +68,8 @@ add_library(DPMBase STATIC
     Species/FrictionForceSpecies/SlidingFrictionSpecies.cc
     Species/FrictionForceSpecies/FrictionSpecies.cc
     Species/AdhesiveForceSpecies/EmptyAdhesiveSpecies.cc
-    Species/AdhesiveForceSpecies/LinearReversibleAdhesiveSpecies.cc
-    Species/AdhesiveForceSpecies/LinearIrreversibleAdhesiveSpecies.cc
+    Species/AdhesiveForceSpecies/ReversibleAdhesiveSpecies.cc
+    Species/AdhesiveForceSpecies/IrreversibleAdhesiveSpecies.cc
 
 	Particles/BaseParticle.cc
 )

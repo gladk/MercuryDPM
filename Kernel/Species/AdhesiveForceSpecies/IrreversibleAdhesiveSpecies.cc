@@ -16,34 +16,34 @@
 // Copyright 2013 The Mercury Developers Team
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
-#include "LinearIrreversibleAdhesiveSpecies.h"
+#include "IrreversibleAdhesiveSpecies.h"
 
-LinearIrreversibleAdhesiveSpecies::LinearIrreversibleAdhesiveSpecies()
-    : BaseSpecies(), LinearReversibleAdhesiveSpecies()
+IrreversibleAdhesiveSpecies::IrreversibleAdhesiveSpecies()
+    : BaseSpecies(), ReversibleAdhesiveSpecies()
 {
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout<<"LinearIrreversibleAdhesiveSpecies::LinearIrreversibleAdhesiveSpecies() finished"<<std::endl;
+    std::cout<<"IrreversibleAdhesiveSpecies::IrreversibleAdhesiveSpecies() finished"<<std::endl;
 #endif
 }
 
-LinearIrreversibleAdhesiveSpecies::LinearIrreversibleAdhesiveSpecies(const LinearIrreversibleAdhesiveSpecies &s)
-    : BaseSpecies(s), LinearReversibleAdhesiveSpecies(s)
+IrreversibleAdhesiveSpecies::IrreversibleAdhesiveSpecies(const IrreversibleAdhesiveSpecies &s)
+    : BaseSpecies(s), ReversibleAdhesiveSpecies(s)
 {
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout<<"LinearIrreversibleAdhesiveSpecies::LinearIrreversibleAdhesiveSpecies(const LinearIrreversibleAdhesiveSpecies &p) finished"<<std::endl;
+    std::cout<<"IrreversibleAdhesiveSpecies::IrreversibleAdhesiveSpecies(const IrreversibleAdhesiveSpecies &p) finished"<<std::endl;
 #endif
 }
 
-LinearIrreversibleAdhesiveSpecies::~LinearIrreversibleAdhesiveSpecies()
+IrreversibleAdhesiveSpecies::~IrreversibleAdhesiveSpecies()
 {
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout<<"LinearIrreversibleAdhesiveSpecies::~LinearIrreversibleAdhesiveSpecies() finished"<<std::endl;
+    std::cout<<"IrreversibleAdhesiveSpecies::~IrreversibleAdhesiveSpecies() finished"<<std::endl;
 #endif   
 }
 
 //the name is set such that the full name does not extend
-std::string LinearIrreversibleAdhesiveSpecies::getBaseName() const
+std::string IrreversibleAdhesiveSpecies::getBaseName() const
 {
-    return "LinearIrreversibleAdhesive";
+    return "IrreversibleAdhesive";
 }
 

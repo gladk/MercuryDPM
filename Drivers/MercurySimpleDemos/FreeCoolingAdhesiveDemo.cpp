@@ -20,7 +20,7 @@
 #include <iostream>
 #include "Mercury2D.h"
 #include "Particles/BaseParticle.h"
-#include "Species/LinearViscoelasticSlidingFrictionLinearReversibleAdhesiveSpecies.h"
+#include "Species/LinearViscoelasticSlidingFrictionReversibleAdhesiveSpecies.h"
 #include "Walls/InfiniteWall.h"
 
 /// In this file 32^2 particles with the same velocity are placed in a
@@ -78,7 +78,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 	
 	///Start off my solving the default problem
  	my_problem_HGRID problem;
-    auto species = problem.speciesHandler.copyAndAddObject(LinearViscoelasticSlidingFrictionLinearReversibleAdhesiveSpecies());
+    auto species = problem.speciesHandler.copyAndAddObject(LinearViscoelasticSlidingFrictionReversibleAdhesiveSpecies());
     species->setDensity(2000);
     species->setDissipation(0.01);
     species->setStiffness(1e4);

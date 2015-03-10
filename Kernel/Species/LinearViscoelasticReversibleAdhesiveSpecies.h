@@ -16,13 +16,13 @@
 // Copyright 2013 The Mercury Developers Team
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
-#ifndef LINEARPLASTICVISCOELASTICFRICTIONLINEARIRREVERSIBLEADHESIVESPECIES_H
-#define LINEARPLASTICVISCOELASTICFRICTIONLINEARIRREVERSIBLEADHESIVESPECIES_H
+#ifndef LINEARVISCOELASTICLINEARREVERSIBLEADHESIVESPECIES_H
+#define LINEARVISCOELASTICLINEARREVERSIBLEADHESIVESPECIES_H
 
 #include "Species.h"
-#include "NormalForceSpecies/LinearPlasticViscoelasticNormalSpecies.h"
-#include "FrictionForceSpecies/FrictionSpecies.h"
-#include "AdhesiveForceSpecies/LinearIrreversibleAdhesiveSpecies.h"
-typedef Species<LinearPlasticViscoelasticNormalSpecies,FrictionSpecies,LinearIrreversibleAdhesiveSpecies> LinearPlasticViscoelasticFrictionLinearIrreversibleAdhesiveSpecies;
-typedef MixedSpecies<LinearPlasticViscoelasticNormalSpecies,FrictionSpecies,LinearIrreversibleAdhesiveSpecies> MixedLinearPlasticViscoelasticFrictionLinearIrreversibleAdhesiveSpecies;
+#include "NormalForceSpecies/LinearViscoelasticNormalSpecies.h"
+#include "FrictionForceSpecies/EmptyFrictionSpecies.h"
+#include "AdhesiveForceSpecies/ReversibleAdhesiveSpecies.h"
+typedef Species<LinearViscoelasticNormalSpecies,EmptyFrictionSpecies,ReversibleAdhesiveSpecies> LinearViscoelasticReversibleAdhesiveSpecies;
+typedef MixedSpecies<LinearViscoelasticNormalSpecies,EmptyFrictionSpecies,ReversibleAdhesiveSpecies> LinearViscoelasticReversibleAdhesiveMixedSpecies;
 #endif

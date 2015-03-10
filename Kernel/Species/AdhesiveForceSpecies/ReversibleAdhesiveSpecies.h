@@ -20,22 +20,22 @@
 #define LINEARREVERSIBLEADHESIVESPECIES_H
 #include "Species/BaseSpecies.h"
 #include "Math/ExtendedMath.h"
-#include "Interactions/AdhesiveForceInteractions/LinearReversibleAdhesiveInteraction.h"
+#include "Interactions/AdhesiveForceInteractions/ReversibleAdhesiveInteraction.h"
 class BaseInteractable;
 class BaseInteraction;
 
 //Note the getVelocity can for some Species be dependent on which point on the Species is meant.
-class LinearReversibleAdhesiveSpecies : public virtual BaseSpecies
+class ReversibleAdhesiveSpecies : public virtual BaseSpecies
 {
 public:
-    typedef LinearReversibleAdhesiveInteraction InteractionType;
-    LinearReversibleAdhesiveSpecies();
-    LinearReversibleAdhesiveSpecies(const LinearReversibleAdhesiveSpecies &s);
-    virtual ~LinearReversibleAdhesiveSpecies();
+    typedef ReversibleAdhesiveInteraction InteractionType;
+    ReversibleAdhesiveSpecies();
+    ReversibleAdhesiveSpecies(const ReversibleAdhesiveSpecies &s);
+    virtual ~ReversibleAdhesiveSpecies();
     void read(std::istream& is);
     void write(std::ostream& os) const;
     std::string getBaseName() const;
-    void mix(LinearReversibleAdhesiveSpecies* const S, LinearReversibleAdhesiveSpecies* const T);
+    void mix(ReversibleAdhesiveSpecies* const S, ReversibleAdhesiveSpecies* const T);
 
 //adhesion-specific functions
 

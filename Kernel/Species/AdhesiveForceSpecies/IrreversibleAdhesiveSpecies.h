@@ -20,19 +20,19 @@
 #define LINEARIRREVERSIBLEADHESIVESPECIES_H
 #include "Species/BaseSpecies.h"
 #include "Math/ExtendedMath.h"
-#include "Interactions/AdhesiveForceInteractions/LinearIrreversibleAdhesiveInteraction.h"
-#include "LinearReversibleAdhesiveSpecies.h"
+#include "Interactions/AdhesiveForceInteractions/IrreversibleAdhesiveInteraction.h"
+#include "ReversibleAdhesiveSpecies.h"
 class BaseInteractable;
 class BaseInteraction;
 
 //Note the getVelocity can for some Species be dependent on which point on the Species is meant.
-class LinearIrreversibleAdhesiveSpecies : public LinearReversibleAdhesiveSpecies
+class IrreversibleAdhesiveSpecies : public ReversibleAdhesiveSpecies
 {
 public:
-    typedef LinearIrreversibleAdhesiveInteraction InteractionType;
-    LinearIrreversibleAdhesiveSpecies();
-    LinearIrreversibleAdhesiveSpecies(const LinearIrreversibleAdhesiveSpecies &s);
-    virtual ~LinearIrreversibleAdhesiveSpecies();
+    typedef IrreversibleAdhesiveInteraction InteractionType;
+    IrreversibleAdhesiveSpecies();
+    IrreversibleAdhesiveSpecies(const IrreversibleAdhesiveSpecies &s);
+    virtual ~IrreversibleAdhesiveSpecies();
     std::string getBaseName() const;
 };
 #endif

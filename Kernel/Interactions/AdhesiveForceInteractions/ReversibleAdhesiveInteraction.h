@@ -22,16 +22,16 @@
 #include "Interactions/BaseInteraction.h"
 #include "Math/Vector.h"
 class BaseParticle;
-class LinearReversibleAdhesiveSpecies;
+class ReversibleAdhesiveSpecies;
 class BaseInteractable;
 
-class LinearReversibleAdhesiveInteraction : public virtual BaseInteraction
+class ReversibleAdhesiveInteraction : public virtual BaseInteraction
 {
 public:
-    typedef LinearReversibleAdhesiveSpecies SpeciesType;
-    LinearReversibleAdhesiveInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
-    LinearReversibleAdhesiveInteraction(const LinearReversibleAdhesiveInteraction &p);
-    virtual ~LinearReversibleAdhesiveInteraction();
+    typedef ReversibleAdhesiveSpecies SpeciesType;
+    ReversibleAdhesiveInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
+    ReversibleAdhesiveInteraction(const ReversibleAdhesiveInteraction &p);
+    virtual ~ReversibleAdhesiveInteraction();
 
     void computeForce();
 
@@ -43,7 +43,7 @@ public:
 
     Mdouble getElasticEnergy() const;
 
-    const LinearReversibleAdhesiveSpecies* getSpecies() const;
+    const ReversibleAdhesiveSpecies* getSpecies() const;
 
     std::string getName() const;
 };

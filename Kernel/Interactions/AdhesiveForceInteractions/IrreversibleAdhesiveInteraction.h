@@ -19,19 +19,19 @@
 #ifndef LINEARIRREVERSIBLEADHESIVEINTERACTION_H
 #define LINEARIRREVERSIBLEADHESIVEINTERACTION_H
 
-#include "LinearReversibleAdhesiveInteraction.h"
+#include "ReversibleAdhesiveInteraction.h"
 #include "Math/Vector.h"
 class BaseParticle;
-class LinearIrreversibleAdhesiveSpecies;
+class IrreversibleAdhesiveSpecies;
 class BaseInteractable;
 
-class LinearIrreversibleAdhesiveInteraction : public LinearReversibleAdhesiveInteraction
+class IrreversibleAdhesiveInteraction : public ReversibleAdhesiveInteraction
 {
 public:
-    typedef LinearIrreversibleAdhesiveSpecies SpeciesType;
-    LinearIrreversibleAdhesiveInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
-    LinearIrreversibleAdhesiveInteraction(const LinearIrreversibleAdhesiveInteraction &p);
-    virtual ~LinearIrreversibleAdhesiveInteraction();
+    typedef IrreversibleAdhesiveSpecies SpeciesType;
+    IrreversibleAdhesiveInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
+    IrreversibleAdhesiveInteraction(const IrreversibleAdhesiveInteraction &p);
+    virtual ~IrreversibleAdhesiveInteraction();
 
     void computeForce();
 
@@ -41,7 +41,7 @@ public:
     ///Interaction print function, which accepts an std::stringstream as input.
     void write(std::ostream& os) const;
 
-    const LinearIrreversibleAdhesiveSpecies* getSpecies() const;
+    const IrreversibleAdhesiveSpecies* getSpecies() const;
 
     std::string getName() const;
 

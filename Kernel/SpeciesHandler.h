@@ -54,12 +54,12 @@ public:
 
     template<typename U> typename U::MixedSpeciesType* getMixedObject(const U* S, const U* T);
 
-//    MixedLinearViscoelasticSpecies* getMixedObject(const LinearViscoelasticSpecies*,const LinearViscoelasticSpecies*);
-//    MixedLinearPlasticViscoelasticSpecies* getMixedObject(const LinearPlasticViscoelasticSpecies*,const LinearPlasticViscoelasticSpecies*);
-//    MixedLinearViscoelasticSlidingFrictionSpecies* getMixedObject(const LinearViscoelasticSlidingFrictionSpecies*,const LinearViscoelasticSlidingFrictionSpecies*);
-//    MixedLinearPlasticViscoelasticSlidingFrictionSpecies* getMixedObject(const LinearPlasticViscoelasticSlidingFrictionSpecies*,const LinearPlasticViscoelasticSlidingFrictionSpecies*);
-//    MixedLinearViscoelasticFrictionSpecies* getMixedObject(const LinearViscoelasticFrictionSpecies*,const LinearViscoelasticFrictionSpecies*);
-//    MixedLinearPlasticViscoelasticFrictionSpecies* getMixedObject(const LinearPlasticViscoelasticFrictionSpecies*,const LinearPlasticViscoelasticFrictionSpecies*);
+//    LinearViscoelasticMixedSpecies* getMixedObject(const LinearViscoelasticSpecies*,const LinearViscoelasticSpecies*);
+//    LinearPlasticViscoelasticMixedSpecies* getMixedObject(const LinearPlasticViscoelasticSpecies*,const LinearPlasticViscoelasticSpecies*);
+//    LinearViscoelasticSlidingFrictionMixedSpecies* getMixedObject(const LinearViscoelasticSlidingFrictionSpecies*,const LinearViscoelasticSlidingFrictionSpecies*);
+//    LinearPlasticViscoelasticSlidingFrictionMixedSpecies* getMixedObject(const LinearPlasticViscoelasticSlidingFrictionSpecies*,const LinearPlasticViscoelasticSlidingFrictionSpecies*);
+//    LinearViscoelasticFrictionMixedSpecies* getMixedObject(const LinearViscoelasticFrictionSpecies*,const LinearViscoelasticFrictionSpecies*);
+//    LinearPlasticViscoelasticFrictionMixedSpecies* getMixedObject(const LinearPlasticViscoelasticFrictionSpecies*,const LinearPlasticViscoelasticFrictionSpecies*);
 
     BaseSpecies* getMixedObject(const unsigned int id1, const unsigned int id2);
 

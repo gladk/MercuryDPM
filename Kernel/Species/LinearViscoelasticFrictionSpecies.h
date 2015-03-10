@@ -23,5 +23,5 @@
 #include "NormalForceSpecies/LinearViscoelasticNormalSpecies.h"
 #include "FrictionForceSpecies/FrictionSpecies.h"
 typedef Species<LinearViscoelasticNormalSpecies,FrictionSpecies> LinearViscoelasticFrictionSpecies;
-typedef MixedSpecies<LinearViscoelasticNormalSpecies,FrictionSpecies> MixedLinearViscoelasticFrictionSpecies;
+typedef MixedSpecies<LinearViscoelasticNormalSpecies,FrictionSpecies> LinearViscoelasticFrictionMixedSpecies;
 #endif

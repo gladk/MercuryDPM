@@ -50,7 +50,7 @@ public:
         std::cout << "X" << std::endl;
         LinearViscoelasticSpecies* species1 = speciesHandler.copyAndAddObject(species0);
         std::cout << "X" << std::endl;
-        MixedLinearViscoelasticSpecies* species01 = speciesHandler.getMixedObject(species0, species1);
+        LinearViscoelasticMixedSpecies* species01 = speciesHandler.getMixedObject(species0, species1);
         std::cout << "X" << std::endl;
         species0->setDensity(6.0/constants::pi);
         std::cout << "Y" << std::endl;
