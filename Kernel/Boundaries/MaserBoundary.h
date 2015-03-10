@@ -24,7 +24,7 @@
 #include "BaseBoundary.h"
 #include "Math/Vector.h"
 
-class BaseSpecies;
+class ParticleSpecies;
 
 class MaserBoundary : public BaseBoundary
 {
@@ -109,7 +109,7 @@ private:
      */
     Vec3D shift_;
 
-    std::map<const BaseSpecies*,const BaseSpecies*> speciesConversionNormalToMaser_;
-    std::map<const BaseSpecies*,const BaseSpecies*> speciesConversionMaserToNormal_;
+    std::map<const ParticleSpecies*,const ParticleSpecies*> speciesConversionNormalToMaser_;
+    std::map<const ParticleSpecies*,const ParticleSpecies*> speciesConversionMaserToNormal_;
 };
 #endif

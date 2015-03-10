@@ -45,14 +45,21 @@ public:
         setSaveCount(2587);
 
         //I don't know how to write this in a neat way.
-        auto species0 = speciesHandler.copyAndAddObject(LinearViscoelasticSpecies());
-        auto species1 = speciesHandler.copyAndAddObject(species0);
-        auto species01 = speciesHandler.getMixedObject(species0, species1);
+        std::cout << "X" << std::endl;
+        LinearViscoelasticSpecies* species0 = speciesHandler.copyAndAddObject(LinearViscoelasticSpecies());
+        std::cout << "X" << std::endl;
+        LinearViscoelasticSpecies* species1 = speciesHandler.copyAndAddObject(species0);
+        std::cout << "X" << std::endl;
+        MixedLinearViscoelasticSpecies* species01 = speciesHandler.getMixedObject(species0, species1);
+        std::cout << "X" << std::endl;
         species0->setDensity(6.0/constants::pi);
+        std::cout << "Y" << std::endl;
         species0->setCollisionTimeAndRestitutionCoefficient(0.01,0.25,2);
-        species01->setCollisionTimeAndRestitutionCoefficient(0.01,0.5,2);
-
+        std::cout << "Z" << std::endl;
         write(std::cout,false);
+        species01->setCollisionTimeAndRestitutionCoefficient(0.01,0.5,2);
+        std::cout << "Y" << std::endl;
+
 
 		//set particles
 		BaseParticle P0;

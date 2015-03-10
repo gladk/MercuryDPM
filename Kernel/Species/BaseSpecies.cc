@@ -28,7 +28,6 @@ class BaseInteractable;
 BaseSpecies::BaseSpecies()
 {
     handler_ = 0;
-    density_=0;
 #ifdef DEBUG_CONSTRUCTOR
     std::cout<<"BaseSpecies::BaseSpecies() finished"<<std::endl;
 #endif
@@ -38,7 +37,6 @@ BaseSpecies::BaseSpecies(const BaseSpecies &p)
         : BaseObject(p)
 {
     handler_ = p.handler_;
-    density_=p.density_;
 #ifdef DEBUG_CONSTRUCTOR
     std::cout<<"BaseSpecies::BaseSpecies(const BaseSpecies &p) finished"<<std::endl;
 #endif
@@ -70,21 +68,11 @@ SpeciesHandler* BaseSpecies::getHandler() const
 void BaseSpecies::write(std::ostream& os) const
 {
     BaseObject::write(os);
-//    if (density_!=0)
-        os << " density " << density_;
-//    else
-//        os << " mixedSpecies";
 }
 
 void BaseSpecies::read(std::istream& is)
 {
     BaseObject::read(is);
-    std::string dummy;
-    is >> dummy;
-//    if (dummy.compare("mixedSpecies"))
-        is >> density_;
-//    else
-//        density_ = 0;
 }
 
 std::string BaseSpecies::getBaseName() const
@@ -102,59 +90,14 @@ Mdouble BaseSpecies::getInteractionDistance() const
     return 0.0;
 }
 
-///\todo recalculate masses when setting dim_particle or rho
-///Allows the density to be changed
-void BaseSpecies::setDensity(Mdouble density)
-{
-    if (density >= 0)
-    {
-        density_ = density;
-        if (getHandler())
-            getHandler()->getDPMBase()->particleHandler.computeAllMasses(getIndex());
-    }
-    else
-    {
-        std::cerr << "Error in setDensity(" << density << ")" << std::endl;
-        exit(-1);
-    }
-}
-
-///Allows the density to be accessed
-Mdouble BaseSpecies::getDensity() const
-{
-    return density_;
-}
-
 Mdouble BaseSpecies::average(Mdouble a, Mdouble b)
 {
     return (a + b) != 0.0 ? (2. * (a * b) / (a + b)) : 0;
 }
 
-Mdouble BaseSpecies::getMassFromRadius(const Mdouble radius)
-{
-    int particleDimensions = getHandler()->getDPMBase()->getParticleDimensions();
-    if (particleDimensions == 3)
-    {
-        return 4.0 / 3.0 * constants::pi * radius * radius * radius * getDensity();
-    }
-    else if (particleDimensions == 2)
-    {
-        return constants::pi * radius * radius * getDensity();
-    }
-    else if (particleDimensions == 1)
-    {
-        return 2.0 * radius * getDensity();
-    }
-    else
-    {
-        std::cerr << "In Species::MassFromRadius the dimension of the particle is set to " << particleDimensions << std::endl;
-        exit(-1);
-    }
-}
 
 ///create values for mixed species
 void BaseSpecies::mix(BaseSpecies* const S UNUSED, BaseSpecies* const T UNUSED)
 {
-    density_ = 0;
 }
 

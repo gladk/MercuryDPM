@@ -10,7 +10,7 @@ systemDimensions 3 particleDimensions 3 gravity 0 0 0
 Species 2
 LinearViscoelasticSpecies id 0 density 1.90985931710274 stiffness 117914.164567622 dissipation 277.258872223978
 LinearViscoelasticSpecies id 1 density 0 stiffness 0 dissipation 0
-LinearViscoelasticSpecies id 1 density 0 stiffness 103500.574150076 dissipation 138.629436111989
+LinearViscoelasticMixedSpecies idA 1 idB 0 stiffness 103500.574150076 dissipation 138.629436111989
 Walls 2
 InfiniteWall id 0 indSpecies 0 position 0 0 0 orientation 0 0 0 0 velocity 0 0 0 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 normal 0 0 -1 factor 1
 InfiniteWall id 1 indSpecies 1 position 0 0 0 orientation 0 0 0 0 velocity 0 0 0 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 normal -1 0 0 factor 1

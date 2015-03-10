@@ -18,9 +18,9 @@
 
 #include "Particles/BaseParticle.h"
 #include "Species/Species.h"
-#include "Species/LinearViscoelasticSpecies.h"
-#include "Species/LinearPlasticViscoelasticSpecies.h"
-#include "Species/TangentialForceSpecies/SlidingFrictionSpecies.h"
+#include "Species/NormalForceSpecies/LinearViscoelasticNormalSpecies.h"
+#include "Species/NormalForceSpecies/LinearPlasticViscoelasticNormalSpecies.h"
+#include "Species/FrictionForceSpecies/SlidingFrictionSpecies.h"
 #include "Species/AdhesiveForceSpecies/LinearReversibleAdhesiveSpecies.h"
 #include "Species/AdhesiveForceSpecies/LinearIrreversibleAdhesiveSpecies.h"
 #include "DPMBase.h"
@@ -35,11 +35,11 @@ extern Logger<LOG_MAIN_LEVEL> logger;
 class ParticleParticleInteraction : public DPMBase{
 public:
 
-    Species<LinearViscoelasticSpecies, SlidingFrictionSpecies,LinearIrreversibleAdhesiveSpecies>* species;
+    Species<LinearViscoelasticNormalSpecies, SlidingFrictionSpecies,LinearIrreversibleAdhesiveSpecies>* species;
 
     ParticleParticleInteraction()
     {
-        species = new Species<LinearViscoelasticSpecies, SlidingFrictionSpecies,LinearIrreversibleAdhesiveSpecies>;
+        species = new Species<LinearViscoelasticNormalSpecies, SlidingFrictionSpecies,LinearIrreversibleAdhesiveSpecies>;
         speciesHandler.addObject(species);
     }
 
@@ -91,11 +91,11 @@ private:
 class ParticleParticleInteractionWithPlasticForces : public DPMBase{
 
 public:
-    Species<LinearPlasticViscoelasticSpecies, SlidingFrictionSpecies,LinearIrreversibleAdhesiveSpecies>* species;
+    Species<LinearPlasticViscoelasticNormalSpecies, SlidingFrictionSpecies,LinearIrreversibleAdhesiveSpecies>* species;
 
     ParticleParticleInteractionWithPlasticForces()
     {
-        species = new Species<LinearPlasticViscoelasticSpecies, SlidingFrictionSpecies,LinearIrreversibleAdhesiveSpecies>;
+        species = new Species<LinearPlasticViscoelasticNormalSpecies, SlidingFrictionSpecies,LinearIrreversibleAdhesiveSpecies>;
         speciesHandler.addObject(species);
     }
 
@@ -149,11 +149,11 @@ private:
 class ParticleWallInteraction : public DPMBase{
 public:
 
-    Species<LinearViscoelasticSpecies, SlidingFrictionSpecies,LinearIrreversibleAdhesiveSpecies>* species;
+    Species<LinearViscoelasticNormalSpecies, SlidingFrictionSpecies,LinearIrreversibleAdhesiveSpecies>* species;
 
     ParticleWallInteraction()
     {
-        species = new Species<LinearViscoelasticSpecies, SlidingFrictionSpecies,LinearIrreversibleAdhesiveSpecies>;
+        species = new Species<LinearViscoelasticNormalSpecies, SlidingFrictionSpecies,LinearIrreversibleAdhesiveSpecies>;
         speciesHandler.addObject(species);
     }
 

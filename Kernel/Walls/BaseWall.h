@@ -79,7 +79,7 @@ public:
      * wallHandler, which is needed to retrieve species information.
      */
     ///\todo TW: this function should also check if the particle is the correct particle for the species type
-    void setSpecies(const BaseSpecies* species);
+    void setSpecies(const ParticleSpecies* species);
 
 private:
 

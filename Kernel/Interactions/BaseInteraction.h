@@ -160,14 +160,14 @@ public:
 
     void gatherContactStatistics();
 
-protected:
-
-    //Variables that only the derived Interactions have to know about:
     const Vec3D& getRelativeVelocity() const;
     Mdouble getNormalRelativeVelocity() const;
     Mdouble getAbsoluteNormalForce() const;
     virtual const Vec3D getTangentialForce() const;
 
+protected:
+
+    //functions that only the derived Interactions have to know about:
     void addForce(Vec3D force);
     void addTorque(Vec3D torque);
 

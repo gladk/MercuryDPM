@@ -20,7 +20,7 @@
 #include "InteractionHandler.h"
 #include "Particles/BaseParticle.h"
 #include "Interactions/BaseInteraction.h"
-#include "Species/BaseSpecies.h"
+#include "Species/ParticleSpecies.h"
 #include "ParticleHandler.h"
 #include "DPMBase.h"
 
@@ -145,7 +145,7 @@ void BaseParticle::unfix()
 }
 
 ///Compute BaseParticle mass function, which required a reference to the Species vector. It computes the Particles mass, Inertia and the inverses.
-/// this function is called, if BaseParticleHandler::addObject, SpeciesHandler::addObject, BaseSpecies::setDensity, BaseParticle::setRadius or DPMBase::setParticleDimensions is called
+/// this function is called, if BaseParticleHandler::addObject, SpeciesHandler::addObject, ParticleSpecies::setDensity, BaseParticle::setRadius or DPMBase::setParticleDimensions is called
 void BaseParticle::computeMass()
 {
     if (!isFixed())
@@ -528,7 +528,7 @@ void BaseParticle::setIndSpecies(unsigned int indSpecies)
     }
 }
 
-void BaseParticle::setSpecies(const BaseSpecies* species)
+void BaseParticle::setSpecies(const ParticleSpecies* species)
 {
     BaseInteractable::setSpecies(species);
 

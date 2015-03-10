@@ -20,8 +20,9 @@
 #define LINEARVISCOELASTICSLIDINGFRICTIONLINEARREVERSIBLEADHESIVESPECIES_H
 
 #include "Species.h"
-#include "LinearViscoelasticSpecies.h"
-#include "TangentialForceSpecies/SlidingFrictionSpecies.h"
+#include "NormalForceSpecies/LinearViscoelasticNormalSpecies.h"
+#include "FrictionForceSpecies/SlidingFrictionSpecies.h"
 #include "AdhesiveForceSpecies/LinearReversibleAdhesiveSpecies.h"
-typedef Species<LinearViscoelasticSpecies,SlidingFrictionSpecies,LinearReversibleAdhesiveSpecies> LinearViscoelasticSlidingFrictionLinearReversibleAdhesiveSpecies;
+typedef Species<LinearViscoelasticNormalSpecies,SlidingFrictionSpecies,LinearReversibleAdhesiveSpecies> LinearViscoelasticSlidingFrictionLinearReversibleAdhesiveSpecies;
+typedef MixedSpecies<LinearViscoelasticNormalSpecies,SlidingFrictionSpecies,LinearReversibleAdhesiveSpecies> MixedLinearViscoelasticSlidingFrictionLinearReversibleAdhesiveSpecies;
 #endif

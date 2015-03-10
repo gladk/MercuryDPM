@@ -33,11 +33,12 @@
 //This is only used to change the file permission of the xball script create, at some point this code may be moved from this file to a different file.
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <Species/LinearViscoelasticSlidingFrictionSpecies.h>
 #include "Interactions/Interaction.h"
 
 #include "Species/Species.h"
 #include "Species/LinearViscoelasticSpecies.h"
-#include "Species/TangentialForceSpecies/SlidingFrictionSpecies.h"
+#include "Species/FrictionForceSpecies/SlidingFrictionSpecies.h"
 
 //This is part of this class and just separates out the stuff to do with xballs.
 #include "MD_xballs.icc"
@@ -66,8 +67,8 @@ std::ostream& operator<<(std::ostream& os, DPMBase &md)
     return os;
 }
 
-DPMBase::DPMBase(const STD_save& other)
-        : STD_save(other)
+DPMBase::DPMBase(const FilesAndRunNumber& other)
+        : FilesAndRunNumber(other)
 {
     constructor();
 }
@@ -932,7 +933,7 @@ bool DPMBase::readParAndIniFiles(const char* filename)
 
     //clear species handler
     speciesHandler.clear();
-    Species<LinearViscoelasticSpecies, SlidingFrictionSpecies>* S = new Species<LinearViscoelasticSpecies, SlidingFrictionSpecies>;
+    auto S = new LinearViscoelasticSlidingFrictionSpecies;
     speciesHandler.addObject(S);
 
     setParticleDimensions(3);
@@ -1662,6 +1663,13 @@ void DPMBase::solve()
 
     checkSettings();
 
+    if (getRunNumber()>0) 
+    {
+        std::stringstream name;
+        name << getName() << "." << getRunNumber();
+        setName(name.str());
+    }
+    
     //append_ determines if files have to be appended or not
     if (getAppend())
     {

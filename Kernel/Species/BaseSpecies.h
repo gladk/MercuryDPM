@@ -51,20 +51,10 @@ public:
     ///create values for mixed species
     void mix(BaseSpecies* const S, BaseSpecies* const T);
 
-    ///\todo TW: should getMassFromRadius be removed?
-    Mdouble getMassFromRadius(const Mdouble radius);
-
     ///Returns the particle distance below which adhesive forces can occur (needed for contact detection)
     virtual Mdouble getInteractionDistance() const;
 
 //setters and getters
-
-    ///Allows the density to be changed
-    ///\todo recalculate masses when setting dim_particle or rho
-    void setDensity(Mdouble density);
-
-    ///Allows the density to be accessed
-    Mdouble getDensity() const;
 
     ///Allows the dimension of the particle (f.e. for mass) to be accessed
     virtual bool getUseAngularDOFs() const = 0;
@@ -73,6 +63,5 @@ public:
 
 private:
     SpeciesHandler* handler_;
-    Mdouble density_; ///<particle density
 };
 #endif

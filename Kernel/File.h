@@ -37,7 +37,7 @@ std::istream& operator>>(std::istream&is, FileType&fileType);
 
 /*!
  * \class File
- * \brief The class Files contains five File objects for the data, fstat, ene, restart and stat output. STD_save inherits from Files.
+ * \brief The class Files contains five File objects for the data, fstat, ene, restart and stat output. FilesAndRunNumber inherits from Files.
  */
 class File
 {

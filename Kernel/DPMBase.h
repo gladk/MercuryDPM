@@ -25,7 +25,7 @@
 #endif
 
 //This is the class that defines the std_save routines
-#include "STD_save.h"
+#include "FilesAndRunNumber.h"
 //The vector class contains a 3D vector class.
 #include "Math/Vector.h"
 //This class defines the particle handler
@@ -52,7 +52,7 @@
  * \brief A class that defines and solves a DPM problem
  * \bug When restarting the first time step is not saved, therefore there is a missing time step after a restart
  */
-class DPMBase : public STD_save
+class DPMBase : public FilesAndRunNumber
 {
 public:
     /*!
@@ -68,7 +68,7 @@ public:
     /*!
      * \brief
      */
-    DPMBase(const STD_save& other);
+    DPMBase(const FilesAndRunNumber& other);
 
     /*!
      * \brief
@@ -198,7 +198,7 @@ public:
     /*!
      * \brief Access function for the time
      */
-    void setTime(Mdouble time__);
+    void setTime(Mdouble time);
 
     /*!
      * \brief Allows the upper time limit to be changed

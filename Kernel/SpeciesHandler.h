@@ -21,37 +21,45 @@
 
 #include "BaseHandler.h"
 class BaseSpecies;
+class ParticleSpecies;
 
-/// \brief Container to store all BaseSpecies
-/// \details The SpeciesHandler is a container to store all BaseSpecies. It is implemented by a vector of pointers to BaseSpecies.
-class SpeciesHandler : public BaseHandler<BaseSpecies>
+/// \brief Container to store all ParticleSpecies
+/// \details The SpeciesHandler is a container to store all ParticleSpecies. It is implemented by a vector of pointers to ParticleSpecies.
+class SpeciesHandler : public BaseHandler<ParticleSpecies>
 {
 public:
     /// \brief Default constructor, it simply creates an empty SpeciesHandler.
     SpeciesHandler();
 
-    /// \brief Copy constructor, it copies the SpeciesHandler and all BaseSpecies it contains.
+    /// \brief Copy constructor, it copies the SpeciesHandler and all ParticleSpecies it contains.
     SpeciesHandler(const SpeciesHandler&other);
 
     /// \brief Assignment operator.
     SpeciesHandler operator =(const SpeciesHandler& rhs);
     
-    /// \brief Destructor, it simply destructs the SpeciesHandler and all BaseSpecies it contains.
+    /// \brief Destructor, it simply destructs the SpeciesHandler and all ParticleSpecies it contains.
     ~SpeciesHandler();
 
-    /// \brief Adds a new BaseSpecies to the SpeciesHandler.
-    virtual void addObject(BaseSpecies* const S);
+    /// \brief Adds a new ParticleSpecies to the SpeciesHandler.
+    virtual void addObject(ParticleSpecies* const S);
 
     void removeObject(unsigned const int id);
 
-    /// \brief Reads BaseSpecies into the SpeciesHandler from restart data.
+    /// \brief Reads ParticleSpecies into the SpeciesHandler from restart data.
     void readObject(std::istream& is);
 
-    BaseSpecies* readOldObject(std::istream& is);
+    ParticleSpecies* readOldObject(std::istream& is);
 
     unsigned int getMixedId(const unsigned int id1, const unsigned int id2) const;
 
-    template<typename U> U* getMixedObject(const U* S, const U* T);
+    template<typename U> typename U::MixedSpeciesType* getMixedObject(const U* S, const U* T);
+
+//    MixedLinearViscoelasticSpecies* getMixedObject(const LinearViscoelasticSpecies*,const LinearViscoelasticSpecies*);
+//    MixedLinearPlasticViscoelasticSpecies* getMixedObject(const LinearPlasticViscoelasticSpecies*,const LinearPlasticViscoelasticSpecies*);
+//    MixedLinearViscoelasticSlidingFrictionSpecies* getMixedObject(const LinearViscoelasticSlidingFrictionSpecies*,const LinearViscoelasticSlidingFrictionSpecies*);
+//    MixedLinearPlasticViscoelasticSlidingFrictionSpecies* getMixedObject(const LinearPlasticViscoelasticSlidingFrictionSpecies*,const LinearPlasticViscoelasticSlidingFrictionSpecies*);
+//    MixedLinearViscoelasticFrictionSpecies* getMixedObject(const LinearViscoelasticFrictionSpecies*,const LinearViscoelasticFrictionSpecies*);
+//    MixedLinearPlasticViscoelasticFrictionSpecies* getMixedObject(const LinearPlasticViscoelasticFrictionSpecies*,const LinearPlasticViscoelasticFrictionSpecies*);
 
     BaseSpecies* getMixedObject(const unsigned int id1, const unsigned int id2);
 

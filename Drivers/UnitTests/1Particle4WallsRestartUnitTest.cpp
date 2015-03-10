@@ -42,7 +42,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
         "timeStep 1e-04 time 0 ntimeSteps 0 timeMax 0.01\n"
         "systemDimensions 3 particleDimensions 3 gravity 0 0 0\n"
 		"Species 1\n"
-		"LinearViscoelasticSlidingFrictionSpecies id 0 rho 1.9098593 k 200000 disp 0 slidingStiffness 57142.857 slidingDissipation 0 frictionCoefficient 0.5 frictionCoefficientStatic 0.5\n"
+		"LinearViscoelasticSlidingFrictionSpecies id 0 density 1.9098593 stiffness 200000 dissipation 0 slidingStiffness 57142.857 slidingDissipation 0 frictionCoefficient 0.5 frictionCoefficientStatic 0.5\n"
         "Walls 4\n"
 		"InfiniteWall id 0 indSpecies 0 position 0 0 0 orientation 0 0 0 1 velocity 0 0 0 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 normal -1 0 0 position 0 factor 1\n"
 		"InfiniteWall id 1 indSpecies 0 position 0 0 0 orientation 0 0 0 1 velocity 0 0 0 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 normal  1 0 0 position .96 factor 1\n"

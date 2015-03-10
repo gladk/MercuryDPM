@@ -20,7 +20,8 @@
 #define LINEARPLASTICVISCOELASTICFRICTIONSPECIES_H
 
 #include "Species.h"
-#include "LinearPlasticViscoelasticSpecies.h"
-#include "TangentialForceSpecies/FrictionSpecies.h"
-typedef Species<LinearPlasticViscoelasticSpecies,FrictionSpecies> LinearPlasticViscoelasticFrictionSpecies;
+#include "NormalForceSpecies/LinearPlasticViscoelasticNormalSpecies.h"
+#include "FrictionForceSpecies/FrictionSpecies.h"
+typedef Species<LinearPlasticViscoelasticNormalSpecies,FrictionSpecies> LinearPlasticViscoelasticFrictionSpecies;
+typedef MixedSpecies<LinearPlasticViscoelasticNormalSpecies,FrictionSpecies> MixedLinearPlasticViscoelasticFrictionSpecies;
 #endif

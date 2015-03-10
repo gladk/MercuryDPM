@@ -209,6 +209,15 @@ void Chute::setupSideWalls()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void Chute::createBottom()
 {
+    /// \bug This is temporary fix and how to do this should be discussed. Thomas how much damping should there be?
+    //auto species = new LinearViscoelasticSpecies;
+    //speciesHandler.addObject(species);
+    //setDimension(3);
+    //species->setDensity(2000.0);
+    //species->setStiffness(8000000.0);
+
+    
+    
     if (fabs(getFixedParticleRadius()) < 1e-12) // smooth bottom
     {
         //bottom wall 
@@ -221,8 +230,10 @@ void Chute::createBottom()
         // Define standard fixed particle
         /// \todo Does the bottom we always has to be this particle?
         BaseParticle F0;
+        F0.setHandler(&particleHandler);
         F0.setRadius(getFixedParticleRadius());
         F0.setPosition(Vec3D(0.0, 0.0, 0.0));
+        
         
         if (roughBottomType_ == MONOLAYER_ORDERED)
         {
@@ -294,6 +305,8 @@ void Chute::createBottom()
         //finally, fix particles to the floor
         for (std::vector<BaseParticle*>::iterator it = particleHandler.begin(); it != particleHandler.end(); ++it)
             (*it)->fixParticle();
+        
+        std::cout << "but here we get" << std::endl;
         
     }
 }

@@ -19,13 +19,14 @@ add_library(DPMBase STATIC
 	Logger.cc
 	File.cc
 	Files.cc
-	STD_save.cc
+	FilesAndRunNumber.cc
+	DPMBase.cc
+
 	BoundaryHandler.cc
 	InteractionHandler.cc
 	ParticleHandler.cc
 	SpeciesHandler.cc
 	WallHandler.cc
-	DPMBase.cc
 
 	Boundaries/BaseBoundary.cc
 	Boundaries/AngledPeriodicBoundary.cc
@@ -48,31 +49,29 @@ add_library(DPMBase STATIC
 	Walls/Screw.cc
 
 	Interactions/BaseInteraction.cc
-	Interactions/LinearViscoelasticInteraction.cc
-	Interactions/LinearPlasticViscoelasticInteraction.cc
-	Interactions/HertzianViscoelasticInteraction.cc
-	Interactions/TangentialForceInteractions/EmptyTangentialInteraction.cc
-    Interactions/TangentialForceInteractions/SlidingFrictionInteraction.cc
-    Interactions/TangentialForceInteractions/FrictionInteraction.cc
+	Interactions/NormalForceInteractions/LinearViscoelasticInteraction.cc
+	Interactions/NormalForceInteractions/LinearPlasticViscoelasticInteraction.cc
+	Interactions/NormalForceInteractions/HertzianViscoelasticInteraction.cc
+	Interactions/FrictionForceInteractions/EmptyFrictionInteraction.cc
+    Interactions/FrictionForceInteractions/SlidingFrictionInteraction.cc
+    Interactions/FrictionForceInteractions/FrictionInteraction.cc
     Interactions/AdhesiveForceInteractions/EmptyAdhesiveInteraction.cc
     Interactions/AdhesiveForceInteractions/LinearReversibleAdhesiveInteraction.cc
     Interactions/AdhesiveForceInteractions/LinearIrreversibleAdhesiveInteraction.cc
 
 	Species/BaseSpecies.cc
-    Species/LinearViscoelasticSpecies.cc
-    Species/LinearPlasticViscoelasticSpecies.cc
-    Species/HertzianViscoelasticSpecies.cc
-    Species/TangentialForceSpecies/EmptyTangentialSpecies.cc
-    Species/TangentialForceSpecies/SlidingFrictionSpecies.cc
-    Species/TangentialForceSpecies/FrictionSpecies.cc
+	Species/ParticleSpecies.cc
+    Species/NormalForceSpecies/LinearViscoelasticNormalSpecies.cc
+    Species/NormalForceSpecies/LinearPlasticViscoelasticNormalSpecies.cc
+    Species/NormalForceSpecies/HertzianViscoelasticNormalSpecies.cc
+    Species/FrictionForceSpecies/EmptyFrictionSpecies.cc
+    Species/FrictionForceSpecies/SlidingFrictionSpecies.cc
+    Species/FrictionForceSpecies/FrictionSpecies.cc
     Species/AdhesiveForceSpecies/EmptyAdhesiveSpecies.cc
     Species/AdhesiveForceSpecies/LinearReversibleAdhesiveSpecies.cc
     Species/AdhesiveForceSpecies/LinearIrreversibleAdhesiveSpecies.cc
 
 	Particles/BaseParticle.cc
-	#The follow two should maybe removed from base at some point
-	Particles/TangentialSpringParticle.cc
-	Particles/DeltaMaxsParticle.cc
 )
 
 #Could later create a 2D and 3D library seperatly, but sure how many we want to create

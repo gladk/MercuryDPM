@@ -19,7 +19,7 @@
 #include "BaseInteractable.h"
 #include "Particles/BaseParticle.h"
 #include "Interactions/BaseInteraction.h"
-#include "Species/BaseSpecies.h"
+#include "Species/ParticleSpecies.h"
 
 ///\todo TW: why do some constructors (e.g. BaseInteractable, BaseParticle)not explicitly call the constructor from the inherited class?
 BaseInteractable::BaseInteractable()
@@ -80,12 +80,12 @@ void BaseInteractable::setIndSpecies(unsigned int indSpecies)
     indSpecies_ = indSpecies;
 }
 
-const BaseSpecies* BaseInteractable::getSpecies() const
+const ParticleSpecies* BaseInteractable::getSpecies() const
 {
     return species_;
 }
 
-void BaseInteractable::setSpecies(const BaseSpecies* species)
+void BaseInteractable::setSpecies(const ParticleSpecies* species)
 {
     species_ = species;
     indSpecies_ = species->getIndex();

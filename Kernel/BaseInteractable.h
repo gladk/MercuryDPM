@@ -26,7 +26,7 @@
 #include "Math/Vector.h"
 
 class BaseParticle;
-class BaseSpecies;
+class ParticleSpecies;
 class BaseInteraction;
 class InteractionHandler;
 /*!
@@ -82,13 +82,13 @@ public:
      * \brief
      * \param[in]
      */
-    const BaseSpecies* getSpecies() const;
+    const ParticleSpecies* getSpecies() const;
 
     /*!
      * \brief
      * \param[in]
      */
-    void setSpecies(const BaseSpecies* species);
+    void setSpecies(const ParticleSpecies* species);
 
     /*!
      * \brief
@@ -267,7 +267,7 @@ private:
     /*!
      * \brief 
      */
-    const BaseSpecies* species_;
+    const ParticleSpecies* species_;
 
     /*!
      * \brief

@@ -20,7 +20,7 @@
 #define HERTZIANVISCOELASTICFRICTIONSPECIES_H
 
 #include "Species.h"
-#include "HertzianViscoelasticSpecies.h"
-#include "TangentialForceSpecies/FrictionSpecies.h"
-typedef Species<HertzianViscoelasticSpecies,FrictionSpecies> HertzianViscoelasticFrictionSpecies;
+#include "NormalForceSpecies/HertzianViscoelasticNormalSpecies.h"
+#include "FrictionForceSpecies/FrictionSpecies.h"
+typedef MixedSpecies<HertzianViscoelasticNormalSpecies,FrictionSpecies> MixedHertzianViscoelasticFrictionSpecies;
 #endif

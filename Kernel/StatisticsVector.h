@@ -33,7 +33,7 @@ enum StatType
     O, X, Y, Z, XY, XZ, YZ, XYZ, RAZ, RZ, AZ, RA, R, A
 };
 
-#include "Math/Polynomial.h"
+#include "Math/NormalisedPolynomial.h"
 #include "StatisticsPoint.h"
 
 /*!

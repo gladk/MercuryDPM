@@ -17,11 +17,12 @@
 // For the list of developers, see <http://www.MercuryDPM.org/Team>
 
 #ifndef LINEARPLASTICVISCOELASTICSLIDINGFRICTIONLINEARIRREVERSIBLEADHESIVESPECIES_H
-#define LINEARVISCOELASTICSLIDINGFRICTIONLINEARIRREVERSIBLEADHESIVESPECIES_H
+#define LINEARPLASTICVISCOELASTICSLIDINGFRICTIONLINEARIRREVERSIBLEADHESIVESPECIES_H
 
 #include "Species.h"
-#include "LinearViscoelasticSpecies.h"
-#include "TangentialForceSpecies/SlidingFrictionSpecies.h"
+#include "NormalForceSpecies/LinearPlasticViscoelasticNormalSpecies.h"
+#include "FrictionForceSpecies/SlidingFrictionSpecies.h"
 #include "AdhesiveForceSpecies/LinearIrreversibleAdhesiveSpecies.h"
-typedef Species<LinearViscoelasticSpecies,SlidingFrictionSpecies,LinearIrreversibleAdhesiveSpecies> LinearViscoelasticSlidingFrictionLinearIrreversibleAdhesiveSpecies;
+typedef Species<LinearPlasticViscoelasticNormalSpecies,SlidingFrictionSpecies,LinearIrreversibleAdhesiveSpecies> LinearPlasticViscoelasticSlidingFrictionLinearIrreversibleAdhesiveSpecies;
+typedef MixedSpecies<LinearPlasticViscoelasticNormalSpecies,SlidingFrictionSpecies,LinearIrreversibleAdhesiveSpecies> MixedLinearPlasticViscoelasticSlidingFrictionLinearIrreversibleAdhesiveSpecies;
 #endif

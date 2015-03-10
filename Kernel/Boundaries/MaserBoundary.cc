@@ -21,7 +21,7 @@
 #include "BoundaryHandler.h"
 #include "ParticleHandler.h"
 #include "Particles/BaseParticle.h"
-#include "Species/BaseSpecies.h"
+#include "Species/ParticleSpecies.h"
 
 MaserBoundary* MaserBoundary::copy() const
 {
@@ -151,9 +151,9 @@ void MaserBoundary::addParticleToMaser(BaseParticle *P)
     if (conversion == speciesConversionNormalToMaser_.end())
     {
         std::cout << "New conversion required" << std::endl;
-        BaseSpecies* newSpecies = getHandler()->getDPMBase()->speciesHandler.copyAndAddObject(P->getSpecies()->copy());
-        speciesConversionNormalToMaser_.insert(std::pair<const BaseSpecies*, const BaseSpecies*>(P->getSpecies(), newSpecies));
-        speciesConversionMaserToNormal_.insert(std::pair<const BaseSpecies*, const BaseSpecies*>(newSpecies, P->getSpecies()));
+        ParticleSpecies* newSpecies = getHandler()->getDPMBase()->speciesHandler.copyAndAddObject(P->getSpecies()->copy());
+        speciesConversionNormalToMaser_.insert(std::pair<const ParticleSpecies*, const ParticleSpecies*>(P->getSpecies(), newSpecies));
+        speciesConversionMaserToNormal_.insert(std::pair<const ParticleSpecies*, const ParticleSpecies*>(newSpecies, P->getSpecies()));
         P->setSpecies(newSpecies);
     }
     else

@@ -19,16 +19,16 @@
 #ifndef INTERACTION_H
 #define INTERACTION_H
 
-#include "TangentialForceInteractions/EmptyTangentialInteraction.h"
+#include "FrictionForceInteractions/EmptyFrictionInteraction.h"
 #include "AdhesiveForceInteractions/EmptyAdhesiveInteraction.h"
 #include "InteractionHandler.h"
 #include "BaseInteractable.h"
 class BaseInteractable;
-template<class NormalForceSpecies, class TangentialForceSpecies, class AdhesiveForceSpecies> class Species;
+template<class NormalForceSpecies, class FrictionForceSpecies, class AdhesiveForceSpecies> class Species;
 
 //this class combines normal and tangential force laws
-template<class NormalForceInteraction, class TangentialForceInteraction=EmptyTangentialInteraction, class AdhesiveForceInteraction=EmptyAdhesiveInteraction>
-class Interaction : public NormalForceInteraction, public TangentialForceInteraction, public AdhesiveForceInteraction
+template<class NormalForceInteraction, class FrictionForceInteraction=EmptyFrictionInteraction, class AdhesiveForceInteraction=EmptyAdhesiveInteraction>
+class Interaction : public NormalForceInteraction, public FrictionForceInteraction, public AdhesiveForceInteraction
 {
 public:
     Interaction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp);
@@ -38,7 +38,7 @@ public:
     virtual ~Interaction();
 
     ///Interaction copy method. It calls to copy constructor of this Interaction, useful for polymorphism
-    Interaction<NormalForceInteraction, TangentialForceInteraction, AdhesiveForceInteraction>* copy() const;
+    Interaction<NormalForceInteraction, FrictionForceInteraction, AdhesiveForceInteraction>* copy() const;
 
     //PI->P, PJ->I
     void computeForce();
@@ -53,101 +53,101 @@ public:
 
     Mdouble getElasticEnergy() const;
 
-    //const Species<NormalForceInteraction::SpeciesType, TangentialForceInteraction::SpeciesType>* getSpecies() const;
+    //const Species<NormalForceInteraction::SpeciesType, FrictionForceInteraction::SpeciesType>* getSpecies() const;
 
     void integrate(Mdouble timeStep);
 
     void reverseHistory();
 };
 
-template<class NormalForceInteraction, class TangentialForceInteraction, class AdhesiveForceInteraction>
-Interaction<NormalForceInteraction, TangentialForceInteraction, AdhesiveForceInteraction>::Interaction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
-: BaseInteraction(P, I, timeStamp), NormalForceInteraction(P, I, timeStamp), TangentialForceInteraction(P, I, timeStamp), AdhesiveForceInteraction(P, I, timeStamp)
+template<class NormalForceInteraction, class FrictionForceInteraction, class AdhesiveForceInteraction>
+Interaction<NormalForceInteraction, FrictionForceInteraction, AdhesiveForceInteraction>::Interaction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
+: BaseInteraction(P, I, timeStamp), NormalForceInteraction(P, I, timeStamp), FrictionForceInteraction(P, I, timeStamp), AdhesiveForceInteraction(P, I, timeStamp)
 {
 #ifdef DEBUG_CONSTRUCTOR
     std::cout<<"Interaction::Interaction() finished"<<std::endl;
 #endif
 }
 
-template<class NormalForceInteraction, class TangentialForceInteraction, class AdhesiveForceInteraction>
-Interaction<NormalForceInteraction, TangentialForceInteraction, AdhesiveForceInteraction>::Interaction(const Interaction &p)
-: BaseInteraction(p), NormalForceInteraction(p), TangentialForceInteraction(p), AdhesiveForceInteraction(p)
+template<class NormalForceInteraction, class FrictionForceInteraction, class AdhesiveForceInteraction>
+Interaction<NormalForceInteraction, FrictionForceInteraction, AdhesiveForceInteraction>::Interaction(const Interaction &p)
+: BaseInteraction(p), NormalForceInteraction(p), FrictionForceInteraction(p), AdhesiveForceInteraction(p)
 {
 #ifdef DEBUG_CONSTRUCTOR
     std::cout<<"Interaction::Interaction(const Interaction &p finished"<<std::endl;
 #endif
 }
 
-template<class NormalForceInteraction, class TangentialForceInteraction, class AdhesiveForceInteraction>
-Interaction<NormalForceInteraction, TangentialForceInteraction, AdhesiveForceInteraction>::~Interaction()
+template<class NormalForceInteraction, class FrictionForceInteraction, class AdhesiveForceInteraction>
+Interaction<NormalForceInteraction, FrictionForceInteraction, AdhesiveForceInteraction>::~Interaction()
 {
 #ifdef DEBUG_CONSTRUCTOR
     std::cout<<"Interaction::~Interaction() finished"<<std::endl;
 #endif
 }
 
-template<class NormalForceInteraction, class TangentialForceInteraction, class AdhesiveForceInteraction>
-Interaction<NormalForceInteraction, TangentialForceInteraction, AdhesiveForceInteraction>* Interaction<NormalForceInteraction, TangentialForceInteraction, AdhesiveForceInteraction>::copy() const
+template<class NormalForceInteraction, class FrictionForceInteraction, class AdhesiveForceInteraction>
+Interaction<NormalForceInteraction, FrictionForceInteraction, AdhesiveForceInteraction>* Interaction<NormalForceInteraction, FrictionForceInteraction, AdhesiveForceInteraction>::copy() const
 {
     return new Interaction(*this);
 }
 
 ///BaseParticle print function, which accepts an os std::stringstream as input. It prints human readable BaseParticle information to the std::stringstream
-template<class NormalForceInteraction, class TangentialForceInteraction, class AdhesiveForceInteraction>
-void Interaction<NormalForceInteraction, TangentialForceInteraction, AdhesiveForceInteraction>::write(std::ostream& os) const
+template<class NormalForceInteraction, class FrictionForceInteraction, class AdhesiveForceInteraction>
+void Interaction<NormalForceInteraction, FrictionForceInteraction, AdhesiveForceInteraction>::write(std::ostream& os) const
 {
     NormalForceInteraction::write(os);
-    TangentialForceInteraction::write(os);
+    FrictionForceInteraction::write(os);
     AdhesiveForceInteraction::write(os);
 }
 
-template<class NormalForceInteraction, class TangentialForceInteraction, class AdhesiveForceInteraction>
-void Interaction<NormalForceInteraction, TangentialForceInteraction, AdhesiveForceInteraction>::read(std::istream& is)
+template<class NormalForceInteraction, class FrictionForceInteraction, class AdhesiveForceInteraction>
+void Interaction<NormalForceInteraction, FrictionForceInteraction, AdhesiveForceInteraction>::read(std::istream& is)
 {
     NormalForceInteraction::read(is);
-    TangentialForceInteraction::read(is);
+    FrictionForceInteraction::read(is);
     AdhesiveForceInteraction::read(is);
 }
 
 
-template<class NormalForceInteraction, class TangentialForceInteraction, class AdhesiveForceInteraction>
-void Interaction<NormalForceInteraction, TangentialForceInteraction, AdhesiveForceInteraction>::reverseHistory()
+template<class NormalForceInteraction, class FrictionForceInteraction, class AdhesiveForceInteraction>
+void Interaction<NormalForceInteraction, FrictionForceInteraction, AdhesiveForceInteraction>::reverseHistory()
 {
     NormalForceInteraction::reverseHistory();
-    TangentialForceInteraction::reverseHistory();
+    FrictionForceInteraction::reverseHistory();
     AdhesiveForceInteraction::reverseHistory();
 }
 
-template<class NormalForceInteraction, class TangentialForceInteraction, class AdhesiveForceInteraction>
-std::string Interaction<NormalForceInteraction, TangentialForceInteraction, AdhesiveForceInteraction>::getName() const
+template<class NormalForceInteraction, class FrictionForceInteraction, class AdhesiveForceInteraction>
+std::string Interaction<NormalForceInteraction, FrictionForceInteraction, AdhesiveForceInteraction>::getName() const
 {
-    return NormalForceInteraction::getName() + TangentialForceInteraction::getName() + AdhesiveForceInteraction::getName() + "Interaction";
+    return NormalForceInteraction::getName() + FrictionForceInteraction::getName() + AdhesiveForceInteraction::getName() + "Interaction";
 }
 
-template<class NormalForceInteraction, class TangentialForceInteraction, class AdhesiveForceInteraction>
-void Interaction<NormalForceInteraction, TangentialForceInteraction, AdhesiveForceInteraction>::integrate(Mdouble timeStep)
+template<class NormalForceInteraction, class FrictionForceInteraction, class AdhesiveForceInteraction>
+void Interaction<NormalForceInteraction, FrictionForceInteraction, AdhesiveForceInteraction>::integrate(Mdouble timeStep)
 {
-    TangentialForceInteraction::integrate(timeStep);
+    FrictionForceInteraction::integrate(timeStep);
 }
 
-template<class NormalForceInteraction, class TangentialForceInteraction, class AdhesiveForceInteraction>
-void Interaction<NormalForceInteraction, TangentialForceInteraction, AdhesiveForceInteraction>::computeForce()
+template<class NormalForceInteraction, class FrictionForceInteraction, class AdhesiveForceInteraction>
+void Interaction<NormalForceInteraction, FrictionForceInteraction, AdhesiveForceInteraction>::computeForce()
 {
     NormalForceInteraction::computeForce();
-    TangentialForceInteraction::computeForce();
+    FrictionForceInteraction::computeForce();
     AdhesiveForceInteraction::computeForce();
 }
 
-template<class NormalForceInteraction, class TangentialForceInteraction, class AdhesiveForceInteraction>
-Mdouble Interaction<NormalForceInteraction, TangentialForceInteraction, AdhesiveForceInteraction>::getElasticEnergy() const
+template<class NormalForceInteraction, class FrictionForceInteraction, class AdhesiveForceInteraction>
+Mdouble Interaction<NormalForceInteraction, FrictionForceInteraction, AdhesiveForceInteraction>::getElasticEnergy() const
 {
-    return NormalForceInteraction::getElasticEnergy() + TangentialForceInteraction::getElasticEnergy() + AdhesiveForceInteraction::getElasticEnergy();
+    return NormalForceInteraction::getElasticEnergy() + FrictionForceInteraction::getElasticEnergy() + AdhesiveForceInteraction::getElasticEnergy();
 }
 
 
-//template<class NormalForceInteraction, class TangentialForceInteraction, class AdhesiveForceInteraction>
-//const Species<NormalForceInteraction::SpeciesType, TangentialForceInteraction::SpeciesType>* Interaction::getSpecies() const
+//template<class NormalForceInteraction, class FrictionForceInteraction, class AdhesiveForceInteraction>
+//const Species<NormalForceInteraction::SpeciesType, FrictionForceInteraction::SpeciesType>* Interaction::getSpecies() const
 //{
-//    return dynamic_cast<const Species<NormalForceInteraction::SpeciesType, TangentialForceInteraction::SpeciesType>*>(getBaseSpecies());
+//    return dynamic_cast<const Species<NormalForceInteraction::SpeciesType, FrictionForceInteraction::SpeciesType>*>(getBaseSpecies());
 //}
 #endif

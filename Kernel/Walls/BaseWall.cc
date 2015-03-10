@@ -19,7 +19,7 @@
 #include "BaseWall.h"
 #include "DPMBase.h"
 #include "WallHandler.h"
-#include "Species/BaseSpecies.h"
+#include "Species/ParticleSpecies.h"
 
 BaseWall::BaseWall()
 {
@@ -82,7 +82,7 @@ void BaseWall::setIndSpecies(unsigned int indSpecies)
     }
 }
 
-void BaseWall::setSpecies(const BaseSpecies* species)
+void BaseWall::setSpecies(const ParticleSpecies* species)
 {
     BaseInteractable::setSpecies(species);
 

@@ -18,7 +18,7 @@
 
 #include "ChuteBottom.h"
 #include "Species/LinearViscoelasticSpecies.h"
-#include "Species/TangentialForceSpecies/SlidingFrictionSpecies.h"
+#include "Species/FrictionForceSpecies/SlidingFrictionSpecies.h"
 #include "Boundaries/PeriodicBoundary.h"
 #include "Walls/InfiniteWall.h"
 
@@ -69,6 +69,8 @@ void ChuteBottom::makeRoughBottom(ParticleHandler &ChuteParticleHandler)
     //~ setInflowHeight(45.*getInflowParticleRadius()); note: Changing the Inflow height was an attempt to make the bottom density homogeneous, but it did not have the desired effect
     setRoughBottomType(MONOLAYER_DISORDERED);
     setFixedParticleRadius(getInflowParticleRadius());
+  
+
 
     auto species = dynamic_cast<LinearViscoelasticSpecies*>(speciesHandler.getObject(0));
     if (species!=nullptr)
@@ -172,12 +174,13 @@ void ChuteBottom::setupInitialConditions()
     //try max_failed times to find new insertable particle
 
     BaseParticle inflowParticle_;
+    inflowParticle_.setHandler(&particleHandler);
     inflowParticle_.setOrientation(Vec3D(0.0, 0.0, 0.0));
     inflowParticle_.setAngularVelocity(Vec3D(0.0, 0.0, 0.0));
     while (failed <= max_failed)
     {
         inflowParticle_.setRadius(getFixedParticleRadius());
-        inflowParticle_.computeMass();
+        //inflowParticle_.computeMass();
 
         //The position components are first stored in a Vec3D, because if you pass them directly into setPosition the compiler is allowed to change the order in which the numbers are generated
         Vec3D position;
@@ -186,7 +189,8 @@ void ChuteBottom::setupInitialConditions()
         position.Z = random.getRandomNumber(2 * inflowParticle_.getRadius(), getZMax() - inflowParticle_.getRadius());
         inflowParticle_.setPosition(position);
         inflowParticle_.setVelocity(Vec3D(0.0, 0.0, 0.0));
-
+        
+        
         if (checkParticleForInteraction(inflowParticle_))
         {
             particleHandler.copyAndAddObject(inflowParticle_);
