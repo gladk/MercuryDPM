@@ -1,0 +1,19 @@
+restart_version 1.0 name wallSpecies
+dataFile name wallSpecies.data fileType ONE_FILE saveCount 2587
+fStatFile name wallSpecies.fstat fileType ONE_FILE saveCount 2587
+eneFile name wallSpecies.ene fileType ONE_FILE saveCount 2587
+restartFile name wallSpecies.restart fileType ONE_FILE saveCount 2587
+statFile name wallSpecies.stat fileType ONE_FILE saveCount 2587
+xMin 0 xMax 20 yMin 0 yMax 20 zMin 0 zMax 20
+timeStep 0.0002 time 15.0002 timeMax 15
+systemDimensions 3 particleDimensions 3 gravity 0 0 0
+Species 2
+LinearViscoelasticSpecies id 0 density 1.9098593 stiffness 117914.16 dissipation 277.25887
+LinearViscoelasticSpecies id 1 density 0 stiffness 0 dissipation 0
+LinearViscoelasticSpecies id 1 density 0 stiffness 103500.57 dissipation 138.62944
+Walls 2
+InfiniteWall id 0 indSpecies 0 position 0 0 0 orientation 0 0 0 0 velocity 0 0 0 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 normal 0 0 -1 position 0 factor 1
+InfiniteWall id 1 indSpecies 1 position 0 0 0 orientation 0 0 0 0 velocity 0 0 0 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 normal -1 0 0 position 0 factor 1
+Boundaries 0
+Particles 1
+BaseParticle id 0 indSpecies 0 position 5.6715962 10 1.7980721 orientation 0 0 0 0 velocity 0.49298992 0 0.23642947 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 radius 0.5 invMass 1 invInertia 10

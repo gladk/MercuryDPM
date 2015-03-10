@@ -1,0 +1,3 @@
+add_subdirectory(UnitTests)
+add_subdirectory(MercurySimpleDemos)
+add_subdirectory(MercuryCG)

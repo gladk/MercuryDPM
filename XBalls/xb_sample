@@ -1,0 +1,1 @@
+xballs -format 7 -f test.xb7 -s 2 -sort -drottheta 0.11 -redraw 26 -dunidist .01 -drotphi 0.075 -v0 -col0 -cmax -moh 250 -o 250 -eyepos 1.8 -deyepos '-.05' -solidf -unidist 0.5

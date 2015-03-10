@@ -1,0 +1,16 @@
+restart_version 1.0 name movingWall
+dataFile name movingWall.data fileType ONE_FILE saveCount 264
+fStatFile name movingWall.fstat fileType ONE_FILE saveCount 264
+eneFile name movingWall.ene fileType ONE_FILE saveCount 264
+restartFile name movingWall.restart fileType ONE_FILE saveCount 264
+statFile name movingWall.stat fileType ONE_FILE saveCount 264
+xMin 0 xMax 2 yMin 0 yMax 2 zMin 0 zMax 2
+timeStep 0.0002 time 1.0002 timeMax 1
+systemDimensions 3 particleDimensions 3 gravity 0 0 0
+Species 1
+LinearViscoelasticSlidingFrictionSpecies id 0 density 1.9098593 stiffness 49348.022 dissipation -0 slidingStiffness 0 slidingDissipation 0 frictionCoefficient 0 frictionCoefficientStatic 0
+Walls 1
+InfiniteWall id 0 indSpecies 0 position 0 0 0 orientation 0 0 0 0 velocity 0 0 1 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 normal 0 0 -1 position -1.0002 factor 1
+Boundaries 0
+Particles 1
+BaseParticle id 0 indSpecies 0 position 1 1 2.9726204 orientation 0 0 0 0 velocity 0 0 3.0004108 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 radius 0.5 invMass 1 invInertia 10

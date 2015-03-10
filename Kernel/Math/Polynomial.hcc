@@ -1,0 +1,431 @@
+// This file is part of MercuryDPM.
+// 
+// MercuryDPM is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// MercuryDPM is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with MercuryDPM.  If not, see <http://www.gnu.org/licenses/>.
+// 
+// Copyright 2013 The Mercury Developers Team
+// For the list of developers, see <http://www.MercuryDPM.org/Team>
+
+template<StatType T>
+void NORMALIZED_POLYNOMIAL<T>::set_polynomial(std::vector<double> new_coefficients, unsigned int new_dim)
+{
+    coefficients = new_coefficients;
+    dim = new_dim;
+    finish_set_polynomial();
+}
+
+template<StatType T>
+void NORMALIZED_POLYNOMIAL<T>::set_polynomial(double* new_coefficients, unsigned int num_coeff, unsigned int new_dim)
+{
+    coefficients.resize(num_coeff);
+    for (unsigned int i = 0; i < num_coeff; i++)
+        coefficients[i] = new_coefficients[i];
+    dim = new_dim;
+    finish_set_polynomial();
+}
+
+template<StatType T>
+void NORMALIZED_POLYNOMIAL<T>::finish_set_polynomial()
+{
+    //normalizes the Polynomial.
+    double volume = get_volume();
+    if (fabs(volume - 1.0) > 1e-12)
+        std::cout << "Warning: Polynomial has to be normalized by " << volume << std::endl;
+    for (unsigned int i = 0; i < coefficients.size(); i++)
+        coefficients[i] /= volume;
+    
+    //sets #averaged_coefficients	
+    set_average();
+    
+    //std::couts the Polynomial
+    std::stringstream sstr;
+    sstr << *this;
+    setName(sstr.str().c_str());
+    std::cout << "p=" << *this << std::endl;
+}
+
+template<StatType T>
+double NORMALIZED_POLYNOMIAL<T>::get_volume()
+{
+    double volume = 0;
+    unsigned int N = coefficients.size();
+    if (dim == 3)
+    {
+        for (unsigned int i = 0; i < N; i++)
+            volume += coefficients[i] / (2. + N - i);
+        volume *= 4. * constants::pi;
+    }
+    else if (dim == 2)
+    {
+        std::cerr << "dim=2 is not working yet" << std::endl;
+        exit(-1);
+        for (unsigned int i = 0; i < coefficients.size(); i++)
+            volume += coefficients[i] / (1. + N - i);
+        volume *= 2. * constants::pi;
+    }
+    else if (dim == 1)
+    {
+        std::cerr << "dim=1 is not working yet" << std::endl;
+        exit(-1);
+        for (unsigned int i = 0; i < coefficients.size(); i++)
+            volume += coefficients[i] / (0. + N - i);
+        volume *= 2.;
+    }
+    else
+    {
+        std::cerr << "Error in get_volume: dim=" << dim << std::endl;
+        exit(-1);
+    }
+    return volume;
+}
+
+template<StatType T>
+void NORMALIZED_POLYNOMIAL<T>::set_average()
+{
+    std::cout << "set_average" << std::endl;
+}
+
+template<StatType T>
+void NORMALIZED_POLYNOMIAL<T>::set_average_1D()
+{
+    std::cout << "set_average_1D" << std::endl;
+    unsigned int N = coefficients.size();
+    averaged_coefficients.resize(N + 2);
+    for (unsigned int i = 0; i < N + 2; i++)
+    {
+        averaged_coefficients[i] = 0;
+    }
+    for (unsigned int i = 0; i < N; i++)
+    {
+        averaged_coefficients[N + 1] += coefficients[i] * 2 * constants::pi / (N - 1 - i + 2);
+        averaged_coefficients[i] -= coefficients[i] * 2 * constants::pi / (N - 1 - i + 2);
+    }
+}
+
+//not needed
+template<StatType T>
+void NORMALIZED_POLYNOMIAL<T>::set_average_2D()
+{
+}
+
+//Returns the value of the Polynomial \f$p(r)=\sum_{i=0}^{N-1) c_i r^{N-1-i}\f$.
+template<StatType T>
+double NORMALIZED_POLYNOMIAL<T>::evaluate(double r)
+{
+    unsigned int N = coefficients.size();
+    double value = coefficients[0];
+    for (unsigned int i = 1; i < N; i++)
+        value = value * r + coefficients[i];
+    ///\todo I originally forgot to put a return statement here but the compiler did not give me a warning. Can we give a compiler option to throw warnings if there are no return statements?
+    return value;
+}
+
+//Returns the value of the Polynomial \f$p(r)=\sum_{i=0}^{N-1) (N-1-i) c_i r^{N-2-i}\f$.
+template<StatType T>
+double NORMALIZED_POLYNOMIAL<T>::evaluateGradient(double r)
+{
+    unsigned int N = coefficients.size();
+    double value = (N - 1) * coefficients[0];
+    for (unsigned int i = 1; i < N - 1; i++)
+        value = value * r + (N - 1 - i) * coefficients[i];
+    return value;
+}
+
+template<StatType T>
+double NORMALIZED_POLYNOMIAL<T>::evaluate_1D(double r)
+{
+    unsigned int N = averaged_coefficients.size();
+    double value = averaged_coefficients[0];
+    for (unsigned int i = 1; i < N; i++)
+        value = value * r + averaged_coefficients[i];
+    return value;
+}
+
+template<StatType T>
+double NORMALIZED_POLYNOMIAL<T>::evaluateGradient_1D(double r)
+{
+    unsigned int N = coefficients.size();
+    double value = coefficients[0];
+    double value2 = coefficients[0];
+    for (unsigned int i = 1; i < N - 1; i++)
+    {
+        value = value * r + coefficients[i];
+        value2 += coefficients[i];
+    }
+    return 2. * constants::pi * r * (value2 - value * r);
+}
+
+template<StatType T>
+double NORMALIZED_POLYNOMIAL<T>::evaluateGradient_2D(double)
+{
+    ///\todo
+    return 0.0;
+}
+
+template<StatType T>
+double NORMALIZED_POLYNOMIAL<T>::evaluate_2D(double r)
+{
+    //~ std::cout << "eval_2D" << std::endl;
+    unsigned int N = coefficients.size();
+    double value1 = 2. * coefficients[N - 1];
+    double value2 = 0;
+    double r2 = r * r;
+    switch (N)
+    {
+        case 7:
+            value1 += coefficients[N - 7] * 2. / 35. * (5. + r2 * (6. + r2 * (8 * r2 + 16)));
+            [[clang::fallthrough]];
+        case 6:
+            value1 += coefficients[N - 6] * (8. + (10. + 15. * r2) * r2) / 24.;
+            value2 += coefficients[N - 6] * (15. * r2 * r2 * r2) / 24.;
+            [[clang::fallthrough]];
+        case 5:
+            value1 += coefficients[N - 5] * .4 * (1. + r2 * (4. / 3. + r2 * 8. / 3.));
+            [[clang::fallthrough]];
+        case 4:
+            value1 += coefficients[N - 4] * (2. + r2 * 3.) / 4.;
+            value2 += coefficients[N - 4] * .75 * r2 * r2;
+            [[clang::fallthrough]];
+        case 3:
+            value1 += coefficients[N - 3] * 2. / 3. * (1. + r2 * 2.);
+            [[clang::fallthrough]];
+        case 2:
+            value1 += coefficients[N - 2] * 1.;
+            value2 += coefficients[N - 2] * r2;
+            [[clang::fallthrough]];
+        case 1:
+            break;
+        default:
+            std::cerr << "Error: no rules set for high-order polynomials" << std::endl;
+            exit(-1);
+    }
+    double root = sqrt(1 - r2);
+    double invz = root / r;
+    double arccsch = log(sqrt(1. + invz * invz) + invz);
+    return value1 * root + value2 * arccsch;
+}
+
+template<StatType T>
+double NORMALIZED_POLYNOMIAL<T>::evaluateIntegral(double a, double b, double t)
+{
+    unsigned int N = coefficients.size();
+    double value1 = coefficients[N - 1] * (b - a);
+    double value2 = 0;
+    double t2 = t * t;
+    double a2 = a * a;
+    double b2 = b * b;
+    double roota = sqrt(a * a + t2);
+    double rootb = sqrt(b * b + t2);
+    switch (N)
+    {
+        case 7:
+            value1 += coefficients[N - 7] * (b * (b2 * b2 * b2 / 7.0 + 0.6 * b2 * b2 * t2 + b2 * t2 * t2 + t2 * t2 * t2) - a * (a2 * a2 * a2 / 7.0 + 0.6 * a2 * a2 * t2 + a2 * t2 * t2 + t2 * t2 * t2));
+            [[clang::fallthrough]];
+        case 6:
+            value1 += coefficients[N - 6] * (b * rootb * (8. * b2 * b2 + 26. * b2 * t2 + 33. * t2 * t2) - a * roota * (8. * a2 * a2 + 26. * a2 * t2 + 33. * t2 * t2)) / 48.;
+            value2 += coefficients[N - 6] * 15. / 48. * t2 * t2 * t2;
+            [[clang::fallthrough]];
+        case 5:
+            value1 += coefficients[N - 5] * (b * (b2 * b2 / 5. + 2. / 3. * b2 * t2 + t2 * t2) - a * (a2 * a2 / 5. + 2. / 3. * a2 * t2 + t2 * t2));
+            [[clang::fallthrough]];
+        case 4:
+            value1 += coefficients[N - 4] * (b * rootb * (2. * b2 + 5. * t2) - a * roota * (2. * a2 + 5. * t2)) / 8.;
+            value2 += coefficients[N - 4] * 3. / 8. * t2 * t2;
+            [[clang::fallthrough]];
+        case 3:
+            value1 += coefficients[N - 3] * (b * (b2 / 3. + t2) - a * (a2 / 3. + t2));
+            [[clang::fallthrough]];
+        case 2:
+            value1 += coefficients[N - 2] * (b * rootb - a * roota) / 2.;
+            value2 += coefficients[N - 2] * t2 / 2.;
+            [[clang::fallthrough]];
+        case 1:
+            break;
+        default:
+            std::cerr << "Error: no rules set for high-order polynomials" << std::endl;
+            exit(-1);
+    }
+    double A = a / t;
+    double B = b / t;
+    double arcsinh = t < 1e-12 ? 0.0 : log(B + sqrt(1. + B * B)) - log(A + sqrt(1. + A * A));
+    //~ std::cout 
+    //~ << "value1 " << value1 << std::endl
+    //~ << "value2 " << value2 << std::endl
+    //~ << "arcsinh " << arcsinh << std::endl
+    //~ << "a " << a << std::endl
+    //~ << "b " << b << std::endl
+    //~ << "t " << t << std::endl;
+    return value1 + value2 * arcsinh;
+}
+
+///\todo{Thomas: has yet to be implemented}
+template <StatType T>
+double NORMALIZED_POLYNOMIAL<T>::evaluateIntegral_2D(double a UNUSED, double b UNUSED, double t UNUSED)
+{   
+    std::cerr << "evaluateIntegral_2D is not implemented yet" << std::endl;
+    exit(-1);
+}
+
+template<StatType T>
+double NORMALIZED_POLYNOMIAL<T>::evaluateIntegral_1D(double a, double b, double t)
+{
+    unsigned int N = averaged_coefficients.size();
+    double value1 = averaged_coefficients[N - 1] * (b - a);
+    double value2 = 0;
+    double t2 = t * t;
+    double a2 = a * a;
+    double b2 = b * b;
+    double roota = sqrt(a * a + t2);
+    double rootb = sqrt(b * b + t2);
+    switch (N)
+    {
+        case 7:
+            value1 += averaged_coefficients[N - 7] * (b * (b2 * b2 * b2 / 7.0 + 0.6 * b2 * b2 * t2 + b2 * t2 * t2 + t2 * t2 * t2) - a * (a2 * a2 * a2 / 7.0 + 0.6 * a2 * a2 * t2 + a2 * t2 * t2 + t2 * t2 * t2));
+            [[clang::fallthrough]];
+        case 6:
+            value1 += averaged_coefficients[N - 6] * (b * rootb * (8. * b2 * b2 + 26. * b2 * t2 + 33. * t2 * t2) - a * roota * (8. * a2 * a2 + 26. * a2 * t2 + 33. * t2 * t2)) / 48.;
+            value2 += averaged_coefficients[N - 6] * 15. / 48. * t2 * t2 * t2;
+            [[clang::fallthrough]];
+        case 5:
+            value1 += averaged_coefficients[N - 5] * (b * (b2 * b2 / 5. + 2. / 3. * b2 * t2 + t2 * t2) - a * (a2 * a2 / 5. + 2. / 3. * a2 * t2 + t2 * t2));
+            [[clang::fallthrough]];
+        case 4:
+            value1 += averaged_coefficients[N - 4] * (b * rootb * (2. * b2 + 5. * t2) - a * roota * (2. * a2 + 5. * t2)) / 8.;
+            value2 += averaged_coefficients[N - 4] * 3. / 8. * t2 * t2;
+            [[clang::fallthrough]];
+        case 3:
+            value1 += averaged_coefficients[N - 3] * (b * (b2 / 3. + t2) - a * (a2 / 3. + t2));
+            [[clang::fallthrough]];
+        case 2:
+            value1 += averaged_coefficients[N - 2] * (b * rootb - a * roota) / 2.;
+            value2 += averaged_coefficients[N - 2] * t2 / 2.;
+            [[clang::fallthrough]];
+        case 1:
+            break;
+        default:
+            std::cerr << "Error: no rules set for high-order polynomials" << std::endl;
+            exit(-1);
+    }
+    double A = a / t;
+    double B = b / t;
+    double arcsinh = t < 1e-12 ? 0.0 : log(B + sqrt(1. + B * B)) - log(A + sqrt(1. + A * A));
+    return value1 + value2 * arcsinh;
+    
+    // 3D Heaviside:  ( b-a );
+    // 3D Polynomial: evaluateIntegral(max(a,-wn)/w,min(b,wn)/w,tangential.GetLength()/w)*w;
+    // 1D Polynomial: evaluateIntegral(max(a,-wn)/w,min(b,wn)/w,tangential.GetLength()/w)*w;
+    // 1D Heaviside:  ((b*pi*(wn2-mathsFunc::square(b)/3.0)))-((a*pi*(wn2-mathsFunc::square(a)/3.0)));
+    //~ averaged_coefficients[N+1] += coefficients[i]*2*pi/(N-1-i+2);
+    //~ averaged_coefficients[i] -= coefficients[i]*2*pi/(N-1-i+2);
+    
+}
+
+template<> void NORMALIZED_POLYNOMIAL<X>::set_average()
+{
+    set_average_1D();
+}
+template<> void NORMALIZED_POLYNOMIAL<Y>::set_average()
+{
+    set_average_1D();
+}
+template<> void NORMALIZED_POLYNOMIAL<Z>::set_average()
+{
+    set_average_1D();
+}
+template<> void NORMALIZED_POLYNOMIAL<XY>::set_average()
+{
+    set_average_2D();
+}
+template<> void NORMALIZED_POLYNOMIAL<XZ>::set_average()
+{
+    set_average_2D();
+}
+template<> void NORMALIZED_POLYNOMIAL<YZ>::set_average()
+{
+    set_average_2D();
+}
+
+template<> double NORMALIZED_POLYNOMIAL<X>::evaluate(double r)
+{
+    return evaluate_1D(r);
+}
+template<> double NORMALIZED_POLYNOMIAL<Y>::evaluate(double r)
+{
+    return evaluate_1D(r);
+}
+template<> double NORMALIZED_POLYNOMIAL<Z>::evaluate(double r)
+{
+    return evaluate_1D(r);
+}
+template<> double NORMALIZED_POLYNOMIAL<XY>::evaluate(double r)
+{
+    return evaluate_2D(r);
+}
+template<> double NORMALIZED_POLYNOMIAL<XZ>::evaluate(double r)
+{
+    return evaluate_2D(r);
+}
+template<> double NORMALIZED_POLYNOMIAL<YZ>::evaluate(double r)
+{
+    return evaluate_2D(r);
+}
+
+template<> double NORMALIZED_POLYNOMIAL<X>::evaluateGradient(double r)
+{
+    return evaluateGradient_1D(r);
+}
+template<> double NORMALIZED_POLYNOMIAL<Y>::evaluateGradient(double r)
+{
+    return evaluateGradient_1D(r);
+}
+template<> double NORMALIZED_POLYNOMIAL<Z>::evaluateGradient(double r)
+{
+    return evaluateGradient_1D(r);
+}
+template<> double NORMALIZED_POLYNOMIAL<XY>::evaluateGradient(double r)
+{
+    return evaluateGradient_2D(r);
+}
+template<> double NORMALIZED_POLYNOMIAL<XZ>::evaluateGradient(double r)
+{
+    return evaluateGradient_2D(r);
+}
+template<> double NORMALIZED_POLYNOMIAL<YZ>::evaluateGradient(double r)
+{
+    return evaluateGradient_2D(r);
+}
+
+template<> double NORMALIZED_POLYNOMIAL<X>::evaluateIntegral(double a, double b, double t)
+{
+    return evaluateIntegral_1D(a, b, t);
+}
+template<> double NORMALIZED_POLYNOMIAL<Y>::evaluateIntegral(double a, double b, double t)
+{
+    return evaluateIntegral_1D(a, b, t);
+}
+template<> double NORMALIZED_POLYNOMIAL<Z>::evaluateIntegral(double a, double b, double t)
+{
+    return evaluateIntegral_1D(a, b, t);
+}
+template<> double NORMALIZED_POLYNOMIAL<XY>::evaluateIntegral(double a, double b, double t)
+{
+    return evaluateIntegral_2D(a, b, t);
+}
+template<> double NORMALIZED_POLYNOMIAL<XZ>::evaluateIntegral(double a, double b, double t)
+{
+    return evaluateIntegral_2D(a, b, t);
+}
+template<> double NORMALIZED_POLYNOMIAL<YZ>::evaluateIntegral(double a, double b, double t)
+{
+    return evaluateIntegral_2D(a, b, t);
+}

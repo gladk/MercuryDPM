@@ -1,0 +1,21 @@
+restart_version 1.0 name TwoParticleElasticCollisionSelfTest
+dataFile name TwoParticleElasticCollisionSelfTest.data fileType ONE_FILE saveCount 10
+fStatFile name TwoParticleElasticCollisionSelfTest.fstat fileType NO_FILE saveCount 10
+eneFile name TwoParticleElasticCollisionSelfTest.ene fileType ONE_FILE saveCount 10
+restartFile name TwoParticleElasticCollisionSelfTest.restart fileType ONE_FILE saveCount 10
+statFile name TwoParticleElasticCollisionSelfTest.stat fileType ONE_FILE saveCount 10
+xMin 0 xMax 0.01 yMin 0 yMax 0.01 zMin 0 zMax 0
+timeStep 2e-05 time 0.25002 timeMax 0.25
+systemDimensions 2 particleDimensions 2 gravity 0 -9.8 0
+Species 1
+LinearViscoelasticSpecies id 0 density 2000 stiffness 10000 dissipation 0
+Walls 4
+InfiniteWall id 0 indSpecies 0 position 0 0 0 orientation 0 0 0 0 velocity 0 0 0 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 normal -1 0 0 position -0 factor 1
+InfiniteWall id 1 indSpecies 0 position 0 0 0 orientation 0 0 0 0 velocity 0 0 0 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 normal 1 0 0 position 0.01 factor 1
+InfiniteWall id 2 indSpecies 0 position 0 0 0 orientation 0 0 0 0 velocity 0 0 0 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 normal 0 -1 0 position -0 factor 1
+InfiniteWall id 3 indSpecies 0 position 0 0 0 orientation 0 0 0 0 velocity 0 0 0 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 normal 0 1 0 position 0.01 factor 1
+Boundaries 0
+Particles 2
+BaseParticle id 0 indSpecies 0 position 0.0056345673 0.0049660651 0 orientation 0 0 0 0 velocity -0.099982294 -0.025399286 0 angularVelocity 0 0 0 0 force 0 -0.015393804 0 torque 0 0 0 radius 0.0005 invMass 636.61977 invInertia 5.0929582e+09
+BaseParticle id 1 indSpecies 0 position 0.0043654327 0.0049660651 0 orientation 0 0 0 0 velocity 0.099982294 -0.025399286 0 angularVelocity 0 0 0 0 force 0 -0.015393804 0 torque 0 0 0 radius 0.0005 invMass 636.61977 invInertia 5.0929582e+09
+NUM_BUCKETS 10 hGridMaxLevels 3 cellOverSizeRatio 1

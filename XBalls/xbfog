@@ -1,0 +1,4 @@
+#!/bin/tcsh
+# xballs.linux -format 7 -s 6 -f ./snap30_S.xb7 -noborder 4 -cube -rotphi .4 -rottheta .5 -cmode 8 -cmax -scala 4 -c 4 -v0 -translate 0.051 0.051 0.051 -o 100 -w 500 -h 500 -invert -rred 1 -f test3dfog.xb7 -fog 15 -noinvert -fpower 3 -sort -cmode 1 -c 10 $*
+./xballs.linux -format 7 -s 6 -f ./snap30_S.xb7 -noborder 4 -cube -rotphi .4 -rottheta .5 -cmode 8 -cmax -scala 4 -c 4 -v0 -translate "-0.051" "-0.051" "-0.051" -o 200 -moh 200 -w 500 -h 500 -rred 1 -fog 15 -fpower 4 -sort $*
+

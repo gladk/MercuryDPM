@@ -1,4 +1,0 @@
-add_subdirectory(UnitTests)
-add_subdirectory(MercurySimpleDemos)
-add_subdirectory(ChuteDemos)
-add_subdirectory(MercuryCG)
