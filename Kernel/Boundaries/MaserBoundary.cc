@@ -51,7 +51,7 @@ void MaserBoundary::read(std::istream& is)
 }
 
 void MaserBoundary::write(std::ostream& os) const
-        {
+{
     BaseBoundary::write(os);
 }
 

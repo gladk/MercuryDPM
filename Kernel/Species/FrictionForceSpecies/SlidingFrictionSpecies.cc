@@ -58,7 +58,7 @@ SlidingFrictionSpecies::SlidingFrictionSpecies(const SlidingFrictionSpecies &s)
 
 SlidingFrictionSpecies::~SlidingFrictionSpecies()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"SlidingFrictionSpecies::~SlidingFrictionSpecies() finished"<<std::endl;
 #endif   
 }

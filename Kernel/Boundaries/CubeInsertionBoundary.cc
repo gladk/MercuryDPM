@@ -30,7 +30,7 @@
 CubeInsertionBoundary* CubeInsertionBoundary::copy() const
 {
 #ifdef DEBUG_CONSTRUCTOR
-    cerr << "virtual CubeInsertionBoundary* copy() const finished" << endl;
+    std::cout << "CubeInsertionBoundary::copy() const finished" << std::endl;
 #endif		
     return new CubeInsertionBoundary(*this);
 }

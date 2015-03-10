@@ -48,11 +48,13 @@
 #include "Species/LinearPlasticViscoelasticFrictionReversibleAdhesiveSpecies.h"
 #include "Species/LinearPlasticViscoelasticSlidingFrictionReversibleAdhesiveSpecies.h"
 
+#include "Species/LinearViscoelasticFrictionLiquidBridgeWilletSpecies.h"
+
 ///Constructor of the SpeciesHandler class. It creates and empty SpeciesHandler.
 SpeciesHandler::SpeciesHandler()
 {
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "SpeciesHandler::SpeciesHandler() finished" << std::endl;
+    std::cout << "SpeciesHandler::SpeciesHandler() finished" << std::endl;
 #endif
 }
 
@@ -63,9 +65,19 @@ SpeciesHandler::SpeciesHandler(const SpeciesHandler &other)
     clear();
     setDPMBase(other.getDPMBase());
     copyContentsFromOtherHandler(other);
-    mixedObjects_ = other.getMixedObjects();
+//    mixedObjects_ = other.getMixedObjects();
+    /* Instead of copying over the mixed objects pointers we reconstruct them.
+    ** Currently probably leaking memory of the old ones in the process. Who's
+    ** responsible for handling the old species? @dducks
+    ** Jira #MDPM-71
+    */
+    mixedObjects_.clear();
+    for (BaseSpecies * mixSpec : other.mixedObjects_) {
+      mixedObjects_.push_back(mixSpec->copy());
+      mixedObjects_.back()->setHandler(this);
+    }
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "SpeciesHandler::SpeciesHandler(const SpeciesHandler &PH) finished" << std::endl;
+    std::cout << "SpeciesHandler::SpeciesHandler(const SpeciesHandler &other) finished" << std::endl;
 #endif
 }
 
@@ -76,10 +88,18 @@ SpeciesHandler SpeciesHandler::operator =(const SpeciesHandler& rhs)
     {
         clear();
         copyContentsFromOtherHandler(rhs);
-        mixedObjects_ = rhs.getMixedObjects();
+    //    mixedObjects_ = rhs.getMixedObjects();
+        //POTENTIAL LEAK HERE: Jira bug #MDPM-71
+        //Who is responsible for memory mgmt of species?
+        mixedObjects_.clear();
+        for (BaseSpecies * mixSpec : rhs.mixedObjects_) {
+            mixedObjects_.push_back(mixSpec->copy());
+            mixedObjects_.back()->setHandler(this);
+        }
     }
+
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "SpeciesHandler SpeciesHandler::operator =(const SpeciesHandler& rhs)" << std::endl;
+    std::cout << "SpeciesHandler SpeciesHandler::operator =(const SpeciesHandler& rhs)" << std::endl;
 #endif
     ///\todo TW: the assignment operator doesn't copy the mixed objects
     return *this;
@@ -87,6 +107,9 @@ SpeciesHandler SpeciesHandler::operator =(const SpeciesHandler& rhs)
 
 SpeciesHandler::~SpeciesHandler()
 {
+    for (BaseSpecies* o : mixedObjects_)
+        delete o;
+    mixedObjects_.clear();
 #ifdef DEBUG_DESTRUCTOR
     std::cout << "SpeciesHandler::~SpeciesHandler() finished" << std::endl;
 #endif
@@ -202,6 +225,12 @@ void SpeciesHandler::readObject(std::istream& is)
     else if (type.compare("LinearPlasticViscoelasticFrictionReversibleAdhesiveSpecies") == 0)
     {
         LinearPlasticViscoelasticFrictionReversibleAdhesiveSpecies species;
+        is >> species;
+        copyAndAddObject(species);
+    }
+    else if (type.compare("LinearViscoelasticFrictionLiquidBridgeWilletSpecies") == 0)
+    {
+        LinearViscoelasticFrictionLiquidBridgeWilletSpecies species;
         is >> species;
         copyAndAddObject(species);
     }
@@ -335,7 +364,11 @@ void SpeciesHandler::readObject(std::istream& is)
         {
             LinearPlasticViscoelasticFrictionReversibleAdhesiveMixedSpecies species;
             is >> species;
-            mixedObjects_.push_back(species.copy());
+        }
+        else if (type.compare("LinearViscoelasticFrictionLiquidBridgeWilletMixedSpecies") == 0)
+        {
+            LinearViscoelasticFrictionLiquidBridgeWilletMixedSpecies species;
+            is >> species;
         }
         else if (type.compare("k") == 0) //for backwards compatibility
         {
@@ -457,6 +490,9 @@ BaseSpecies* SpeciesHandler::getMixedObject(const unsigned int id1, const unsign
 void SpeciesHandler::addObject(ParticleSpecies* const O)
 {
     BaseHandler<ParticleSpecies>::addObject(O);
+    std::cout << "Part / Mix: "
+              << objects_.size() << " / "
+              << mixedObjects_.size() << std::endl;
     for (unsigned int id =0; id+1 < getNumberOfObjects(); id++)
     {
         mixedObjects_.push_back(O->copyMixed());
@@ -466,6 +502,7 @@ void SpeciesHandler::addObject(ParticleSpecies* const O)
     }
     O->setHandler(this);
     getDPMBase()->particleHandler.computeAllMasses(O->getIndex());
+	getDPMBase()->setRotation(useAngularDOFs());
 }
 
 void SpeciesHandler::removeObject(unsigned const int id)
@@ -475,6 +512,7 @@ void SpeciesHandler::removeObject(unsigned const int id)
     {
         mixedObjects_.erase(mixedObjects_.begin()+getMixedId(id, id2));
     }
+	getDPMBase()->setRotation(useAngularDOFs());
 }
 
 void SpeciesHandler::write(std::ostream& os) const
@@ -490,6 +528,20 @@ void SpeciesHandler::write(std::ostream& os) const
             it2++;
         }
     }
+    /*
+    This behaves like the code above but is actually readable
+    @weinhartt is there a reason?
+    
+    there is a reason. Curernt architecture does not allow this
+    \todo define new restart format. @dducks
+    
+    for (ParticleSpecies * spec : objects_) {
+      os << *spec << std::endl;
+    }
+    for (BaseSpecies * spec : mixedObjects_) {
+       os << *spec << std::endl;
+    }
+    */
 }
 
 std::string SpeciesHandler::getName() const
@@ -533,3 +585,5 @@ template LinearViscoelasticSlidingFrictionReversibleAdhesiveSpecies::MixedSpecie
 template LinearPlasticViscoelasticSlidingFrictionReversibleAdhesiveSpecies::MixedSpeciesType* SpeciesHandler::getMixedObject(const LinearPlasticViscoelasticSlidingFrictionReversibleAdhesiveSpecies*,const LinearPlasticViscoelasticSlidingFrictionReversibleAdhesiveSpecies*);
 template LinearViscoelasticFrictionReversibleAdhesiveSpecies::MixedSpeciesType* SpeciesHandler::getMixedObject(const LinearViscoelasticFrictionReversibleAdhesiveSpecies*,const LinearViscoelasticFrictionReversibleAdhesiveSpecies*);
 template LinearPlasticViscoelasticFrictionReversibleAdhesiveSpecies::MixedSpeciesType* SpeciesHandler::getMixedObject(const LinearPlasticViscoelasticFrictionReversibleAdhesiveSpecies*,const LinearPlasticViscoelasticFrictionReversibleAdhesiveSpecies*);
+
+template LinearViscoelasticFrictionLiquidBridgeWilletSpecies::MixedSpeciesType* SpeciesHandler::getMixedObject(const LinearViscoelasticFrictionLiquidBridgeWilletSpecies*,const LinearViscoelasticFrictionLiquidBridgeWilletSpecies*);

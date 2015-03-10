@@ -90,11 +90,6 @@ public:
     void unfix();
 
     /*!
-     * \brief Compute Particle mass function, which required a reference to the Species vector. It computes the Particles mass, Inertia and the inverses.
-     */
-    void computeMass();
-
-    /*!
      * \brief Particle read function, which accepts an std::stringstream as input.
      */
     virtual void read(std::istream& is);

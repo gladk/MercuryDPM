@@ -41,9 +41,9 @@ void setupInitialConditions()
 {	
 //! [T1:createParticle]
 BaseParticle p0;
-p0.setRadius(0.005); // sets particle radius
+p0.setRadius(0.05); // sets particle radius
 p0.setPosition(Vec3D(0.1*getXMax(),0.1*getYMax(),0.1*getZMax())); // sets particle position
-p0.setVelocity(Vec3D(0.1,0.1,0.1));
+p0.setVelocity(Vec3D(0.5,0.1,0.1));
 particleHandler.copyAndAddObject(p0);
 //! [T1:createParticle]
 }
@@ -64,7 +64,7 @@ problem.setGravity(Vec3D(0.0,0.0,0.0));
 problem.setXMax(1.0);
 problem.setYMax(1.0);
 problem.setZMax(1.0);
-problem.setTimeMax(1.0);
+problem.setTimeMax(2.0);
 //! [T1:problemSetup]
 
 //! [T1:speciesProp]

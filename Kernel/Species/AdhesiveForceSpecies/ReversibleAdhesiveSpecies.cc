@@ -47,7 +47,7 @@ ReversibleAdhesiveSpecies::ReversibleAdhesiveSpecies(const ReversibleAdhesiveSpe
 
 ReversibleAdhesiveSpecies::~ReversibleAdhesiveSpecies()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"ReversibleAdhesiveSpecies::~ReversibleAdhesiveSpecies() finished"<<std::endl;
 #endif   
 }

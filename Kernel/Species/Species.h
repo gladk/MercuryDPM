@@ -45,7 +45,7 @@ public:
     Species(const Species &s);
     virtual ~Species();
     Species<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>* copy() const;
-    MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>* copyMixed() const;
+    BaseSpecies* copyMixed() const;
     /// Called by SpeciesHandler::readObject
     void read(std::istream& is);
     void write(std::ostream& os) const;
@@ -80,7 +80,7 @@ Species<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::Species
 template<class NormalForceSpecies, class FrictionForceSpecies, class AdhesiveForceSpecies>
 Species<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::~Species()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"Species::~Species() finished"<<std::endl;
 #endif
 }
@@ -100,7 +100,7 @@ Species<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>* Species
 
 ///Species copy method. It calls to copy constructor of this Species, useful for polymorphism
 template<class NormalForceSpecies, class FrictionForceSpecies, class AdhesiveForceSpecies>
-MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>* Species<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::copyMixed() const
+BaseSpecies* Species<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::copyMixed() const
 {
     return new MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>(*this);
 }

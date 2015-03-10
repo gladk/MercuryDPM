@@ -58,7 +58,7 @@ public:
             for (unsigned int j=0; j< nParticle; j++){
 				P0.setRadius(random.getRandomNumber(0.0005,0.001));
             	particleHandler.copyAndAddObject(P0);
-                particleHandler.getLastObject()->computeMass();
+                //P0.getSpecies()->computeMass(P0&);
 
             }
 
@@ -144,7 +144,7 @@ public:
 			//set random masses
 
 			particleHandler.getObject(0)->setRadius(random.getRandomNumber(0.0005,0.001));
-			particleHandler.getObject(0)->computeMass();
+			particleHandler.getObject(0)->getSpecies()->computeMass(particleHandler.getObject(0));
 			
 			//set random relative velocity
 			normal = Vec3D(-1.0,0.0,0.0);

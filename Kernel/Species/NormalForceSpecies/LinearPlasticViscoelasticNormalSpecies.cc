@@ -58,7 +58,7 @@ LinearPlasticViscoelasticNormalSpecies::LinearPlasticViscoelasticNormalSpecies(c
 
 LinearPlasticViscoelasticNormalSpecies::~LinearPlasticViscoelasticNormalSpecies()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"LinearPlasticViscoelasticNormalSpecies::~LinearPlasticViscoelasticNormalSpecies() finished"<<std::endl;
 #endif   
 }
@@ -122,17 +122,17 @@ BaseInteraction* LinearPlasticViscoelasticNormalSpecies::getNewInteraction(BaseI
 
 
 ///Acccess functions for the plastic model
-void LinearPlasticViscoelasticNormalSpecies::setPlasticParameters(Mdouble loadingStiffness, Mdouble maxUnloadingStiffness, Mdouble cohesionStiffness, Mdouble maxPenetration)
+void LinearPlasticViscoelasticNormalSpecies::setPlasticParameters(Mdouble loadingStiffness, Mdouble unloadingStiffnessMax, Mdouble cohesionStiffness, Mdouble penetrationDepthMax)
 {
-    if (loadingStiffness <= 0 || maxUnloadingStiffness < loadingStiffness || cohesionStiffness < 0 || maxPenetration < 0 || maxPenetration > 1)
+    if (loadingStiffness <= 0 || unloadingStiffnessMax < loadingStiffness || cohesionStiffness < 0 || penetrationDepthMax < 0 || penetrationDepthMax > 1)
     {
         std::cerr << "Error: arguments of setPlasticParameters do not make sense" << std::endl;
         exit(-1);
     }
     setLoadingStiffness(loadingStiffness);
-    setUnloadingStiffnessMax(maxUnloadingStiffness);
+    setUnloadingStiffnessMax(unloadingStiffnessMax);
     setCohesionStiffness(cohesionStiffness);
-    setPenetrationDepthMax(maxPenetration);
+    setPenetrationDepthMax(penetrationDepthMax);
 }
 
 Mdouble LinearPlasticViscoelasticNormalSpecies::getLoadingStiffness() const
@@ -155,20 +155,20 @@ void LinearPlasticViscoelasticNormalSpecies::setLoadingStiffness(Mdouble loading
 {
     loadingStiffness_ = loadingStiffness;
 }
-void LinearPlasticViscoelasticNormalSpecies::setUnloadingStiffnessMax(Mdouble maxUnloadingStiffness)
+void LinearPlasticViscoelasticNormalSpecies::setUnloadingStiffnessMax(Mdouble unloadingStiffnessMax)
 {
-    unloadingStiffnessMax_ = maxUnloadingStiffness;
+    unloadingStiffnessMax_ = unloadingStiffnessMax;
 }
 void LinearPlasticViscoelasticNormalSpecies::setCohesionStiffness(Mdouble cohesionStiffness)
 {
     cohesionStiffness_ = cohesionStiffness;
 }
-void LinearPlasticViscoelasticNormalSpecies::setPenetrationDepthMax(Mdouble maxPenetration)
+void LinearPlasticViscoelasticNormalSpecies::setPenetrationDepthMax(Mdouble penetrationDepthMax)
 {
-    penetrationDepthMax_ = maxPenetration;
+    penetrationDepthMax_ = penetrationDepthMax;
 }
 ///Calculates collision time for stiffest spring constant, divides by 50
-Mdouble LinearPlasticViscoelasticNormalSpecies::computePlasticTimeStep(Mdouble mass)
+Mdouble LinearPlasticViscoelasticNormalSpecies::computeTimeStep(Mdouble mass)
 {
     return 0.02 * constants::pi / std::sqrt(unloadingStiffnessMax_ / (.5 * mass) - mathsFunc::square(dissipation_ /mass));
 }

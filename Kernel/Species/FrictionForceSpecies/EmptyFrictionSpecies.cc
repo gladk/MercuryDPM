@@ -42,7 +42,7 @@ EmptyFrictionSpecies::EmptyFrictionSpecies(const EmptyFrictionSpecies &s)
 
 EmptyFrictionSpecies::~EmptyFrictionSpecies()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"EmptySpecies::~EmptySpecies() finished"<<std::endl;
 #endif   
 }

@@ -14,4 +14,5 @@ InfiniteWall id 0 indSpecies 0 position 0 0 0 orientation 0 0 0 0 velocity 0 0 0
 Boundaries 0
 Particles 1
 BaseParticle id 0 indSpecies 0 position 0.005 0.0601627008726401 0 orientation 0 0 0 0 velocity 0 0.826766039744481 0 angularVelocity 0 0 0 0 force 0 -0.0102625360017267 0 torque 0 0 0 radius 0.005 invMass 954.929658551372 invInertia 95492965.8551372
+Interactions 0
 NUM_BUCKETS 10 hGridMaxLevels 3 cellOverSizeRatio 1

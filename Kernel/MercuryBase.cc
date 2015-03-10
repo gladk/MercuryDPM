@@ -35,7 +35,7 @@ MercuryBase::MercuryBase()
 {
     constructor();
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "HGRID_base() finished"<<std::endl;
+    std::cout << "MercuryBase::MercuryBase() finished"<<std::endl;
 #endif
 }
 

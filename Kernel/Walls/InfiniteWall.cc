@@ -74,7 +74,7 @@ void InfiniteWall::set(Vec3D normal, Vec3D point)
 
 void InfiniteWall::setNormal(const Vec3D normal)
 {
-    factor_ = 1. / sqrt(Vec3D::dot(normal, normal));
+    factor_ = 1. / Vec3D::getLength(normal);
     normal_ = normal * factor_;
 }
 

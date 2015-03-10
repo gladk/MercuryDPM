@@ -89,20 +89,9 @@ public:
      */
     void eraseOldInteractions(Mdouble lastTimeStep);
 
-    /*!
-     * \brief
-     */
-    void setSpecies(SpeciesHandler* speciesHandler);
+    void write(std::ostream& os) const;
 
     std::string getName() const;
-
-    Mdouble timeStep_;
-
-private:
-    /*!
-     * \brief 
-     */
-    SpeciesHandler* speciesHandler_;
 };
 #endif
 

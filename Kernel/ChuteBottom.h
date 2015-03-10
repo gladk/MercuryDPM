@@ -93,7 +93,7 @@ public:
     /*!
      * \brief
      */
-    void makeRoughBottom(ParticleHandler &ChuteParticleHandler);
+    void makeRoughBottom(Chute &chute);
 
     /*!
      * \brief

@@ -46,19 +46,23 @@ void IntersectionOfWalls::clear()
     objects_.clear();
 }
 
-///Adds a wall to the set of finite walls, given an outward normal vector s.t. normal*x=normal*point
+///Adds a wall to the set of finite walls, given an outward unit normal vector s.t. normal*x=normal*point
+///\todo TW this function seems to require a *unit* normal vector now
 void IntersectionOfWalls::addObject(Vec3D normal, Vec3D point)
 {
-    addObject(normal, Vec3D::dot(normal, point));
+    addObject(normal, Vec3D::dot(Vec3D::getUnitVector(normal), point));
 }
+
 ///Adds a wall to the set of finite walls, given an outward normal vector s. t. normal*x=position
 void IntersectionOfWalls::addObject(Vec3D normal_, Mdouble position_)
 {
+    normal_.normalize();
+
     //n is the index of the new wall
     unsigned int n = objects_.size();
     objects_.resize(n + 1);
     objects_[n].set(normal_, position_);
-    
+
     // AB[n*(n-1)/2+m] is the direction of the intersecting line between walls m and n, m<n
     // A[n*(n-1)/2+m] is a point on the intersecting line between walls m and n, m<n
     // See http://www.netcomuk.co.uk/~jenolive/vect18d.html for finding the line where two planes meet
@@ -67,7 +71,7 @@ void IntersectionOfWalls::addObject(Vec3D normal_, Mdouble position_)
     for (unsigned int m = 0; m < n; m++)
     {
         unsigned int id = (n - 1) * n / 2 + m;
-        //first we Vec3D::Cross the wall normals and normalize to obtain AB
+        //first we cross the wall normals and normalize to obtain AB
         AB_[id] = Vec3D::cross(objects_[m].getNormal(), objects_[n].getNormal());
         AB_[id] /= sqrt(AB_[id].getLengthSquared());
         //then we find a point A (using AB*x=0 as a third plane)
@@ -106,6 +110,16 @@ void IntersectionOfWalls::addObject(Vec3D normal_, Mdouble position_)
                             + (objects_[n].getNormal().X * objects_[m].getNormal().Y - objects_[m].getNormal().X * objects_[n].getNormal().Y) * Vec3D::dot(objects_[l].getPosition(),objects_[l].getNormal())) * invdet;
         }
     }
+
+//    std::cout << *this << std::endl;
+//    for (InfiniteWall w : objects_)
+//        std::cout << "o " << w.getNormal() << ", " << w.getPosition() << std::endl;
+//    for (Vec3D v : A_)
+//        std::cout << "A " << v << std::endl;
+//    for (Vec3D v : AB_)
+//        std::cout << "AB " << v << std::endl;
+//    for (Vec3D v : C_)
+//        std::cout << "C " << v << std::endl;
 }
 
 void IntersectionOfWalls::createOpenPrism(std::vector<Vec3D> Points, Vec3D PrismAxis)
@@ -141,35 +155,32 @@ void IntersectionOfWalls::createPrism(std::vector<Vec3D> Points)
 }
 
 bool IntersectionOfWalls::getDistanceAndNormal(const BaseParticle &P, Mdouble &distance, Vec3D &normal_return) const
-        {
+{
     return getDistanceAndNormal(P.getPosition(), P.getInteractionRadius(), distance, normal_return);
 }
 
 ///Since this function should be called before calculating any Particle-Wall interactions, it can also be used to set the normal vector in case of curved walls.
 bool IntersectionOfWalls::getDistanceAndNormal(const Vec3D& position, Mdouble wallInteractionRadius, Mdouble &distance, Vec3D &normal_return) const
-        {
-    static Mdouble distance_new;
-    static Mdouble distance2;
-    static Mdouble distance3;
-    unsigned static int id;
-    unsigned static int id2;
-    unsigned static int id3;
-    
-    //if we are here, this is a finite wall
+{
     distance = -1e20;
-    distance2 = -1e20;
-    distance3 = -1e20;
-    //for all finite walls
+    Mdouble distance2 = -1e20;
+    Mdouble distance3 = -1e20;
+    Mdouble distanceCurrent;
+    unsigned int id;
+    unsigned int id2;
+    unsigned int id3;
+
+    //The object has to touch each wall  each wall (distanceCurrent) and keep the minimum distance (distance) and wall index (id)
     for (unsigned int i = 0; i < objects_.size(); i++)
     {
-        //calculate the distance to the particle
-        distance_new = objects_[i].getDistance(position);
-        //return false if the distance to any one wall is too large (i.e. no contact)
-        if (distance_new >= wallInteractionRadius)
+        // Calculate distance to each wall (distanceCurrent);
+        distanceCurrent = objects_[i].getDistance(position);
+        // The object has to touch each wall (distanceCurrent >= wallInteractionRadius), otherwise return false (i.e. no contact)
+        if (distanceCurrent >= wallInteractionRadius)
             return false;
-        //store the minimum distance and the respective wall in "distance" and "id"
-        //and store up to two walls (id2, id3) and their distances (distance2, distance3), if the possible contact point is near the intersection between id and id2 (and id3)
-        if (distance_new > distance)
+        // Keep the minimum distance (distance) and wall index (id)
+        // and store up to two walls (id2, id3) and their distances (distance2, distance3), if the possible contact point is near the intersection between id and id2 (and id3)
+        if (distanceCurrent > distance)
         {
             if (distance > -wallInteractionRadius)
             {
@@ -184,25 +195,25 @@ bool IntersectionOfWalls::getDistanceAndNormal(const Vec3D& position, Mdouble wa
                     id2 = id;
                 }
             }
-            distance = distance_new;
+            distance = distanceCurrent;
             id = i;
         }
-        else if (distance_new > -wallInteractionRadius)
+        else if (distanceCurrent > -wallInteractionRadius)
         {
             if (distance2 > -wallInteractionRadius)
             {
-                distance3 = distance_new;
+                distance3 = distanceCurrent;
                 id3 = i;
             }
             else
             {
-                distance2 = distance_new;
+                distance2 = distanceCurrent;
                 id2 = i;
             }
         }
     }
     
-    //if we are here, the closest wall is id; 
+    //If we are here, the closest wall is id;
     //if distance2>-P.Radius (and distance3>-P.Radius), the possible contact point is near the intersection between id and id2 (and id3)
     if (distance2 > -wallInteractionRadius)
     {
@@ -251,7 +262,23 @@ bool IntersectionOfWalls::getDistanceAndNormal(const Vec3D& position, Mdouble wa
     //contact is with id
     normal_return = objects_[id].getNormal();
     return true;
-    
+}
+
+void IntersectionOfWalls::move(const Vec3D& move)
+{
+    BaseInteractable::move(move);
+    for(Vec3D& a : A_)
+    {
+		a+=move;
+	}
+	for(Vec3D& c : C_)
+	{
+		c+=move;
+	}  
+	for(InfiniteWall& o : objects_)
+	{
+		o.move(move);
+	}
 }
 
 ///reads wall
@@ -263,7 +290,7 @@ void IntersectionOfWalls::read(std::istream& is)
     is >> dummy >> n;
     
     Vec3D normal;
-    Mdouble position;
+    Vec3D position;
     for (int i = 0; i < n; i++)
     {
         is >> dummy >> normal >> dummy >> position;
@@ -292,9 +319,9 @@ void IntersectionOfWalls::oldRead(std::istream& is)
 
 ///outputs wall
 void IntersectionOfWalls::write(std::ostream& os) const
-        {
+{
     BaseWall::write(os);
-    os << " numIntersectionOfWallss " << objects_.size();
+    os << " numIntersectionOfWalls " << objects_.size();
     for (std::vector<InfiniteWall>::const_iterator it = objects_.begin(); it != objects_.end(); ++it)
     {
         os << " normal " << it->getNormal() << " position " << it->getPosition();
@@ -323,6 +350,6 @@ BaseInteraction* IntersectionOfWalls::getInteractionWith(BaseParticle *P, Mdoubl
     }
     else
     {
-        return 0;
+        return nullptr;
     }
 }

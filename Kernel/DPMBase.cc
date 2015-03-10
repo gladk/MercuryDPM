@@ -48,7 +48,8 @@
 #include "Species/FrictionForceSpecies/SlidingFrictionSpecies.h"
 
 //This is part of this class and just separates out the stuff to do with xballs.
-#include "MD_xballs.icc"
+#include "CMakeDefinitions.hpp"
+#include "DPMBaseXBalls.icc"
 #include "Logger.h"
 #include "Particles/BaseParticle.h"
 #include "Walls/BaseWall.h"
@@ -113,7 +114,6 @@ DPMBase::DPMBase(const DPMBase& other)
     interactionHandler.setDPMBase(this);
     speciesHandler.setDPMBase(this);
     wallHandler.setDPMBase(this);
-    interactionHandler.setSpecies(&speciesHandler);
 
     speciesHandler = other.speciesHandler;
     particleHandler = other.particleHandler;
@@ -269,7 +269,7 @@ void DPMBase::setXMax(Mdouble xMax)
 
 void DPMBase::setYMax(Mdouble yMax)
 {
-    if (yMax > getYMin())
+    if (yMax >= getYMin())
     {
         yMax_ = yMax;
     }
@@ -281,7 +281,7 @@ void DPMBase::setYMax(Mdouble yMax)
 
 void DPMBase::setZMax(Mdouble zMax)
 {
-    if (zMax > getZMin())
+    if (zMax >= getZMin())
     {
         zMax_ = zMax;
     }
@@ -297,7 +297,6 @@ void DPMBase::setTimeStep(Mdouble timeStep)
     if (timeStep >= 0.0)
     {
         timeStep_ = timeStep;
-        interactionHandler.timeStep_ = timeStep;
     }
     else
     {
@@ -473,6 +472,10 @@ void DPMBase::hGridActionsBeforeTimeLoop()
 {
 }
 
+void DPMBase::actionsOnRestart()
+{
+}
+
 ///This is action before the time step is started
 void DPMBase::hGridActionsBeforeTimeStep()
 {
@@ -561,14 +564,6 @@ void DPMBase::setFixedParticles(unsigned int n)
         particleHandler.getObject(i)->fixParticle();
 }
 
-void DPMBase::computeParticleMasses()
-{
-    for (std::vector<BaseParticle*>::iterator it = particleHandler.begin(); it != particleHandler.end(); ++it)
-    {
-        (*it)->computeMass();
-    }
-}
-
 void DPMBase::printTime() const
 {
     std::cout << "t=" << std::setprecision(3) << std::left << std::setw(6) << getTime()
@@ -594,8 +589,6 @@ void DPMBase::constructor()
     interactionHandler.setDPMBase(this);
     wallHandler.setDPMBase(this);
     interactionHandler.setDPMBase(this);
-    ///\todo take specieshandler out
-    interactionHandler.setSpecies(&speciesHandler);
 
     particleHandler.setStorageCapacity(2);
     setSystemDimensions(2);
@@ -1011,8 +1004,8 @@ bool DPMBase::findNextExistingDataFile(Mdouble tmin, bool verbose)
 // Note: this function assumes that all particles are species 0 and sets the particle class accordingly!
 bool DPMBase::readNextDataFile(unsigned int format)
 {
-    getDataFile().openNextFile();
-    getFStatFile().openNextFile();
+    getDataFile().openNextFile(std::fstream::in);
+    //getFStatFile().openNextFile();
     //Set the correct formation based of dimension if the formation is not specified by the user
     if (format == 0)
     {
@@ -1031,11 +1024,12 @@ bool DPMBase::readNextDataFile(unsigned int format)
     }
     //end if
     
-    unsigned int N;
+    unsigned int N=0;
     Mdouble dummy;
-    
+    getDataFile().getFstream() >> N;
+
     //read first parameter and check if we reached the end of the file
-    if (!(getDataFile().getFstream() >> N))
+    if (N==0)
         return false;
     
     BaseParticle* P0 = new BaseParticle();
@@ -1046,7 +1040,7 @@ bool DPMBase::readNextDataFile(unsigned int format)
         while (particleHandler.getNumberOfObjects() > N)
             particleHandler.removeLastObject();
     delete P0;
-    
+
 #ifdef DEBUG_OUTPUT
     std::cout << "Number of particles read from file "<<N << std::endl;
 #endif
@@ -1082,7 +1076,6 @@ bool DPMBase::readNextDataFile(unsigned int format)
                 (*it)->setOrientation(Vec3D(0.0, 0.0, 0.0));
                 (*it)->setAngularVelocity(Vec3D(0.0, 0.0, 0.0));
                 (*it)->setRadius(radius);
-                (*it)->computeMass();
             }
             //End the interator over all particles
             break;
@@ -1103,7 +1096,6 @@ bool DPMBase::readNextDataFile(unsigned int format)
                 (*it)->setOrientation(-angle);
                 (*it)->setAngularVelocity(-angularVelocity);
                 (*it)->setRadius(radius);
-                (*it)->computeMass();
             } //end for all particles
             break;
         }
@@ -1121,7 +1113,6 @@ bool DPMBase::readNextDataFile(unsigned int format)
                 (*it)->setOrientation(angle);
                 (*it)->setAngularVelocity(angularVelocity);
                 (*it)->setRadius(radius);
-                (*it)->computeMass();
             } //end for all particles
             break;
         }
@@ -1139,11 +1130,12 @@ bool DPMBase::readNextDataFile(unsigned int format)
                 (*it)->setOrientation(angle);
                 (*it)->setAngularVelocity(angularVelocity);
                 (*it)->setRadius(radius);
-                (*it)->computeMass();
+                
             } //end for all particles
             break;
         }
     } //end switch statement
+    particleHandler.computeAllMasses();
     
     return true;
 }
@@ -1214,16 +1206,11 @@ void DPMBase::computeInternalForces(BaseParticle* P1, BaseParticle* P2)
     {
         C->computeForce();
 
-        //std::cout<<"Name="<<C->getName()<<std::endl;
-        //std::cout<<"Adding force "<< C->getForce()<<" to particle "<<PI->getId()<<std::endl;
-        //std::cout<<"Adding force "<<-C->getForce()<<" to particle "<<PJ->getId()<<std::endl;
         PI->addForce(C->getForce());
         PJ->addForce(-C->getForce());
 
         if (getRotation())
         {
-            //std::cout<<"Adding Torque "<< C->getTorque() - Vec3D::cross(PI->getPosition() - C->getContactPoint(), C->getForce())<<" to particle "<<PI->getId()<<std::endl;
-            //std::cout<<"Adding Torque "<<-C->getTorque() + Vec3D::cross(PJ->getPosition() - C->getContactPoint(), C->getForce())<<" to particle "<<PJ->getId()<<std::endl;
             PI->addTorque(C->getTorque() - Vec3D::cross(PI->getPosition() - C->getContactPoint(), C->getForce()));
             PJ->addTorque(-C->getTorque() + Vec3D::cross(PJ->getPosition() - C->getContactPoint(), C->getForce()));
         }
@@ -1261,17 +1248,13 @@ void DPMBase::computeWalls(BaseParticle* pI)
         {
             C->computeForce();
 
-            //std::cout<<"Name="<<C->getName()<<std::endl;
-            //std::cout<<std::setprecision(15)<<"Adding force "<< C->getForce()<<" to particle "<<pI->getId()<<std::endl;
-            //std::cout<<std::setprecision(15)<<"Adding force "<<-C->getForce()<<" to wall "<<(*it)->getId()<<std::endl;
             pI->addForce(C->getForce());
             (*it)->addForce(-C->getForce());
 
             if (getRotation())
             {
-                //std::cout<<std::setprecision(15)<<"Adding Torque "<< C->getTorque() - Vec3D::cross(pI->getPosition() - C->getContactPoint(), C->getForce())<<" to particle "<<pI->getId()<<std::endl;
-                //std::cout<<std::setprecision(15)<<"Adding Torque "<<-C->getTorque() + Vec3D::cross((*it)->getPosition() - C->getContactPoint(), C->getForce())<<" to wall "<<(*it)->getId()<<std::endl;
                 pI->addTorque(C->getTorque() - Vec3D::cross(pI->getPosition() - C->getContactPoint(), C->getForce()));
+                ///\todo TW: I think this torque has the wrong sign
                 (*it)->addTorque(-C->getTorque() + Vec3D::cross((*it)->getPosition() - C->getContactPoint(), C->getForce()));
             }
         }
@@ -1421,7 +1404,7 @@ void DPMBase::computeInternalForces(BaseParticle* i)
 
 ///Writes all MD data
 void DPMBase::write(std::ostream& os, bool writeAllParticles) const
-        {
+{
     os << "restart_version " << "1.0";
     Files::write(os);
     os << "xMin " << getXMin()
@@ -1454,6 +1437,17 @@ void DPMBase::write(std::ostream& os, bool writeAllParticles) const
     {
         for (unsigned int i = 0; i < 2; i++)
             os << *particleHandler.getObject(i) << std::endl;
+        os << "..." << std::endl;
+    }
+    if (writeAllParticles || interactionHandler.getNumberOfObjects() < 4)
+    {
+        interactionHandler.write(os);
+    }
+    else
+    {
+        os << "Interactions " << interactionHandler.getNumberOfObjects() << std::endl;
+        for (unsigned int i = 0; i < 2; i++)
+            os << *interactionHandler.getObject(i) << std::endl;
         os << "..." << std::endl;
     }
 }
@@ -1519,6 +1513,7 @@ void DPMBase::read(std::istream& is)
                 ///todo{Do we want to calculate the mass?}
                 //particleHandler.getLastObject()->computeMass();
             }
+            interactionHandler.read(is);
         }
         else if (!restartVersion_.compare("3"))
         {
@@ -1668,6 +1663,10 @@ void DPMBase::solve()
         std::cerr << "Have created the particles initial conditions " << std::endl;
 #endif
     }
+    else
+    {
+        actionsOnRestart();
+    }
 
     checkSettings();
 
@@ -1690,7 +1689,7 @@ void DPMBase::solve()
     initialiseStatistics();
 
     /// Setup the mass of each particle.
-    computeParticleMasses();
+    particleHandler.computeAllMasses();
 
     /// Other initializations
     //max_radius = getLargestParticle()->getRadius();
@@ -1712,9 +1711,6 @@ void DPMBase::solve()
     while (getTime() < getTimeMax() && continueSolve())
     {
         writeOutputFiles(); //everything is written at the beginning of the timestep!
-
-        /// Check if rotation_ is on
-        rotation_ = speciesHandler.useAngularDOFs();
         
         /// Loop over all particles doing the time integration step
         hGridActionsBeforeIntegration();
@@ -1790,7 +1786,6 @@ int DPMBase::readArguments(int argc, char *argv[])
         if (!isRead)
         {
             std::cerr << "Warning: not all arguments read correctly!" << std::endl;
-            exit(-10);
         }
     }
     return isRead;
@@ -1847,7 +1842,7 @@ int DPMBase::readNextArgument(int& i, int argc, char *argv[])
         setTimeMax(atof(argv[i + 1]));
         std::cout << "  reset timeMax from " << old << " to " << getTimeMax() << std::endl;
     }
-    else if (!strcmp(argv[i], "-save_count") || !strcmp(argv[i], "-savecount"))
+    else if (!strcmp(argv[i], "-saveCount"))
     {
         setSaveCount(static_cast<unsigned int>(atoi(argv[i + 1])));
     }
@@ -1867,6 +1862,10 @@ int DPMBase::readNextArgument(int& i, int argc, char *argv[])
     {
         getEneFile().setSaveCount(static_cast<unsigned int>(atoi(argv[i + 1])));
     }
+    else if (!strcmp(argv[i], "-saveCountRestart"))
+    {
+        getRestartFile().setSaveCount(static_cast<unsigned int>(atoi(argv[i + 1])));
+    }
     else if (!strcmp(argv[i], "-dim"))
     {
         setSystemDimensions(atoi(argv[i + 1]));
@@ -1877,23 +1876,27 @@ int DPMBase::readNextArgument(int& i, int argc, char *argv[])
         setGravity(Vec3D(atof(argv[i + 1]), atof(argv[i + 2]), atof(argv[i + 3])));
         i += 2;
     }
-    else if (!strcmp(argv[i], "-options_data"))
+    else if (!strcmp(argv[i], "-fileType"))
+    { //uses int input
+        setFileType(static_cast<FileType>(atoi(argv[i + 1])));
+    }
+    else if (!strcmp(argv[i], "-fileTypeFStat"))
     { //uses int input
         getFStatFile().setFileType(static_cast<FileType>(atoi(argv[i + 1])));
     }
-    else if (!strcmp(argv[i], "-options_data"))
+    else if (!strcmp(argv[i], "-fileTypeRestart"))
     {
         getRestartFile().setFileType(static_cast<FileType>(atoi(argv[i + 1])));
     }
-    else if (!strcmp(argv[i], "-options_data"))
+    else if (!strcmp(argv[i], "-fileTypeData"))
     {
         getDataFile().setFileType(static_cast<FileType>(atoi(argv[i + 1])));
     }
-    else if (!strcmp(argv[i], "-options_data"))
+    else if (!strcmp(argv[i], "-fileTypeStat"))
     {
         getStatFile().setFileType(static_cast<FileType>(atoi(argv[i + 1])));
     }
-    else if (!strcmp(argv[i], "-options_data"))
+    else if (!strcmp(argv[i], "-fileTypeEne"))
     {
         getEneFile().setFileType(static_cast<FileType>(atoi(argv[i + 1])));
     }
@@ -2071,6 +2074,7 @@ bool DPMBase::checkParticleForInteraction(const BaseParticle& p)
         }
     }
     return true;
+    ///\todo tw check against periodic copies (see ShearCell3DInitialConditions.cpp)
 }
 
 ///Remove periodic duplicate Particles (i.e. removes particles created by Check_and_Duplicate_Periodic_Particle(int i, int nWallPeriodic)). Note that between these two functions it is not allowed to create additional functions. It returns the number of Particles removed
@@ -2089,12 +2093,12 @@ void DPMBase::removeDuplicatePeriodicParticles()
 ///Calls Check_and_Duplicate_Periodic_Particle for all Particles currently in Particles[] and returns the number of particles created
 void DPMBase::checkAndDuplicatePeriodicParticles()
 {
-    for (std::vector<BaseBoundary*>::iterator it = boundaryHandler.begin(); it != boundaryHandler.end(); ++it)
+    for (BaseBoundary* it : boundaryHandler)
     {
         unsigned int N = particleHandler.getNumberOfObjects(); //Required because the number of particles increases
         for (unsigned int i = 0; i < N; i++)
         {
-            (*it)->createPeriodicParticles(particleHandler.getObject(i), particleHandler);
+            it->createPeriodicParticles(particleHandler.getObject(i), particleHandler);
         }
     }
 }

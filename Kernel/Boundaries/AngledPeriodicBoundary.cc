@@ -22,8 +22,6 @@
 //ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
 #include "AngledPeriodicBoundary.h"
 #include "ParticleHandler.h"
 #include "Particles/BaseParticle.h"
@@ -32,7 +30,7 @@
 AngledPeriodicBoundary* AngledPeriodicBoundary::copy() const
 {
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "virtual AngledPeriodicBoundary* copy() const finished" << std::endl;
+    std::cout << "AngledPeriodicBoundary::copy() const finished" << std::endl;
 #endif                
     return new AngledPeriodicBoundary(*this);
 }
@@ -82,7 +80,7 @@ Mdouble AngledPeriodicBoundary::distance(const Vec3D &P)
     }
 }
 
-void AngledPeriodicBoundary::shift_position(BaseParticle* P)
+void AngledPeriodicBoundary::shiftPosition(BaseParticle* P)
 {
     Vec3D position = P->getPosition() - origin;
     if (left_wall)
@@ -117,53 +115,49 @@ void AngledPeriodicBoundary::shift_position(BaseParticle* P)
     }
 }
 
-// ///returns the shifted particle w/o actually shifting
-// Vec3D AngledPeriodicBoundary::getShiftedPosition(Vec3D &Position) {
-//     if (left_wall) {
-//         return Position + shift;
-//     }
-//     else {
-//         return Position - shift;
-//     }
-// }
+void AngledPeriodicBoundary::shiftPositions(Vec3D& P1, Vec3D& P2)
+{
+    ///\todo TW: this still doesn't shift all data
+    Vec3D position1 = P1 - origin;
+    Vec3D position2 = P2 - origin;
+    Mdouble normalDistance;
+    Mdouble radialDistance;
+    if (left_wall)
+    {
+        normalDistance = Vec3D::dot(position1, normal_left);
+        radialDistance = Vec3D::dot(position1, radialAxis_left);
+        P1+=(normalDistance * diff_normal + radialDistance * diff_radial);
+        normalDistance = Vec3D::dot(position2, normal_left);
+        radialDistance = Vec3D::dot(position2, radialAxis_left);
+        P2+=(normalDistance * diff_normal + radialDistance * diff_radial);
+        left_wall = false;
+    }
+    else
+    {
+        normalDistance = Vec3D::dot(position1, normal_right);
+        radialDistance = Vec3D::dot(position1, radialAxis_right);
+        P1+=(-normalDistance * diff_normal - radialDistance * diff_radial);
+        normalDistance = Vec3D::dot(position2, normal_right);
+        radialDistance = Vec3D::dot(position2, radialAxis_right);
+        P2+=(-normalDistance * diff_normal - radialDistance * diff_radial);
+        left_wall = true;
+    }
+}
 
-// ///shifts two particles
-// void AngledPeriodicBoundary::shift_positions(Vec3D &PI, Vec3D &PJ) {
-//     if (left_wall) {
-//         PI += shift;
-//         PJ += shift;
-//         left_wall = false;
-//     }
-//     else {
-//         PI -= shift;
-//         PJ -= shift;
-//         left_wall = true;
-//     }
-// }
-
-// ///shift P such that it is closest to Q
-// void AngledPeriodicBoundary::getCloseTogether(Vec3D &P,Vec3D &Q) {
-//     Mdouble PQdotn = Vec3D::Dot(P-Q, normal);
-//     Mdouble shift_norm2 = shift.Vec3D::GetLength2();
-//     //Check if P is so far from Q that a shift would move it closer
-//     if (mathsFunc::square(PQdotn) > .25 * shift_norm2) {
-//         //Now determine the direction of the shift
-//         if (PQdotn>0.0) P -= shift;
-//         else P += shift;
-//     }
-// }
 
 void AngledPeriodicBoundary::read(std::istream& is)
 {
     BaseBoundary::read(is);
     std::string dummy;
     is >> dummy >> normal_left >> dummy >> normal_right >> dummy >> origin;
+    set(normal_left, normal_right, origin);
 }
 
 void AngledPeriodicBoundary::oldRead(std::istream& is)
 {
     std::string dummy;
     is >> dummy >> normal_left >> dummy >> normal_right >> dummy >> origin;
+    set(normal_left, normal_right, origin);
 }
 
 void AngledPeriodicBoundary::write(std::ostream& os) const
@@ -187,50 +181,18 @@ Vec3D& AngledPeriodicBoundary::getNormal()
         return normal_right;
 }
 
+Mdouble AngledPeriodicBoundary::getOpeningAngle()
+{
+    return acos(Vec3D::dot(normal_left, normal_right));
+}
+
 void AngledPeriodicBoundary::createPeriodicParticles(BaseParticle *P, ParticleHandler &pH)
 {
-    //std::cout << "createPeriodicParticles" << std::endl;
     if (distance(*P) < P->getInteractionRadius() + pH.getLargestParticle()->getInteractionRadius())
     {
         BaseParticle* F0 = P->copy();
-        shift_position(F0);
-        
-        /*//If the Particle includes TangentalSprings reverse them
-        TangentialSpringParticle* TSParticle = dynamic_cast<TangentialSpringParticle*>(F0);
-        if (TSParticle)
-        {
-            TSParticle->reverseTangentialSprings();
-            for (std::vector<CTangentialSpring>::iterator it = TSParticle->get_TangentialSprings().begin(); it != TSParticle->get_TangentialSprings().end(); it++)
-            {
-                //std::cout << it->delta << std::endl;
-                if (!left_wall)
-                {
-                    Mdouble normalDistance = Vec3D::dot(it->delta, normal_left);
-                    Mdouble radialDistance = Vec3D::dot(it->delta, radialAxis_left);
-                    it->delta += normalDistance * diff_normal + radialDistance * diff_radial;
-                    normalDistance = Vec3D::dot(it->RollingSpring, normal_left);
-                    radialDistance = Vec3D::dot(it->RollingSpring, radialAxis_left);
-                    it->RollingSpring += normalDistance * diff_normal + radialDistance * diff_radial;
-                    normalDistance = Vec3D::dot(it->TorsionSpring, normal_left);
-                    radialDistance = Vec3D::dot(it->TorsionSpring, radialAxis_left);
-                    it->TorsionSpring += normalDistance * diff_normal + radialDistance * diff_radial;
-                }
-                else
-                {
-                    Mdouble normalDistance = Vec3D::dot(it->delta, normal_right);
-                    Mdouble radialDistance = Vec3D::dot(it->delta, radialAxis_right);
-                    it->delta -= normalDistance * diff_normal + radialDistance * diff_radial;
-                    normalDistance = Vec3D::dot(it->RollingSpring, normal_right);
-                    radialDistance = Vec3D::dot(it->RollingSpring, radialAxis_right);
-                    it->RollingSpring -= normalDistance * diff_normal + radialDistance * diff_radial;
-                    normalDistance = Vec3D::dot(it->TorsionSpring, normal_right);
-                    radialDistance = Vec3D::dot(it->TorsionSpring, radialAxis_right);
-                    it->TorsionSpring -= normalDistance * diff_normal + radialDistance * diff_radial;
-                }
-                //std::cout << it->delta << std::endl;
-            }
-        }*/
-        
+        shiftPosition(F0);
+
         //If Particle is Mdouble shifted, get correct original particle
         BaseParticle* From = P;
         while (From->getPeriodicFromParticle() != nullptr)
@@ -243,8 +205,7 @@ void AngledPeriodicBoundary::createPeriodicParticles(BaseParticle *P, ParticleHa
 
 bool AngledPeriodicBoundary::checkBoundaryAfterParticleMoved(BaseParticle *P, ParticleHandler &pH UNUSED)
 {
-    //std::cout << "checkBoundaryAfterParticleMoved" << std::endl;
     if (distance(*P) < 0)
-        shift_position(P);
+        shiftPosition(P);
     return false;
 }

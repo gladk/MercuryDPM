@@ -198,7 +198,7 @@ Details concerning the above included headers (from the kernel) can be found in
 A class named \a Tutorial1 inherits from \a Mercury3D and is defined as below
 \snippet Drivers/Tutorials/T1.cpp T1:class
 The below function creates and sets up  the problems’ initial conditions
-\code void setupParticlesInitialConditions()\endcode
+\code void setupInitialConditions()\endcode
 
 ###How to create a particle?
 A particle is created and copied in a manner shown below

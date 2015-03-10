@@ -76,8 +76,10 @@ public:
      * \brief shifts the particle (after distance set the left_wall value)
      * \todo add velocity, angular, springs shift
      */
-    void shift_position(BaseParticle* P);
-    
+    void shiftPosition(BaseParticle* P);
+
+    void shiftPositions(Vec3D&  P1, Vec3D& P2);
+
     /*!
      * \brief reads wall
      */
@@ -102,7 +104,12 @@ public:
      * \brief 
      */
     Vec3D& getNormal();
-    
+
+    /*!
+     * \brief angle between walls in radians
+     */
+    Mdouble getOpeningAngle();
+
     /*!
      * \brief 
      * \param[in]

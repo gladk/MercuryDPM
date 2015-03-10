@@ -56,6 +56,7 @@ void BaseWall::read(std::istream& is)
 {
     BaseInteractable::read(is);
 }
+
 void BaseWall::write(std::ostream& os) const
 {
     BaseInteractable::write(os);

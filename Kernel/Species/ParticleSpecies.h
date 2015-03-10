@@ -58,6 +58,11 @@ public:
 
     ///Allows the density to be accessed
     Mdouble getDensity() const;
+    
+    /*!
+     * \brief Compute Particle mass function, which required a reference to the Species vector. It computes the Particles mass, Inertia and the inverses.
+     */
+    virtual void computeMass(BaseParticle* p) const;
 
 private:
     Mdouble density_;

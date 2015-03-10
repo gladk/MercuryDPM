@@ -50,6 +50,9 @@ public:
     SpeciesHandler* getHandler() const;
     virtual std::string getBaseName() const;
     virtual std::string getName() const;
+    
+    
+  
 
 // Species-specific functions
 

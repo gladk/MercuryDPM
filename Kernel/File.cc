@@ -175,8 +175,8 @@ void File::setCounter(unsigned int counter)
 
 bool File::openNextFile()
 {
-    ++counter_;
-    
+    //++counter_;
+
     if (getFileType() == FileType::MULTIPLE_FILES || getFileType() == FileType::MULTIPLE_FILES_PADDED)
     {
         File::close();
@@ -192,6 +192,11 @@ bool File::openNextFile()
     }
 }
 
+bool File::openNextFile(std::fstream::openmode openMode)
+{
+    setOpenMode(openMode);
+    return openNextFile();
+}
 
 std::fstream::openmode File::getOpenMode() const
 {
@@ -254,7 +259,10 @@ bool File::open()
             return false;
         }
     }
-
+    ///\todo tw: DEBUG_OUTPUT is currently only defined in DPMBase.h
+    #ifdef DEBUG_OUTPUT
+        std::cout << "open " << getFullName() << std::endl;
+    #endif
     nextSavedTimeStep_ += saveCount_;
     counter_++;
     return true;

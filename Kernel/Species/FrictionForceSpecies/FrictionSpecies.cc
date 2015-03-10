@@ -31,7 +31,7 @@ class BaseParticle;
 class BaseInteractable;
 
 FrictionSpecies::FrictionSpecies()
-    : BaseSpecies()
+    : SlidingFrictionSpecies()
 {
     rollingStiffness_=0.0;
     rollingDissipation_=0.0;
@@ -47,7 +47,7 @@ FrictionSpecies::FrictionSpecies()
 }
 
 FrictionSpecies::FrictionSpecies(const FrictionSpecies &s)
-    : BaseSpecies(s)
+    : SlidingFrictionSpecies(s)
 {
     rollingStiffness_=s.rollingStiffness_;
     rollingDissipation_=s.rollingDissipation_;
@@ -64,7 +64,7 @@ FrictionSpecies::FrictionSpecies(const FrictionSpecies &s)
 
 FrictionSpecies::~FrictionSpecies()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"FrictionSpecies::~FrictionSpecies() finished"<<std::endl;
 #endif   
 }

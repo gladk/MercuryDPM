@@ -30,7 +30,7 @@ Mercury3D::Mercury3D()
 {
     constructor();
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "Mercury3D::Mercury3D() finished"<<std::endl;
+    std::cout << "Mercury3D::Mercury3D() finished"<<std::endl;
 #endif
 }
 
@@ -39,7 +39,7 @@ Mercury3D::Mercury3D(const Mercury3D& other)
         : DPMBase(other), MercuryBase(other)
 {
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "Mercury3D::Mercury3D(Mercury3D& other) finished"<<std::endl;
+    std::cout << "Mercury3D::Mercury3D(Mercury3D& other) finished"<<std::endl;
 #endif
 }
 
@@ -49,7 +49,7 @@ Mercury3D::Mercury3D(const DPMBase& other)
 {
     constructor();
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "Mercury3D::Mercury3D(DPMBase& other) finished"<<std::endl;
+    std::cout << "Mercury3D::Mercury3D(DPMBase& other) finished"<<std::endl;
 #endif
 }
 
@@ -315,23 +315,27 @@ void Mercury3D::hGridUpdateParticle(BaseParticle *obj)
 ///Removes BaseParticle *obj from the HGrid
 void Mercury3D::hGridRemoveParticle(BaseParticle *obj)
 {
-    unsigned int bucket = getHGrid()->computeHashBucketIndex(obj->getHGridX(), obj->getHGridY(), obj->getHGridZ(), obj->getHGridLevel());
-    if (obj->getHGridPrevObject())
+    HGrid* hGrid=getHGrid();
+    if (hGrid)
     {
-        obj->getHGridPrevObject()->setHGridNextObject(obj->getHGridNextObject());
-    }
-    else
-    {
-        if (getHGrid()->getFirstBaseParticleInBucket(bucket) == obj)
-        {
-            getHGrid()->setFirstBaseParticleInBucket(bucket, obj->getHGridNextObject());
-        }
-    }
-    
-    if (obj->getHGridNextObject())
-    {
-        obj->getHGridNextObject()->setHGridPrevObject(obj->getHGridPrevObject());
-    }
+		unsigned int bucket = hGrid->computeHashBucketIndex(obj->getHGridX(), obj->getHGridY(), obj->getHGridZ(), obj->getHGridLevel());
+		if (obj->getHGridPrevObject())
+		{
+			obj->getHGridPrevObject()->setHGridNextObject(obj->getHGridNextObject());
+		}
+		else
+		{
+			if (hGrid->getFirstBaseParticleInBucket(bucket) == obj)
+			{
+				hGrid->setFirstBaseParticleInBucket(bucket, obj->getHGridNextObject());
+			}
+		}
+		
+		if (obj->getHGridNextObject())
+		{
+			obj->getHGridNextObject()->setHGridPrevObject(obj->getHGridPrevObject());
+		}
+	}
 }
 
 ///Tests if there are any collisions between BaseParticle *obj and particles in cell (x, y, z, l)

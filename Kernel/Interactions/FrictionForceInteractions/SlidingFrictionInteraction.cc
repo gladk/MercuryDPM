@@ -30,6 +30,7 @@
 #include "InteractionHandler.h"
 #include <iomanip>
 #include <fstream>
+#include <DPMBase.h>
 
 SlidingFrictionInteraction::SlidingFrictionInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
     : BaseInteraction(P, I, timeStamp)
@@ -51,7 +52,7 @@ SlidingFrictionInteraction::SlidingFrictionInteraction(const SlidingFrictionInte
 
 SlidingFrictionInteraction::~SlidingFrictionInteraction()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"SlidingFrictionInteraction::~SlidingFrictionInteraction() finished"<<std::endl;
 #endif
 }
@@ -89,7 +90,7 @@ void SlidingFrictionInteraction::computeForce()
                 slidingSpringVelocity_= (tangentialRelativeVelocity - Vec3D::dot(slidingSpring_, getP()->getVelocity() - getI()->getVelocity()) * getNormal() / getDistance());
 
             //integrate(getHandler()->timeStep_);
-            slidingSpring_ += slidingSpringVelocity_ * getHandler()->timeStep_;
+            slidingSpring_ += slidingSpringVelocity_ * getHandler()->getDPMBase()->getTimeStep();
 
             //Calculate test force acting on P including viscous force
             tangentialForce_ = - species->getSlidingStiffness() * slidingSpring_ - species->getSlidingDissipation() * tangentialRelativeVelocity;

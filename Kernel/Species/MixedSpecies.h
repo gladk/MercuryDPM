@@ -85,7 +85,7 @@ MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::Mi
 template<class NormalForceSpecies, class FrictionForceSpecies, class AdhesiveForceSpecies>
 MixedSpecies<NormalForceSpecies, FrictionForceSpecies, AdhesiveForceSpecies>::~MixedSpecies()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"MixedSpecies::~MixedSpecies() finished"<<std::endl;
 #endif
 }

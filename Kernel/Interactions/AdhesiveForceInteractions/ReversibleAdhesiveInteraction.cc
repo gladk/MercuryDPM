@@ -49,7 +49,7 @@ ReversibleAdhesiveInteraction::ReversibleAdhesiveInteraction(const ReversibleAdh
 
 ReversibleAdhesiveInteraction::~ReversibleAdhesiveInteraction()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"ReversibleAdhesiveInteraction::~ReversibleAdhesiveInteraction() finished"<<std::endl;
 #endif
 }
@@ -62,7 +62,7 @@ void ReversibleAdhesiveInteraction::read(std::istream& is  UNUSED)
 
 void ReversibleAdhesiveInteraction::computeForce()
 {
-    std::cout << "ReversibleAdhesiveInteraction::computeForce" << std::endl;
+    //std::cout << "ReversibleAdhesiveInteraction::computeForce" << std::endl;
     const ReversibleAdhesiveSpecies* species = getSpecies();
 
     if (getOverlap()>=0)

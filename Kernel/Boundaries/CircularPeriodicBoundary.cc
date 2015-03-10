@@ -32,7 +32,7 @@ CircularPeriodicBoundary::CircularPeriodicBoundary()
 {
     innerRadius_ = 1.0;
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "CircularPeriodicBoundary() finished" << std::endl;
+    std::cout << "CircularPeriodicBoundary::CircularPeriodicBoundary() finished" << std::endl;
 #endif				
 }
 
@@ -41,18 +41,21 @@ CircularPeriodicBoundary::CircularPeriodicBoundary(double innerRadius)
 {
     this->innerRadius_ = innerRadius;
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "CircularPeriodicBoundary(double innerRadius) finished" << std::endl;
+    std::cout << "CircularPeriodicBoundary::CircularPeriodicBoundary(double innerRadius) finished" << std::endl;
 #endif				
 }
 
 CircularPeriodicBoundary::~CircularPeriodicBoundary()
 {
+	#ifdef DEBUG_DESTRUCTOR
+    std::cerr << "CircularPeriodicBoundary::~CircularPeriodicBoundary() finished" << std::endl;
+#endif	
 }
 
 CircularPeriodicBoundary* CircularPeriodicBoundary::copy() const
 {
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "virtual CircularPeriodicBoundary* copy() const finished" << std::endl;
+    std::cerr << "CircularPeriodicBoundary::copy() const finished" << std::endl;
 #endif				
     return new CircularPeriodicBoundary(*this);
 }

@@ -106,12 +106,12 @@ public:
     void setCounter(unsigned int counter);
 
     /*!
-     * \brief Sets File::openMode_
+     * \brief Gets File::openMode_
      */
     std::fstream::openmode getOpenMode() const;
 
     /*!
-     * \brief Gets File::openMode_
+     * \brief Sets File::openMode_
      */
     void setOpenMode(std::fstream::openmode openMode);
 
@@ -164,6 +164,8 @@ public:
      * \brief This function should be called before a timestep is written, as it opens a new file in case multiple files are used
      */
     bool openNextFile();
+
+    bool openNextFile(std::fstream::openmode openMode);
 
     /*!
      * \brief Closes the file by calling fstream_.close()

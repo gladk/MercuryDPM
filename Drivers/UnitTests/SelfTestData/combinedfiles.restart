@@ -16,3 +16,4 @@ Boundaries 0
 Particles 2
 BaseParticle id 0 indSpecies 0 position 0.5 0.5 0.496655694016986 orientation 0 0 0 0 velocity 0 0 -0.603941330031128 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 radius 0.5 invMass 3.64756261112416 invInertia 36.4756261112416
 BaseParticle id 1 indSpecies 0 position 0.5 0.5 1.50234430598304 orientation 0 0 0 0 velocity 0 0 0.603941330031128 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 radius 0.5 invMass 3.64756261112416 invInertia 36.4756261112416
+Interactions 0

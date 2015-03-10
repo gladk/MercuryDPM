@@ -49,7 +49,7 @@ EmptyAdhesiveInteraction::EmptyAdhesiveInteraction(const EmptyAdhesiveInteractio
 
 EmptyAdhesiveInteraction::~EmptyAdhesiveInteraction()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"EmptyAdhesiveInteraction::~EmptyAdhesiveInteraction() finished"<<std::endl;
 #endif
 }

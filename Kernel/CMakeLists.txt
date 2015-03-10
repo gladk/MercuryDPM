@@ -58,6 +58,7 @@ add_library(DPMBase STATIC
     Interactions/AdhesiveForceInteractions/EmptyAdhesiveInteraction.cc
     Interactions/AdhesiveForceInteractions/ReversibleAdhesiveInteraction.cc
     Interactions/AdhesiveForceInteractions/IrreversibleAdhesiveInteraction.cc
+    Interactions/AdhesiveForceInteractions/LiquidBridgeWilletInteraction.cc
 
 	Species/BaseSpecies.cc
 	Species/ParticleSpecies.cc
@@ -70,6 +71,7 @@ add_library(DPMBase STATIC
     Species/AdhesiveForceSpecies/EmptyAdhesiveSpecies.cc
     Species/AdhesiveForceSpecies/ReversibleAdhesiveSpecies.cc
     Species/AdhesiveForceSpecies/IrreversibleAdhesiveSpecies.cc
+    Species/AdhesiveForceSpecies/LiquidBridgeWilletSpecies.cc
 
 	Particles/BaseParticle.cc
 )

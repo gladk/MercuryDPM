@@ -52,7 +52,7 @@ LinearPlasticViscoelasticInteraction::LinearPlasticViscoelasticInteraction(const
 
 LinearPlasticViscoelasticInteraction::~LinearPlasticViscoelasticInteraction()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"LinearPlasticViscoelasticInteraction::~LinearPlasticViscoelasticInteraction() finished"<<std::endl;
 #endif
 }

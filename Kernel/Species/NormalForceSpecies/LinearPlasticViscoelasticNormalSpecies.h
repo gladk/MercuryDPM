@@ -57,7 +57,7 @@ public:
 //setters and getters
 
     ///Acccess functions for the plastic model
-    void setPlasticParameters(Mdouble loadingStiffness, Mdouble maxUnloadingStiffness, Mdouble cohesionStiffness, Mdouble maxPenetration);
+    void setPlasticParameters(Mdouble loadingStiffness, Mdouble unloadingStiffnessMax, Mdouble cohesionStiffness, Mdouble penetrationDepthMax);
 
     ///gets k_1 in the plastic model
     Mdouble getLoadingStiffness() const;
@@ -73,18 +73,18 @@ public:
 
     void setLoadingStiffness(Mdouble loadingStiffness);
 
-    void setUnloadingStiffnessMax(Mdouble maxUnloadingStiffness);
+    void setUnloadingStiffnessMax(Mdouble unloadingStiffnessMax);
 
     void setCohesionStiffness(Mdouble cohesionStiffness);
 
-    void setPenetrationDepthMax(Mdouble maxPenetration);
+    void setPenetrationDepthMax(Mdouble penetrationDepthMax);
 
     void setDissipation(Mdouble dissipation);
 
     ///Allows the spring and dissipation constants to be changed simultaneously
     void setLoadingStiffnessAndDissipation(helpers::KAndDisp new_);
 
-    Mdouble computePlasticTimeStep(Mdouble mass);
+    Mdouble computeTimeStep(Mdouble mass);
 
     ///Allows the normal dissipation to be accessed
     Mdouble getDissipation() const;

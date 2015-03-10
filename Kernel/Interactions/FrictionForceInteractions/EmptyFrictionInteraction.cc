@@ -49,7 +49,7 @@ EmptyFrictionInteraction::EmptyFrictionInteraction(const EmptyFrictionInteractio
 
 EmptyFrictionInteraction::~EmptyFrictionInteraction()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"EmptyFrictionInteraction::~EmptyFrictionInteraction() finished"<<std::endl;
 #endif
 }

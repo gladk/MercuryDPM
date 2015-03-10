@@ -76,7 +76,7 @@ Tutorial7 problem; // instantiate an object of class Tutorial 6
 problem.setName("Tutorial7");
 problem.setSystemDimensions(2);
 problem.setGravity(Vec3D(0.0,0.0,0.0));
-problem.setXMax(0.5);
+problem.setXMax(1);
 problem.setYMax(0.5);
 problem.setTimeMax(5.0);
 //

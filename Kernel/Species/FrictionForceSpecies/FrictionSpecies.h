@@ -34,7 +34,7 @@ class BaseInteraction;
 
 //Note the getVelocity can for some Species be dependent on which point on the Species is meant.
 ///\todo TW: should this class be renamed SlidingRollingTorsionFrictionSpecies?
-class FrictionSpecies : public virtual SlidingFrictionSpecies
+class FrictionSpecies : public SlidingFrictionSpecies
 {
 public:
     typedef FrictionInteraction InteractionType;

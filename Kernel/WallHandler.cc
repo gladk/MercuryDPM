@@ -39,7 +39,7 @@
 WallHandler::WallHandler()
 {
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "WallHandler::WallHandler() finished" << std::endl;
+    std::cout << "WallHandler::WallHandler() finished" << std::endl;
 #endif
 }
 
@@ -47,22 +47,24 @@ WallHandler::WallHandler()
 WallHandler::WallHandler(const WallHandler &WH)
 : BaseHandler<BaseWall>()
 {
+    setDPMBase(WH.getDPMBase());
     copyContentsFromOtherHandler(WH);
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "WallHandler::WallHandler(const WallHandler &PH) finished" << std::endl;
+    std::cout << "WallHandler::WallHandler(const WallHandler &PH) finished" << std::endl;
 #endif
 }
 
 /// \param[in] rhs The WallHandler on the right hand side of the assignment.
 WallHandler WallHandler::operator =(const WallHandler& rhs)
 {
-    if (this != &rhs)
+    /// \bug this calls the copy constructor again (weird and ciccular)
+if (this != &rhs)
     {
         clear();
         copyContentsFromOtherHandler(rhs);
     }
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "WallHandler::operator = (const WallHandler& rhs) finished" << std::endl;
+    std::cout << "WallHandler::operator = (const WallHandler& rhs) finished" << std::endl;
 #endif
     return *this;
 }

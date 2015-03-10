@@ -73,7 +73,7 @@ BaseInteractable::~BaseInteractable()
     {
         interactions_.front()->removeFromHandler();
     }
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"BaseInteractable::~BaseInteractable() finished"<<std::endl;
 #endif
 }
@@ -143,14 +143,17 @@ void BaseInteractable::setPosition(const Vec3D& position)
 {
     position_ = position;
 }
+
 void BaseInteractable::setOrientation(const Vec3D& orientation)
 {
     orientation_ = orientation;
 }
+
 void BaseInteractable::move(const Vec3D& move)
 {
     position_ += move;
 }
+
 void BaseInteractable::rotate(const Vec3D& rotate)
 {
     orientation_ += rotate;

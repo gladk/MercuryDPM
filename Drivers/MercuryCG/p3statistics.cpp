@@ -116,11 +116,11 @@ int main(int argc, char *argv[]) {
 // 		std::cout << "cylindrical, AZ averaging" << std::endl;
 // 		StatisticsVector<R> stats(argc, argv);
 // 		stats.statistics_from_p3();
-// 	} else if (T==XYZ) { //no averaging
-// 		std::cout << "no averaging" << std::endl;
-// 		StatisticsVector<XYZ> stats(argc, argv);
-// 		std::cout << "stats" << std::endl;
-// 		stats.statistics_from_p3();
+	} else if (T==XYZ) { //no averaging
+		std::cout << "no averaging" << std::endl;
+		StatisticsVector<XYZ> stats(argc, argv);
+		std::cout << "stats" << std::endl;
+		stats.statistics_from_p3();
 	} else {std::cerr << "stattype not found" << std::endl; exit(-1); }
 	return 0;
 }

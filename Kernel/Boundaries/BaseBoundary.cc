@@ -44,8 +44,8 @@ BaseBoundary::BaseBoundary(const BaseBoundary &b)
 
 BaseBoundary::~BaseBoundary()
 {
-#ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "BaseBoundary::~BaseBoundary() finished"<<std::endl;
+#ifdef DEBUG_DESTRUCTOR
+    std::cout << "BaseBoundary::~BaseBoundary() finished"<<std::endl;
 #endif 
 }
 

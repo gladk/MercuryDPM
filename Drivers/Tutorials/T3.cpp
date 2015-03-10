@@ -69,7 +69,7 @@ problem.setGravity(Vec3D(0.0,0.0,-9.81));
 problem.setXMax(1.0);
 problem.setYMax(1.0);
 problem.setZMax(2.0);
-problem.setTimeMax(2.0);
+problem.setTimeMax(5.0);
 //
 
 //! [T3:speciesProp]

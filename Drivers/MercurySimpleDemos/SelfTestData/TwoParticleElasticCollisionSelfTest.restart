@@ -18,4 +18,5 @@ Boundaries 0
 Particles 2
 BaseParticle id 0 indSpecies 0 position 0.0056345672661971 0.00496606506459341 0 orientation 0 0 0 0 velocity -0.0999822942401462 -0.0253992856953407 0 angularVelocity 0 0 0 0 force 0 -0.01539380400259 0 torque 0 0 0 radius 0.0005 invMass 636.619772367581 invInertia 5092958178.94065
 BaseParticle id 1 indSpecies 0 position 0.00436543273380732 0.00496606506459341 0 orientation 0 0 0 0 velocity 0.0999822942402187 -0.0253992856953407 0 angularVelocity 0 0 0 0 force 0 -0.01539380400259 0 torque 0 0 0 radius 0.0005 invMass 636.619772367581 invInertia 5092958178.94065
+Interactions 0
 NUM_BUCKETS 10 hGridMaxLevels 3 cellOverSizeRatio 1

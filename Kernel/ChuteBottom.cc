@@ -69,7 +69,7 @@ void ChuteBottom::constructor()
     setIsBottomPeriodic(true);
 }
 
-void ChuteBottom::makeRoughBottom(ParticleHandler &ChuteParticleHandler)
+void ChuteBottom::makeRoughBottom(Chute &chute)
 {
     // set all parameters that should be different from the original chute
     setChuteAngle(0.0);
@@ -77,19 +77,20 @@ void ChuteBottom::makeRoughBottom(ParticleHandler &ChuteParticleHandler)
     //~ setInflowHeight(45.*getInflowParticleRadius()); note: Changing the Inflow height was an attempt to make the bottom density homogeneous, but it did not have the desired effect
     setRoughBottomType(MONOLAYER_DISORDERED);
     setFixedParticleRadius(getInflowParticleRadius());
-  
 
-
-    auto species = dynamic_cast<LinearViscoelasticSpecies*>(speciesHandler.getObject(0));
+    auto species = dynamic_cast<LinearViscoelasticNormalSpecies*>(speciesHandler.getObject(0));
     if (species!=nullptr)
     {
-        Mdouble collisionTime= helpers::computeCollisionTimeFromKAndDispAndEffectiveMass(species->getStiffness(),species->getDensity(),0.5*species->getMassFromRadius(0.5 * (getMinInflowParticleRadius() + getMaxInflowParticleRadius())));
-        species->setCollisionTimeAndRestitutionCoefficient(collisionTime*10.0,0.2,species->getMassFromRadius(0.5 * (getMinInflowParticleRadius() + getMaxInflowParticleRadius())));
-        setTimeStep(10.0 * 0.02 * helpers::computeCollisionTimeFromKAndDispAndEffectiveMass(species->getStiffness(),species->getDensity(),species->getMassFromRadius(0.5 * (getMinInflowParticleRadius() + getMaxInflowParticleRadius()))));
+        //increase collision time, lower dissipation, increase timestep
+        Mdouble effectiveMass = 0.5*speciesHandler.getObject(0)->getMassFromRadius(0.5 * (getMinInflowParticleRadius() + getMaxInflowParticleRadius()));
+        Mdouble collisionTime= helpers::computeCollisionTimeFromKAndDispAndEffectiveMass(species->getStiffness(),speciesHandler.getObject(0)->getDensity(),effectiveMass);
+        species->setCollisionTimeAndRestitutionCoefficient(10.0*collisionTime,0.2,effectiveMass);
+        setTimeStep(10.0 * 0.02 * helpers::computeCollisionTimeFromKAndDispAndEffectiveMass(species->getStiffness(),speciesHandler.getObject(0)->getDensity(),effectiveMass));
     }
     else
     {
         std::cerr << "ChuteBottom::makeRoughBottom: Warning: species type does not allow setting the parameters" << std::endl;
+        exit(-1);
     }
     auto species2 = dynamic_cast<SlidingFrictionSpecies*>(speciesHandler.getObject(0));
     if (species2 != nullptr)
@@ -134,10 +135,19 @@ void ChuteBottom::makeRoughBottom(ParticleHandler &ChuteParticleHandler)
     }
 
     //copy the rough bottom over
-    ChuteParticleHandler.setStorageCapacity(particleHandler.getNumberOfObjects());
+    chute.particleHandler.setStorageCapacity(particleHandler.getNumberOfObjects());
     std::cout << "Chute bottom finished, consisting of " << particleHandler.getNumberOfObjects() << " Particles" << std::endl;
 
-    ChuteParticleHandler = particleHandler;
+    chute.particleHandler = particleHandler;
+    /// \todo{ after copying a particle handler, you have to set the species pointers to the species of the chute problem;
+    /// a) do you need to set other things?
+    /// b) this should probably be done in ParticleHandler::operator =
+    /// }
+    for (BaseParticle* p : chute.particleHandler)
+    {
+        p->setSpecies(chute.speciesHandler.getObject(0));
+    }
+
 }
 
 void ChuteBottom::setupInitialConditions()

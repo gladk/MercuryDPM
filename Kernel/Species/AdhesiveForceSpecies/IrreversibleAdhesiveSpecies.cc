@@ -43,7 +43,7 @@ IrreversibleAdhesiveSpecies::IrreversibleAdhesiveSpecies(const IrreversibleAdhes
 
 IrreversibleAdhesiveSpecies::~IrreversibleAdhesiveSpecies()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"IrreversibleAdhesiveSpecies::~IrreversibleAdhesiveSpecies() finished"<<std::endl;
 #endif   
 }

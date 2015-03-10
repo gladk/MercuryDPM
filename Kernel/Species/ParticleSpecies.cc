@@ -51,7 +51,7 @@ ParticleSpecies::ParticleSpecies(const ParticleSpecies &p)
 
 ParticleSpecies::~ParticleSpecies()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"ParticleSpecies::~ParticleSpecies() finished"<<std::endl;
 #endif
 }
@@ -136,3 +136,39 @@ Mdouble ParticleSpecies::getMassFromRadius(const Mdouble radius)
         exit(-1);
     }
 }
+
+///Compute BaseParticle mass function, which required a reference to the Species vector. It computes the Particles mass, Inertia and the inverses.
+/// this function is called, if BaseParticleHandler::addObject, SpeciesHandler::addObject, ParticleSpecies::setDensity, BaseParticle::setRadius or DPMBase::setParticleDimensions is called
+void ParticleSpecies::computeMass(BaseParticle* p) const
+{
+    if (!p->isFixed())
+    {
+        switch (p->getParticleDimensions())
+        {
+            case 3:
+            {
+                p->setMass(4.0 / 3.0 * constants::pi * p->getRadius() * p->getRadius() * p->getRadius() * getDensity());
+                p->setInertia(.4 * p->getMass() * mathsFunc::square(p->getRadius()));
+                break;
+            }
+            case 2:
+            {
+                p->setMass(constants::pi * p->getRadius() * p->getRadius() * getDensity());
+                p->setInertia(.5 * p->getMass() * mathsFunc::square(p->getRadius()));
+                break;
+            }
+            case 1:
+            {
+                p->setMass(2.0 * p->getRadius() * getDensity());
+                p->setInertia(0.0);
+                break;
+            }
+            default:
+            {
+                std::cerr << "In computeMass() the dimension of the particle is not set" << std::endl;
+                exit(-1);
+            }
+        }
+    }
+}
+

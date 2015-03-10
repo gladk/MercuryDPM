@@ -41,3 +41,29 @@ BaseParticle id 21 indSpecies 0 position 4.5 1.49988134925286 0 orientation 0 0 
 BaseParticle id 22 indSpecies 0 position 4.5 2.49984179853538 0 orientation 0 0 0 0 velocity 0 -6.190166103161e-07 0 angularVelocity 0 0 0 0 force 0 7.4032855914119e-05 0 torque 0 0 0 radius 0.5 invMass 1 invInertia 8
 BaseParticle id 23 indSpecies 0 position 4.5 3.49981543124975 0 orientation 0 0 0 0 velocity 0 -7.45057951146875e-07 0 angularVelocity 0 0 0 0 force 0 8.91071574622426e-05 0 torque 0 0 0 radius 0.5 invMass 1 invInertia 8
 BaseParticle id 24 indSpecies 0 position 4.5 4.49980224756333 0 orientation 0 0 0 0 velocity 0 -8.10739169840211e-07 0 angularVelocity 0 0 0 0 force 0 9.69624887157128e-05 0 torque 0 0 0 radius 0.5 invMass 1 invInertia 8
+Interactions 25
+LinearViscoelasticInteraction particleWallIds 0 2 timeStamp 0.999999999999923 force -0 5.00034066193278 -0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 0 1 timeStamp 0.999999999999923 force 0 -4.00031306352139 0 torque 0 0 0
+LinearViscoelasticInteraction particleWallIds 5 2 timeStamp 0.999999999999923 force -0 5.00034066193278 -0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 5 6 timeStamp 0.999999999999923 force 0 -4.00031306352139 0 torque 0 0 0
+LinearViscoelasticInteraction particleWallIds 10 2 timeStamp 0.999999999999923 force -0 5.00034066193278 -0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 10 11 timeStamp 0.999999999999923 force 0 -4.00031306352139 0 torque 0 0 0
+LinearViscoelasticInteraction particleWallIds 15 2 timeStamp 0.999999999999923 force -0 5.00034066193278 -0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 15 16 timeStamp 0.999999999999923 force 0 -4.00031306352139 0 torque 0 0 0
+LinearViscoelasticInteraction particleWallIds 20 2 timeStamp 0.999999999999923 force -0 5.00034066193278 -0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 20 21 timeStamp 0.999999999999923 force 0 -4.00031306352139 0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 1 2 timeStamp 0.999999999999923 force 0 -3.00026010250209 0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 6 7 timeStamp 0.999999999999923 force 0 -3.00026010250209 0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 11 12 timeStamp 0.999999999999923 force 0 -3.00026010250209 0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 16 17 timeStamp 0.999999999999923 force 0 -3.00026010250209 0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 21 22 timeStamp 0.999999999999923 force 0 -3.00026010250209 0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 2 3 timeStamp 0.999999999999923 force 0 -2.00018606964618 0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 7 8 timeStamp 0.999999999999923 force 0 -2.00018606964618 0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 12 13 timeStamp 0.999999999999923 force 0 -2.00018606964618 0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 17 18 timeStamp 0.999999999999923 force 0 -2.00018606964618 0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 22 23 timeStamp 0.999999999999923 force 0 -2.00018606964618 0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 3 4 timeStamp 0.999999999999923 force 0 -1.00009696248872 0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 8 9 timeStamp 0.999999999999923 force 0 -1.00009696248872 0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 13 14 timeStamp 0.999999999999923 force 0 -1.00009696248872 0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 18 19 timeStamp 0.999999999999923 force 0 -1.00009696248872 0 torque 0 0 0
+LinearViscoelasticInteraction particleIds 23 24 timeStamp 0.999999999999923 force 0 -1.00009696248872 0 torque 0 0 0

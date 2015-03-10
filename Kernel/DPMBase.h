@@ -456,6 +456,11 @@ protected:
      * \brief This is were the walls are
      */
     virtual void computeWalls(BaseParticle* PI);
+    
+    /*!
+     * \brief This is a virtual function why the users can add extra code which is execuated only when the code is restarted
+     */
+    virtual void actionsOnRestart();
 
     /*!
      * \brief This is actions before the start of the main time loop
@@ -472,6 +477,7 @@ protected:
      */
     virtual void hGridActionsBeforeTimeStep();
 
+    /// \bug Why are the hGRID actions public, this seems wrong. Someone please comment [Ant].
 public:
     /*!
      * \brief
@@ -609,11 +615,6 @@ protected:
      * \brief
      */
     void initialiseTangentialSprings();
-
-    /*!
-     * \brief Computes the mass of each particle
-     */
-    void computeParticleMasses();
 
     /*!
      * \brief prints time to std::cout

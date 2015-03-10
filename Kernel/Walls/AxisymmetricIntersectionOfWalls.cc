@@ -48,18 +48,23 @@ AxisymmetricIntersectionOfWalls* AxisymmetricIntersectionOfWalls::copy() const
     return new AxisymmetricIntersectionOfWalls(*this);
 }
 
-bool AxisymmetricIntersectionOfWalls::getDistanceAndNormal(const BaseParticle &P, Mdouble &distance, Vec3D &normal_return) const
+bool AxisymmetricIntersectionOfWalls::getDistanceAndNormal(const BaseParticle &P, Mdouble &distance, Vec3D &normalReturn) const
 {
-    ///\todo{Kay found a bug here}
+    ///\todo test
     //transform to axisymmetric coordinates
     Vec3D PO = P.getPosition() -getPosition(); //move the coordinate system to the axis origin, so P0=(xhat,yhat,zhat)
-    Vec3D tangential = PO - P.getPosition().Z * getOrientation(); //tangential is the projection into the (xhat,yhat) plane
-    Vec3D transformedPosition=Vec3D(tangential.getLength(), 0.0, Vec3D::dot(getOrientation(), PO)); //now P=(r,phi,zhat) is cylindrical
-    tangential /= P.getPosition().X;
-    Vec3D normal_axisymmetric_coordinates;
+    Mdouble normal = Vec3D::dot(PO, getOrientation());
+    Vec3D tangentialUnitVector = PO - normal * getOrientation(); //tangential is the projection into the (xhat,yhat) plane
+    Mdouble tangential = tangentialUnitVector.getLength();
+    if (tangential!=0.0)
+        tangentialUnitVector /= tangential;
+    else //in this case the tangential vector is irrelevant
+        std::cout << "Warning: Particle " << P.getIndex() << " is exactly on the symmetry axis of wall " << this->getIndex() << std::endl;
+    Vec3D transformedPosition = Vec3D(tangential, 0.0, normal); //now P=(r,phi,zhat) is cylindrical
+    Vec3D transformedNormal;
     //determine wall distance, normal and contact in axissymmetric coordinates
     //and transform from axisymmetric coordinates
-    if (!IntersectionOfWalls::getDistanceAndNormal(transformedPosition,P.getWallInteractionRadius(), distance, normal_axisymmetric_coordinates))
+    if (!IntersectionOfWalls::getDistanceAndNormal(transformedPosition, P.getWallInteractionRadius(), distance, transformedNormal))
     {
         //if not in contact
         return false;
@@ -67,16 +72,7 @@ bool AxisymmetricIntersectionOfWalls::getDistanceAndNormal(const BaseParticle &P
     else
     {
         //if in contact
-        normal_return = normal_axisymmetric_coordinates.Z * getOrientation() + tangential * normal_axisymmetric_coordinates.X;
-        ///\todo {Radius is based on Particle, not wall, DK i commented this, Thomas will look at it, since now it looks strange (i.e. getVelocity already returns a cartesian velocity}
-        /*
-        if (!getVelocity().isZero())
-        { //assuming most walls have zero velocity, this if statement saves time
-            Vec3D angular = Vec3D::cross(axisOrientation, tangential);
-            CartesianVelocity = Vec3D(getVelocity().Z * axisOrientation + tangential * getVelocity().X + angular * P.getPosition().X * getVelocity().Y);
-        }
-        */
-        //std::cout << P.getPosition() << " v " << getVelocity() << " cv " << velocity << std::endl;
+        normalReturn = transformedNormal.Z * getOrientation() + transformedNormal.X * tangentialUnitVector;
         return true;
     }
 }

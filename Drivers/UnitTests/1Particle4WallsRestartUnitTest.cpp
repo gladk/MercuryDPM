@@ -23,8 +23,10 @@
 //(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <Logger.h>
 #include "DPMBase.h"
 #include "Math/Helpers.h"
+extern Logger<LOG_MAIN_LEVEL> logger;
 
 /// In this file, 1 Particle and 4 Walls are loaded from files 
 /// "1Particle4Walls.ini" and "1Particle4Walls.restart". The particles 
@@ -35,7 +37,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 {
 	helpers::writeToFile("1Particle4WallsRestartUnitTest.ini",
 		"1 0 0 0 0 .96 1 .96\n"
-		"0.48 0 0.48  0 0 0  0.5  0 0 0  0 60 0  0\n"
+		"0.48 0 0.48  0 0 0  0.5  0 0 0  0 0 0  0\n"
 		);
 
 	helpers::writeToFile("1Particle4WallsRestartUnitTest.restart",
@@ -51,25 +53,37 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 		"Species 1\n"
 		"LinearViscoelasticSlidingFrictionSpecies id 0 density 1.9098593 stiffness 200000 dissipation 0 slidingStiffness 57142.857 slidingDissipation 0 frictionCoefficient 0.5 frictionCoefficientStatic 0.5\n"
         "Walls 4\n"
-		"InfiniteWall id 0 indSpecies 0 position 0 0 0 orientation 0 0 0 1 velocity 0 0 0 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 normal -1 0 0 position 0 factor 1\n"
-		"InfiniteWall id 1 indSpecies 0 position 0 0 0 orientation 0 0 0 1 velocity 0 0 0 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 normal  1 0 0 position .96 factor 1\n"
-		"InfiniteWall id 2 indSpecies 0 position 0 0 0 orientation 0 0 0 1 velocity 0 0 0 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 normal 0 0 -1 position 0 factor 1\n"
-		"InfiniteWall id 3 indSpecies 0 position 0 0 0 orientation 0 0 0 1 velocity 0 0 0 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 normal 0 0  1 position .96 factor 1\n"
-		"WallsPeriodic 0\n"
-		"Particles 0 \n"
-        "NUM_BUCKETS 16 HGRID_MAX_LEVELS 1 MIN_CELL_SIZE 1 SPHERE_TO_CELL_RATIO 1 CELL_TO_CELL_RATIO 2\n"
+		"InfiniteWall id 0 indSpecies 0 position 0    0 0    orientation 0 0 0 1 velocity 0 0 0 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 normal -1 0 0 factor 1\n"
+		"InfiniteWall id 1 indSpecies 0 position 0.96 0 0    orientation 0 0 0 1 velocity 0 0 0 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 normal  1 0 0 factor 1\n"
+		"InfiniteWall id 2 indSpecies 0 position 0    0 0    orientation 0 0 0 1 velocity 0 0 0 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 normal 0 0 -1 factor 1\n"
+		"InfiniteWall id 3 indSpecies 0 position 0    0 0.96 orientation 0 0 0 1 velocity 0 0 0 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 normal 0 0  1 factor 1\n"
+		"Boundaries 0\n"
+		"Particles 1\n"
+        "BaseParticle id 0 indSpecies 0 position 0.48 0 0.48 orientation 0 0 0 1 velocity 0 0 0 angularVelocity 0 60 0 0 force 0 0 0 torque 0 0 0 radius 0.5 invMass 1 invInertia 10\n"
+        "Interactions 4\n"
+        "LinearViscoelasticSlidingFrictionInteraction particleWallIds 0 0 timeStamp 0 force 0 0 0 torque 0 0 0 slidingSpring 0 0 0\n"
+        "LinearViscoelasticSlidingFrictionInteraction particleWallIds 0 1 timeStamp 0 force 0 0 0 torque 0 0 0 slidingSpring 0 0 0\n"
+        "LinearViscoelasticSlidingFrictionInteraction particleWallIds 0 2 timeStamp 0 force 0 0 0 torque 0 0 0 slidingSpring 0 0 0\n"
+        "LinearViscoelasticSlidingFrictionInteraction particleWallIds 0 3 timeStamp 0 force 0 0 0 torque 0 0 0 slidingSpring 0 0 0\n"
 		);
 		
  	DPMBase problem;
     problem.setName("1Particle4WallsRestartUnitTest");
     problem.readRestartFile();
-	problem.readDataFile("1Particle4WallsRestartUnitTest.ini");
+	//problem.readDataFile("1Particle4WallsRestartUnitTest.ini");
 	problem.setAppend(false);
-	problem.solve();
+    //problem.write(std::cout,true);
+    problem.solve();
+    //problem.write(std::cout,true);
 	problem.writeRestartFile();
 	
-	//Now check the rotational energy in the system; it should loose some rotational energy in the first loop due to
+    BaseParticle* p = problem.particleHandler.getObject(0);
+    if (!p->getAngularVelocity().compareTo(Vec3D(0.0,17.7251802668803,0.0), 1e-7))  logger.log(Log::FATAL, "First particles has the wrong angular velocity it is %, while is should be %.",p->getAngularVelocity(),Vec3D(0.0,17.7251802668803,0.0));
+    if (!p->getVelocity().compareTo(Vec3D(0.0,0.0,0.0)  , 1e-7))  logger.log(Log::FATAL, "First particle has the wrong velocity, it is %, while it should be %",p->getVelocity(),0.0);
+
+    //Now check the rotational energy in the system; it should loose some rotational energy in the first loop due to
 	//sliding, then conserve energy as no tangential dissipation is used.
 	//gnuplot:
 	// p '1Particle4WallsRestartUnitTest_restart.ene' u 1:4 w l t 'rotational energy', '1Particle4WallsRestartUnitTest_restart.ene' u 1:($3+$4+$5-160) w l t 'total energy - normal elastic energy'
+
 }

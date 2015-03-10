@@ -33,12 +33,13 @@
 #include "SpeciesHandler.h"
 #include "Species/BaseSpecies.h"
 #include "Interactions/BaseInteraction.h"
+#include "DPMBase.h"
 
 ///Constructor of the ParticleHandler class. It creates and empty ParticleHandler.
 InteractionHandler::InteractionHandler()
 {
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "InteractionHandler::InteractionHandler() finished" << std::endl;
+    std::cout << "InteractionHandler::InteractionHandler() finished" << std::endl;
 #endif
 }
 
@@ -48,7 +49,7 @@ InteractionHandler::InteractionHandler(const InteractionHandler &IH UNUSED)
 {
     //By default interactions are not copied.
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "InteractionHandler::InteractionHandler(const InteractionHandler &IH) finished" << std::endl;
+    std::cout << "InteractionHandler::InteractionHandler(const InteractionHandler &IH) finished" << std::endl;
 #endif
 }
 
@@ -60,7 +61,7 @@ InteractionHandler InteractionHandler::operator =(const InteractionHandler& rhs)
         clear();
     }
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "InteractionHandler InteractionHandler::operator =(const InteractionHandler& rhs)" << std::endl;
+    std::cout << "InteractionHandler::operator =(const InteractionHandler& rhs)" << std::endl;
 #endif
     return *this;
 }
@@ -81,12 +82,6 @@ void InteractionHandler::addObject(BaseInteraction* I)
     I->setHandler(this);
 }
 
-void InteractionHandler::readObject(std::istream& is UNUSED)
-{
-    std::cerr << "Error in InteractionHandler::readObject" << std::endl;
-    exit(-1);
-}
-
 BaseInteraction* InteractionHandler::getExistingInteraction(BaseInteractable* P, BaseInteractable* I)
 {
     //for particle-particle collision it is assumed BaseInteractable P has a lower index then I, so we only have to check for I, not P
@@ -102,7 +97,7 @@ BaseInteraction* InteractionHandler::getExistingInteraction(BaseInteractable* P,
 
 BaseInteraction* InteractionHandler::getInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
 {
-    BaseSpecies* species = speciesHandler_->getMixedObject(P->getIndSpecies(),I->getIndSpecies());
+    BaseSpecies* species = getDPMBase()->speciesHandler.getMixedObject(P->getIndSpecies(),I->getIndSpecies());
 
     //std::cout << "Trying to reconnect to BaseInteraction between P=" << P->getId() << " and " << I->getId() << std::endl;
     BaseInteraction* C = getExistingInteraction(P, I);
@@ -191,13 +186,33 @@ void InteractionHandler::eraseOldInteractions(Mdouble lastTimeStep)
     }
 }
 
-void InteractionHandler::setSpecies(SpeciesHandler* specieshandler)
-{
-    speciesHandler_ = specieshandler;
-}
-
-
 std::string InteractionHandler::getName() const
 {
     return "InteractionHandler";
+}
+
+void InteractionHandler::write(std::ostream& os) const
+{
+    os << "Interactions " << getNumberOfObjects() << std::endl;
+    for (std::vector<BaseInteraction*>::const_iterator it = begin(); it != end(); ++it)
+        os << (**it) << std::endl;
+}
+
+/// \param[in] is The input stream from which the information is read.
+void InteractionHandler::readObject(std::istream& is)
+{
+    std::string type, dummy, idType;
+    unsigned int id0, id1;
+    Mdouble timeStamp;
+
+    std::stringstream line(std::stringstream::in | std::stringstream::out);
+    helpers::getLineFromStringStream(is, line);
+    line >> type >> idType >> id0 >> id1 >> dummy >> timeStamp;
+    ///\todo TW: Change identifier in restart file from id to index; is there any reason the id should be kept after restarting, once this is done? (Note, the id is set to the old one in the particle handler because interactions store id, not indices; also note id's are slow
+    BaseInteraction* C;
+    if (idType.compare("particleIds")==0)
+        C = getInteraction(getDPMBase()->particleHandler.getObjectById(id0), getDPMBase()->particleHandler.getObjectById(id1), timeStamp);
+    else
+        C = getInteraction(getDPMBase()->particleHandler.getObjectById(id0), getDPMBase()->wallHandler.getObjectById(id1), timeStamp);
+    line >> (*C);
 }

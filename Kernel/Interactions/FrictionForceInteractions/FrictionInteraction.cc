@@ -30,6 +30,7 @@
 #include "InteractionHandler.h"
 #include <iomanip>
 #include <fstream>
+#include <DPMBase.h>
 
 FrictionInteraction::FrictionInteraction(BaseInteractable* P, BaseInteractable* I, Mdouble timeStamp)
     : BaseInteraction(P, I, timeStamp), SlidingFrictionInteraction(P, I, timeStamp)
@@ -53,7 +54,7 @@ FrictionInteraction::FrictionInteraction(const FrictionInteraction &p)
 
 FrictionInteraction::~FrictionInteraction()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"FrictionInteraction::~FrictionInteraction() finished"<<std::endl;
 #endif
 }
@@ -94,7 +95,7 @@ void FrictionInteraction::computeForce()
             //used to Integrate the spring
             rollingSpringVelocity_= rollingRelativeVelocity;
             //integrate(getHandler()->timeStep_);
-            rollingSpring_ += rollingSpringVelocity_ * getHandler()->timeStep_;
+            rollingSpring_ += rollingSpringVelocity_ * getHandler()->getDPMBase()->getTimeStep();
 
             //Calculate test force acting on P including viscous force
             Vec3D rollingForce = - species->getRollingStiffness() * rollingSpring_ - species->getRollingDissipation() * rollingRelativeVelocity;
@@ -136,7 +137,7 @@ void FrictionInteraction::computeForce()
             //Integrate the spring
             torsionSpringVelocity_= torsionRelativeVelocity;
             //integrate(getHandler()->timeStep_);
-            torsionSpring_ += Vec3D::dot(torsionSpring_ + torsionSpringVelocity_ * getHandler()->timeStep_, getNormal()) * getNormal();
+            torsionSpring_ += Vec3D::dot(torsionSpring_ + torsionSpringVelocity_ * getHandler()->getDPMBase()->getTimeStep(), getNormal()) * getNormal();
 
             //Calculate test force acting on P including viscous force
             Vec3D torsionForce = - species->getTorsionStiffness() * torsionSpring_ - species->getTorsionDissipation() * torsionRelativeVelocity;

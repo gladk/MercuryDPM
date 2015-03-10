@@ -29,6 +29,7 @@
 #include "ParticleHandler.h"
 #include "DPMBase.h"
 #include "SpeciesHandler.h"
+#include "Species/ParticleSpecies.h"
 
 
 
@@ -38,7 +39,7 @@ ParticleHandler::ParticleHandler()
     largestParticle_ = nullptr;
     smallestParticle_ = nullptr;
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "ParticleHandler::ParticleHandler() finished" << std::endl;
+    std::cout << "ParticleHandler::ParticleHandler() finished" << std::endl;
 #endif
 }
 
@@ -52,7 +53,7 @@ ParticleHandler::ParticleHandler(const ParticleHandler& PH)
     smallestParticle_ = nullptr;
     copyContentsFromOtherHandler(PH);
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "ParticleHandler::ParticleHandler(const ParticleHandler &PH) finished" << std::endl;
+    std::cout << "ParticleHandler::ParticleHandler(const ParticleHandler &PH) finished" << std::endl;
 #endif
 }
 
@@ -67,7 +68,7 @@ ParticleHandler ParticleHandler::operator =(const ParticleHandler& rhs)
         copyContentsFromOtherHandler(rhs);
     }
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "ParticleHandler::operator = (const ParticleHandler& rhs) finished" << std::endl;
+    std::cout << "ParticleHandler::operator = (const ParticleHandler& rhs) finished" << std::endl;
 #endif
     return *this;
 }
@@ -98,7 +99,7 @@ void ParticleHandler::addObject(BaseParticle* P)
     //set the particleHandler pointer
     P->setHandler(this);
     //compute mass of the particle
-    P->computeMass();
+    P->getSpecies()->computeMass(P)	;
     //Check if this particle has new extrema
     checkExtrema(P);
 }
@@ -276,6 +277,8 @@ void ParticleHandler::readObject(std::istream& is)
         BaseParticle baseParticle;
         is >> baseParticle;
         copyAndAddObject(baseParticle);
+        getLastObject()->setId(baseParticle.getId()); //to ensure old id
+        ///\todo make sure setting the id doesn't break the id setter :)
     }
     ///todo{Remove for final version}
     else if (type.compare("BP") == 0)
@@ -283,6 +286,7 @@ void ParticleHandler::readObject(std::istream& is)
         BaseParticle baseParticle;
         baseParticle.oldRead(is);
         copyAndAddObject(baseParticle);
+        getLastObject()->setId(baseParticle.getId()); //to ensure old id
     }
     else if (isdigit(type[0]))
     {
@@ -372,15 +376,25 @@ void ParticleHandler::checkExtremaOnDelete(BaseParticle* P)
 
 void ParticleHandler::computeAllMasses(unsigned int indSpecies)
 {
-    for (auto it= begin(); it!=end(); it++)
-        if ((*it)->getIndSpecies()==indSpecies)
-            (*it)->computeMass();
+    /** \todo: expose objects so we can iterate over them.
+     * Expose either objects_ or rip out the entire basehandler as it
+     * is NOT linear in memory and has no clear API.
+     * @dducks
+     **/
+     for (BaseParticle* particle : *this)
+        if (particle->getIndSpecies()==indSpecies)
+            particle->getSpecies()->computeMass(particle);
 }
 
 void ParticleHandler::computeAllMasses()
 {
-    for (auto it= begin(); it!=end(); it++)
-        (*it)->computeMass();
+    /** \todo: expose objects so we can iterate over them.
+    * Expose either objects_ or rip out the entire basehandler as it
+    * is NOT linear in memory and has no clear API.
+    * @dducks
+    **/
+    for (BaseParticle* particle : *this)
+        particle->getSpecies()->computeMass(particle);
 }
 
 std::string ParticleHandler::getName() const

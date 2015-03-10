@@ -63,7 +63,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
         "BP 0 0 0 0 0 0 0.5 0 0 0 0 0 0 0 0 0\n"
         "BP 0 0 0 0 0 0 0.5 0 0 0 0 0 0 0 0 0\n"
         "BP 0 0 0 0 0 0 0.5 0 0 0 0 0 0 0 0 0\n"
-		"NUM_BUCKETS 16 HGRID_MAX_LEVELS 1 MIN_CELL_SIZE 1 SPHERE_TO_CELL_RATIO 1 CELL_TO_CELL_RATIO 2\n"
+		"Interactions 0\n"
 		);
 	
  	DPMBase problem;

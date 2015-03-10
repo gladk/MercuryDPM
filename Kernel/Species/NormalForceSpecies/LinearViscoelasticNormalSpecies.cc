@@ -53,7 +53,7 @@ LinearViscoelasticNormalSpecies::LinearViscoelasticNormalSpecies(const LinearVis
 
 LinearViscoelasticNormalSpecies::~LinearViscoelasticNormalSpecies()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"LinearViscoelasticNormalSpecies::~LinearViscoelasticNormalSpecies() finished"<<std::endl;
 #endif
 }

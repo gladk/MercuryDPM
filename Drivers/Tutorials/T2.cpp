@@ -36,7 +36,7 @@ public:
 void setupInitialConditions()
 {	
 BaseParticle p0;
-p0.setRadius(0.005);
+p0.setRadius(0.05);
 p0.setPosition(Vec3D(0.5*getXMax(),0.5*getYMax(),getZMax()));
 p0.setVelocity(Vec3D(0.0,0.0,0.0));
 particleHandler.copyAndAddObject(p0);
@@ -57,7 +57,7 @@ problem.setGravity(Vec3D(0.0,0.0,-9.81));
 problem.setXMax(1.0);
 problem.setYMax(1.0);
 problem.setZMax(5.0);
-problem.setTimeMax(0.75);
+problem.setTimeMax(1.5);
 //
 
 //! [T2:speciesProp]

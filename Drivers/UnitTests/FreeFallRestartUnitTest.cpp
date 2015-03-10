@@ -60,6 +60,12 @@ public:
 		particleHandler.copyAndAddObject(p0);
 
 	}
+    
+    void actionsOnRestart()
+    {
+        
+        std::cout << "In this function you can add code that is run on restart" <<std::endl;
+    }
 
 };
 
@@ -102,7 +108,7 @@ int main(int argc, char *argv[])
             logger.log(Log::FATAL,"Case 3: restarted at t=0.2; using separate data files");
 
 
-		    if (system("./FreeFallRestartUnitTest -tmax 0.2 -name FreeFallRestartUnitTest_SeparateFiles -options_data 2"))
+		    if (system("./FreeFallRestartUnitTest -tmax 0.2 -name FreeFallRestartUnitTest_SeparateFiles -fileTypeData 2"))
                        logger.log(Log::FATAL,"code did not run");
 		    if (system("./FreeFallRestartUnitTest -r FreeFallRestartUnitTest_SeparateFiles -tmax 0.4 "))
                        logger.log(Log::FATAL,"code did not run");

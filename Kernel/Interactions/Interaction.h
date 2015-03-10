@@ -88,7 +88,7 @@ Interaction<NormalForceInteraction, FrictionForceInteraction, AdhesiveForceInter
 template<class NormalForceInteraction, class FrictionForceInteraction, class AdhesiveForceInteraction>
 Interaction<NormalForceInteraction, FrictionForceInteraction, AdhesiveForceInteraction>::~Interaction()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"Interaction::~Interaction() finished"<<std::endl;
 #endif
 }

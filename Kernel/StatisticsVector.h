@@ -268,7 +268,7 @@ public:
      */
     bool check_current_time_for_statistics()
     {
-        return (getTime() > getCGTimeMin() && getTime() <= getTimeMaxStat() + getTimeStep());
+        return (getTime() >= getCGTimeMin() && getTime() <= getTimeMaxStat() + getTimeStep());
     }
     
 
@@ -1171,6 +1171,7 @@ protected:
      * \brief
      */
     bool loadVelocityProfile(const char* filename);
+    bool loadPositions(const char* filename);
 
     /*!
      * \brief
@@ -1207,7 +1208,8 @@ protected:
     void auto_setdim();
 
     unsigned int stepSize_;///
-    
+
+    std::vector<Vec3D> positions_;
 };
 
 #include "StatisticsPoint.hcc"

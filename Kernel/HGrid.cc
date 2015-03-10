@@ -89,35 +89,37 @@ void HGrid::insertParticleToHgrid(BaseParticle *obj)
 //-------------------------------------------------
 
 /// Computes hash bucket index in range [0, NUM_BUCKETS-1]
+/**
+ * Computes a hash from parameters
+ * @param x coordinate
+ * @param y coordinate
+ * @param z coordinate
+ * @param l ??
+ * @return a hashed value
+ */
 unsigned int HGrid::computeHashBucketIndex(int x, int y, int z, unsigned int l) const
         {
-    const int h1 = static_cast<int>(0x8da6b343); // Large multiplicative constants;
-    const int h2 = static_cast<int>(0xd8163841); // here arbitrarily chosen primes
-    const int h3 = static_cast<int>(0xcb1ab31f);
-    const int h4 = static_cast<int>(0x165667b1);
+    const unsigned int h1 = 0x8da6b343u; // Large multiplicative constants;
+    const unsigned int h2 = 0xd8163841u; // here arbitrarily chosen primes
+    const unsigned int h3 = 0xcb1ab31fu;
+    const unsigned int h4 = 0x165667b1u;
     
-    int n = h1 * x + h2 * y + h3 * z + h4 * static_cast<int>(l);
-    n = n % static_cast<int>(numberOfBuckets_);
+    unsigned long int n = h1 * x + h2 * y + h3 * z + h4 * l;
+    n = n % numberOfBuckets_;
     
-    if (n < 0)
-        n += numberOfBuckets_;
-    
-    return static_cast<unsigned int>(n);
+    return n;
 }
 
 unsigned int HGrid::computeHashBucketIndex(int x, int y, unsigned int l) const
         {
-    const int h1 = static_cast<int>(0x8da6b343); // Large multiplicative constants;
-    const int h2 = static_cast<int>(0xd8163841); // here arbitrarily chosen primes
-    const int h4 = static_cast<int>(0x165667b1);
+    const unsigned int h1 = 0x8da6b343u; // Large multiplicative constants;
+    const unsigned int h2 = 0xd8163841u; // here arbitrarily chosen primes
+    const unsigned int h4 = 0x165667b1u;
     
-    int n = h1 * x + h2 * y + h4 * static_cast<int>(l);
-    n = n % static_cast<int>(numberOfBuckets_);
+    unsigned long int n = h1 * x + h2 * y + h4 * l;
+    n = n % numberOfBuckets_;
     
-    if (n < 0)
-        n += numberOfBuckets_;
-    
-    return static_cast<unsigned int>(n);
+    return n;
 }
 
 unsigned int HGrid::getNumberOfBuckets() const

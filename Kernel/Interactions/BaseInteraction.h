@@ -170,6 +170,9 @@ public:
     const Vec3D& getRelativeVelocity() const;
     Mdouble getNormalRelativeVelocity() const;
     Mdouble getAbsoluteNormalForce() const;
+
+protected:
+
     virtual const Vec3D getTangentialForce() const;
 
     Mdouble getEffectiveRadius() const;

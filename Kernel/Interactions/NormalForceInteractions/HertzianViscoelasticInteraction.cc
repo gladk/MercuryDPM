@@ -49,7 +49,7 @@ HertzianViscoelasticInteraction::HertzianViscoelasticInteraction(const HertzianV
 
 HertzianViscoelasticInteraction::~HertzianViscoelasticInteraction()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"HertzianViscoelasticInteraction::~HertzianViscoelasticInteraction() finished"<<std::endl;
 #endif
 }

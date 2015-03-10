@@ -41,7 +41,7 @@ Chute::Chute()
 {
     constructor();
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "Chute() finished" << std::endl;
+    std::cout << "Chute::Chute() finished" << std::endl;
 #endif      
 }
 
@@ -51,7 +51,7 @@ Chute::Chute(const DPMBase& other)
 {
     constructor();
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "Chute(MD& other) finished" << std::endl;
+    std::cout << "Chute::Chute(const DPMBase& other) finished" << std::endl;
 #endif      
 }
 
@@ -59,9 +59,10 @@ Chute::Chute(const DPMBase& other)
 Chute::Chute(const MercuryBase& other)
         : DPMBase(other), Mercury3D(other)
 {
+  
     constructor();
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "Chute(HGRID_base& other)  finished" << std::endl;
+    std::cout << "Chute::Chute(const MercuryBase& other)  finished" << std::endl;
 #endif      
 }
 
@@ -69,14 +70,15 @@ Chute::Chute(const MercuryBase& other)
 Chute::Chute(const Mercury3D& other)
         : DPMBase(other), Mercury3D(other)
 {
-    constructor();
+        constructor();
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "Chute(Mercury3D& other) finished" << std::endl;
+    std::cerr << "Chute::Chute(const Mercury3D& other) finished" << std::endl;
 #endif      
 }
 
 void Chute::constructor()
 {
+    insertionBoundary_ = nullptr;
     isChutePeriodic_ = false;
     setFixedParticleRadius(0.001);
     setRoughBottomType(MONOLAYER_DISORDERED);
@@ -124,6 +126,7 @@ void Chute::read(std::istream& is)
 }
 
 ///This function writes all chute data
+///\todo I think this function is superseeded by write(std::ostream& os, bool writeAllParticles)
 void Chute::write(std::ostream& os) const
         {
     MercuryBase::write(os);
@@ -182,13 +185,20 @@ void Chute::printTime() const
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void Chute::setupInitialConditions()
 {
+    if (speciesHandler.getNumberOfObjects()==0)
+        logger.log(Log::FATAL, "Chute % cannot complete because no species have been defined.", getName());
+
     setupSideWalls();
-    
+
     ChuteInsertionBoundary b1;
-    b1.set(new BaseParticle, maxFailed_, Vec3D(getXMin(), getYMin(), getZMin()), Vec3D(getXMax(), getYMax(), getZMax()), minInflowParticleRadius_, maxInflowParticleRadius_, fixedParticleRadius_, inflowVelocity_, inflowVelocityVariance_);
+    BaseParticle* p = new BaseParticle;
+    // by default, insert particles of species 0
+    p->setSpecies(speciesHandler.getObject(0));
+    b1.set(p, maxFailed_, Vec3D(getXMin(), getYMin(), getZMin()), Vec3D(getXMax(), getYMax(), getZMax()), minInflowParticleRadius_, maxInflowParticleRadius_, fixedParticleRadius_, inflowVelocity_, inflowVelocityVariance_);
     insertionBoundary_ = boundaryHandler.copyAndAddObject(b1);
 
     //creates the bottom of the chute
+    
     createBottom();
 }
 
@@ -216,14 +226,6 @@ void Chute::setupSideWalls()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void Chute::createBottom()
 {
-    /// \bug This is temporary fix and how to do this should be discussed. Thomas how much damping should there be?
-    //auto species = new LinearViscoelasticSpecies;
-    //speciesHandler.addObject(species);
-    //setDimension(3);
-    //species->setDensity(2000.0);
-    //species->setStiffness(8000000.0);
-
-    
     
     if (fabs(getFixedParticleRadius()) < 1e-12) // smooth bottom
     {
@@ -236,10 +238,13 @@ void Chute::createBottom()
     {
         // Define standard fixed particle
         /// \todo Does the bottom we always has to be this particle?
+        
+        
         BaseParticle F0;
         F0.setHandler(&particleHandler);
         F0.setRadius(getFixedParticleRadius());
         F0.setPosition(Vec3D(0.0, 0.0, 0.0));
+        
         
         
         if (roughBottomType_ == MONOLAYER_ORDERED)
@@ -263,12 +268,7 @@ void Chute::createBottom()
         else if (roughBottomType_ == MONOLAYER_DISORDERED)
         { // random fixed-particle bottom
             std::cout << "create rough chute bottom, fixed z" << std::endl;
-            
-            //bottom wall 
-            InfiniteWall w0;
-            w0.set(Vec3D(0.0, 0.0, -1.0), -(getZMin() - .5 * F0.getRadius()));
-            wallHandler.copyAndAddObject(w0);
-            
+
             //add first particle to initialise HGRID
             
             //The position components are first stored in a Vec3D, because if you pass them directly into setPosition the compiler is allowed to change the order in which the numbers are generated
@@ -299,13 +299,19 @@ void Chute::createBottom()
                     failed++;
                 }
             }
+
+            //bottom wall (create after particle creation, as checkParticleForInteraction also checks against walls)
+            InfiniteWall w0;
+            w0.set(Vec3D(0.0, 0.0, -1.0), -(getZMin() - .5 * F0.getRadius()));
+            wallHandler.copyAndAddObject(w0);
         }
         else //if (roughBottomType_ == MULTILAYER)
         {
+            
             //this pointer is the current MD class, so the bottom is create with the particles properties from the MD class
             ChuteBottom bottom(*this);
             bottom.setInflowParticleRadius(getFixedParticleRadius());
-            bottom.makeRoughBottom(particleHandler);
+            bottom.makeRoughBottom(*this);
             std::cout << "Starting to destruct ChuteBottom" << std::endl;
         }
         std::cout << "Destructed ChuteBottom" << std::endl;
@@ -313,7 +319,6 @@ void Chute::createBottom()
         for (std::vector<BaseParticle*>::iterator it = particleHandler.begin(); it != particleHandler.end(); ++it)
             (*it)->fixParticle();
         
-        std::cout << "but here we get" << std::endl;
         
     }
 }
@@ -587,15 +592,15 @@ const Mdouble Chute::getMaxInflowParticleRadius() const
 
 void Chute::setInflowHeight(Mdouble inflowHeight)
 {
-    if (inflowHeight >= minInflowParticleRadius_ + maxInflowParticleRadius_)
+    //if (inflowHeight >= minInflowParticleRadius_ + maxInflowParticleRadius_)
     {
         inflowHeight_ = inflowHeight;
         setZMax(1.2 * inflowHeight_);
     }
-    else
-    {
-        std::cerr << "WARNING : Inflow height not changed to " << inflowHeight << ", value must be greater than or equal to diameter of inflow particle" << std::endl;
-    }
+//    else
+//    {
+//        std::cerr << "WARNING : Inflow height not changed to " << inflowHeight << ", value must be greater than or equal to diameter of inflow particle" << std::endl;
+//    }
 }
 
 Mdouble Chute::getInflowHeight() const

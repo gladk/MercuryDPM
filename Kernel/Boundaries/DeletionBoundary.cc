@@ -35,7 +35,7 @@ DeletionBoundary::DeletionBoundary()
     distance_ = std::numeric_limits<double>::quiet_NaN();
     scaleFactor_ = std::numeric_limits<double>::quiet_NaN();
 #ifdef DEBUG_CONSTRUCTOR
-    std::cout<<"DeletionBoundary () finished"<<std::endl;
+    std::cout<<"DeletionBoundary::DeletionBoundary() finished"<<std::endl;
 #endif
 }
 

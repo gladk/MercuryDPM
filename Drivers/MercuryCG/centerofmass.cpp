@@ -25,7 +25,7 @@
 
 ///takes data and fstat files and splits them into *.data.???? and *.fstat.???? files
 
-#include <string>
+#include <string.h>
 #include <iomanip>
 #include <iostream>
 #include <fstream>
@@ -72,6 +72,7 @@ public:
 		}
 
 		splittingradius=0;
+                splittinginfo=false;
 	}
 
 	///Destructor
@@ -89,34 +90,53 @@ public:
 		double CX1, CY1, CZ1;
 		double CX2, CY2, CZ2;
 		double VX, VY, VZ;
-		double T, R, M, M1, M2, mass;
+                double AX, AY, AZ;
+                double WX, WY, WZ;
+		double T, R, M, M1, M2, mass, info;
 		std::string line;
 		std::stringstream output_filename;
 		std::fstream output_file;				
 		
 		data_file >> N;
 		while (data_file.good()) {
-			M = M1 = M2 = 0;
+			M = M1 = M2 = 0.0;
 			data_file >> T;
 			//open, write, close output file
 			getline(data_file,line);
-			CX = CY = CZ = 0;
-			CX1 = CY1 = CZ1 = 0;
-			CX2 = CY2 = CZ2 = 0;
+			CX = CY = CZ = 0.0;
+			CX1 = CY1 = CZ1 = 0.0;
+			CX2 = CY2 = CZ2 = 0.0;
 			for (unsigned int i=0; i<N; i++) {
-				data_file >> X >> Y >> Z >> VX >> VY >> VZ >> R;
+				data_file >> X >> Y >> Z >> VX >> VY >> VZ >> R >> AX >> AY >> AZ >> WX >> WY >> WZ >> info;
 				mass=R*R*R;
 				getline(data_file,line);
-				CX += X*mass; CY += Y*mass; CZ += Z*mass; M+=mass;
-				if (splittingradius) {
+                                
+                                if (splittingradius){
+				    CX += X*mass; CY += Y*mass; CZ += Z*mass; M+=mass;
+                                }
+				if (splittinginfo){
+                                        if(info==info0||info==info1){
+                                                CX += X*mass; CY += Y*mass; CZ += Z*mass; M+=mass;
+                                        }
+                                }
+                                if (splittingradius) {
 					if (R<splittingradius) {
 						CX1 += X*mass; CY1 += Y*mass; CZ1 += Z*mass; M1+=mass;
 					} else {
 						CX2 += X*mass; CY2 += Y*mass; CZ2 += Z*mass; M2+=mass;
 					}
 				}
+				if (splittinginfo) {
+                                        //std::cout << "hello" << std::endl;
+					if (info==info0) {
+                                                //std::cout << "hello" << std::endl;
+						CX1 += X*mass; CY1 += Y*mass; CZ1 += Z*mass; M1+=mass;
+					} else if (info==info1) {
+						CX2 += X*mass; CY2 += Y*mass; CZ2 += Z*mass; M2+=mass;
+					}
+				}
 			}
-			if (splittingradius) {
+			if (splittingradius||splittinginfo) {
 				com_file << T << " " << CX/M << " " << CY/M << " " << CZ/M;
 				com_file << " " << CX1/M1 << " " << CY1/M1 << " " << CZ1/M1;
 				com_file << " " << CX2/M2 << " " << CY2/M2 << " " << CZ2/M2 << std::endl;
@@ -141,6 +161,8 @@ private:
 public:
 	//
 	double splittingradius;
+        bool splittinginfo;
+        int info0, info1;
 };
 
 int main(int argc, char *argv[])
@@ -155,7 +177,22 @@ int main(int argc, char *argv[])
 	CFile files(name);
 	
 	//defines the splitting radius
-	if (argc>2) files.splittingradius = atof(argv[2]);
+//	if (argc>2) files.splittingradius = atof(argv[2]);
+	if (argc>2) {
+		if (!strcmp(argv[2],"-info")) {
+                        //std::cout << "hello" << std::endl; 
+			if (argc>4) {
+				files.splittinginfo = true;
+				files.info0 = atoi(argv[3]);
+				files.info1 = atoi(argv[4]);
+			} else {
+				std::cerr << "Please provide two info values" << std::endl;
+			}
+		} else {
+			files.splittingradius = atof(argv[2]);
+		}
+	}
+
 	
 	files.copy();
 	std::cout << "finished writing files: " << name << std::endl;

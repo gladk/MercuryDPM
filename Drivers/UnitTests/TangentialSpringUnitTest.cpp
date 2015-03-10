@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 	species->setSlidingStiffness(species->getStiffness()*2/7);
 	species->setSlidingFrictionCoefficient(1e20);
     tangentialSpringUnitTestProblem.setTimeStep(2e-5);
-	tangentialSpringUnitTestProblem.setFileType(FileType::NO_FILE);
+	//tangentialSpringUnitTestProblem.setFileType(FileType::NO_FILE);
  	tangentialSpringUnitTestProblem.setGravity(Vec3D(0,0,-1));
  	tangentialSpringUnitTestProblem.setTimeMax(2.5);
 	tangentialSpringUnitTestProblem.solve(argc,argv);

@@ -17,3 +17,4 @@ InfiniteWall id 1 indSpecies 1 position 0 0 0 orientation 0 0 0 0 velocity 0 0 0
 Boundaries 0
 Particles 1
 BaseParticle id 0 indSpecies 0 position 5.67159624347559 10 1.79807205425628 orientation 0 0 0 0 velocity 0.492989922257665 0 0.23642946655368 angularVelocity 0 0 0 0 force 0 0 0 torque 0 0 0 radius 0.5 invMass 1 invInertia 10
+Interactions 0

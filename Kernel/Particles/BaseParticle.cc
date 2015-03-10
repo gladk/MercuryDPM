@@ -148,42 +148,7 @@ bool BaseParticle::isFixed() const
 void BaseParticle::unfix()
 {
     invMass_ = 1.0;
-    computeMass();
-}
-
-///Compute BaseParticle mass function, which required a reference to the Species vector. It computes the Particles mass, Inertia and the inverses.
-/// this function is called, if BaseParticleHandler::addObject, SpeciesHandler::addObject, ParticleSpecies::setDensity, BaseParticle::setRadius or DPMBase::setParticleDimensions is called
-void BaseParticle::computeMass()
-{
-    if (!isFixed())
-    {
-        switch (getParticleDimensions())
-        {
-            case 3:
-                {
-                setMass(4.0 / 3.0 * constants::pi * radius_ * radius_ * radius_ * getSpecies()->getDensity());
-                setInertia(.4 * getMass() * mathsFunc::square(radius_));
-                break;
-            }
-            case 2:
-                {
-                setMass(constants::pi * radius_ * radius_ * getSpecies()->getDensity());
-                setInertia(.5 * getMass() * mathsFunc::square(radius_));
-                break;
-            }
-            case 1:
-                {
-                setMass(2.0 * radius_ * getSpecies()->getDensity());
-                setInertia(0.0);
-                break;
-            }
-            default:
-                {
-                std::cerr << "In computeMass() the dimension of the particle is not set" << std::endl;
-                exit(-1);
-            }
-        }
-    }
+    getSpecies()->computeMass(this);
 }
 
 ///BaseParticle print function, which accepts an os std::stringstream as input. It prints human readable BaseParticle information to the std::stringstream
@@ -403,7 +368,7 @@ void BaseParticle::setRadius(const Mdouble _new)
     radius_ = _new;
     if (getHandler())
     {
-        computeMass();
+        getSpecies()->computeMass(this);
         getHandler()->checkExtrema(this);
     }
 }
@@ -528,6 +493,7 @@ void BaseParticle::setIndSpecies(unsigned int indSpecies)
     if (handler_ != nullptr)
     {
         setSpecies(getHandler()->getDPMBase()->speciesHandler.getObject(getIndSpecies()));
+        ///\todo TW do we have to update the species stored in the interactions here?
     }
     else
     {

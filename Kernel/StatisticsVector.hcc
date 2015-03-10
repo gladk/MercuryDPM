@@ -27,6 +27,7 @@
 
 #include "Particles/BaseParticle.h"
 #include "Boundaries/PeriodicBoundary.h"
+#include "Boundaries/AngledPeriodicBoundary.h"
 #include "Species/LinearViscoelasticSpecies.h"
 
 std::ostream& operator<<(std::ostream& os, const StatType S)
@@ -250,7 +251,7 @@ void StatisticsVector<T>::constructor(std::string name)
     
     // set name
     setName(name.c_str());
-    
+
     if (!strcmp(getName().c_str(), "c3d"))
     {
         //write here what to do with Stefan's data 
@@ -294,7 +295,7 @@ StatisticsVector<T>::StatisticsVector(int argc, char *argv[])
     //create StatisticsVector
     std::string filename(argv[1]);
     constructor(filename);
-    
+
     //check for options (standardly '-option argument')
     readStatArguments(argc, argv);
 }
@@ -484,6 +485,10 @@ void StatisticsVector<T>::readStatArguments(int argc, char *argv[])
             setZMinStat(atof(argv[i + 1]));
             setZMaxStat(atof(argv[i + 2]));
             i++; //requires two arguments
+        }
+        else if (!strcmp(argv[i], "-positions"))
+        {
+            loadPositions(argv[i+1]);
         }
         else if (!strcmp(argv[i], "-indSpecies"))
         {
@@ -936,6 +941,7 @@ void StatisticsVector<T>::write_statistics()
     getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << getTime() << std::endl;
     for (unsigned int i = 0; i < Points.size(); i++)
         getStatFile().getFstream() << Points[i];
+    //std::cout << "S" << Points[2] << std::endl;
     if (getDoGradient())
     {
         getStatFile().getFstream() << std::left << std::setprecision(8) << std::setw(6) << getTime() << std::endl;
@@ -1106,12 +1112,17 @@ void StatisticsVector<T>::write_time_average_statistics()
 template<StatType T>
 void StatisticsVector<T>::statistics_from_fstat_and_data()
 {
+    std::cout << "set " << " positions" << std::endl;
+    getDataFile().setCounter(0);
+    getFStatFile().setCounter(0);
+
     //This opens the file the data will be recalled from
     if (getDataFile().getFileType() == FileType::ONE_FILE)
         getDataFile().open(std::fstream::in);
     if (getFStatFile().getFileType() == FileType::ONE_FILE)
         getFStatFile().open(std::fstream::in);
-    
+
+
     //load first set of timesteps to obtain xdim, ydim, zdim
     
     //try to read data files; if data.0000 does not exist, try the next, up to .9999
@@ -1119,17 +1130,13 @@ void StatisticsVector<T>::statistics_from_fstat_and_data()
     {
         if (readNextDataFile(format))
             break;
-        //set_file_counter(i);
-        getFStatFile().openNextFile();
+        getFStatFile().openNextFile(std::fstream::in);
     }
-    
+
     //set tminstat to smallest time evaluated
     if (getTime() >= getCGTimeMin())
         setCGTimeMin(getTime() - getTimeStep());
-    
-    //This opens the file the force data will be recalled from
-    //getFStatFile().open(std::fstream::in);
-    
+
     //This creates the file statistics will be saved to
     //getStatFile.open(std::fstream::out);
     
@@ -1161,10 +1168,11 @@ void StatisticsVector<T>::statistics_from_fstat_and_data()
     }
     else if (verbosity)
     {
-        DPMBase::write(std::cout, false);
-        std::cout << std::endl;
+        //DPMBase::write(std::cout, false);
+        //std::cout << std::endl;
     }
-    
+
+
     //this increases the file counter
     if ((getFStatFile().getFileType() == FileType::MULTIPLE_FILES || getFStatFile().getFileType() == FileType::MULTIPLE_FILES_PADDED) && getTime() < getCGTimeMin())
     {
@@ -1174,24 +1182,31 @@ void StatisticsVector<T>::statistics_from_fstat_and_data()
             findNextExistingDataFile(getCGTimeMin(), false);
         for (int i = 1; i < getDataFile().getCounter(); i++)
             jump_fstat();
-        
+
     }
-    
-    //Output statistics for each time step 
+
+    //Output statistics for each time step
     std::cout << "Start statistics" << std::endl;
     do
     {
         if (getTime() > getTimeMaxStat())
         {
-            std::cout << "reached end t=" << std::setprecision(9) << getTime() << " tmaxStat=" << std::setprecision(9) << getTimeMaxStat() << std::endl;
+            std::cout
+                << "reached end t=" << std::setprecision(9) << getTime()
+                << " tmaxStat=" << std::setprecision(9) << getTimeMaxStat()
+                << std::endl;
             break;
         }
-        else if (getTime() >= getCGTimeMin())
+        else if (getTime() < getCGTimeMin())
         {
             if (verbosity > 1)
+                std::cout << "Jumping statistics t=" << getTime() << " tminStat()=" << getCGTimeMin() << std::endl;
+            jump_fstat();
+        }
+        else
+        {
+            if (verbosity)
                 std::cout << "Get statistics for t=" << std::setprecision(9) << getTime() << std::endl;
-            else if (verbosity)
-                std::cout << "Get statistics for t=" << std::setprecision(9) << getTime() << " \r";
             if (verbosity > 1)
                 std::cout << "#particles=" << particleHandler.getNumberOfObjects() << std::endl;
             
@@ -1205,12 +1220,6 @@ void StatisticsVector<T>::statistics_from_fstat_and_data()
             gather_force_statistics_from_fstat_and_data();
             processStatistics(true);
             
-        }
-        else
-        {
-            if (verbosity > 1)
-                std::cout << "Jumping statistics t=" << getTime() << " tminStat()=" << getCGTimeMin() << std::endl;
-            jump_fstat();
         }
         //if step size>1, skip a number of steps.
         if (getDataFile().getFileType() == FileType::ONE_FILE)
@@ -1267,7 +1276,8 @@ bool StatisticsVector<T>::read_next_from_p3p_file()
     
     //Ignoring first line
     getline(p3p_file, dummyStr);
-    std::cout << dummyStr << std::endl;
+    if (verbosity>2)
+        std::cout << dummyStr << std::endl;
     //Reading second line
     p3p_file >> dummy;
     setTime(dummy);
@@ -1277,7 +1287,8 @@ bool StatisticsVector<T>::read_next_from_p3p_file()
     //std::cout << dummyStr << std::endl;
     //Ignoring third line
     getline(p3p_file, dummyStr);
-    std::cout << dummyStr << std::endl;
+    if (verbosity>2)
+        std::cout << dummyStr << std::endl;
     if (p3p_file.eof() || p3p_file.peek() == -1)
     {
         std::cout << "reached end of p3p file" << std::endl;
@@ -1319,7 +1330,8 @@ bool StatisticsVector<T>::read_next_from_p3p_file()
       //auto_setSystemDimensions();
     
     getline(p3p_file, dummyStr);
-    std::cout << dummyStr << std::endl;
+    if (verbosity>2)
+        std::cout << dummyStr << std::endl;
     
     //fix particles, if data_FixedParticles!=0
     
@@ -1384,7 +1396,7 @@ void StatisticsVector<T>::statistics_from_p3()
     //getStatFile.open(std::fstream::out);
     
     initialiseStatistics();
-    
+
     //std::couts collision time
     if (verbosity > 1)
     {
@@ -1407,11 +1419,11 @@ void StatisticsVector<T>::statistics_from_p3()
     }
     else if (verbosity)
     {
-        DPMBase::write(std::cout);
+        DPMBase::write(std::cout,false);
         std::cout << std::endl;
     }
-    
-    //Output statistics for each time step 
+
+    //Output statistics for each time step
     std::cout << "Start statistics" << std::endl;
     do
     {
@@ -1422,10 +1434,8 @@ void StatisticsVector<T>::statistics_from_p3()
         }
         else if (getTime() >= getCGTimeMin())
         {
-            if (verbosity > 1)
+            if (verbosity)
                 std::cout << "Get statistics for t=" << std::setprecision(9) << getTime() << std::endl;
-            else if (verbosity)
-                std::cout << "Get statistics for t=" << std::setprecision(9) << getTime() << " \r";
             if (verbosity > 1)
                 std::cout << "#particles=" << particleHandler.getNumberOfObjects() << std::endl;
             
@@ -1491,7 +1501,8 @@ void StatisticsVector<T>::jump_p3c()
     
     //Ignoring first line
     getline(p3w_file, dummyStr);
-    std::cout << dummyStr << std::endl;
+    if (verbosity>2)
+        std::cout << dummyStr << std::endl;
     //Reading second line
     p3w_file >> dummy;
     setTime(dummy);
@@ -1515,7 +1526,8 @@ void StatisticsVector<T>::gather_force_statistics_from_p3c(int version)
     
     //Ignoring first line
     getline(p3c_file, dummyStr);
-    std::cout << dummyStr << std::endl;
+    if (verbosity>2)
+        std::cout << dummyStr << std::endl;
     //Reading second line
     p3c_file >> dummy;
     setTime(dummy);
@@ -1524,7 +1536,8 @@ void StatisticsVector<T>::gather_force_statistics_from_p3c(int version)
     getline(p3c_file, dummyStr);
     //Ignoring third line
     getline(p3c_file, dummyStr);
-    std::cout << dummyStr << std::endl;
+    if (verbosity>2)
+        std::cout << dummyStr << std::endl;
     //Checking for end of file
     //if (p3c_file.eof()||p3c_file.peek()==-1) return false;
     
@@ -1533,7 +1546,7 @@ void StatisticsVector<T>::gather_force_statistics_from_p3c(int version)
     for (std::vector<BaseParticle*>::iterator it = particleHandler.begin(); it != particleHandler.end(); ++it)
         Nmax = std::max(Nmax, (*it)->getIndex());
     static std::vector<int> index;
-    index.resize(Nmax);
+    index.resize(Nmax+1);
     {
         int i = 0;
         for (std::vector<BaseParticle*>::iterator it = particleHandler.begin(); it != particleHandler.end(); ++it)
@@ -1577,7 +1590,7 @@ void StatisticsVector<T>::gather_force_statistics_from_p3c(int version)
                     >> index2_p3
                     >> Force;
         }
-        else
+        else //p4p
         {
             p3c_file
                     >> index1_p3
@@ -1590,6 +1603,26 @@ void StatisticsVector<T>::gather_force_statistics_from_p3c(int version)
         P1 = particleHandler.getObject(index1);
         P2 = particleHandler.getObject(index2);
         P1_P2_normal = P1->getPosition() - P2->getPosition();
+        // deal with periodic boundaries; correct if the distance between two particles is bigger than half the domain size
+        // (only works if periodic walls are >2d apart)
+        ///\todo tw: a better way to do p3/p4 statistics is to move p3/p4 files to Mercury files and perform statistics there
+        std::cout << "#forces="  << std::setprecision(9) << P1_P2_normal.Y << "|" << getYMax()-getYMin() << std::endl;
+        if (2.0*P1_P2_normal.X > getXMax()-getXMin())
+            P1_P2_normal.X -=     getXMax()-getXMin();
+        else if (2.0*P1_P2_normal.X < getXMin()-getXMax())
+            P1_P2_normal.X +=     getXMax()-getXMin();
+
+        else if (2.0*P1_P2_normal.Y > getYMax()-getYMin())
+            P1_P2_normal.Y -=     getYMax()-getYMin();
+        else if (2.0*P1_P2_normal.Y < getYMin()-getYMax())
+            P1_P2_normal.Y +=     getYMax()-getYMin();
+
+        else if (2.0*P1_P2_normal.Z > getZMax()-getZMin())
+            P1_P2_normal.Z -=     getZMax()-getZMin();
+        else if (2.0*P1_P2_normal.Z < getZMin()-getZMax())
+            P1_P2_normal.Z +=     getZMax()-getZMin();
+        std::cout << "#forces="  << std::setprecision(9) << P1_P2_normal.Y << "|" << getYMax()-getYMin() << std::endl;
+
         dist = Vec3D::getLength(P1_P2_normal);
         P1_P2_normal /= dist;
         delta = P1->getRadius() + P2->getRadius() - dist;
@@ -1609,6 +1642,7 @@ void StatisticsVector<T>::gather_force_statistics_from_p3c(int version)
             P1_P2_tangential /= fdott;
         }
         //Finished reading file
+        std::cout << "#forces=" << P1_P2_normal << "|" << fdotn << std::endl;
         gatherContactStatistics(index1, index2, Contact, delta, 0, fdotn, fdott, P1_P2_normal, -P1_P2_tangential);
         gatherContactStatistics(index2, index1, Contact, delta, 0, fdotn, fdott, -P1_P2_normal, P1_P2_tangential);
     }
@@ -1617,7 +1651,8 @@ void StatisticsVector<T>::gather_force_statistics_from_p3c(int version)
         std::cout << "#forces=" << counter << std::endl;
     //Ignoring last line
     getline(p3c_file, dummyStr);
-    std::cout << dummyStr << std::endl;
+    if (verbosity>2)
+        std::cout << dummyStr << std::endl;
     
     gather_force_statistics_from_p3w(version, index);
 }
@@ -1631,7 +1666,8 @@ void StatisticsVector<T>::gather_force_statistics_from_p3w(int version, std::vec
     
     //Ignoring first line
     getline(p3w_file, dummyStr);
-    std::cout << dummyStr << std::endl;
+    if (verbosity>2)
+        std::cout << dummyStr << std::endl;
     //Reading second line
     p3w_file >> dummy;
     setTime(dummy);
@@ -1640,7 +1676,8 @@ void StatisticsVector<T>::gather_force_statistics_from_p3w(int version, std::vec
     getline(p3w_file, dummyStr);
     //Ignoring third line
     getline(p3w_file, dummyStr);
-    std::cout << dummyStr << std::endl;
+    if (verbosity>2)
+        std::cout << dummyStr << std::endl;
     
     // ==> /Users/weinhartt/CarlosLabra/ConfinedCompression_P3P_Spheres.csv.p3w <==
     // TIMESTEP CONTACTS
@@ -1716,88 +1753,106 @@ void StatisticsVector<T>::gather_force_statistics_from_p3w(int version, std::vec
         std::cout << "#wall forces=" << counter << std::endl;
     //Ignoring last line
     getline(p3w_file, dummyStr);
-    std::cout << dummyStr << std::endl;
+    if (verbosity>2)
+        std::cout << dummyStr << std::endl;
 }
+
 
 ///Set position of statistics points and set variables to 0
 template<StatType T>
 void StatisticsVector<T>::setPositions()
 {
-    //Dimensions of the domain / n 
-    Vec3D diff = Vec3D(
+    std::cout << "set " << " positions" << std::endl;
+    int N = positions_.size();
+    if (N!=0)
+    {
+        std::cout << "setting " << N << " positions" << std::endl;
+        Points.resize(N);
+        for (int i = 0; i<N; i++) {
+            Points[i].setPosition(positions_[i]);
+        }
+        nx = N; ny=1; nz=1;
+    }
+    else //set automatically on mesh
+    {
+        //Dimensions of the domain / n
+        Vec3D diff = Vec3D(
             (getXMaxStat() - getXMinStat()) / nx,
             (getYMaxStat() - getYMinStat()) / ny,
             (getZMaxStat() - getZMinStat()) / nz);
-    //Center of the domain
-    Vec3D avg = 0.5 * Vec3D(
+        //Center of the domain
+        Vec3D avg = 0.5 * Vec3D(
             getXMaxStat() + getXMinStat(),
             getYMaxStat() + getYMinStat(),
             getZMaxStat() + getZMinStat());
-    //Left endpoint of the domain
-    Vec3D Min = Vec3D(
+        //Left endpoint of the domain
+        Vec3D Min = Vec3D(
             getXMinStat(),
             getYMinStat(),
             getZMinStat());
-    
-    int num[3] = {0, 0, 0};
-    if (getMirrorAtDomainBoundary() != 0.0)
-    {
-        if (statType == X || statType == XY || statType == XZ || statType == XYZ)
+
+        int num[3] = {0, 0, 0};
+        if (getMirrorAtDomainBoundary() != 0.0)
         {
-            //add so many points to domain on both ends
-            //todo: the 8 is arbitrary
-            num[0] = static_cast<int>(std::floor(std::max(getMirrorAtDomainBoundary(), getCutoff()) / diff.X));
-            nx += 2 * num[0];
-            Min.X -= num[0] * diff.X;
+            if (statType == X || statType == XY || statType == XZ || statType == XYZ)
+            {
+                //add so many points to domain on both ends
+                //todo: the 8 is arbitrary
+                num[0] = static_cast<int>(std::floor(std::max(getMirrorAtDomainBoundary(), getCutoff()) / diff.X));
+                nx += 2 * num[0];
+                Min.X -= num[0] * diff.X;
+            }
+            if (statType == Y || statType == XY || statType == YZ || statType == XYZ)
+            {
+                num[1] = static_cast<int>(std::floor(std::max(getMirrorAtDomainBoundary(), getCutoff()) / diff.Y));
+                ny += 2 * num[1];
+                Min.Y -= num[1] * diff.Y;
+            }
+            if (statType == Z || statType == XZ || statType == XZ || statType == XYZ)
+            {
+                num[2] = static_cast<int>(std::floor(std::max(getMirrorAtDomainBoundary(), getCutoff()) / diff.Z));
+                nz += 2 * num[2];
+                Min.Z -= num[2] * diff.Z;
+            }
         }
-        if (statType == Y || statType == XY || statType == YZ || statType == XYZ)
+
+        //Set position of statistics points and set variables to 0
+        N = std::max(nx, 1) * std::max(ny, 1) * std::max(nz, 1);
+        Points.resize(N);
         {
-            num[1] = static_cast<int>(std::floor(std::max(getMirrorAtDomainBoundary(), getCutoff()) / diff.Y));
-            ny += 2 * num[1];
-            Min.Y -= num[1] * diff.Y;
-        }
-        if (statType == Z || statType == XZ || statType == XZ || statType == XYZ)
-        {
-            num[2] = static_cast<int>(std::floor(std::max(getMirrorAtDomainBoundary(), getCutoff()) / diff.Z));
-            nz += 2 * num[2];
-            Min.Z -= num[2] * diff.Z;
-        }
-    }
-    
-    //Set position of statistics points and set variables to 0
-    int N = std::max(nx, 1) * std::max(ny, 1) * std::max(nz, 1);
-    Points.resize(N);
-    {
-        int n = 0;
-        for (int i = 0; i < std::max(nx, 1); i++)
-            for (int j = 0; j < std::max(ny, 1); j++)
-                for (int k = 0; k < std::max(nz, 1); k++)
-                {
-                    Points[n].setPosition(Vec3D((nx > 1) ? (Min.X + diff.X * (i + 0.5)) : avg.X,
+            int n = 0;
+            for (int i = 0; i < std::max(nx, 1); i++)
+                for (int j = 0; j < std::max(ny, 1); j++)
+                    for (int k = 0; k < std::max(nz, 1); k++)
+                    {
+                        Points[n].setPosition(Vec3D((nx > 1) ? (Min.X + diff.X * (i + 0.5)) : avg.X,
                             (ny > 1) ? (Min.Y + diff.Y * (j + 0.5)) : avg.Y,
                             (nz > 1) ? (Min.Z + diff.Z * (k + 0.5)) : avg.Z));
-                    if (doDoublePoints)
-                        Points[n].setPosition(Points[n].getPosition()
+                        if (doDoublePoints)
+                            Points[n].setPosition(Points[n].getPosition()
                                 - Vec3D((i % 2) ? (0.99 * diff.X) : 0, (j % 2) ? (0.99 * diff.Y) : 0, (k % 2) ? (0.99 * diff.Z) : 0));
-                    Points[n].setCGInverseVolume();
-                    Points[n].set_zero();
-                    if (getMirrorAtDomainBoundary() != 0.0)
-                        if ((i < num[0]) || (i > nx - num[0]) || (j < num[1]) || (j > ny - num[1]) || (k < num[2]) || (k > nz - num[2]))
+                        if (getMirrorAtDomainBoundary() != 0.0) if ((i < num[0]) || (i > nx - num[0]) || (j < num[1]) || (j > ny - num[1]) || (k < num[2]) || (k > nz - num[2]))
                         {
                             Points[n].mirrorParticle = n +
-                                    +((i < num[0]) ? (2 * (num[0] - i) - 1) * ny * nz : 0) + ((i > nx - num[0]) ? (2 * (nx - num[0] - i) + 1) * ny * nz : 0)
-                                    + ((j < num[1]) ? (2 * (num[1] - j) - 1) * nz : 0) + ((j > ny - num[1]) ? (2 * (ny - num[1] - j) + 1) * nz : 0)
-                                    + ((k < num[2]) ? (2 * (num[2] - k) - 1) : 0) + ((k > nz - num[2]) ? (2 * (nz - num[2] - k) + 1) : 0);
+                                +((i < num[0]) ? (2 * (num[0] - i) - 1) * ny * nz : 0) + ((i > nx - num[0]) ? (2 * (nx - num[0] - i) + 1) * ny * nz : 0)
+                                + ((j < num[1]) ? (2 * (num[1] - j) - 1) * nz : 0) + ((j > ny - num[1]) ? (2 * (ny - num[1] - j) + 1) * nz : 0)
+                                + ((k < num[2]) ? (2 * (num[2] - k) - 1) : 0) + ((k > nz - num[2]) ? (2 * (nz - num[2] - k) + 1) : 0);
                         }
-                    n++;
-                }
-    }
-    if (statType == RAZ || statType == RZ || statType == RA || statType == AZ || statType == R || statType == A)
-    {
-        for (unsigned int k = 0; k < Points.size(); k++)
-        {
-            Points[k].setPosition(Points[k].getPosition().getFromCylindricalCoordinates());
+                        n++;
+                    }
         }
+        if (statType == RAZ || statType == RZ || statType == RA || statType == AZ || statType == R || statType == A)
+        {
+            for (unsigned int k = 0; k < Points.size(); k++)
+            {
+                Points[k].setPosition(Points[k].getPosition().getFromCylindricalCoordinates());
+            }
+        }
+    }
+    for (int i = 0; i<N; i++)
+    {
+        Points[i].setCGInverseVolume();
+        Points[i].set_zero();
     }
     if (getDoGradient())
     {
@@ -1817,7 +1872,7 @@ void StatisticsVector<T>::setPositions()
             dz[n].set_zero();
         }
     }
-    
+
     //Set TimeAverage the same way
     if (getDoTimeAverage())
     {
@@ -1834,7 +1889,7 @@ void StatisticsVector<T>::setPositions()
                         n++;
                     }
         }
-        
+
         if (getDoVariance())
         {
             timeVariance.resize(N);
@@ -1845,7 +1900,7 @@ void StatisticsVector<T>::setPositions()
                 timeVariance[n].set_zero();
             }
         }
-        
+
         if (getDoGradient())
         {
             dxTimeAverage.resize(N);
@@ -1864,8 +1919,33 @@ void StatisticsVector<T>::setPositions()
                 dzTimeAverage[n].set_zero();
             }
         }
-        
-    } //end if (getDoTimeAverage()) 
+
+    } //end if (getDoTimeAverage())
+}
+
+template<StatType T>
+bool StatisticsVector<T>::loadPositions(const char* filename)
+{
+    //This opens the file the data will be recalled from
+    std::fstream is;
+    is.open(filename, std::fstream::in);
+    if (!is.is_open() || is.bad())
+    {
+        std::cout << "Loading positions file " << filename << " failed" << std::endl;
+        return false;
+    }
+
+    double N=0;
+    is >> N;
+    positions_.resize(N);
+    for (int i=0; i<N; i++)
+    {
+        is >> positions_[i];
+    }
+    //Close the file
+    is.close();
+    std::cout << "Loaded " << positions_.size() << " positions from file " << filename << std::endl;
+    return true;
 }
 
 ///
@@ -2070,8 +2150,7 @@ void StatisticsVector<T>::gather_force_statistics_from_fstat_and_data()
     //read in first three lines (should start with '#')
     std::string dummy;
     if (getFStatFile().getFileType() == FileType::MULTIPLE_FILES || getFStatFile().getFileType() == FileType::MULTIPLE_FILES_PADDED)
-        getFStatFile().openNextFile();
-    ;
+        getFStatFile().openNextFile(std::fstream::in);
     getline(getFStatFile().getFstream(), dummy);
     getline(getFStatFile().getFstream(), dummy);
     getline(getFStatFile().getFstream(), dummy);
@@ -2120,7 +2199,7 @@ void StatisticsVector<T>::gather_force_statistics_from_fstat_and_data()
         
     }
     if (verbosity > 1)
-        std::cout << "#forces=" << counter << std::endl;
+        std::cout << "#forces=" << counter << ", t=" << time << std::endl;
 }
 
 ///get force statistics
@@ -2129,10 +2208,11 @@ void StatisticsVector<T>::evaluate_force_statistics(int wp)
 {
     ///todo{What are P1 and P2 over here?}
     if (periodicWalls)
+    {
         for (unsigned int k = wp; k < boundaryHandler.getNumberOfObjects(); k++)
         {
-            ///todo{DK: This only works for PeriodicBoundary and not for AngularPeriodicBoundaries}
-            PeriodicBoundary* b0 = dynamic_cast<PeriodicBoundary*>(boundaryHandler.getObject(k));
+            ///todo{DK: This only works for PeriodicBoundary and not for AngledPeriodicBoundaries}
+            PeriodicBoundary *b0 = dynamic_cast<PeriodicBoundary *>(boundaryHandler.getObject(k));
             if (b0)
             {
                 b0->getDistance(P1);
@@ -2140,8 +2220,17 @@ void StatisticsVector<T>::evaluate_force_statistics(int wp)
                 evaluate_force_statistics(k + 1);
                 b0->shiftPositions(P1, P2);
             }
+            AngledPeriodicBoundary* b1 = dynamic_cast<AngledPeriodicBoundary*>(boundaryHandler.getObject(k));
+            if (b1 != nullptr)
+            {
+                b1->distance(P1);
+                b1->shiftPositions(P1, P2);
+                evaluate_force_statistics(k + 1);
+                b1->shiftPositions(P1, P2);
+            }
         }
-    
+    }
+
     ///\todo{TW: Couple stress calculation works only for Gaussians}
     //evaluate fields that only depend on CParticle parameters
     Mdouble psi; //Course graining integral
@@ -2155,7 +2244,12 @@ void StatisticsVector<T>::evaluate_force_statistics(int wp)
             counter++;
             if (!std::isfinite(psi))
             {
-                std::cerr << "error: psi =" << psi << " is infinite for P1=" << P1 << ", P2=" << P2 << ", t=" << getTime() << std::endl;
+                std::cerr << "error: psi =" << psi << " is infinite for "
+                    <<   "P1=" << P1
+                    << ", P2=" << P2
+                    << ", P1_P2_normal=" << P1_P2_normal
+                    << ", P1_P2_distance=" << P1_P2_distance
+                    << ", t=" << getTime() << std::endl;
                 psi = 0;
             }
             Points[i].ContactCoupleStress += (Matrix3D::cross(P1_P2_Contact * psi, P1_P2_ContactCoupleStress) - Matrix3D::cross(rpsi, P1_P2_ContactCoupleStress)) * (-0.5);
@@ -2272,22 +2366,35 @@ void StatisticsVector<T>::evaluate_particle_statistics(std::vector<BaseParticle*
 {
     ///\todo{I currently disabled displacement calculation as it takes forever}
     bool doDisplacement = false;
-    
+
     if (periodicWalls)
+    {
         for (unsigned int k = wp; k < boundaryHandler.getNumberOfObjects(); k++)
         {
-            PeriodicBoundary* b0 = dynamic_cast<PeriodicBoundary*>(boundaryHandler.getObject(k));
-            if (b0)
+            PeriodicBoundary* b = dynamic_cast<PeriodicBoundary*>(boundaryHandler.getObject(k));
+            if (b != nullptr)
             {
-                Mdouble dist = b0->getDistance(P1);
-                if (mathsFunc::square(dist - (*P)->getRadius()) < 9.0 * getCGWidthSquared())
+                Mdouble dist = b->getDistance(P1);
+                if (mathsFunc::square(dist - (*P)->getInteractionRadius()) < getCutoff2())
                 {
-                    b0->shiftPosition(*P);
+                    b->shiftPosition(*P);
                     evaluate_particle_statistics(P, k + 1);
-                    b0->shiftPosition(*P);
+                    b->shiftPosition(*P);
+                }
+            }
+            AngledPeriodicBoundary* c = dynamic_cast<AngledPeriodicBoundary*>(boundaryHandler.getObject(k));
+            if (c != nullptr)
+            {
+                Mdouble dist = c->distance(P1);
+                if (mathsFunc::square(dist - (*P)->getInteractionRadius()) < getCutoff2())
+                {
+                    c->shiftPosition(*P);
+                    evaluate_particle_statistics(P, k + 1);
+                    c->shiftPosition(*P);
                 }
             }
         }
+    }
     
     //evaluate fields that only depend on CParticle parameters
     Mdouble phi; //Course graining function

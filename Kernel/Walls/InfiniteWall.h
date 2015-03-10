@@ -84,6 +84,8 @@ public:
      */
     void set(Vec3D normal, Mdouble position);
 
+    using BaseWall::move;
+    
     /*!
      * \brief Allows the wall to be moved to a new position
      */
@@ -131,7 +133,10 @@ public:
 
 private:
     Vec3D normal_; ///<outward unit normal vector
-    Mdouble factor_; ///This is the normal to rescale to unit vectors.
+
+    ///This is the normal to rescale to unit vectors.
+    ///\todo{TW: it is unnecessary to store the factor; remove?}
+    Mdouble factor_;
 };
 
 #endif

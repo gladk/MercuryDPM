@@ -92,7 +92,7 @@ if(Mercury_BUILD_DOCUMENTATION)
     configure_file(Configuration/new_header.html
 	    		${PROJECT_BINARY_DIR}/Configuration/new_header.html @ONLY IMMEDIATE)
 
-    #-- Add custom targets to both make and clean (delete) the documentation
+       #-- Add custom targets to both make and clean (delete) the documentation
     add_custom_target 	(doc
 		    COMMAND ${DOXYGEN_EXECUTABLE} ${PROJECT_BINARY_DIR}/Configuration/doxygen.conf
             SOURCES ${PROJECT_BINARY_DIR}/Configuration/doxygen.conf)
@@ -105,10 +105,6 @@ if(Mercury_BUILD_DOCUMENTATION)
 	add_custom_target	(docWeb
 			COMMAND ${DOXYGEN_EXECUTABLE} ${PROJECT_BINARY_DIR}/Configuration/web_doxygen.conf
 			SOURCES ${PROJECT_BINARY_DIR}/Configuration/web_doxygen.conf)
-
-		#add_custom_target	(docPublishAlpha
-		#	COMMAND rsync -vr docs/html/* WebAdmin@einder.ewi.utwente.nl:/home/www/html/hpGEM/assets/doxygen/alpha/
-		#			COMMENT "Publishing (uploading) the current documentation as ALPHA realese" )
   endif()
 endif()
 
@@ -117,8 +113,10 @@ option(Mercury_Include_Xballs_Support "Use the xballs of Stefan Luding for visua
 if (Mercury_Include_Xballs_Support)
 	FIND_PACKAGE(X11)
         configure_file(${PROJECT_SOURCE_DIR}/XBalls/xballs.txt ${PROJECT_BINARY_DIR}/XBalls/xballs.txt)
+	 configure_file(${PROJECT_SOURCE_DIR}/XBalls/MakeMovie
+	    		${PROJECT_BINARY_DIR}/XBalls/MakeMovie @ONLY IMMEDIATE)
+
     if (NOT X11_FOUND)
         message(FATAL_ERROR "X11 is needed, please install it")
     endif()
 endif()
-

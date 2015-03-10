@@ -74,8 +74,6 @@ public:
 
     std::string getName() const;
 
-private:
-    
 };
 
 #endif

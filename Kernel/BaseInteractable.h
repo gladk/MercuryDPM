@@ -161,7 +161,7 @@ public:
      * \brief
      * \param[in]
      */
-    void move(const Vec3D& move);
+    virtual void move(const Vec3D& move);
 
     /*!
      * \brief

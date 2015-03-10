@@ -33,6 +33,8 @@
 
 #include <iostream>
 #include <vector>
+#include "Math/Helpers.h"
+
 ///\todo TW: someone help: how do I add a logger here?
 
 class DPMBase;
@@ -121,6 +123,13 @@ public:
 
     /*!
      * \brief Gets a pointer to the Object at the specified index in the BaseHandler.
+     * \param[in] id the id of the requested Object.
+     * \return A pointer to the requested Object.    
+     */
+    T* getObjectById(const unsigned int id);
+
+    /*!
+     * \brief Gets a pointer to the Object at the specified index in the BaseHandler.
      * \param[in] id the index of the requested Object.
      * \return A pointer to the requested Object.    
      */
@@ -202,12 +211,14 @@ public:
 
     virtual std::string getName() const = 0;
 
-private:
+protected:
+    //This should not be private. That's just annoying. @dducks
     /*!
      * \brief The actual list of Object pointers
      */
     std::vector<T*> objects_;
-
+    
+private:
     /*!
      * \brief An integer to keep track of the largest number of objects ever stored in this BaseHandler
      */
@@ -346,10 +357,24 @@ template<class T> void BaseHandler<T>::read(std::istream& is)
     clear();
     unsigned int N;
     std::string dummy;
-    is >> dummy >> N;
+    is >> dummy;
+    std::stringstream line(std::stringstream::in | std::stringstream::out);
+	helpers::getLineFromStringStream(is, line);
+    line >> N;
     //std::cout << "In " << getName() << "::read(is): reading in " << N << " objects..." << std::endl; //verbose level
     for (unsigned int i = 0; i < N; i++)
         readObject(is);
+}
+
+template<class T> T* BaseHandler<T>::getObjectById(const unsigned int id)
+{
+    if (id<getNumberOfObjects() && objects_[id]->getId()==id) 
+        return objects_[id]; //should be quicker because typically the id and index matches
+    for (typename std::vector<T*>::const_iterator it = begin(); it != end(); it++) 
+        if ((*it)->getId()==id) 
+            return *it;  
+    std::cerr << "Object not found" << std::endl;
+    exit(-1);
 }
 
 template<class T> T* BaseHandler<T>::getObject(const unsigned int id)

@@ -49,7 +49,7 @@ LinearViscoelasticInteraction::LinearViscoelasticInteraction(const LinearViscoel
 
 LinearViscoelasticInteraction::~LinearViscoelasticInteraction()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"LinearViscoelasticInteraction::~LinearViscoelasticInteraction() finished"<<std::endl;
 #endif
 }

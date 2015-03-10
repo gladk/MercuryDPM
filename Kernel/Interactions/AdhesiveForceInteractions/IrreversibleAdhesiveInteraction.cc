@@ -43,6 +43,7 @@ IrreversibleAdhesiveInteraction::IrreversibleAdhesiveInteraction(BaseInteractabl
 IrreversibleAdhesiveInteraction::IrreversibleAdhesiveInteraction(const IrreversibleAdhesiveInteraction &p)
     : BaseInteraction(p),  ReversibleAdhesiveInteraction(p)
 {
+	///\todo tw check if the parameters are valid when inserting the species into the handler
     wasInContact_=p.wasInContact_;
 #ifdef DEBUG_CONSTRUCTOR
     std::cout<<"IrreversibleAdhesiveInteraction::IrreversibleAdhesiveInteraction(const IrreversibleAdhesiveInteraction &p finished"<<std::endl;
@@ -51,7 +52,7 @@ IrreversibleAdhesiveInteraction::IrreversibleAdhesiveInteraction(const Irreversi
 
 IrreversibleAdhesiveInteraction::~IrreversibleAdhesiveInteraction()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"IrreversibleAdhesiveInteraction::~IrreversibleAdhesiveInteraction() finished"<<std::endl;
 #endif
 }

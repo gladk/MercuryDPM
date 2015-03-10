@@ -71,24 +71,27 @@ BaseInteraction::~BaseInteraction()
     //std::cout<<"Removing interaction with index="<<getIndex()<<" id="<<getId()<<std::endl;
     P_->removeInteraction(this);
     I_->removeInteraction(this);
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"BaseInteraction::~BaseInteraction() finished"<<std::endl;
 #endif
 }
 
 ///BaseParticle print function, which accepts an os std::stringstream as input. It prints human readable BaseParticle information to the std::stringstream
 void BaseInteraction::write(std::ostream& os) const
-        {
-    os << "Interaction" << " particleIds " << P_->getId() << " " << I_->getId() <<" timeStamp "<<timeStamp_<< " force " << force_ << " torque " << torque_;
+{
+    os << getName();
+    if (dynamic_cast<BaseParticle*>(I_) != nullptr)
+        os << " particleIds " << P_->getId() << " " << I_->getId();
+    else
+        os << " particleWallIds " << P_->getId() << " " << I_->getId();
+    os <<" timeStamp "<<timeStamp_<< " force " << force_ << " torque " << torque_;
 }
 
 void BaseInteraction::read(std::istream& is)
 {
-    unsigned int id1, id2;
+    //the rest gets read by the interactin handler
     std::string dummy;
-    is >> dummy >> id1 >> dummy >> id2 >> dummy >> force_ >> dummy >> torque_;
-    P_->setId(id1);
-    I_->setId(id2);
+    is >> dummy >> force_ >> dummy >> torque_;
 }
 
 std::string BaseInteraction::getName() const

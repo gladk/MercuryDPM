@@ -46,8 +46,8 @@ BaseObject::BaseObject(const BaseObject &p)
 
 BaseObject::~BaseObject()
 {
-#ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "BaseBoundary::~BaseBoundary() finished"<<std::endl;
+#ifdef DEBUG_DESTRUCTOR
+    std::cout << "BaseObject::~BaseBoundary() finished"<<std::endl;
 #endif
 }
 

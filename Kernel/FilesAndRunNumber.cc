@@ -36,7 +36,7 @@ FilesAndRunNumber::FilesAndRunNumber()
 {
     constructor();
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "FilesAndRunNumber::FilesAndRunNumber() finished"<<std::endl;
+    std::cout << "FilesAndRunNumber::FilesAndRunNumber() finished"<<std::endl;
 #endif
 }
 
@@ -45,7 +45,7 @@ FilesAndRunNumber::FilesAndRunNumber(const FilesAndRunNumber& other)
 {
     runNumber_ = other.runNumber_;
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "FilesAndRunNumber::FilesAndRunNumber(FilesAndRunNumber& other) finished"<<std::endl;
+    std::cout << "FilesAndRunNumber::FilesAndRunNumber(FilesAndRunNumber& other) finished"<<std::endl;
 #endif
 }
 

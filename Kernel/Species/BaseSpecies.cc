@@ -33,6 +33,7 @@ class BaseParticle;
 class BaseInteractable;
 
 BaseSpecies::BaseSpecies()
+		: BaseObject()
 {
     handler_ = 0;
 #ifdef DEBUG_CONSTRUCTOR
@@ -51,7 +52,7 @@ BaseSpecies::BaseSpecies(const BaseSpecies &p)
 
 BaseSpecies::~BaseSpecies()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"BaseSpecies::~BaseSpecies() finished"<<std::endl;
 #endif   
 }
@@ -107,4 +108,6 @@ Mdouble BaseSpecies::average(Mdouble a, Mdouble b)
 void BaseSpecies::mix(BaseSpecies* const S UNUSED, BaseSpecies* const T UNUSED)
 {
 }
+
+
 

@@ -30,7 +30,7 @@
 HopperInsertionBoundary* HopperInsertionBoundary::copy() const
 {
 #ifdef DEBUG_CONSTRUCTOR
-    cerr << "virtual HopperInsertionBoundary* copy() const finished" << endl;
+    std::cout << "HopperInsertionBoundary::copy() const finished" << std::endl;
 #endif		
     return new HopperInsertionBoundary(*this);
 }

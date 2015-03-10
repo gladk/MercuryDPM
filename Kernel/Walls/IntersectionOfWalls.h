@@ -96,6 +96,12 @@ public:
     bool getDistanceAndNormal(const Vec3D& postition, Mdouble wallInteractionRadius, Mdouble &distance, Vec3D &normal_return) const;
 
     /*!
+     * \brief
+     * \param[in]
+     */
+    void move(const Vec3D& move);
+    
+    /*!
      * \brief reads wall
      */
     void read(std::istream& is);

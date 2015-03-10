@@ -42,7 +42,7 @@ EmptyAdhesiveSpecies::EmptyAdhesiveSpecies(const EmptyAdhesiveSpecies &s)
 
 EmptyAdhesiveSpecies::~EmptyAdhesiveSpecies()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"EmptyAdhesiveSpecies::~EmptyAdhesiveSpecies() finished"<<std::endl;
 #endif   
 }

@@ -67,7 +67,7 @@ public:
 		particleHandler.copyAndAddObject(P1);
 				
 		double mass=1.0;
-        setTimeStep(species->computePlasticTimeStep(mass)*2.0);
+        setTimeStep(species->computeTimeStep(mass)*2.0);
 		setTimeMax(getTimeStep()*100.0);
         setFileType(FileType::ONE_FILE);
         setSaveCount(1);

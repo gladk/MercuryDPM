@@ -53,7 +53,7 @@ HertzianViscoelasticNormalSpecies::HertzianViscoelasticNormalSpecies(const Hertz
 
 HertzianViscoelasticNormalSpecies::~HertzianViscoelasticNormalSpecies()
 {
-#ifdef DEBUG_CONSTRUCTOR
+#ifdef DEBUG_DESTRUCTOR
     std::cout<<"HertzianViscoelasticNormalSpecies::~HertzianViscoelasticNormalSpecies() finished"<<std::endl;
 #endif
 }

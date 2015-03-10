@@ -44,7 +44,7 @@
 BoundaryHandler::BoundaryHandler()
 {
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "BoundaryHandler::BoundaryHandler() finished" << std::endl;
+    std::cout << "BoundaryHandler::BoundaryHandler() finished" << std::endl;
 #endif
 }
 
@@ -54,7 +54,7 @@ BoundaryHandler::BoundaryHandler(const BoundaryHandler &BH)
 {
     copyContentsFromOtherHandler(BH);
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "BoundaryHandler::BoundaryHandler(const BoundaryHandler &BH) finished" << std::endl;
+    std::cout << "BoundaryHandler::BoundaryHandler(const BoundaryHandler &BH) finished" << std::endl;
 #endif
 }
 
@@ -67,7 +67,7 @@ BoundaryHandler BoundaryHandler::operator =(const BoundaryHandler& rhs)
         copyContentsFromOtherHandler(rhs);
     }
 #ifdef DEBUG_CONSTRUCTOR
-    std::cerr << "BoundaryHandler BoundaryHandler::operator =(const BoundaryHandler& rhs)" << std::endl;
+    std::cout << "BoundaryHandler BoundaryHandler::operator =(const BoundaryHandler& rhs)" << std::endl;
 #endif
     return *this;
 }
