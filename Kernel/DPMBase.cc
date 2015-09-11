@@ -1910,6 +1910,9 @@ void DPMBase::solve()
         ntimeSteps_ = 0;
         resetFileCounter();
         setTime(0.0);
+        //this is to ensure that the interaction time stamps agree with the resetting of the time value
+        for (auto& i : interactionHandler)
+            i->setTimeStamp(0);
         setupInitialConditions();
         setNextSavedTimeStep(0); //reset the counter
 #ifdef DEBUG_OUTPUT

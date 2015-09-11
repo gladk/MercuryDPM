@@ -170,7 +170,12 @@ void InteractionHandler::removeObjectKeepingPeriodics(unsigned const int id)
                 BaseInteraction* iOther = getExistingInteraction(P, realI);
                 if (iOther)
                 {
-                    //std::cout << "Found" << std::endl;
+                    //Here we decide which of the two interactions should be kept:
+                    //the interaction between the two real particles (iMain), or 
+                    //the interaction between the real and a ghost particle (iOther). 
+                    //It picks the one for which a collision has happened, 
+                    //i.e. the one with the newer timeStamp. 
+                    ///\todo this function will create an error if the timeStamp is in the future! This should not happen (ever), but who knows.
                     if (iOther->getTimeStamp() < iMain->getTimeStamp())
                     {
                         //std::cout << "Switching" << std::endl;
