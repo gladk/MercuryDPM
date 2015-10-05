@@ -5,7 +5,7 @@ include_directories(
 )
 
 #Basic library without hGrid
-add_library(DPMBase STATIC
+set (DPMBase_src
 	Math/ExtendedMath.cc
 	Math/Helpers.cc
 	Math/Vector.cc
@@ -77,26 +77,33 @@ add_library(DPMBase STATIC
 	Particles/BaseParticle.cc
     ${Mercury_BINARY_DIR}/Kernel/CMakeDefinitions.cc
 )
+
+add_library(DPMBase STATIC ${DPMBase_src})
+
 if(Mercury_BACKTRACE_DEMANGLE)
   target_link_libraries(DPMBase dl)
 endif()
 
 #Could later create a 2D and 3D library seperatly, but sure how many we want to create
-add_library(MercuryBase STATIC
+set(MercuryBase_src
 	HGrid.cc
 	MercuryBase.cc
 	Mercury2D.cc
 	Mercury3D.cc
 	HGridOptimiser.cc)
 
+add_library(MercuryBase STATIC ${MercuryBase_src})
 target_link_libraries(MercuryBase DPMBase)
 
 #Required for Chute drivers
-add_library(Chute STATIC
+set(Chute_src
 	ChuteBottom.cc
 	ChuteWithHopper.cc
 	#ChuteWithHopperAndInset_copy_of_ChuteWithHopper.cc
 	Chute.cc
 )
+add_library(Chute STATIC ${Chute_src})
 
 target_link_libraries(Chute MercuryBase)
+
+install(TARGETS MercuryBase DPMBase Chute DESTINATION ${CMAKE_INSTALL_LIBDIR})

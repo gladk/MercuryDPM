@@ -24,6 +24,7 @@ add_definitions( -DMERCURY_LOGLEVEL=Log::${Mercury_LOGLEVEL} )
 include(CheckIncludeFiles)
 include(CheckIncludeFileCXX)
 include(CheckLibraryExists)
+include(GNUInstallDirs)
 #We need execinfo.h for backtrace()
 CHECK_INCLUDE_FILES(execinfo.h  HAS_EXECINFO_H)
 #We would like cxxabi.h and dlfcn.h for the name demangling..
