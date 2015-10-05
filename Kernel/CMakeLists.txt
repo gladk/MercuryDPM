@@ -107,3 +107,23 @@ add_library(Chute STATIC ${Chute_src})
 target_link_libraries(Chute MercuryBase)
 
 install(TARGETS MercuryBase DPMBase Chute DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+set(headersList "."
+  "Boundaries"
+  "Interactions"
+  "Interactions/AdhesiveForceInteractions"
+  "Interactions/FrictionForceInteractions"
+  "Interactions/NormalForceInteractions"
+  "Math"
+  "Particles"
+  "Species"
+  "Species/AdhesiveForceSpecies"
+  "Species/FrictionForceSpecies"
+  "Species/FrictionForceSpecies"
+  "Species/NormalForceSpecies"
+  "Walls")
+
+foreach(pathCur ${headersList})
+  FILE(GLOB Head_LIB  "${pathCur}/*.h")
+  INSTALL(FILES ${Head_LIB} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/MercuryDPM/${pathCur}/")
+endforeach(pathCur ${headersList})
