@@ -1,6 +1,7 @@
 include_directories(${X11_X11_INCLUDE_PATH} ${X11_Xt_INCLUDE_PATH})
 #include_directories(${X11_X11_INCLUDE_PATH} ${X11_Xt_INCLUDE_PATH} ${X11_XRes_INCLUDE_PATH})
 
+FIND_PACKAGE(X11 REQUIRED)
 
 if (Mercury_Include_Xballs_Support)
 
