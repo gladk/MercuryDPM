@@ -32,6 +32,9 @@ CHECK_INCLUDE_FILE_CXX(cxxabi.h HAS_CXXABI_H)
 CHECK_LIBRARY_EXISTS(dl dladdr  "" HAS_DLADDR_LIB)
 
 #Without it, we simply can't do backtraces.
+set( Mercury_BACKTRACE_ENABLE OFF)
+set( Mercury_BACKTRACE_DEMANGLE OFF)
+
 if (${HAS_EXECINFO_H})
   #enable it only in debug..
   if (CMAKE_BUILD_TYPE)
