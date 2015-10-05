@@ -118,6 +118,7 @@ configure_file(Configuration/CMakeDefinitions.h
 ##################################################
 
 option(Mercury_BUILD_DOCUMENTATION "Use Doxygen to create the HTML based API documentation" OFF)
+option(build_sharedlib "Build shared libraries" ON)
 
 
 if(Mercury_BUILD_DOCUMENTATION)

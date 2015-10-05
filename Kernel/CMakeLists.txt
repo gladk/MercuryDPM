@@ -127,3 +127,15 @@ foreach(pathCur ${headersList})
   FILE(GLOB Head_LIB  "${pathCur}/*.h")
   INSTALL(FILES ${Head_LIB} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/MercuryDPM/${pathCur}/")
 endforeach(pathCur ${headersList})
+
+if (build_sharedlib)
+  foreach(libName DPMBase MercuryBase Chute)
+    add_library(${libName}Shared SHARED ${${libName}_src})
+    set_target_properties(${libName}Shared PROPERTIES
+      VERSION ${Mercury_VERSION_MAJOR}
+      SOVERSION ${Mercury_VERSION_MAJOR}.${Mercury_VERSION_MINOR}
+      OUTPUT_NAME ${libName})
+  endforeach(libName DPMBase MercuryBase Chute)
+  target_link_libraries(ChuteShared MercuryBaseShared)
+  install(TARGETS MercuryBaseShared DPMBaseShared ChuteShared DESTINATION ${CMAKE_INSTALL_LIBDIR})
+endif (build_sharedlib)
