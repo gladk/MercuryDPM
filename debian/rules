@@ -1,0 +1,13 @@
+#!/usr/bin/make -f
+%:
+	dh $@ --parallel
+
+UPSTREAM_VERSION=0.1
+
+override_dh_auto_configure:
+	dh_auto_configure -- -Dbuild_sharedlib=1
+
+override_dh_strip:
+	dh_strip --dbg-package=libmercurydpm$(UPSTREAM_VERSION)-dbg
+
+override_dh_auto_test:

@@ -1,0 +1,41 @@
+Source: mercurydpm
+Maintainer: Debian Science Team <debian-science-maintainers@lists.alioth.debian.org>
+Uploaders: Anton Gladky <gladk@debian.org>
+Section: libs
+Testsuite: autopkgtest
+Priority: optional
+Build-Depends: cmake,
+               debhelper (>= 9)
+Standards-Version: 3.9.6
+Vcs-Browser: https://anonscm.debian.org/cgit/debian-science/packages/mercurydpm.git
+Vcs-Git: git://anonscm.debian.org/debian-science/packages/mercurydpm.git
+Homepage: http://www.mercurydpm.net/
+
+Package: libmercurydpm-dev
+Architecture: any
+Section: libdevel
+Priority: extra
+Depends: libmercurydpm0.1 (= ${binary:Version}),
+         ${misc:Depends}
+Description: Development files for the mercurydpm library
+ ALGLIB is a cross-platform numerical analysis and data processing library.
+
+Package: libmercurydpm0.1
+Architecture: any
+Multi-Arch: same
+Depends: ${misc:Depends},
+         ${shlibs:Depends}
+Pre-Depends: ${misc:Pre-Depends}
+Description: Numerical analysis and data processing library
+ ALGLIB is a cross-platform numerical analysis and data processing library.
+
+Package: libmercurydpm0.1-dbg
+Architecture: any
+Multi-Arch: same
+Section: debug
+Priority: extra
+Depends: libmercurydpm0.1 (= ${binary:Version}),
+         ${misc:Depends}
+Pre-Depends: ${misc:Pre-Depends}
+Description: Debugging symbols for the mercurydpm library
+ ALGLIB is a cross-platform numerical analysis and data processing library.
